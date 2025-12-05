@@ -1,0 +1,562 @@
+Put your HTML text here<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- WelderGor Gorweld — One-Gradient Layout (header under hazard, prefooter image, sparks from elements) -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WelderGor Gorweld | Forged in the scrapyard</title>
+  <meta name="description" content="WelderGor Gorweld — scrapyard-styled memecoin. One global background gradient, transparent sections, unified borders, distinct footer. Welding sparks effect from elements. Placeholders until verified." />
+  <meta name="theme-color" content="#1b130f" />
+
+  <!-- Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WelderGor Gorweld | Forged in the scrapyard">
+  <meta property="og:description" content="Junkyard-grade memecoin. Clean links, public address.">
+  <meta property="og:image" content="https://your-domain.example/og-image.png">
+  <meta property="og:url" content="https://your-domain.example">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="WelderGor Gorweld">
+  <meta name="twitter:description" content="Scrapyard-grade memecoin.">
+  <meta name="twitter:image" content="https://your-domain.example/og-image.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --text:#eae5dd;
+      --muted:#beb7b0;
+      --accent:#39ff88;
+      --accent-2:#22d26a;
+      --hazard:#f6cd29;
+
+      --hazard-h: 22px;
+
+      --panel: rgba(31,22,15,.74);
+      --panel-2: rgba(26,18,12,.58);
+
+      --border:#3a2b23;
+      --radius:14px;
+      --shadow:0 12px 28px rgba(0,0,0,.45);
+
+      --container-w: 1200px;
+      --side-pad: 92%;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{ scroll-behavior:smooth }
+    body{
+      margin:0; color:var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
+      line-height:1.5; overflow-x:hidden;
+      background:#18110d;
+    }
+
+    /* One fixed gradient */
+    body::before{
+      content:""; position:fixed; inset:-12vh -12vw; pointer-events:none; z-index:0;
+      background:
+        radial-gradient(1200px 900px at 15% 10%, rgba(88,64,48,.32), transparent 60%),
+        radial-gradient(1200px 900px at 85% 0%, rgba(57,255,136,.06), transparent 60%),
+        linear-gradient(180deg, #18110d 0%, #22170f 45%, #18110d 100%);
+      background-repeat:no-repeat;
+    }
+    /* Noise */
+    body::after{
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 2px, transparent 2px 4px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 1px, transparent 1px 3px);
+      mix-blend-mode:multiply; opacity:.7;
+    }
+
+    /* Hazard stripes */
+    .hazard-edge{
+      position:fixed; left:0; right:0; height:var(--hazard-h); z-index:1000; pointer-events:none;
+    }
+    .hazard-edge.top{ top:0; filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)) }
+    .hazard-edge.bottom{ bottom:0; filter: drop-shadow(0 -4px 10px rgba(0,0,0,.35)) }
+    .hazard-edge::before{
+      content:""; position:absolute; inset:0; opacity:.95;
+      background: repeating-linear-gradient(45deg, #0a0a0a 0 14px, var(--hazard) 14px 28px);
+      border-top:1px solid #000; border-bottom:1px solid #000;
+    }
+
+    a{color:var(--accent); text-decoration:none}
+    a:hover{color:var(--accent-2)}
+    .container{width:min(var(--container-w), var(--side-pad)); margin-inline:auto; position:relative; z-index:2}
+    .mono{ font-family: "Share Tech Mono", monospace }
+
+    section{ background:transparent; margin:0; padding:56px 0 }
+    main{ padding-bottom:0 }
+
+    /* Header */
+    header{
+      position:sticky; top:var(--hazard-h); z-index:50;
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      border:none;
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
+    .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.5px}
+    .brand .logo{
+      width:44px; height:44px; border-radius:10px;
+      background:#0f0f0f;
+      box-shadow: inset 0 0 12px rgba(57,255,136,.15), 0 8px 18px rgba(0,0,0,.35);
+      display:grid; place-items:center; border:none;
+    }
+    .logo svg{width:26px; height:26px}
+    .brand b{font-size:1.05rem}
+    .brand small{color:#beb7b0; font-weight:600}
+
+    .menu{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+    .menu a.link{color:#dcd6cf; padding:8px 10px; border-radius:8px}
+    .menu a.link:hover{background:rgba(42,31,24,.6); color:var(--accent)}
+
+    .hamburger{display:none; background:#1b120d; padding:8px 10px; border-radius:10px; color:#e9e5df; border:none}
+    @media (max-width: 900px){
+      .menu{display:none}
+      .menu.open{display:flex; flex-direction:column; align-items:flex-start; padding:12px 0}
+      .hamburger{display:inline-flex}
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px; border-radius:var(--radius); font-weight:800; letter-spacing:.3px;
+      color:#0c0f0d; background:var(--accent);
+      box-shadow: 0 8px 18px rgba(57,255,136,.25), inset 0 -2px 0 rgba(0,0,0,.15);
+      transition: transform .05s ease, filter .2s ease, box-shadow .2s ease; cursor:pointer;
+      border:none;
+    }
+    .btn:hover{filter:brightness(1.05); box-shadow: 0 10px 24px rgba(57,255,136,.35), inset 0 -2px 0 rgba(0,0,0,.15)}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{
+      background:#19231d; color:var(--accent);
+      box-shadow: 0 8px 18px rgba(0,0,0,.25), inset 0 -2px 0 rgba(0,0,0,.25);
+    }
+
+    /* HERO */
+    .hero{ text-align:center; padding-top:70px; padding-bottom:22px }
+    .title{
+      font-family:"Bebas Neue", system-ui;
+      font-size: clamp(3rem, 6vw + 1rem, 7.2rem);
+      margin: 6px 0 8px; line-height:.94; letter-spacing:1px;
+      color:#fbfaed;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 8px 30px rgba(57,255,136,.12);
+    }
+    .title .accent{ color:var(--accent); filter: drop-shadow(0 0 18px rgba(57,255,136,.25)) }
+    .subtitle{ color:#dcd6cf; font-size:1.05rem; max-width:900px; margin: 0 auto 14px }
+    .chips{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0 16px }
+    .chip{
+      font-family: "Share Tech Mono", monospace; font-size:.95rem;
+      padding:8px 12px; border-radius:999px; color:#cfc9c2;
+      background: var(--panel);
+      border:1px solid var(--border);
+    }
+
+    /* Tagline + images left/right */
+    .title .tagline{
+      display:inline-flex; align-items:center; gap:12px;
+      font-family:"Share Tech Mono", monospace; font-weight:800;
+      letter-spacing:1.1px; text-transform:uppercase;
+      font-size:clamp(.9rem, .5vw + .75rem, 1.1rem);
+      color:#d0cac3; margin:0 0 10px;
+      filter: drop-shadow(0 0 10px rgba(57,255,136,.08));
+    }
+    .title .tagline .tag-img{
+      width:clamp(34px, 2.4vw + 22px, 56px);
+      height:clamp(34px, 2.4vw + 22px, 56px);
+      border-radius:12px; object-fit:cover; object-position:center;
+      background:#0f0f0f; border:1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    /* QUICK BAR */
+    .quickbar{
+      display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;
+      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 900px){ .quickbar{ grid-template-columns: 1fr; gap:8px } }
+    .addr{ font-family:"Share Tech Mono", monospace; color:#ddd6cf; word-break:break-all }
+    .addr small{ color:var(--muted) }
+    .copy{ cursor:pointer; color:var(--accent); font-weight:800 }
+    .note{ color:#c9c2bb; font-size:.9rem; margin-top:8px }
+
+    /* GRID for Specs + Buy */
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap:18px; margin-top:28px; }
+    @media (max-width: 1000px){ .grid{ grid-template-columns:1fr } }
+
+    /* Panels */
+    .panel{ background: var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow: var(--shadow); position:relative; overflow:hidden; }
+    .panel.texture::before{
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:.06;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.3) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.45) 0 1px, transparent 1px 4px);
+      mix-blend-mode:overlay;
+    }
+
+    h2.section-title{
+      font-family:"Bebas Neue", system-ui; letter-spacing:.7px;
+      font-size: clamp(1.8rem, 1.2rem + 2.8vw, 3.1rem);
+      margin:0 0 10px; color:#efece6; text-shadow:0 0 8px rgba(57,255,136,.12);
+    }
+    .sub{ color:#d3cdc6; margin:0 0 18px }
+
+    .specs{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px }
+    @media (max-width: 900px){ .specs{ grid-template-columns:1fr } }
+    .spec{ background: var(--panel-2); border:1px solid var(--border); border-radius:var(--radius); padding:14px; }
+    .spec b{ display:block; font-size:.9rem; color:#e7e1da; letter-spacing:.4px }
+    .spec .v{ font-size:1.2rem; font-weight:800; margin-top:6px; color:#dcd6cf }
+
+    .steps{ display:flex; flex-direction:column; gap:10px }
+    .step{
+      display:grid; grid-template-columns: 34px 1fr; gap:12px; align-items:flex-start;
+      background: var(--panel-2); border:1px solid var(--border); border-radius:var(--radius); padding:14px;
+    }
+    .step .num{
+      width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+      background:#213024; color:var(--accent); font-weight:800
+    }
+    .step p{ margin:.2rem 0 0; color:#d8d2cb }
+
+    .links-list{ display:grid; gap:10px }
+    .link-row{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      background: var(--panel-2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;
+    }
+    .link-row .meta{ color:#d3cdc6 }
+    .link-row code{
+      background: rgba(0,0,0,.35); padding:6px 8px; border-radius:8px;
+      color:#cfc4b7; font-family: "Share Tech Mono", monospace; font-size:12px;
+    }
+
+    .prefooter{ padding: 0; margin: 20px 0 0 }
+    .prefooter .wrap{ width:min(var(--container-w), var(--side-pad)); margin:0 auto; position:relative; z-index:2; display:flex; justify-content:center; align-items:flex-end; }
+    .prefooter img{ display:block; max-width:min(820px, 92%); height:auto; margin:0 auto; }
+
+    footer{ position: relative; z-index: 4; padding: 28px 0 56px; border-top: 1px solid var(--border); color: #cfc8c1; background: transparent; }
+    footer::before{
+      content:""; position:absolute; inset:0; z-index: 0;
+      background: linear-gradient(180deg, #140e0b 0%, #0f0a08 100%);
+      box-shadow: 0 -10px 32px rgba(0,0,0,.55) inset, 0 1px 0 rgba(255,255,255,.06) inset;
+    }
+    footer .container{ position: relative; z-index: 1 }
+
+    /* SPARKS canvas */
+    .sparks-canvas{ position:fixed; inset:0; z-index:3; pointer-events:none; mix-blend-mode: screen; opacity:.85; }
+  </style>
+</head>
+<body>
+  <!-- Hazard bars -->
+  <div class="hazard-edge top" aria-hidden="true"></div>
+  <div class="hazard-edge bottom" aria-hidden="true"></div>
+
+  <!-- Sparks -->
+  <canvas id="sparksCanvas" class="sparks-canvas" aria-hidden="true"></canvas>
+
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- welding mask -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#39ff88" d="M6 7c0-1.7 1.3-3 3-3h6c1.7 0 3 1.3 3 3v6c0 2.2-1.8 4-4 4H10c-2.2 0-4-1.8-4-4V7z"/>
+            <rect x="8" y="7.5" width="8" height="4" rx="1.5" fill="#0b0f0c"/>
+            <rect x="10.2" y="9" width="1.6" height=".8" fill="#39ff88"/>
+            <rect x="12.2" y="9" width="1.6" height=".8" fill="#39ff88"/>
+          </svg>
+        </div>
+        <div>
+          <b>WelderGor Gorweld</b><br>
+          <small>Scrapyard memecoin • community-first</small>
+        </div>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Open navigation">☰ Menu</button>
+      <nav class="menu" id="menu">
+        <a class="link" href="#about">About</a>
+        <a class="link" href="#specs">Specs & Buy</a>
+        <a class="link" href="#links">Links</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <h1 class="title">
+          <span class="tagline">
+            <!-- Skrypt niżej sam znajdzie plik w tym samym folderze (szuka m.in. imgwelder-left.jpg / imgwelder-right.jpg) -->
+            <img class="tag-img left" alt="Welder (left)" src='left.jpg'>
+            forged in the scrapyard
+            <img class="tag-img right" alt="Welder (right)" src='right.jpg'>
+          </span><br>
+          <span class="accent">Gorweld Weldergor</span>
+        </h1>
+        <p class="subtitle">Built by a relentless crew. Clean links and public address. All figures are placeholders until verified on-chain.</p>
+        <div class="chips">
+          <span class="chip">Chain: Solana (via Pump.fun)</span>
+          <span class="chip">Ticker: GORWELD</span>
+        </div>
+
+        <!-- QUICK BAR -->
+        <div class="quickbar">
+          <div class="addr">
+            <small>Contract</small><br>
+            <span id="fullAddr" class="mono">A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr</span>
+            <span class="copy" id="copyBtn"> • 📋 Copy</span>
+            <div class="note">Note: Data on this site is placeholder-only until wired to on-chain sources.</div>
+          </div>
+          <a class="btn" href="https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr" target="_blank" rel="noopener">🔥 Buy on Pump.fun</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="container">
+      <div class="panel texture">
+        <h2 class="section-title">About</h2>
+        <p class="sub">
+          WelderGor Gorweld is a meme-driven project with a scrapyard aesthetic. We keep it simple:
+          verified links, public address, and placeholders until on-chain numbers are wired in.
+        </p>
+      </div>
+    </section>
+
+    <!-- SPECS + BUY -->
+    <div class="container grid">
+      <!-- SPECS -->
+      <section id="specs" class="panel texture">
+        <h2 class="section-title">Specs & Tokenomics</h2>
+        <p class="sub">Simple and visible. Placeholders below — update once final on-chain data is confirmed.</p>
+
+        <div class="specs">
+          <div class="spec">
+            <b>Supply</b>
+            <div class="v mono">Placeholder</div>
+            <small class="muted">To be published</small>
+          </div>
+          <div class="spec">
+            <b>Launch</b>
+            <div class="v">Pump.fun (bonding)</div>
+            <small class="muted">Verify on official page</small>
+          </div>
+          <div class="spec">
+            <b>Fees & Ownership</b>
+            <div class="v mono">Placeholder</div>
+            <small class="muted">Will be verified</small>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="specs">
+          <div class="spec">
+            <b>Allocation</b>
+            <div class="v mono">Placeholder</div>
+            <small class="muted">No claims until confirmed</small>
+          </div>
+          <div class="spec">
+            <b>Ticker</b>
+            <div class="v">GORWELD</div>
+          </div>
+          <div class="spec">
+            <b>Chain</b>
+            <div class="v">Solana (via Pump.fun)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW TO BUY -->
+      <section id="buy" class="panel texture">
+        <h2 class="section-title">How to Buy</h2>
+        <p class="sub">Quick path. Always match the contract address exactly.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <div>
+              <b>Get a Solana wallet</b>
+              <p>Install Phantom or Solflare. Secure your seed phrase offline.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div>
+              <b>Fund with SOL</b>
+              <p>Top up enough for the swap and fees.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div>
+              <b>Open the official page</b>
+              <p><a href="https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr" target="_blank" rel="noopener">pump.fun/coin/...NMqr</a></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <div>
+              <b>Verify & buy</b>
+              <p>Match the contract exactly and complete the swap.</p>
+              <p class="muted mono" id="inlineAddr">A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- OFFICIAL LINKS -->
+    <section id="links" class="container">
+      <div class="panel texture">
+        <h2 class="section-title">Official links</h2>
+        <p class="sub">Only verified links. Update as needed.</p>
+
+        <div class="links-list">
+          <div class="link-row">
+            <div>
+              <b>Pump.fun (coin page)</b>
+              <div class="meta">Trading and on-chain details</div>
+            </div>
+            <code>https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr</code>
+            <a class="btn secondary" href="https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr" target="_blank" rel="noopener">Open</a>
+          </div>
+          <div class="link-row">
+            <div>
+              <b>Short link</b>
+              <div class="meta">As shared by the team</div>
+            </div>
+            <code>https://t.co/oLT2hY5VSM</code>
+            <a class="btn secondary" href="https://t.co/oLT2hY5VSM" target="_blank" rel="noopener">Open</a>
+          </div>
+          <div class="link-row">
+            <div>
+              <b>X (Twitter) — Media</b>
+              <div class="meta">Visuals, clips, and posts</div>
+            </div>
+            <code>https://x.com/PrzemSas/media</code>
+            <a class="btn secondary" href="https://x.com/PrzemSas/media" target="_blank" rel="noopener">Open</a>
+          </div>
+          <div class="link-row">
+            <div>
+              <b>Telegram</b>
+              <div class="meta">Community coordination</div>
+            </div>
+            <code>https://t.me/+E635Vdn-6k1iMDE0</code>
+            <a class="btn secondary" href="https://t.me/+E635Vdn-6k1iMDE0" target="_blank" rel="noopener">Open</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRE-FOOTER IMAGE -->
+    <div class="prefooter">
+      <div class="wrap">
+        <img src="gorweld.png" alt="Gorweld" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Gorboy Flipper iframe widget (przeniesiony do body, żeby HTML był poprawny) -->
+    <section class="container" style="padding:24px 0 56px">
+      <iframe
+        src="https://www.ggt.wtf/flipper.html?mint=YOUR_MINT_HERE"
+        style="width:480px; max-width:100%; height:220px; border:0; border-radius:22px; overflow:hidden; display:block; margin:0 auto;"
+        loading="lazy"
+        title="Gorboy Flipper"
+      ></iframe>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <div><b>WelderGor Gorweld</b> • community-first</div>
+      <div class="muted">© <span id="year"></span></div>
+    </div>
+  </footer>
+
+  <script>
+    // Config
+    const CONFIG = {
+      contract: "A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr",
+      pump: "https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr"
+    };
+
+    // Assign contract
+    const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+    setText("fullAddr", CONFIG.contract);
+    setText("inlineAddr", CONFIG.contract);
+
+    // Copy
+    const copyBtn = document.getElementById("copyBtn");
+    if(copyBtn){
+      copyBtn.addEventListener("click", async () => {
+        try{
+          await navigator.clipboard.writeText(CONFIG.contract);
+          const old = copyBtn.textContent;
+          copyBtn.textContent = "✓ Copied";
+          setTimeout(()=> copyBtn.textContent = old, 1200);
+        }catch(e){ console.warn("Copy failed", e); }
+      });
+    }
+
+    // Mobile nav
+    const menu = document.getElementById("menu");
+    const hamb = document.getElementById("hamburger");
+    if(hamb) hamb.addEventListener("click", ()=> menu.classList.toggle("open"));
+
+    // Footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Dynamic anchor offset (header height + hazard bar)
+    function updateAnchorOffset(){
+      const header = document.querySelector('header');
+      const hazardH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hazard-h')) || 22;
+      const offset = (header?.offsetHeight || 80) + hazardH;
+      document.documentElement.style.scrollPaddingTop = offset + 'px';
+    }
+    window.addEventListener('resize', updateAnchorOffset);
+    window.addEventListener('load', updateAnchorOffset);
+    updateAnchorOffset();
+
+    // SPARKS effect (unchanged)
+    (function(){
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const canvas = document.getElementById("sparksCanvas");
+      if(!canvas || prefersReduced) return;
+
+      const ctx = canvas.getContext("2d");
+      let w, h, dpr;
+      function resize(){
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        canvas.width = Math.floor(innerWidth * dpr);
+        canvas.height= Math.floor(innerHeight * dpr);
+        canvas.style.width = innerWidth + "px";
+        canvas.style.height= innerHeight + "px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        w = innerWidth; h = innerHeight;
+      }
+      window.addEventListener("resize", resize, {passive:true});
+      resize();
+
+      const sparks = [];
+      const G = 980, DRAG = 0.995, MAX_SPARKS = 260;
+
+      function emit(x, y, {power=1, angle=-Math.PI/2, spread=1.0, count=16, hueBase=45, hueVar=35} = {}){
+        for(let i=0;i<count;i++){
+          const a = angle + (Math.random()-0.5)*spread;
+          const speed = (220 + Math.random()*380)*power;
+          sparks.push({
+            x, y,
+            vx: Math.cos(a)*speed + (Math.random()-0.5)*60,
+            vy: Math.sin(a)*speed - Math.random()*30,
+            life: 0,
+            ttl: 0.7 + Math.random()*0.6,
+            size: 1 + Math.random()*1.6,
+            hue: hueBase + Math.random()*hueVar
+          });
+        }
+        if(sparks.length > MAX_SPARKS){ sparks.splice(0, sparks.length - 

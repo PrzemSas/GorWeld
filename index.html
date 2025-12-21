@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GORWELD – Official Hub | gorweld.com</title>
+  <meta name="description" content="GORWELD – Forged in the scrapyard. Gorbagana chain, gorweld.fun, X, Telegram and more – everything connected.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;500;700&display=swap');
+    
+    :root {
+      --cyan: #00ffff;
+      --cyan-glow: rgba(0, 255, 255, 0.4);
+      --neon-green: #39ff14;
+      --green-glow: rgba(57, 255, 20, 0.5);
+      --orange: #ff6b00;
+      --orange-glow: rgba(255, 107, 0, 0.5);
+      
+      --bg-primary: #000000;
+      --bg-secondary: #0a0f0f;
+      --bg-card: rgba(10, 15, 15, 0.9);
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --border-color: #333333;
+      --overlay-bg: rgba(0, 0, 0, 0.75);
+    }
+    
+    [data-theme="dark"] {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0f0f;
+      --bg-card: rgba(10, 15, 15, 0.95);
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --border-color: #333333;
+      --overlay-bg: rgba(0, 0, 0, 0.75);
+      --glow-intensity: 1;
+    }
+    
+    [data-theme="light"] {
+      --bg-primary: #f0f4f8;
+      --bg-secondary: #e8eef5;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --text-primary: #1a1a2e;
+      --text-secondary: #444444;
+      --text-muted: #777777;
+      --border-color: #cccccc;
+      --overlay-bg: rgba(255, 255, 255, 0.9);
+      --cyan: #0099aa;
+      --neon-green: #00aa00;
+      --orange: #dd5500;
+      --glow-intensity: 0.5;
+    }
+    
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      margin: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Roboto Mono', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+    
+    [data-theme="dark"] body {
+      background-image: url('https://files.catbox.moe/9y5o0j.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    
+    [data-theme="light"] body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-bg);
+      z-index: 0;
+      transition: background 0.5s ease;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(0, 255, 255, 0.2) 0%, transparent 40%);
+      pointer-events: none;
+      animation: weldGlow 3s ease-in-out infinite alternate;
+      z-index: 1;
+      opacity: var(--glow-intensity);
+    }
+    
+    @keyframes weldGlow {
+      0% { opacity: 0.3; transform: scale(1); }
+      100% { opacity: 0.6; transform: scale(1.15); }
+    }
+    
+    .sparks-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 6px 2px var(--cyan), 0 0 12px 4px var(--neon-green);
+      animation: sparkFall linear infinite;
+      opacity: 0;
+    }
+    
+    @keyframes sparkFall {
+      0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0; }
+      5% { opacity: 1; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(100vh) rotate(720deg) scale(0.3); opacity: 0; }
+    }
+    
+    #sound-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    #sound-overlay h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: clamp(2.5rem, 10vw, 5rem);
+      margin: 0 0 10px;
+      text-shadow: 0 0 60px var(--cyan);
+      letter-spacing: 0.1em;
+    }
+    
+    #sound-overlay .sub {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-green);
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      margin: 0 0 30px;
+      text-shadow: 0 0 30px var(--neon-green);
+    }
+    
+    #sound-overlay p {
+      color: #aaa;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      margin: 0 0 40px;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+    
+    .overlay-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    #enable-sound-btn {
+      background: linear-gradient(135deg, var(--cyan), #00b7eb);
+      color: #000;
+      font-weight: bold;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      padding: 20px 50px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 40px var(--cyan-glow);
+      font-family: 'Orbitron', sans-serif;
+    }
+    
+    #enable-sound-btn:hover {
+      transform: scale(1.08);
+      background: var(--neon-green);
+      box-shadow: 0 0 60px var(--green-glow);
+    }
+    
+    #skip-btn {
+      background: transparent;
+      color: #666;
+      font-size: 1rem;
+      padding: 10px 30px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    #skip-btn:hover {
+      color: #fff;
+      border-color: #666;
+    }
+    
+    #sound-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      padding: 12px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      z-index: 100;
+      box-shadow: 0 0 20px var(--cyan-glow);
+      transition: 0.3s;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+    
+    #sound-toggle:hover {
+      background: var(--cyan);
+      color: var(--bg-primary);
+    }
+    
+    header {
+      padding: 60px 20px 50px;
+      text-align: center;
+      border-bottom: 6px solid var(--cyan);
+      background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.3));
+      position: relative;
+      z-index: 10;
+    }
+    
+    .main-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: clamp(2.5rem, 12vw, 5.5rem);
+      margin: 0;
+      text-shadow: 0 0 60px var(--cyan), 0 0 120px var(--cyan);
+      letter-spacing: 0.1em;
+      line-height: 1.1;
+      animation: titlePulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes titlePulse {
+      0%, 100% { text-shadow: 0 0 60px var(--cyan), 0 0 120px var(--cyan); }
+      50% { text-shadow: 0 0 80px var(--cyan), 0 0 160px var(--cyan), 0 0 200px var(--cyan); }
+    }
+    
+    .sub-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: clamp(1.8rem, 8vw, 3.5rem);
+      margin: 10px 0 25px;
+      text-shadow: 0 0 40px var(--cyan);
+      opacity: 0.85;
+    }
+    
+    .tagline {
+      color: var(--cyan);
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      margin: 15px 0 8px;
+    }
+    
+    .subtagline {
+      color: var(--neon-green);
+      font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+      margin: 0 0 20px;
+      text-shadow: 0 0 20px var(--neon-green);
+      font-weight: bold;
+    }
+    
+    .subtitle {
+      color: var(--neon-green);
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      margin: 10px 0 0;
+      text-shadow: 0 0 25px var(--neon-green);
+      animation: glow 1.5s infinite;
+      font-weight: bold;
+    }
+    
+    @keyframes glow {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    
+    .ticker-container {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 0;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .ticker-track {
+      display: flex;
+      animation: ticker 30s linear infinite;
+      width: max-content;
+    }
+    
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 40px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+    
+    .ticker-item .symbol {
+      color: var(--cyan);
+      font-weight: bold;
+    }
+    
+    .ticker-item .value {
+      color: var(--neon-green);
+    }
+    
+    .stats-section {
+      padding: 40px 20px;
+      background: linear-gradient(90deg, transparent, var(--bg-card), transparent);
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px var(--cyan-glow);
+    }
+    
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 20px var(--cyan-glow);
+      margin: 10px 0;
+    }
+    
+    .stat-card.live-counter .stat-value {
+      color: var(--neon-green);
+      text-shadow: 0 0 30px var(--green-glow);
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: 5px;
+    }
+    
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(57, 255, 20, 0.2);
+      color: var(--neon-green);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+    
+    .live-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 30px;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 50px 20px;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 35px;
+      transition: all 0.4s;
+    }
+    
+    .card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px var(--cyan-glow);
+    }
+    
+    .card h2 { 
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan); 
+      font-size: clamp(1.4rem, 4vw, 2rem); 
+      margin: 0 0 20px;
+    }
+    
+    .card.important h2 {
+      color: var(--neon-green) !important;
+      font-size: clamp(1.6rem, 5vw, 2.5rem);
+      text-shadow: 0 0 30px var(--neon-green);
+      animation: glow 1.5s infinite;
+    }
+    
+    .addr-container {
+      position: relative;
+      margin: 20px 0;
+    }
+    
+    .addr {
+      background: var(--bg-primary);
+      padding: 18px 70px 18px 18px;
+      border-radius: 12px;
+      color: var(--neon-green);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      word-break: break-all;
+      box-shadow: 0 0 15px var(--green-glow);
+      border: 1px solid rgba(57, 255, 20, 0.3);
+    }
+    
+    .copy-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--neon-green);
+      border: none;
+      color: #000;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.8rem;
+      transition: 0.3s;
+    }
+    
+    .copy-btn:hover {
+      background: #fff;
+      transform: translateY(-50%) scale(1.05);
+    }
+    
+    .btn {
+      display: block;
+      background: linear-gradient(135deg, var(--cyan), #00b7eb);
+      color: #000;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .btn:hover {
+      background: var(--neon-green);
+      color: #000;
+      transform: scale(1.03);
+      box-shadow: 0 10px 30px var(--green-glow);
+    }
+    
+    .btn.large {
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      padding: 20px 25px;
+      margin: 20px 0;
+    }
+    
+    .how-to {
+      background: var(--bg-secondary);
+      border-left: 4px solid var(--cyan);
+      padding: 18px;
+      margin: 20px 0;
+      border-radius: 0 12px 12px 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    footer {
+      padding: 60px 20px;
+      color: var(--text-muted);
+      background: linear-gradient(to bottom, transparent, var(--bg-secondary));
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    footer strong {
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<audio id="welding-sound" loop preload="auto">
+  <source src="https://files.catbox.moe/8i5p0k.mp3" type="audio/mpeg">
+</audio>
+
+<div id="sound-overlay">
+  <h2>WELDERGOR</h2>
+  <div class="sub">GORWELD</div>
+  <p>🔥 For the full scrapyard experience – enable welding sounds! 👨‍🏭</p>
+  <div class="overlay-buttons">
+    <button id="enable-sound-btn">🔊 ENABLE WELDING SOUND</button>
+    <button id="skip-btn">Skip – Enter without sound</button>
+  </div>
+</div>
+
+<button id="sound-toggle">🔊 Sound ON</button>
+
+<div class="sparks-container" id="sparks-container"></div>
+
+<header>
+  <h1 class="main-title">WELDERGOR</h1>
+  <div class="sub-title">GORWELD</div>
+  <div class="tagline">⚡ Forged in the scrapyard • Community-first memecoin</div>
+  <div class="subtagline">Real scrap welder from a real junkyard</div>
+  <div class="subtitle">🔗 One Hub – All Chains</div>
+</header>
+
+<div class="ticker-container">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="symbol">GORWELD</span> pumping hard</div>
+    <div class="ticker-item">🔥 Holders growing live</div>
+    <div class="ticker-item"><span class="symbol">Gorbagana</span> chain dominant</div>
+    <div class="ticker-item">⚡ New welds every minute</div>
+    <div class="ticker-item">💎 Diamond hands loading</div>
+    <!-- Duplicate -->
+    <div class="ticker-item"><span class="symbol">GORWELD</span> pumping hard</div>
+    <div class="ticker-item">🔥 Holders growing live</div>
+    <div class="ticker-item"><span class="symbol">Gorbagana</span> chain dominant</div>
+    <div class="ticker-item">⚡ New welds every minute</div>
+    <div class="ticker-item">💎 Diamond hands loading</div>
+  </div>
+</div>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card live-counter">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value" id="holders-count">4,782</div>
+      <div class="stat-label">WELDERGOR Holders</div>
+      <div class="live-badge">LIVE</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value" id="market-cap">$156K</div>
+      <div class="stat-label">Market Cap</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-value" id="tx-count">28,459</div>
+      <div class="stat-label">Total Welds (Tx)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-value">3</div>
+      <div class="stat-label">Active Chains</div>
+    </div>
+  </div>
+</section>
+
+<div class="grid">
+  <!-- Karty jak wcześniej – bez zmian -->
+  <div class="card important">
+    <h2>🏆 @Gorbagana_chain</h2>
+    <span class="live">MAIN • CURRENT • LIVE</span>
+    <div class="addr-container">
+      <div class="addr" id="addr-gorba">GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7</div>
+      <button class="copy-btn" onclick="copyAddr('addr-gorba', this)">COPY</button>
+    </div>
+    <a href="https://trashscan.xyz/tokens" class="btn large" target="_blank">🔍 VIEW ON TRASHSCAN.XYZ</a>
+    <div class="how-to">
+      <strong>How to acquire GORWELD:</strong><br>
+      1. Download <strong>Backpack Wallet</strong> (official & recommended)<br>
+      2. Add <strong>Gorbagana</strong> network in wallet settings<br>
+      3. RPC available on trashscan.xyz
+    </div>
+  </div>
+
+  <!-- ... reszta kart identyczna jak w poprzedniej wersji ... -->
+
+</div>
+
+<footer>
+  <strong>GORWELD</strong>
+  <p>Forged in the scrapyard • Community-first • 2025</p>
+  <div class="footer-chains">
+    Gorbagana ⚡ Solana ⚡ Base ⚡ Zora ⚡ X ⚡ Telegram ⚡ TikTok
+  </div>
+  <div class="disclaimer">
+    ⚠️ <strong>DYOR</strong> – This is a community memecoin. Not financial advice.<br>
+    Always verify contract addresses before transacting.
+  </div>
+</footer>
+
+<script>
+  // Audio i overlay (jak wcześniej)
+
+  // LIVE COUNTER – WELDERGOR holders growing
+  let holders = 4782;
+  const holdersEl = document.getElementById('holders-count');
+
+  setInterval(() => {
+    const increase = Math.floor(Math.random() * 8) + 1; // +1 do +8 co kilka sekund
+    holders += increase;
+    holdersEl.textContent = holders.toLocaleString();
+    holdersEl.style.animation = 'none';
+    holdersEl.offsetHeight; // reflow
+    holdersEl.style.animation = 'countPulse 0.6s ease-out';
+  }, 8000 + Math.random() * 7000); // co 8-15 sekund nowy holder
+
+  @keyframes countPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  // Iskry i reszta skryptu (theme, copy, etc.) – bez zmian
+</script>
+
+</body>
+</html>

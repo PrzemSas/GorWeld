@@ -4,99 +4,137 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Scrapyard Welder – $GorWeldd Forge 🔥🗑️</title>
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
   <style>
-    body {
-      margin: 0; font-family: 'Courier New', monospace; background: #0d0d0d; color: #eee;
-      background: linear-gradient(to bottom, #1a0a00, #000); text-align: center;
-      overflow-x: hidden;
-    }
-    h1 { color: #ff5500; text-shadow: 0 0 15px #ff8800; margin: 20px 10px; font-size: 2.8em; }
-    #connect { padding: 15px 40px; font-size: 20px; background: #ff6600; border: 2px solid #ff9900; color: white; border-radius: 10px; cursor: pointer; margin: 20px; font-weight: bold; }
-    #connect:hover { background: #ff8800; box-shadow: 0 0 20px #ff6600; }
-    #status { font-size: 18px; margin: 15px; color: #ffcc66; }
-    #game { margin: 30px auto; max-width: 600px; padding: 25px; background: rgba(0,0,0,0.7); border-radius: 15px; border: 2px solid #ff6600; }
-    #welder { font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.2s, filter 0.3s; }
-    #welder:hover { filter: brightness(1.4); }
-    #welder:active { transform: scale(1.5) rotate(10deg); }
-    #points { font-size: 40px; color: #00ff88; margin: 30px 0; text-shadow: 0 0 12px #00ff88; }
-    #buy-section { margin: 40px auto; max-width: 500px; padding: 20px; background: #222; border-radius: 12px; border: 1px solid #ff5500; }
-    #buy-section a { color: #ff8800; font-size: 22px; font-weight: bold; text-decoration: none; }
-    #buy-section a:hover { text-decoration: underline; }
-    .spark { position: absolute; font-size: 45px; pointer-events: none; animation: sparkFly 1.3s ease-out forwards; color: #ffff00; }
-    @keyframes sparkFly {
-      0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: translateY(-220px) translateX(60px) rotate(720deg) scale(0.4); }
-    }
-    footer { margin: 60px 20px; font-size: 16px; color: #aaa; }
-    a { color: #ff8800; }
-    a:hover { text-decoration: underline; }
+    body { margin:0; font-family:'Courier New',monospace; background:#0d0d0d; color:#eee; background:linear-gradient(to bottom,#1a0a00,#000); text-align:center; overflow-x:hidden; }
+    h1 { color:#ff5500; text-shadow:0 0 15px #ff8800; margin:20px 10px; font-size:2.8em; }
+    #connect { padding:15px 40px; font-size:20px; background:#ff6600; border:2px solid #ff9900; color:white; border-radius:10px; cursor:pointer; margin:20px; font-weight:bold; }
+    #connect:hover { background:#ff8800; box-shadow:0 0 20px #ff6600; }
+    #status, #balance { font-size:18px; margin:15px; color:#ffcc66; }
+    #game { margin:30px auto; max-width:600px; padding:25px; background:rgba(0,0,0,0.7); border-radius:15px; border:2px solid #ff6600; }
+    #welder { font-size:160px; cursor:pointer; user-select:none; transition:transform 0.2s,filter 0.3s; }
+    #welder:hover { filter:brightness(1.4); }
+    #welder:active { transform:scale(1.5) rotate(10deg); }
+    #points { font-size:40px; color:#00ff88; margin:30px 0; text-shadow:0 0 12px #00ff88; }
+    #temp-game { margin:40px 0; }
+    input { padding:12px; font-size:18px; width:140px; text-align:center; background:#222; color:#ffcc66; border:1px solid #ff6600; border-radius:8px; }
+    button { padding:12px 30px; font-size:18px; background:#ff5500; border:none; color:white; border-radius:8px; cursor:pointer; margin:10px; }
+    button:hover { background:#ff7700; }
+    button:disabled { background:#444; cursor:not-allowed; }
+    #buy-section { margin:40px auto; max-width:500px; padding:20px; background:#222; border-radius:12px; border:1px solid #ff5500; }
+    #buy-section a { color:#ff8800; font-size:22px; font-weight:bold; text-decoration:none; }
+    #buy-section a:hover { text-decoration:underline; }
+    .spark { position:absolute; font-size:45px; pointer-events:none; animation:sparkFly 1.3s ease-out forwards; color:#ffff00; }
+    @keyframes sparkFly { 0%{opacity:1;transform:translateY(0) rotate(0deg);} 100%{opacity:0;transform:translateY(-220px) translateX(60px) rotate(720deg) scale(0.4);} }
+    footer { margin:60px 20px; font-size:16px; color:#aaa; }
+    a { color:#ff8800; }
   </style>
 </head>
 <body>
 
   <h1>🗑️🔥 Scrapyard Welder – $GorWeldd Forge 🔥🗑️</h1>
   <button id="connect">Connect Backpack Wallet</button>
-  <div id="status">Wallet: Not connected – connect to weld with power!</div>
+  <div id="status">Wallet: Not connected</div>
+  <div id="balance">Your $GorWeldd Balance: 0 (Hold more for multipliers!)</div>
 
   <div id="game">
     <div id="welder">👨‍🏭</div>
-    <div id="points">Scrap Points: 0</div>
-    <p>Click the welder to weld the dips! Each weld = +1 scrap point.<br>Hold $GorWeldd to unlock future on-chain rewards (burns, airdrops, NFT mints coming soon).</p>
+    <div id="points">Scrap Points: 0 (Multiplier: 1×)</div>
+    <p>Click welder to weld dips! Each weld = +scrap (multiplier based on hold).<br>Hold $GorWeldd → bigger multipliers. Perfect temp guess? Claim bonus with 100 token fee!</p>
+
+    <div id="temp-game">
+      <h2>Guess Secret Temp (1000–2000 °C)</h2>
+      <input type="number" id="guess" placeholder="Enter °C" min="1000" max="2000" />
+      <button id="submit-guess">WELD! ⚡</button>
+      <p id="result"></p>
+      <p>Attempts left: <span id="attempts">10</span></p>
+      <button id="claim-bonus" style="display:none;">Claim Bonus (Burn 100 $GorWeldd)</button>
+    </div>
 
     <div id="buy-section">
-      <h2>Get $GorWeldd on Gorbagana Chain</h2>
-      <p>Only available in the Trash Bin DEX (native Gorbagana swap):</p>
-      <p><a href="https://trashbin.fun" target="_blank">→ Go to Trash Bin DEX & Swap Now 🗑️</a></p>
-      <p>Steps: Connect Backpack → Add Gorbagana network → Bridge/Swap GOR to $GorWeldd → Weld stronger!</p>
+      <h2>Get $GorWeldd</h2>
+      <p>Exclusive on Gorbagana Chain – Trash Bin DEX:</p>
+      <p><a href="https://trashbin.fun" target="_blank">→ Swap Now in Trash Bin 🗑️</a></p>
+      <p>Connect Backpack → Add RPC (rpc.trashscan.io) → Swap GOR/gGOR for $GorWeldd</p>
     </div>
   </div>
 
   <footer>
-    $GorWeldd – Pure trash welding on <strong>@Gorbagana_chain</strong><br>
-    Buy exclusively in <a href="https://trashbin.fun" target="_blank">Trash Bin DEX</a> | X: <a href="https://x.com/PrzemSas" target="_blank">@PrzemSas</a><br>
-    Weld or vanish! ⛓️ #GorWeldd #TrashToChain
+    $GorWeldd (GCQ4NYEd2P8v...qyimG7) on @Gorbagana_chain | Buy in <a href="https://trashbin.fun" target="_blank">Trash Bin</a> | Weld or vanish! ⛓️
   </footer>
 
   <script>
-    const { Connection } = solanaWeb3;
-    // Gorbagana RPC – use the latest from community (rpc.trashscan.io or rpc.gorbagana.wtf)
-    // Check @Gorbagana_chain or trashscan.io for current endpoint
-    const connection = new Connection("https://rpc.trashscan.io", "confirmed"); // fallback: https://rpc.gorbagana.wtf or https://api.gorbagana.dev
+    const { Connection, PublicKey, Transaction, SystemProgram } = solanaWeb3;
+    const { getAssociatedTokenAddressSync, createTransferInstruction, TOKEN_PROGRAM_ID, getAccount } = splToken;
+
+    const connection = new Connection("https://rpc.trashscan.io", "confirmed"); // or api.gorbagana.dev
+
+    const TOKEN_MINT = new PublicKey("GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7");
+    const REVENUE_WALLET = new PublicKey("YOUR_REVENUE_WALLET_HERE"); // <-- ZMIEŃ NA SWÓJ ADRES (np. Twój Backpack)
+    const FEE_AMOUNT = 100n * 10n ** 9n; // 100 tokenów (decimals 9 – dostosuj jeśli inne)
 
     let walletPublicKey = null;
+    let provider = null;
     let points = 0;
+    let multiplier = 1;
+    let attempts = 10;
+    const secretTemp = Math.floor(Math.random() * 1001) + 1000;
 
     const connectBtn = document.getElementById('connect');
     const status = document.getElementById('status');
+    const balanceEl = document.getElementById('balance');
     const welder = document.getElementById('welder');
     const pointsEl = document.getElementById('points');
+    const guessInput = document.getElementById('guess');
+    const submitBtn = document.getElementById('submit-guess');
+    const result = document.getElementById('result');
+    const attemptsEl = document.getElementById('attempts');
+    const claimBtn = document.getElementById('claim-bonus');
 
-    // Connect Backpack wallet only
     connectBtn.onclick = async () => {
-      const provider = window.backpack;
+      provider = window.backpack;
       if (!provider || !provider.isBackpack) {
-        alert("Please use Backpack wallet! Download from backpack.app and add Gorbagana custom RPC (rpc.trashscan.io or similar).");
+        alert("Use Backpack wallet! Add Gorbagana RPC: rpc.trashscan.io");
         return;
       }
       try {
         await provider.connect();
-        walletPublicKey = provider.publicKey.toString();
-        status.innerText = `Wallet: \( {walletPublicKey.slice(0,6)}... \){walletPublicKey.slice(-4)} 🔥 Connected!`;
-        connectBtn.innerText = "Connected – Keep Welding!";
+        walletPublicKey = new PublicKey(provider.publicKey.toString());
+        status.innerText = `Wallet: ${walletPublicKey.toBase58().slice(0,6)}... 🔥`;
+        connectBtn.innerText = "Connected!";
         connectBtn.disabled = true;
+        await checkBalanceAndMultiplier();
       } catch (err) {
-        console.error(err);
-        status.innerText = "Connection failed – try again 😿";
+        status.innerText = "Connection error 😿";
       }
     };
 
-    // Weld click action with sparks
-    welder.onclick = () => {
-      points++;
-      pointsEl.innerText = `Scrap Points: ${points}`;
+    async function checkBalanceAndMultiplier() {
+      if (!walletPublicKey) return;
+      try {
+        const ata = getAssociatedTokenAddressSync(TOKEN_MINT, walletPublicKey);
+        const account = await getAccount(connection, ata);
+        const balance = Number(account.amount) / 1e9; // decimals 9
+        balanceEl.innerText = `Your $GorWeldd: ${balance.toFixed(2)}`;
 
-      // Create spark particles
+        if (balance >= 10000) {
+          multiplier = 5;
+          alert("Epic holder! 5× multiplier unlocked 🔥");
+        } else if (balance >= 1000) {
+          multiplier = 2;
+          alert("Holder boost! 2× multiplier active 🔥");
+        }
+        pointsEl.innerText = `Scrap Points: ${points} (Multiplier: ${multiplier}×)`;
+      } catch (err) {
+        balanceEl.innerText = "No $GorWeldd or error – buy in Trash Bin!";
+      }
+    }
+
+    welder.onclick = () => {
+      points += multiplier;
+      pointsEl.innerText = `Scrap Points: ${points} (Multiplier: ${multiplier}×)`;
+
       for (let i = 0; i < 6; i++) {
         const spark = document.createElement('div');
         spark.className = 'spark';
@@ -106,9 +144,66 @@
         document.body.appendChild(spark);
         setTimeout(() => spark.remove(), 1600);
       }
+    };
 
-      if (points % 50 === 0) {
-        alert(`Massive weld achieved! ${points} scrap points 🔥 Hold $GorWeldd from Trash Bin for epic future drops!`);
+    submitBtn.onclick = () => {
+      if (attempts <= 0) {
+        result.innerText = "No attempts left! Refresh game.";
+        return;
+      }
+      const guess = parseInt(guessInput.value);
+      if (isNaN(guess) || guess < 1000 || guess > 2000) {
+        result.innerText = "Enter 1000–2000 °C!";
+        return;
+      }
+
+      attempts--;
+      attemptsEl.innerText = attempts;
+
+      if (guess === secretTemp) {
+        result.innerText = `PERFECT WELD! 🔥 Secret was ${secretTemp} °C – claim bonus!`;
+        claimBtn.style.display = 'block';
+      } else if (guess < secretTemp) {
+        result.innerText = `Too low! Try higher. Attempts: ${attempts}`;
+      } else {
+        result.innerText = `Too high! Try lower. Attempts: ${attempts}`;
+      }
+
+      if (attempts === 0) result.innerText += ` Game over! Secret: ${secretTemp} °C`;
+    };
+
+    claimBtn.onclick = async () => {
+      if (!provider || !walletPublicKey) return alert("Connect wallet first!");
+      try {
+        const ataSource = getAssociatedTokenAddressSync(TOKEN_MINT, walletPublicKey);
+        const ataDest = getAssociatedTokenAddressSync(TOKEN_MINT, REVENUE_WALLET);
+
+        const tx = new Transaction().add(
+          createTransferInstruction(
+            ataSource,
+            ataDest,
+            walletPublicKey,
+            FEE_AMOUNT,
+            [],
+            TOKEN_PROGRAM_ID
+          )
+        );
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = walletPublicKey;
+
+        const signedTx = await provider.signTransaction(tx);
+        const txId = await connection.sendRawTransaction(signedTx.serialize());
+        await connection.confirmTransaction(txId);
+
+        alert(`Bonus claimed! 100 $GorWeldd sent. Tx: ${txId}`);
+        claimBtn.style.display = 'none';
+        points += 50; // bonus points
+        pointsEl.innerText = `Scrap Points: ${points} (Multiplier: ${multiplier}×)`;
+      } catch (err) {
+        console.error(err);
+        alert("Claim failed: " + (err.message || "Check balance / network"));
       }
     };
   </script>

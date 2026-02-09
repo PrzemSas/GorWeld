@@ -3,86 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scrapyard Welder – $GorWeldd Forge 🔥🗑️</title>
+  <title>Scrapyard Welder – $GorWeldd Debug v3 🔥🗑️</title>
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
   <style>
-    /* ten sam styl co wcześniej – pominąłem dla krótszego kodu */
-    body { margin:0; font-family:'Courier New',monospace; background:#0d0d0d; color:#eee; background:linear-gradient(to bottom,#1a0a00,#000); text-align:center; }
-    h1 { color:#ff5500; text-shadow:0 0 15px #ff8800; }
-    button { padding:12px 30px; background:#ff5500; color:white; border:none; border-radius:8px; cursor:pointer; margin:10px; }
-    #status, #balance, #debug { color:#ffcc66; font-size:18px; margin:10px; }
+    body { margin:0; font-family:Arial,sans-serif; background:#111; color:#eee; text-align:center; padding:20px; }
+    h1 { color:#ff6600; }
+    button { padding:12px 24px; background:#ff5500; color:white; border:none; border-radius:8px; margin:10px; cursor:pointer; }
+    button:hover { background:#ff7700; }
+    #status, #balance, #debug { font-size:18px; margin:15px; padding:10px; background:#222; border-radius:8px; }
+    #debug { color:#ffcc00; white-space:pre-wrap; }
   </style>
 </head>
 <body>
 
-  <h1>🗑️🔥 Scrapyard Welder – Debug Version 🔥🗑️</h1>
-  <button id="connect">Connect Backpack</button>
-  <div id="status">Wallet: Not connected</div>
-  <div id="balance">Balance: Checking...</div>
-  <button id="check-balance">Check Balance Manually</button>
-  <div id="debug">Debug: Open F12 → Console for logs</div>
+  <h1>🗑️🔥 GorWeldd Welder – Debug Mode v3 🔥🗑️</h1>
+  <p><strong>Przed testem:</strong> Dodaj RPC https://rpc.gorbagana.wtf w Backpack i przełącz sieć!</p>
 
-  <!-- reszta gry (welder clicker + guessing) – dodaj jeśli chcesz, tu skrócone -->
+  <button id="connect">Connect Backpack</button>
+  <div id="status">Wallet: Nie połączony</div>
+  <div id="balance">Balance $GorWeldd: Nie sprawdzono</div>
+  <button id="check-balance">Sprawdź Balance / Debug</button>
+  <div id="debug">Debug logi pojawią się tutaj (otwórz F12 → Console dla więcej)</div>
 
   <script>
-    const { Connection, PublicKey, Transaction } = solanaWeb3;
-    const { getAssociatedTokenAddressSync, createTransferInstruction, getAccount } = splToken;
+    const { Connection, PublicKey } = solanaWeb3;
+    const { getAssociatedTokenAddressSync, getAccount } = splToken;
 
-    const RPCS = [
+    const RPC_LIST = [
       "https://rpc.gorbagana.wtf",
       "https://rpc.trashscan.io",
       "https://api.gorbagana.dev"
     ];
-    let connection = new Connection(RPCS[0], "confirmed");
+    let currentRpcIndex = 0;
+    let connection = new Connection(RPC_LIST[currentRpcIndex], "confirmed");
 
     const TOKEN_MINT = new PublicKey("GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7");
-    const REVENUE_WALLET = new PublicKey("YOUR_WALLET_ADDRESS_HERE"); // Zmień!!!
-    const DECIMALS = 9; // Zmień na 6 jeśli Trashscan pokazuje 6
-    const FEE_AMOUNT = 100n * (10n ** BigInt(DECIMALS));
+    const DECIMALS = 9; // <-- Zmień na 6 jeśli Trashscan pokazuje 6 decimals!
 
     let walletPublicKey = null;
     let provider = null;
 
-    function tryNextRpc() {
-      RPCS.push(RPCS.shift()); // rotate
-      connection = new Connection(RPCS[0], "confirmed");
-      console.log("Switched RPC to:", RPCS[0]);
+    function switchRpc() {
+      currentRpcIndex = (currentRpcIndex + 1) % RPC_LIST.length;
+      connection = new Connection(RPC_LIST[currentRpcIndex], "confirmed");
+      document.getElementById('debug').innerText += `\nPrzełączono RPC na: ${RPC_LIST[currentRpcIndex]}`;
+      console.log("Nowy RPC:", RPC_LIST[currentRpcIndex]);
     }
 
     document.getElementById('connect').onclick = async () => {
       provider = window.backpack;
-      if (!provider || !provider.isBackpack) return alert("Install/use Backpack + add Gorbagana RPC!");
+      if (!provider || !provider.isBackpack) {
+        alert("Użyj Backpack wallet! Dodaj RPC https://rpc.gorbagana.wtf w ustawieniach.");
+        return;
+      }
       try {
         await provider.connect();
         walletPublicKey = new PublicKey(provider.publicKey.toString());
-        document.getElementById('status').innerText = `Wallet: ${walletPublicKey.toBase58().slice(0,6)}... Connected!`;
-        await checkBalance();
+        document.getElementById('status').innerText = `Wallet połączony: ${walletPublicKey.toBase58().slice(0,6)}...`;
+        document.getElementById('debug').innerText += `\nConnect OK – wallet: ${walletPublicKey.toBase58()}`;
       } catch (err) {
-        console.error("Connect error:", err);
-        document.getElementById('status').innerText = "Connect failed – check Backpack / RPC";
+        document.getElementById('status').innerText = "Błąd połączenia – sprawdź Backpack";
+        document.getElementById('debug').innerText += `\nConnect error: ${err.message}`;
+        console.error(err);
       }
     };
 
-    async function checkBalance() {
-      if (!walletPublicKey) return;
+    document.getElementById('check-balance').onclick = async () => {
+      if (!walletPublicKey) {
+        document.getElementById('debug').innerText += `\nBrak połączonego wallet – kliknij Connect najpierw`;
+        return;
+      }
+
+      document.getElementById('debug').innerText += `\nSprawdzam balance... (RPC: ${RPC_LIST[currentRpcIndex]})`;
+
       try {
         const ata = getAssociatedTokenAddressSync(TOKEN_MINT, walletPublicKey);
         const account = await getAccount(connection, ata);
-        const balance = Number(account.amount) / 10**DECIMALS;
-        document.getElementById('balance').innerText = `Your $GorWeldd: ${balance.toFixed(2)} (Multiplier based on hold)`;
-        console.log("Balance OK:", balance);
+        const balance = Number(account.amount) / (10 ** DECIMALS);
+        document.getElementById('balance').innerText = `Balance $GorWeldd: ${balance.toFixed(4)}`;
+        document.getElementById('debug').innerText += `\nSukces! ATA znaleziona, balance: ${balance}`;
       } catch (err) {
-        console.error("Balance error:", err.message);
-        document.getElementById('balance').innerText = "No ATA / low balance / RPC issue – buy in Trash Bin";
-        tryNextRpc(); // auto switch RPC on error
+        document.getElementById('balance').innerText = "Błąd / brak tokena / zły RPC";
+        document.getElementById('debug').innerText += `\nBłąd balance: ${err.message}`;
+        console.error("Balance error:", err);
+
+        if (err.message.includes("Account not found") || err.message.includes("not found")) {
+          document.getElementById('debug').innerText += `\nBrak ATA – kup $GorWeldd w Trash Bin najpierw!`;
+        }
+        switchRpc(); // auto przełącz RPC przy błędzie
       }
-    }
-
-    document.getElementById('check-balance').onclick = checkBalance;
-
-    // Dodaj tu resztę gry (welder.onclick, guessing, claim transfer) jak w poprzedniej wersji
-    // Przykład claim: użyj createTransferInstruction + provider.signTransaction + sendRawTransaction
+    };
   </script>
 </body>
 </html>

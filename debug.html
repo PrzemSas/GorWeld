@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GorWeldd Debug v4 – Wallet & Balance Test</title>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #eee; text-align: center; padding: 40px; }
+    h1 { color: #ff6600; }
+    button { padding: 15px 30px; background: #ff5500; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin: 15px; }
+    button:hover { background: #ff8800; }
+    #status, #balance, #debug { font-size: 20px; margin: 20px; padding: 15px; background: #222; border-radius: 10px; }
+    #debug { color: #ffcc00; white-space: pre-wrap; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <h1>🗑️ GorWeldd Wallet Debug v4 🔥</h1>
+  <p><strong>Wymagane:</strong> Backpack z dodanym RPC https://rpc.gorbagana.wtf i przełączoną siecią na Gorbagana!</p>
+
+  <button id="connect">1. Connect Backpack Wallet</button>
+  <div id="status">Status: Nie połączony</div>
+
+  <button id="check">2. Sprawdź Balance $GorWeldd</button>
+  <div id="balance">Balance: Nie sprawdzono</div>
+
+  <div id="debug">Debug log (tu pojawią się szczegóły + błędy):</div>
+
+  <script>
+    const { Connection, PublicKey } = solanaWeb3;
+    const { getAssociatedTokenAddressSync, getAccount } = splToken;
+
+    const RPC = "https://rpc.gorbagana.wtf";  // Najlepszy aktualny RPC
+    const connection = new Connection(RPC, "confirmed");
+
+    const TOKEN_MINT = new PublicKey("GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7");
+    const DECIMALS = 9;  // Najczęściej 9 – zmień na 6 jeśli balance dziwny
+
+    let walletPublicKey = null;
+    let provider = null;
+
+    document.getElementById('connect').onclick = async () => {
+      provider = window.backpack;
+      if (!provider || !provider.isBackpack) {
+        alert("Backpack nie wykryty! Użyj Backpack wallet.");
+        return;
+      }
+      try {
+        await provider.connect();
+        walletPublicKey = new PublicKey(provider.publicKey.toString());
+        document.getElementById('status').innerText = `Połączono: \( {walletPublicKey.toBase58().slice(0,6)}... \){walletPublicKey.toBase58().slice(-4)}`;
+        document.getElementById('debug').innerText += `\nConnect OK – adres: ${walletPublicKey.toBase58()}`;
+      } catch (err) {
+        document.getElementById('status').innerText = "Błąd połączenia – sprawdź Backpack / sieć";
+        document.getElementById('debug').innerText += `\nConnect FAIL: ${err.message || err}`;
+        console.error(err);
+      }
+    };
+
+    document.getElementById('check').onclick = async () => {
+      if (!walletPublicKey) {
+        document.getElementById('debug').innerText += `\nNajpierw połącz wallet!`;
+        return;
+      }
+
+      document.getElementById('debug').innerText += `\nSprawdzam balance... (RPC: ${RPC})`;
+
+      try {
+        const ata = getAssociatedTokenAddressSync(TOKEN_MINT, walletPublicKey);
+        const account = await getAccount(connection, ata);
+        const balance = Number(account.amount) / (10 ** DECIMALS);
+        document.getElementById('balance').innerText = `Balance $GorWeldd: ${balance.toFixed(4)}`;
+        document.getElementById('debug').innerText += `\nSUKCES! Balance: ${balance} (decimals ${DECIMALS})`;
+      } catch (err) {
+        document.getElementById('balance').innerText = "Błąd sprawdzania balance";
+        document.getElementById('debug').innerText += `\nBłąd: ${err.message || err}`;
+        console.error("Balance error:", err);
+
+        if (err.message?.includes("not found") || err.message?.includes("Account")) {
+          document.getElementById('debug').innerText += `\nPrawdopodobnie brak ATA – kup $GorWeldd w Trash Bin najpierw (swap GOR → GorWeldd).`;
+        }
+        if (err.message?.includes("fetch") || err.message?.includes("RPC")) {
+          document.getElementById('debug').innerText += `\nProblem z RPC – spróbuj inny: https://rpc.trashscan.io lub https://api.gorbagana.dev`;
+        }
+      }
+    };
+  </script>
+</body>
+</html>

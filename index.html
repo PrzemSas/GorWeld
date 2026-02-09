@@ -3,237 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scrapyard Welder – Mini Game Online 🔥</title>
-  <meta name="description" content="Guess the perfect welding temperature and don't burn the scrap!"/>
-  
+  <title>Scrapyard Welder – $GorWeldd Forge 🔥🗑️</title>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <style>
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #1a2f38, #2c1a0f);
-      color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-      box-sizing: border-box;
+      margin: 0; font-family: 'Courier New', monospace; background: #0d0d0d; color: #eee;
+      background: linear-gradient(to bottom, #1a0a00, #000); text-align: center;
+      overflow-x: hidden;
     }
-    .container {
-      background: rgba(0,0,0,0.7);
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: 0 10px 40px rgba(255,140,0,0.3);
-      border: 1px solid #555;
-      text-align: center;
+    h1 { color: #ff5500; text-shadow: 0 0 15px #ff8800; margin: 20px 10px; font-size: 2.8em; }
+    #connect { padding: 15px 40px; font-size: 20px; background: #ff6600; border: 2px solid #ff9900; color: white; border-radius: 10px; cursor: pointer; margin: 20px; font-weight: bold; }
+    #connect:hover { background: #ff8800; box-shadow: 0 0 20px #ff6600; }
+    #status { font-size: 18px; margin: 15px; color: #ffcc66; }
+    #game { margin: 30px auto; max-width: 600px; padding: 25px; background: rgba(0,0,0,0.7); border-radius: 15px; border: 2px solid #ff6600; }
+    #welder { font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.2s, filter 0.3s; }
+    #welder:hover { filter: brightness(1.4); }
+    #welder:active { transform: scale(1.5) rotate(10deg); }
+    #points { font-size: 40px; color: #00ff88; margin: 30px 0; text-shadow: 0 0 12px #00ff88; }
+    #buy-section { margin: 40px auto; max-width: 500px; padding: 20px; background: #222; border-radius: 12px; border: 1px solid #ff5500; }
+    #buy-section a { color: #ff8800; font-size: 22px; font-weight: bold; text-decoration: none; }
+    #buy-section a:hover { text-decoration: underline; }
+    .spark { position: absolute; font-size: 45px; pointer-events: none; animation: sparkFly 1.3s ease-out forwards; color: #ffff00; }
+    @keyframes sparkFly {
+      0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(-220px) translateX(60px) rotate(720deg) scale(0.4); }
     }
-    h1 {
-      margin: 0 0 1rem;
-      font-size: 2.4rem;
-      color: #ff8800;
-      text-shadow: 0 0 12px #ff6600aa;
-    }
-    .opis {
-      margin: 0 0 1.5rem;
-      line-height: 1.45;
-      font-size: 1.05rem;
-      opacity: 0.9;
-    }
-    #guess {
-      width: 160px;
-      padding: 14px;
-      font-size: 1.8rem;
-      text-align: center;
-      background: #111;
-      color: #ffdd99;
-      border: 3px solid #ff9900;
-      border-radius: 12px;
-      margin: 1rem 0;
-    }
-    .buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 1rem 0;
-    }
-    button {
-      padding: 14px 28px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    #weldBtn {
-      background: #ff8800;
-      color: #000;
-    }
-    #weldBtn:hover { background: #ffaa00; transform: translateY(-2px); }
-    #newBtn {
-      background: #444;
-      color: #ddd;
-    }
-    #newBtn:hover { background: #555; }
-    #status {
-      font-size: 1.4rem;
-      font-weight: bold;
-      min-height: 2.4rem;
-      margin: 1rem 0;
-      line-height: 1.3;
-    }
-    .green { color: #0f8; text-shadow: 0 0 10px #0f8; }
-    .red   { color: #f44; text-shadow: 0 0 8px #f44; }
-    #attempts {
-      font-size: 1.1rem;
-      margin: 0.5rem 0 1rem;
-      opacity: 0.9;
-    }
-    #sparks {
-      width: 100%;
-      height: 90px;
-      border-radius: 10px;
-      background: #0003;
-      border: 1px solid #555;
-      margin-top: 1rem;
-    }
-    footer {
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
-      opacity: 0.6;
-    }
+    footer { margin: 60px 20px; font-size: 16px; color: #aaa; }
+    a { color: #ff8800; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>🔥 Scrapyard Welder 🔥</h1>
-  
-  <p class="opis">
-    Secret temperature: 1000–2000 °C<br>
-    Too low → weak weld<br>
-    Too high → melted junk<br>
-    Hit it perfect!
-  </p>
+  <h1>🗑️🔥 Scrapyard Welder – $GorWeldd Forge 🔥🗑️</h1>
+  <button id="connect">Connect Backpack Wallet</button>
+  <div id="status">Wallet: Not connected – connect to weld with power!</div>
 
-  <input type="number" id="guess" min="1000" max="2000" placeholder="°C" autocomplete="off">
+  <div id="game">
+    <div id="welder">👨‍🏭</div>
+    <div id="points">Scrap Points: 0</div>
+    <p>Click the welder to weld the dips! Each weld = +1 scrap point.<br>Hold $GorWeldd to unlock future on-chain rewards (burns, airdrops, NFT mints coming soon).</p>
 
-  <div class="buttons">
-    <button id="weldBtn">WELD! ⚡</button>
-    <button id="newBtn">New Game</button>
+    <div id="buy-section">
+      <h2>Get $GorWeldd on Gorbagana Chain</h2>
+      <p>Only available in the Trash Bin DEX (native Gorbagana swap):</p>
+      <p><a href="https://trashbin.fun" target="_blank">→ Go to Trash Bin DEX & Swap Now 🗑️</a></p>
+      <p>Steps: Connect Backpack → Add Gorbagana network → Bridge/Swap GOR to $GorWeldd → Weld stronger!</p>
+    </div>
   </div>
 
-  <div id="attempts">Attempts left: <strong id="left">10</strong></div>
-  <div id="status"></div>
+  <footer>
+    $GorWeldd – Pure trash welding on <strong>@Gorbagana_chain</strong><br>
+    Buy exclusively in <a href="https://trashbin.fun" target="_blank">Trash Bin DEX</a> | X: <a href="https://x.com/PrzemSas" target="_blank">@PrzemSas</a><br>
+    Weld or vanish! ⛓️ #GorWeldd #TrashToChain
+  </footer>
 
-  <canvas id="sparks"></canvas>
+  <script>
+    const { Connection } = solanaWeb3;
+    // Gorbagana RPC – use the latest from community (rpc.trashscan.io or rpc.gorbagana.wtf)
+    // Check @Gorbagana_chain or trashscan.io for current endpoint
+    const connection = new Connection("https://rpc.trashscan.io", "confirmed"); // fallback: https://rpc.gorbagana.wtf or https://api.gorbagana.dev
 
-  <footer>Scrapyard vibes • 2026</footer>
-</div>
+    let walletPublicKey = null;
+    let points = 0;
 
-<script>
-const status = document.getElementById('status');
-const guessInput = document.getElementById('guess');
-const leftEl = document.getElementById('left');
-const canvas = document.getElementById('sparks');
-const ctx = canvas.getContext('2d');
+    const connectBtn = document.getElementById('connect');
+    const status = document.getElementById('status');
+    const welder = document.getElementById('welder');
+    const pointsEl = document.getElementById('points');
 
-let targetTemp = 0;
-let attempts = 10;
-let bestAttempts = localStorage.getItem('scrapWelderBest') || 11;
+    // Connect Backpack wallet only
+    connectBtn.onclick = async () => {
+      const provider = window.backpack;
+      if (!provider || !provider.isBackpack) {
+        alert("Please use Backpack wallet! Download from backpack.app and add Gorbagana custom RPC (rpc.trashscan.io or similar).");
+        return;
+      }
+      try {
+        await provider.connect();
+        walletPublicKey = provider.publicKey.toString();
+        status.innerText = `Wallet: \( {walletPublicKey.slice(0,6)}... \){walletPublicKey.slice(-4)} 🔥 Connected!`;
+        connectBtn.innerText = "Connected – Keep Welding!";
+        connectBtn.disabled = true;
+      } catch (err) {
+        console.error(err);
+        status.innerText = "Connection failed – try again 😿";
+      }
+    };
 
-function newGame() {
-  targetTemp = Math.floor(Math.random() * 1001) + 1000;
-  attempts = 10;
-  leftEl.textContent = attempts;
-  status.textContent = bestAttempts < 11 ? `Best: ${bestAttempts} attempts` : '';
-  status.className = '';
-  guessInput.value = '';
-  guessInput.disabled = false;
-  guessInput.focus();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
+    // Weld click action with sparks
+    welder.onclick = () => {
+      points++;
+      pointsEl.innerText = `Scrap Points: ${points}`;
 
-function drawSparks(color = '#ff8800', count = 20) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < count; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    const r = Math.random() * 5 + 2;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+      // Create spark particles
+      for (let i = 0; i < 6; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.innerText = '⚡';
+        spark.style.left = `${Math.random() * window.innerWidth}px`;
+        spark.style.top = `${Math.random() * window.innerHeight}px`;
+        document.body.appendChild(spark);
+        setTimeout(() => spark.remove(), 1600);
+      }
 
-function handleGuess() {
-  const val = Number(guessInput.value.trim());
-  if (!val || val < 1000 || val > 2000) {
-    status.textContent = 'Enter 1000–2000 °C';
-    status.className = 'red';
-    return;
-  }
-
-  attempts--;
-  leftEl.textContent = attempts;
-
-  const diff = Math.abs(val - targetTemp);
-
-  if (diff === 0) {
-    status.innerHTML = `PERFECT WELD!<br>${val} °C 🎉🔥`;
-    status.className = 'green';
-    drawSparks('#0f8', 35);
-    guessInput.disabled = true;
-
-    const score = attempts + 1;
-    if (score < bestAttempts || bestAttempts == 11) {
-      bestAttempts = score;
-      localStorage.setItem('scrapWelderBest', bestAttempts);
-      status.innerHTML += `<br>New best: ${bestAttempts} attempts!`;
-    }
-    return;
-  }
-
-  if (diff <= 20) {
-    status.textContent = diff <= 8 ? 'Super close!' : 'Getting warmer…';
-    status.className = 'green';
-    drawSparks('#0f8', 15);
-  } else if (val < targetTemp) {
-    status.textContent = 'TOO COLD – more heat!';
-    status.className = 'red';
-    drawSparks('#ff8800', 12);
-  } else {
-    status.textContent = 'TOO HOT – burning junk!';
-    status.className = 'red';
-    drawSparks('#f44', 18);
-  }
-
-  if (attempts <= 0) {
-    status.innerHTML = `Out of attempts.<br>Target was ${targetTemp} °C 😤`;
-    guessInput.disabled = true;
-  }
-
-  guessInput.value = '';
-  guessInput.focus();
-}
-
-// Events
-document.getElementById('weldBtn').onclick = handleGuess;
-document.getElementById('newBtn').onclick = newGame;
-
-guessInput.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    handleGuess();
-  }
-});
-
-// Start
-newGame();
-</script>
+      if (points % 50 === 0) {
+        alert(`Massive weld achieved! ${points} scrap points 🔥 Hold $GorWeldd from Trash Bin for epic future drops!`);
+      }
+    };
+  </script>
 </body>
 </html>

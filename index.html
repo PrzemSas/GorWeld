@@ -624,9 +624,20 @@
             <!-- Balance Checker -->
             <div class="balance-checker">
                 <h3 style="color: #ff6b00; margin-bottom: 20px;">Check Your Balance</h3>
-                <input type="text" class="wallet-input" id="walletInput" placeholder="Enter wallet address...">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="btn btn-secondary" onclick="connectWallet('backpack')" style="flex: 1; padding: 12px;">
+                        🎒 Backpack
+                    </button>
+                    <button class="btn btn-secondary" onclick="connectWallet('phantom')" style="flex: 1; padding: 12px;">
+                        👻 Phantom
+                    </button>
+                </div>
+                <input type="text" class="wallet-input" id="walletInput" placeholder="Or enter wallet address manually...">
                 <button class="btn btn-primary" onclick="checkBalance()">Check Balance</button>
                 <div class="balance-result" id="balanceResult"></div>
+                <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.7;">
+                    Note: Currently using Solana mainnet RPC. For Gorbagana Chain balance, use Trashscan explorer.
+                </p>
             </div>
         </div>
     </section>
@@ -660,16 +671,4 @@
     <!-- Submit Project -->
     <section id="submit">
         <div class="container">
-            <h2>Submit Your Project</h2>
-            <p style="text-align: center; margin-bottom: 40px; opacity: 0.8;">Building on Gorbagana Chain? Showcase your project on GorWeldd!</p>
-            <form class="submit-form" onsubmit="submitProject(event)">
-                <div class="form-group">
-                    <label>Project Name</label>
-                    <input type="text" required placeholder="e.g., TrashSwap DEX">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea required placeholder="Tell us about your project..."></textarea>
-                </div>
-                <div class="form-group">
-                    <la
+            <h2>Subm

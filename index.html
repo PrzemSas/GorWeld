@@ -1,116 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scrapyard Welder – $GorWeldd Forge 🔥🗑️</title>
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <style>
-    body {
-      margin: 0; font-family: 'Courier New', monospace; background: #0d0d0d; color: #eee;
-      background: linear-gradient(to bottom, #1a0a00, #000); text-align: center;
-      overflow-x: hidden;
-    }
-    h1 { color: #ff5500; text-shadow: 0 0 15px #ff8800; margin: 20px 10px; font-size: 2.8em; }
-    #connect { padding: 15px 40px; font-size: 20px; background: #ff6600; border: 2px solid #ff9900; color: white; border-radius: 10px; cursor: pointer; margin: 20px; font-weight: bold; }
-    #connect:hover { background: #ff8800; box-shadow: 0 0 20px #ff6600; }
-    #status { font-size: 18px; margin: 15px; color: #ffcc66; }
-    #game { margin: 30px auto; max-width: 600px; padding: 25px; background: rgba(0,0,0,0.7); border-radius: 15px; border: 2px solid #ff6600; }
-    #welder { font-size: 160px; cursor: pointer; user-select: none; transition: transform 0.2s, filter 0.3s; }
-    #welder:hover { filter: brightness(1.4); }
-    #welder:active { transform: scale(1.5) rotate(10deg); }
-    #points { font-size: 40px; color: #00ff88; margin: 30px 0; text-shadow: 0 0 12px #00ff88; }
-    #buy-section { margin: 40px auto; max-width: 500px; padding: 20px; background: #222; border-radius: 12px; border: 1px solid #ff5500; }
-    #buy-section a { color: #ff8800; font-size: 22px; font-weight: bold; text-decoration: none; }
-    #buy-section a:hover { text-decoration: underline; }
-    .spark { position: absolute; font-size: 45px; pointer-events: none; animation: sparkFly 1.3s ease-out forwards; color: #ffff00; }
-    @keyframes sparkFly {
-      0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: translateY(-220px) translateX(60px) rotate(720deg) scale(0.4); }
-    }
-    footer { margin: 60px 20px; font-size: 16px; color: #aaa; }
-    a { color: #ff8800; }
-    a:hover { text-decoration: underline; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$GorWeldd - Welding the Gorbagana Ecosystem 🔥🗑️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Oswald', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 2px solid #ff6b00;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            color: #ff6b00;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 0.8);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b00;
+        }
+
+        .mobile-menu {
+            display: none;
+            cursor: pointer;
+        }
+
+        .mobile-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #ff6b00;
+            margin: 5px 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+        }
+
+        .sparks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .spark {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ff6b00;
+            border-radius: 50%;
+            animation: sparkFall 3s linear infinite;
+            box-shadow: 0 0 10px #ff6b00;
+        }
+
+        @keyframes sparkFall {
+            0% {
+                transform: translateY(-10px) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .welding-mask {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 4rem;
+            color: #ff6b00;
+            text-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .btn-primary {
+            background: #ff6b00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+        }
+
+        .btn-primary:hover {
+            background: #ff8c33;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ff6b00;
+            border: 2px solid #ff6b00;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 107, 0, 0.1);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 20px;
+            position: relative;
+        }
+
+        section h2 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 3rem;
+            color: #ff6b00;
+            text-align: center;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+        }
+
+        /* About Section */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .about-card {
+            background: rgba(255, 107, 0, 0.05);
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .about-card:hover {
+            border-color: #ff6b00;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .about-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #ff6b00;
+        }
+
+        .about-card p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* Game Section */
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 107, 0, 0.05);
+            border: 3px solid #ff6b00;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .game-screen {
+            background: #000;
+            border: 2px solid #ff6b00;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .temperature-display {
+            font-size: 3rem;
+            color: #ff6b00;
+            margin-bottom: 20px;
+            font-family: 'Bebas Neue', cursive;
+        }
+
+        .temp-bar {
+            width: 100%;
+            height: 30px;
+            background: #222;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .temp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #00ff00, #ffff00, #ff6b00, #ff0000);
+            transition: width 0.3s;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #ff6b00;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 107, 0, 0.05));
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            color: #ff6b00;
+            font-family: 'Bebas Neue', cursive;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .token-address {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            margin-top: 20px;
+            border: 1px solid #ff6b00;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 20px;
+            background: #ff6b00;
+            border: none;
+            color: #000;
+            cursor: pointer;
+            font-weight: 700;
+            border-radius: 5px;
+        }
+
+        /* How to Buy */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 107, 0, 0.05);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 107, 0, 0.3);
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: #ff6b00;
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            color: #ff6b00;
+            margin-bottom: 15px;
+        }
+
+        /* Submit Project */
+        .submit-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff6b00;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 107, 0, 0.05);
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Socials */
+        .socials {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .social-link {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 107, 0, 0.1);
+            border: 2px solid #ff6b00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: #ff6b00;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: #ff6b00;
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        /* Footer */
+        footer {
+            background: #000;
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 2px solid #ff6b00;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .welding-mask {
+                font-size: 80px;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Balance Checker */
+        .balance-checker {
+            max-width: 500px;
+            margin: 40px auto;
+            background: rgba(255, 107, 0, 0.05);
+            border: 2px solid #ff6b00;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .wallet-input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid rgba(255, 107, 0, 0.5);
+            color: #fff;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+
+        .balance-result {
+            margin-top: 20px;
+            font-size: 2rem;
+            color: #ff6b00;
+            font-family: 'Bebas Neue', cursive;
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">$GorWeldd</div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#game">Game</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#buy">Buy</a></li>
+                <li><a href="#submit">Submit</a></li>
+            </ul>
+            <div class="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
 
-  <h1>🗑️🔥 Scrapyard Welder – $GorWeldd Forge 🔥🗑️</h1>
-  <button id="connect">Connect Backpack Wallet</button>
-  <div id="status">Wallet: Not connected – connect to weld with power!</div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="sparks" id="sparks"></div>
+        <div class="hero-content">
+            <div class="welding-mask">🔥</div>
+            <h1>$GorWeldd</h1>
+            <p class="tagline">Welding the Gorbagana Ecosystem 🔥🗑️</p>
+            <div class="cta-buttons">
+                <a href="#buy" class="btn btn-primary">Buy $GorWeldd</a>
+                <a href="#game" class="btn btn-secondary">Play Game</a>
+                <a href="#stats" class="btn btn-secondary">Check Balance</a>
+            </div>
+        </div>
+    </section>
 
-  <div id="game">
-    <div id="welder">👨‍🏭</div>
-    <div id="points">Scrap Points: 0</div>
-    <p>Click the welder to weld the dips! Each weld = +1 scrap point.<br>Hold $GorWeldd to unlock future on-chain rewards (burns, airdrops, NFT mints coming soon).</p>
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <h2>About $GorWeldd</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>🗑️ The Meme</h3>
+                    <p>Born in the scrapyard of Gorbagana Chain, $GorWeldd is the ultimate trash chain welder. We take garbage and make it glow. Oscar the Grouch meets industrial welding in the most memeable SVM fork ever.</p>
+                </div>
+                <div class="about-card">
+                    <h3>⚡ Utility</h3>
+                    <p>Earn $GorWeldd by playing Scrapyard Welder, participate in governance decisions, and burn tokens for highscore supremacy. The more you weld, the more you earn.</p>
+                </div>
+                <div class="about-card">
+                    <h3>🔥 Ecosystem</h3>
+                    <p>Built on Gorbagana Chain - the zero-fee trash fork of Solana. Bridge your $GOR, swap for $GorWeldd, and join the most industrial meme ecosystem in crypto.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div id="buy-section">
-      <h2>Get $GorWeldd on Gorbagana Chain</h2>
-      <p>Only available in the Trash Bin DEX (native Gorbagana swap):</p>
-      <p><a href="https://trashbin.fun" target="_blank">→ Go to Trash Bin DEX & Swap Now 🗑️</a></p>
-      <p>Steps: Connect Backpack → Add Gorbagana network → Bridge/Swap GOR to $GorWeldd → Weld stronger!</p>
-    </div>
-  </div>
+    <!-- Game Section -->
+    <section id="game">
+        <div class="container">
+            <h2>Scrapyard Welder Game</h2>
+            <div class="game-container">
+                <div class="game-screen">
+                    <div class="temperature-display" id="tempDisplay">1500°C</div>
+                    <div class="temp-bar">
+                        <div class="temp-fill" id="tempFill" style="width: 50%"></div>
+                    </div>
+                    <p style="margin-bottom: 20px;">Weld the scrap at the perfect temperature!</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Target: 1400-1600°C</p>
+                </div>
+                <div class="game-controls">
+                    <button class="btn btn-secondary" id="startBtn">Start Welding</button>
+                    <button class="btn btn-primary" id="weldBtn" disabled>🔥 WELD!</button>
+                </div>
+                <div class="score-display">
+                    Score: <span id="score">0</span> | Best: <span id="bestScore">0</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <footer>
-    $GorWeldd – Pure trash welding on <strong>@Gorbagana_chain</strong><br>
-    Buy exclusively in <a href="https://trashbin.fun" target="_blank">Trash Bin DEX</a> | X: <a href="https://x.com/PrzemSas" target="_blank">@PrzemSas</a><br>
-    Weld or vanish! ⛓️ #GorWeldd #TrashToChain
-  </footer>
+    <!-- Stats Section -->
+    <section id="stats">
+        <div class="container">
+            <h2>Token Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">♾️</div>
+                    <div class="stat-label">Market Cap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">🗑️</div>
+                    <div class="stat-label">Holders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">🔥</div>
+                    <div class="stat-label">Total Burned</div>
+                </div>
+            </div>
+            <div class="token-address">
+                <div style="margin-bottom: 10px; color: #ff6b00; font-weight: 700;">Token Address (Gorbagana Chain):</div>
+                <div id="tokenAddress">GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7</div>
+                <button class="copy-btn" onclick="copyAddress()">Copy Address</button>
+            </div>
+            <a href="https://trashscan.io/token/GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7" target="_blank" class="btn btn-primary" style="margin-top: 20px;">View on Trashscan</a>
 
-  <script>
-    const { Connection } = solanaWeb3;
-    // Gorbagana RPC – use the latest from community (rpc.trashscan.io or rpc.gorbagana.wtf)
-    // Check @Gorbagana_chain or trashscan.io for current endpoint
-    const connection = new Connection("https://rpc.trashscan.io", "confirmed"); // fallback: https://rpc.gorbagana.wtf or https://api.gorbagana.dev
+            <!-- Balance Checker -->
+            <div class="balance-checker">
+                <h3 style="color: #ff6b00; margin-bottom: 20px;">Check Your Balance</h3>
+                <input type="text" class="wallet-input" id="walletInput" placeholder="Enter wallet address...">
+                <button class="btn btn-primary" onclick="checkBalance()">Check Balance</button>
+                <div class="balance-result" id="balanceResult"></div>
+            </div>
+        </div>
+    </section>
 
-    let walletPublicKey = null;
-    let points = 0;
+    <!-- How to Buy -->
+    <section id="buy">
+        <div class="container">
+            <h2>How to Buy $GorWeldd</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Get $GOR</h3>
+                    <p>Buy $GOR on Solana or bridge from another chain</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Bridge to gGOR</h3>
+                    <p>Use the zero-fee bridge to convert GOR → gGOR on Gorbagana Chain</p>
+                    <a href="https://gorbagana.com/bridge" target="_blank" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.9rem; padding: 8px 20px;">Bridge Now</a>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Swap for $GorWeldd</h3>
+                    <p>Head to the Gorbagana DEX and swap gGOR for $GorWeldd</p>
+                    <a href="#" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.9rem; padding: 8px 20px;">Swap Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    const connectBtn = document.getElementById('connect');
-    const status = document.getElementById('status');
-    const welder = document.getElementById('welder');
-    const pointsEl = document.getElementById('points');
-
-    // Connect Backpack wallet only
-    connectBtn.onclick = async () => {
-      const provider = window.backpack;
-      if (!provider || !provider.isBackpack) {
-        alert("Please use Backpack wallet! Download from backpack.app and add Gorbagana custom RPC (rpc.trashscan.io or similar).");
-        return;
-      }
-      try {
-        await provider.connect();
-        walletPublicKey = provider.publicKey.toString();
-        status.innerText = `Wallet: \( {walletPublicKey.slice(0,6)}... \){walletPublicKey.slice(-4)} 🔥 Connected!`;
-        connectBtn.innerText = "Connected – Keep Welding!";
-        connectBtn.disabled = true;
-      } catch (err) {
-        console.error(err);
-        status.innerText = "Connection failed – try again 😿";
-      }
-    };
-
-    // Weld click action with sparks
-    welder.onclick = () => {
-      points++;
-      pointsEl.innerText = `Scrap Points: ${points}`;
-
-      // Create spark particles
-      for (let i = 0; i < 6; i++) {
-        const spark = document.createElement('div');
-        spark.className = 'spark';
-        spark.innerText = '⚡';
-        spark.style.left = `${Math.random() * window.innerWidth}px`;
-        spark.style.top = `${Math.random() * window.innerHeight}px`;
-        document.body.appendChild(spark);
-        setTimeout(() => spark.remove(), 1600);
-      }
-
-      if (points % 50 === 0) {
-        alert(`Massive weld achieved! ${points} scrap points 🔥 Hold $GorWeldd from Trash Bin for epic future drops!`);
-      }
-    };
-  </script>
-</body>
-</html>
+    <!-- Submit Project -->
+    <section id="submit">
+        <div class="container">
+            <h2>Submit Your Project</h2>
+            <p style="text-align: center; margin-bottom: 40px; opacity: 0.8;">Building on Gorbagana Chain? Showcase your project on GorWeldd!</p>
+            <form class="submit-form" onsubmit="submitProject(event)">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" required placeholder="e.g., TrashSwap DEX">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea required placeholder="Tell us about your project..."></textarea>
+                </div>
+                <div class="form-group">
+                    <la

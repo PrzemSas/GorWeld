@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>$GorWeldd Evolved Checker – Gorbagana</title>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      --text: #eee;
+      --accent: #ff6600;
+      --success: #4caf50;
+      --error: #f44336;
+    }
+    body.light {
+      --bg: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+      --text: #333;
+      --accent: #e65100;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      transition: all 0.4s;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    body.light .container { background: rgba(255,255,255,0.7); border: 1px solid #ddd; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+    h1 { color: var(--accent); text-shadow: 0 0 15px rgba(255,102,0,0.5); }
+    button {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .primary { background: linear-gradient(135deg, #ff5500, #ff8800); color: white; }
+    .primary:hover { transform: scale(1.03); }
+    .secondary { background: rgba(255,255,255,0.15); color: var(--text); }
+    .status { padding: 18px; border-radius: 12px; background: rgba(0,0,0,0.25); margin: 15px 0; }
+    .log { font-family: monospace; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; max-height: 280px; overflow-y: auto; white-space: pre-wrap; color: #ffcc00; }
+    body.light .log { background: #f8f9fa; color: #333; }
+    .price { font-size: 1.4em; color: #ffd700; margin: 10px 0; }
+    .toggle { position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 50%; cursor: pointer; }
+    body.light .toggle { background: rgba(255,255,255,0.6); }
+  </style>
+</head>
+<body>
+
+<div class="toggle" onclick="document.body.classList.toggle('light')">🌙/☀️</div>
+
+<div class="container">
+  <h1>🗑️🔥 $GorWeldd Evolved Checker</h1>
+  <p>Gorbagana Chain – Advanced Balance + Price Tracker</p>
+
+  <div class="status warning">
+    <strong>Setup required:</strong> Backpack → Settings → Solana → Custom RPC: <code>https://rpc.trashscan.io</code> → Switch network!
+  </div>
+
+  <select id="rpc-select" class="secondary">
+    <option value="https://rpc.trashscan.io">Trashscan RPC (recommended)</option>
+    <option value="https://rpc.gorbagana.wtf">Gorbagana Official</option>
+    <option value="https://api.gorbagana.dev">Gorbagana Dev</option>
+  </select>
+
+  <button id="connect-btn" class="primary">🔗 Connect Wallet</button>
+
+  <div class="status" id="wallet-status">Not connected</div>
+
+  <button id="check-btn" class="primary" disabled>💰 Check & Refresh</button>
+
+  <div id="result" class="status" style="display:none;">
+    <div>Balance: <span id="balance" style="font-size:1.8em; color:var(--success)">0.0000</span> $GorWeldd</div>
+    <div class="price">Current Price: <span id="price">—</span> USD</div>
+    <div>Value: <span id="value" style="font-weight:bold; color:#ffd700">—</span> USD</div>
+    <a id="explorer" href="#" target="_blank" style="color:#2196f3;">View on Trashscan →</a>
+  </div>
+
+  <div class="log" id="log">Evolution log v3 – started...</div>
+
+  <button id="export-log" class="secondary">📤 Export Logs</button>
+</div>
+
+<script>
+  const { Connection, PublicKey } = solanaWeb3;
+  const { getAssociatedTokenAddressSync } = splToken;
+
+  const MINT = new PublicKey("GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7");
+  const logs = document.getElementById('log');
+  let conn, pubkey, provider;
+
+  function log(msg, type='info') {
+    const t = new Date().toLocaleTimeString();
+    const p = type==='error'?'❌':type==='success'?'✅':'ℹ️';
+    logs.textContent += `\n[${t}] ${p} ${msg}`;
+    logs.scrollTop = logs.scrollHeight;
+  }
+
+  function initConn() {
+    conn = new Connection(document.getElementById('rpc-select').value, 'confirmed');
+    log(`RPC switched to ${conn.rpcEndpoint}`);
+  }
+  document.getElementById('rpc-select').onchange = initConn;
+  initConn();
+
+  document.getElementById('connect-btn').onclick = async () => {
+    try {
+      provider = window.backpack?.isBackpack ? window.backpack :
+                  window.solana?.isPhantom ? window.solana : window.solana;
+      if (!provider) throw new Error("No wallet found – install Backpack/Phantom");
+
+      await provider.connect();
+      pubkey = new PublicKey(provider.publicKey.toString());
+      document.getElementById('wallet-status').textContent = `Connected: ${pubkey.toBase58().slice(0,6)}...${pubkey.toBase58().slice(-6)}`;
+      document.getElementById('check-btn').disabled = false;
+      log("Wallet connected – ready to evolve!", 'success');
+    } catch(e) {
+      log("Connect failed: " + e.message, 'error');
+      alert(e.message);
+    }
+  };
+
+  async function fetchPrice() {
+    try {
+      // Proxy via free API (update if needed – CoinGecko sometimes rate-limits)
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=gorbagana&vs_currencies=usd');
+      const data = await res.json();
+      return data.gorbagana?.usd || '—';
+    } catch {
+      return '— (API error)';
+    }
+  }
+
+  document.getElementById('check-btn').onclick = async () => {
+    if (!pubkey) return;
+    const btn = document.getElementById('check-btn');
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+
+    try {
+      const ata = getAssociatedTokenAddressSync(MINT, pubkey);
+      const balInfo = await conn.getTokenAccountBalance(ata);
+      const bal = balInfo.value.uiAmount || 0;
+
+      document.getElementById('balance').textContent = bal.toLocaleString('en-US', {minimumFractionDigits:4});
+      const price = await fetchPrice();
+      document.getElementById('price').textContent = price === '—' ? '—' : `$${price}`;
+      const val = price !== '—' ? (bal * price).toFixed(2) : '—';
+      document.getElementById('value').textContent = val === '—' ? '—' : `$${val}`;
+
+      document.getElementById('explorer').href = `https://trashscan.io/address/${pubkey.toBase58()}`;
+      document.getElementById('result').style.display = 'block';
+
+      log(`Balance: ${bal} | Price: $${price} | Value: $${val}`, 'success');
+    } catch(e) {
+      log("Check error: " + e.message + " (wrong network / no token account?)", 'error');
+      document.getElementById('balance').textContent = '0.0000';
+      document.getElementById('result').style.display = 'block';
+    }
+    btn.textContent = '💰 Refresh';
+    btn.disabled = false;
+  };
+
+  document.getElementById('export-log').onclick = () => {
+    const blob = new Blob([logs.textContent], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'gorweldd-logs.txt'; a.click();
+  };
+
+  log("v3 loaded – connect wallet to start evolving the checker 🗑️");
+</script>
+</body>
+</html>

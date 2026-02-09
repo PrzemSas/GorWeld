@@ -297,6 +297,11 @@
             gap: 20px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .game-controls button {
+            min-width: 150px;
         }
 
         .score-display {
@@ -582,12 +587,13 @@
                     <div class="temp-bar">
                         <div class="temp-fill" id="tempFill" style="width: 50%"></div>
                     </div>
-                    <p style="margin-bottom: 20px;">Weld the scrap at the perfect temperature!</p>
-                    <p style="font-size: 0.9rem; opacity: 0.7;">Target: 1400-1600°C</p>
+                    <p style="margin: 20px 0; font-size: 1.1rem;">🔥 Weld the scrap at the perfect temperature!</p>
+                    <p style="font-size: 1rem; opacity: 0.8;">✅ Target Zone: 1400-1600°C</p>
+                    <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 10px;">Click WELD when temperature is in the green zone!</p>
                 </div>
                 <div class="game-controls">
-                    <button class="btn btn-secondary" id="startBtn">Start Welding</button>
-                    <button class="btn btn-primary" id="weldBtn" disabled>🔥 WELD!</button>
+                    <button class="btn btn-primary" id="startBtn" style="font-size: 1.1rem;">🔥 START WELDING</button>
+                    <button class="btn btn-secondary" id="weldBtn" disabled style="font-size: 1.1rem;">⚡ WELD NOW!</button>
                 </div>
                 <div class="score-display">
                     Score: <span id="score">0</span> | Best: <span id="bestScore">0</span>
@@ -661,14 +667,4 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <h3>Swap for $GorWeldd</h3>
-                    <p>Head to the Gorbagana DEX and swap gGOR for $GorWeldd</p>
-                    <a href="#" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.9rem; padding: 8px 20px;">Swap Now</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Submit Project -->
-    <section id="submit">
-        <div class="container">
-            <h2>Subm
+                    <p>Head to the Gorbagana DEX and swap gGOR for $GorWeld

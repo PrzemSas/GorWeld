@@ -1,670 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>$GorWeldd - Welding the Gorbagana Ecosystem 🔥🗑️</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Oswald', sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            border-bottom: 2px solid #ff6b00;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 2rem;
-            color: #ff6b00;
-            text-shadow: 0 0 20px rgba(255, 107, 0, 0.8);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #ff6b00;
-        }
-
-        .mobile-menu {
-            display: none;
-            cursor: pointer;
-        }
-
-        .mobile-menu span {
-            display: block;
-            width: 25px;
-            height: 3px;
-            background: #ff6b00;
-            margin: 5px 0;
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            padding-top: 80px;
-        }
-
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
-        }
-
-        .sparks {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .spark {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #ff6b00;
-            border-radius: 50%;
-            animation: sparkFall 3s linear infinite;
-            box-shadow: 0 0 10px #ff6b00;
-        }
-
-        @keyframes sparkFall {
-            0% {
-                transform: translateY(-10px) translateX(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) translateX(50px);
-                opacity: 0;
-            }
-        }
-
-        .hero-content {
-            text-align: center;
-            z-index: 10;
-            position: relative;
-        }
-
-        .welding-mask {
-            font-size: 120px;
-            margin-bottom: 20px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        h1 {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 4rem;
-            color: #ff6b00;
-            text-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .tagline {
-            font-size: 1.5rem;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            font-family: 'Oswald', sans-serif;
-        }
-
-        .btn-primary {
-            background: #ff6b00;
-            color: #000;
-            box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
-        }
-
-        .btn-primary:hover {
-            background: #ff8c33;
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #ff6b00;
-            border: 2px solid #ff6b00;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 107, 0, 0.1);
-        }
-
-        /* Section Styles */
-        section {
-            padding: 100px 20px;
-            position: relative;
-        }
-
-        section h2 {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 3rem;
-            color: #ff6b00;
-            text-align: center;
-            margin-bottom: 50px;
-            text-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
-        }
-
-        /* About Section */
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .about-card {
-            background: rgba(255, 107, 0, 0.05);
-            border: 2px solid rgba(255, 107, 0, 0.3);
-            padding: 30px;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .about-card:hover {
-            border-color: #ff6b00;
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
-            transform: translateY(-5px);
-        }
-
-        .about-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: #ff6b00;
-        }
-
-        .about-card p {
-            line-height: 1.6;
-            opacity: 0.9;
-        }
-
-        /* Game Section */
-        .game-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 107, 0, 0.05);
-            border: 3px solid #ff6b00;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .game-screen {
-            background: #000;
-            border: 2px solid #ff6b00;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .temperature-display {
-            font-size: 3rem;
-            color: #ff6b00;
-            margin-bottom: 20px;
-            font-family: 'Bebas Neue', cursive;
-        }
-
-        .temp-bar {
-            width: 100%;
-            height: 30px;
-            background: #222;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .temp-fill {
-            height: 100%;
-            background: linear-gradient(to right, #00ff00, #ffff00, #ff6b00, #ff0000);
-            transition: width 0.3s;
-        }
-
-        .game-controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .game-controls button {
-            min-width: 150px;
-        }
-
-        .score-display {
-            font-size: 1.5rem;
-            margin-top: 20px;
-            color: #ff6b00;
-        }
-
-        /* Stats Section */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 107, 0, 0.05));
-            border: 2px solid rgba(255, 107, 0, 0.3);
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            color: #ff6b00;
-            font-family: 'Bebas Neue', cursive;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.8;
-        }
-
-        .token-address {
-            background: #000;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            word-break: break-all;
-            margin-top: 20px;
-            border: 1px solid #ff6b00;
-        }
-
-        .copy-btn {
-            margin-top: 10px;
-            padding: 8px 20px;
-            background: #ff6b00;
-            border: none;
-            color: #000;
-            cursor: pointer;
-            font-weight: 700;
-            border-radius: 5px;
-        }
-
-        /* How to Buy */
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .step {
-            text-align: center;
-            padding: 30px;
-            background: rgba(255, 107, 0, 0.05);
-            border-radius: 10px;
-            border: 2px solid rgba(255, 107, 0, 0.3);
-        }
-
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background: #ff6b00;
-            color: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 auto 20px;
-        }
-
-        .step h3 {
-            color: #ff6b00;
-            margin-bottom: 15px;
-        }
-
-        /* Submit Project */
-        .submit-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ff6b00;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 107, 0, 0.05);
-            border: 2px solid rgba(255, 107, 0, 0.3);
-            color: #fff;
-            border-radius: 5px;
-            font-family: 'Oswald', sans-serif;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* Socials */
-        .socials {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            margin-top: 40px;
-        }
-
-        .social-link {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 107, 0, 0.1);
-            border: 2px solid #ff6b00;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            text-decoration: none;
-            color: #ff6b00;
-            transition: all 0.3s;
-        }
-
-        .social-link:hover {
-            background: #ff6b00;
-            color: #000;
-            transform: scale(1.1);
-        }
-
-        /* Footer */
-        footer {
-            background: #000;
-            padding: 40px 20px;
-            text-align: center;
-            border-top: 2px solid #ff6b00;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .tagline {
-                font-size: 1.2rem;
-            }
-
-            .welding-mask {
-                font-size: 80px;
-            }
-
-            section h2 {
-                font-size: 2rem;
-            }
-        }
-
-        /* Balance Checker */
-        .balance-checker {
-            max-width: 500px;
-            margin: 40px auto;
-            background: rgba(255, 107, 0, 0.05);
-            border: 2px solid #ff6b00;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .wallet-input {
-            width: 100%;
-            padding: 12px;
-            background: #000;
-            border: 2px solid rgba(255, 107, 0, 0.5);
-            color: #fff;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-family: monospace;
-        }
-
-        .balance-result {
-            margin-top: 20px;
-            font-size: 2rem;
-            color: #ff6b00;
-            font-family: 'Bebas Neue', cursive;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GorWeld | The Furnace Never Sleeps</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --black:#0b0b0b;
+    --steel:#171717;
+    --fire:#ff5a00;
+    --rust:#7a2f0a;
+    --text:#d0d0d0;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    background:var(--black);
+    color:var(--text);
+    font-family:Arial, sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+}
+
+header{
+    height:100vh;
+    background:radial-gradient(circle at center, #1a1a1a 0%, #0b0b0b 70%);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+}
+
+header h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:6rem;
+    letter-spacing:6px;
+    color:var(--fire);
+}
+
+header h2{
+    font-family:'Cinzel', serif;
+    font-weight:400;
+    margin-top:10px;
+    letter-spacing:3px;
+}
+
+header p{
+    margin-top:25px;
+    max-width:600px;
+    font-size:1.1rem;
+}
+
+.button{
+    margin-top:40px;
+    padding:15px 50px;
+    border:2px solid var(--fire);
+    color:var(--fire);
+    text-decoration:none;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.button:hover{
+    background:var(--fire);
+    color:black;
+    box-shadow:0 0 20px var(--fire);
+}
+
+section{
+    padding:100px 10%;
+}
+
+.section-title{
+    font-family:'Cinzel', serif;
+    font-size:2.5rem;
+    margin-bottom:50px;
+    color:var(--fire);
+}
+
+.split{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:60px;
+}
+
+.card{
+    background:var(--steel);
+    padding:40px;
+    border:1px solid #222;
+    transition:.3s;
+}
+
+.card:hover{
+    border-color:var(--fire);
+    box-shadow:0 0 25px rgba(255,90,0,.4);
+}
+
+.fire-line{
+    height:2px;
+    background:linear-gradient(to right,transparent,var(--fire),transparent);
+}
+
+footer{
+    text-align:center;
+    padding:50px;
+    border-top:1px solid #222;
+    font-size:.9rem;
+    background:#070707;
+}
+</style>
 </head>
+
 <body>
-    <!-- Header -->
-    <header>
-        <nav>
-            <div class="logo">$GorWeldd</div>
-            <ul class="nav-links">
-                <li><a href="#about">About</a></li>
-                <li><a href="#game">Game</a></li>
-                <li><a href="#stats">Stats</a></li>
-                <li><a href="#buy">Buy</a></li>
-                <li><a href="#submit">Submit</a></li>
-            </ul>
-            <div class="mobile-menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="sparks" id="sparks"></div>
-        <div class="hero-content">
-            <div class="welding-mask">🔥</div>
-            <h1>$GorWeldd</h1>
-            <p class="tagline">Welding the Gorbagana Ecosystem 🔥🗑️</p>
-            <div class="cta-buttons">
-                <a href="#buy" class="btn btn-primary">Buy $GorWeldd</a>
-                <a href="#game" class="btn btn-secondary">Play Game</a>
-                <a href="#stats" class="btn btn-secondary">Check Balance</a>
-            </div>
+<header>
+    <h1>GORWELD</h1>
+    <h2>The Furnace Never Sleeps</h2>
+    <p>
+        Born in scrap.  
+        Forged in fire.  
+        The market bends. Steel does not.
+    </p>
+    <a href="#forge" class="button">ENTER THE FORGE</a>
+</header>
+
+<div class="fire-line"></div>
+
+<section>
+    <h2 class="section-title">THE WELDER</h2>
+    <div class="split">
+        <div class="card">
+            <h3>Reality</h3>
+            <p>
+                Real steel. Real sparks.  
+                No filters. No borrowed identity.  
+                Work before words.  
+                Heat before hype.
+            </p>
         </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about">
-        <div class="container">
-            <h2>About $GorWeldd</h2>
-            <div class="about-grid">
-                <div class="about-card">
-                    <h3>🗑️ The Meme</h3>
-                    <p>Born in the scrapyard of Gorbagana Chain, $GorWeldd is the ultimate trash chain welder. We take garbage and make it glow. Oscar the Grouch meets industrial welding in the most memeable SVM fork ever.</p>
-                </div>
-                <div class="about-card">
-                    <h3>⚡ Utility</h3>
-                    <p>Earn $GorWeldd by playing Scrapyard Welder, participate in governance decisions, and burn tokens for highscore supremacy. The more you weld, the more you earn.</p>
-                </div>
-                <div class="about-card">
-                    <h3>🔥 Ecosystem</h3>
-                    <p>Built on Gorbagana Chain - the zero-fee trash fork of Solana. Bridge your $GOR, swap for $GorWeldd, and join the most industrial meme ecosystem in crypto.</p>
-                </div>
-            </div>
+        <div class="card">
+            <h3>Myth</h3>
+            <p>
+                In the shadows stands the legend.  
+                Imperium Ferri.  
+                Structure forged under pressure.  
+                A chain built from scrap.
+            </p>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Game Section -->
-    <section id="game">
-        <div class="container">
-            <h2>Scrapyard Welder Game</h2>
-            <div class="game-container">
-                <div class="game-screen">
-                    <div class="temperature-display" id="tempDisplay">1500°C</div>
-                    <div class="temp-bar">
-                        <div class="temp-fill" id="tempFill" style="width: 50%"></div>
-                    </div>
-                    <p style="margin: 20px 0; font-size: 1.1rem;">🔥 Weld the scrap at the perfect temperature!</p>
-                    <p style="font-size: 1rem; opacity: 0.8;">✅ Target Zone: 1400-1600°C</p>
-                    <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 10px;">Click WELD when temperature is in the green zone!</p>
-                </div>
-                <div class="game-controls">
-                    <button class="btn btn-primary" id="startBtn" style="font-size: 1.1rem;">🔥 START WELDING</button>
-                    <button class="btn btn-secondary" id="weldBtn" disabled style="font-size: 1.1rem;">⚡ WELD NOW!</button>
-                </div>
-                <div class="score-display">
-                    Score: <span id="score">0</span> | Best: <span id="bestScore">0</span>
-                </div>
-            </div>
+<div class="fire-line"></div>
+
+<section id="forge">
+    <h2 class="section-title">FABRICA CATENAE</h2>
+    <div class="split">
+        <div class="card">
+            <h3>Dumpster</h3>
+            <p>Scrap feeds the furnace. Nothing is wasted.</p>
         </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section id="stats">
-        <div class="container">
-            <h2>Token Stats</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="marketCap">Loading...</div>
-                    <div class="stat-label">Market Cap</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="holders">Loading...</div>
-                    <div class="stat-label">Holders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="burned">Loading...</div>
-                    <div class="stat-label">Total Burned</div>
-                </div>
-            </div>
-            <div class="token-address">
-                <div style="margin-bottom: 10px; color: #ff6b00; font-weight: 700;">Token Address (Gorbagana Chain):</div>
-                <div id="tokenAddress">GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7</div>
-                <button class="copy-btn" onclick="copyAddress()">Copy Address</button>
-            </div>
-            <a href="https://trashscan.io/token/GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7" target="_blank" class="btn btn-primary" style="margin-top: 20px;">View on Trashscan</a>
-
-            <!-- Balance Checker -->
-            <div class="balance-checker">
-                <h3 style="color: #ff6b00; margin-bottom: 20px;">Check Your Balance</h3>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button class="btn btn-secondary" onclick="connectWallet('backpack')" style="flex: 1; padding: 12px;">
-                        🎒 Backpack
-                    </button>
-                    <button class="btn btn-secondary" onclick="connectWallet('phantom')" style="flex: 1; padding: 12px;">
-                        👻 Phantom
-                    </button>
-                </div>
-                <input type="text" class="wallet-input" id="walletInput" placeholder="Or enter wallet address manually...">
-                <button class="btn btn-primary" onclick="checkBalance()">Check Balance</button>
-                <div class="balance-result" id="balanceResult"></div>
-                <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.7;">
-                    Note: Currently using Solana mainnet RPC. For Gorbagana Chain balance, use Trashscan explorer.
-                </p>
-            </div>
+        <div class="card">
+            <h3>ScrapCoin</h3>
+            <p>Fuel of circulation. Melted under pressure.</p>
         </div>
-    </section>
+        <div class="card">
+            <h3>Chain</h3>
+            <p>Weld by weld. Link by link. Structure over chaos.</p>
+        </div>
+    </div>
+</section>
 
-    <!-- How to Buy -->
-    <section id="buy">
-        <div class="container">
-            <h2>How to Buy $GorWeldd</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Get $GOR</h3>
-                    <p>Buy $GOR on Solana or bridge from another chain</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Bridge to gGOR</h3>
-                    <p>Use the zero-fee bridge to convert GOR → gGOR on Gorbagana Chain</p>
-                    <a href="https://gorbagana.com/bridge" target="_blank" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.9rem; padding: 8px 20px;">Bridge Now</a>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Swap for $GorWeldd</h3>
-            
+<footer>
+    GorWeld — From Scrap to Chain  
+    Market burns. I weld.  
+    © 2026 Imperium Ferri
+</footer>
+
+</body>
+</html>

@@ -1,173 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="GorWeld – Born in scrap. Forged in fire. The furnace never sleeps."/>
-  <title>GorWeld | The Furnace Never Sleeps</title>
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GorWeld – Urodzony ze złomu. Kuty w ogniu imperium. Palenisko nigdy nie gaśnie.">
+  <title>GORWELD · IMPERIVM FERRI</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0a0a0a;
-      --text: #e8e8e8;
-      --accent: #ff4400;
-      --accent-glow: #ff660033;
-      --metal: #b0b0b0;
-      --metal-dark: #444;
+      --bg: #0b0a08;
+      --stone: #1c1914;
+      --gold: #d4af37;
+      --gold-dark: #b8972e;
+      --gold-glow: rgba(212, 175, 55, 0.25);
+      --fire: #a11212;
+      --text-main: #f0e6d2;
+      --text-dim: #c9b38a;
+      --border: #3a2f1f;
     }
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       background: var(--bg);
-      color: var(--text);
-      font-family: 'Roboto Mono', monospace;
-      line-height: 1.55;
+      color: var(--text-main);
+      font-family: 'Cinzel', serif;
+      line-height: 1.65;
       min-height: 100vh;
-      padding: 4vh 5vw;
-      background-image: 
-        radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, var(--accent-glow) 0%, transparent 50%);
+      padding: 8vh 6vw 10vh;
+      background-image:
+        radial-gradient(circle at 12% 18%, var(--gold-glow) 0%, transparent 55%),
+        radial-gradient(circle at 88% 82%, var(--fire) 0%, transparent 65%);
       background-attachment: fixed;
     }
-    
+
     .container {
-      max-width: 1100px;
+      max-width: 1080px;
       margin: 0 auto;
     }
-    
+
     header {
       text-align: center;
-      margin: 8vh 0 10vh;
+      margin: 10vh 0 14vh;
     }
-    
+
     h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(4.5rem, 12vw, 9rem);
+      font-size: clamp(6rem, 15vw, 13rem);
       font-weight: 900;
-      color: var(--accent);
-      text-shadow: 
-        0 0 20px var(--accent),
-        0 0 60px var(--accent-glow);
-      letter-spacing: -0.04em;
-      line-height: 0.92;
+      color: var(--gold);
+      text-shadow: 0 6px 24px var(--gold-glow), 0 2px 8px #000;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      line-height: 0.88;
     }
-    
-    .tagline {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
+
+    .subtitle {
+      font-size: clamp(2rem, 6vw, 3.2rem);
       font-weight: 700;
-      color: #ffaa66;
-      margin: 1.2rem 0 2.4rem;
-      text-shadow: 0 0 12px #ff5500aa;
+      color: var(--text-dim);
+      margin: 2rem 0 3.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
     }
-    
+
     .intro {
-      font-size: 1.35rem;
-      max-width: 720px;
-      margin: 0 auto 4rem;
-      opacity: 0.92;
+      font-size: 1.55rem;
+      max-width: 820px;
+      margin: 0 auto 5.5rem;
+      color: #e0d0b0;
+      letter-spacing: 0.04em;
     }
-    
+
     .cta {
       display: inline-block;
-      margin: 2.5rem 0 1.2rem;
-      padding: 1.1rem 3.2rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: white;
-      background: linear-gradient(145deg, #ff4400, #cc3300);
-      border: none;
-      border-radius: 6px;
+      margin: 3.5rem 0 2.5rem;
+      padding: 1.5rem 5rem;
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #111;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border: 3px solid var(--gold);
+      border-radius: 10px;
       text-decoration: none;
-      box-shadow: 0 0 30px #ff440066;
-      transition: all 0.25s ease;
+      box-shadow: 0 10px 50px var(--gold-glow), inset 0 3px 12px rgba(255,255,220,0.4);
+      transition: all 0.4s ease;
     }
-    
+
     .cta:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px #ff4400aa;
-      background: linear-gradient(145deg, #ff5500, #dd4400);
+      transform: scale(1.07) translateY(-8px);
+      box-shadow: 0 25px 70px var(--gold-glow);
+      background: linear-gradient(135deg, #e6c567, var(--gold));
+      border-color: #e6c567;
     }
-    
-    .social-link {
+
+    .social {
       display: block;
-      margin: 0.8rem 0 4rem;
-      font-size: 1.3rem;
-      color: var(--accent);
+      font-size: 1.7rem;
+      color: var(--gold);
       text-decoration: none;
-      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin: 2rem 0 8rem;
       transition: all 0.3s;
     }
-    
-    .social-link:hover {
-      color: #ffaa66;
-      text-shadow: 0 0 12px var(--accent-glow);
+
+    .social:hover {
+      color: #e6c567;
+      text-shadow: 0 0 20px var(--gold-glow);
     }
-    
+
     section {
-      margin: 8vh 0;
-      padding: 3rem 0;
-      border-top: 1px solid #222;
+      margin: 12vh 0;
+      padding: 5rem 0;
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
     }
-    
+
     h2 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.8rem;
-      color: var(--accent);
-      margin-bottom: 2rem;
-      text-shadow: 0 0 15px var(--accent-glow);
+      font-size: 3.6rem;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 3rem;
+      text-shadow: 0 5px 15px #000;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
     }
-    
+
     h3 {
-      font-size: 1.7rem;
-      color: #ffaa66;
-      margin: 2.2rem 0 1rem;
+      font-size: 2.2rem;
+      color: #e0d0b0;
+      margin: 3rem 0 1.4rem;
+      letter-spacing: 0.08em;
     }
-    
+
     p, li {
-      font-size: 1.18rem;
-      max-width: 780px;
-      margin: 0.9em auto;
-      color: #ddd;
+      font-size: 1.35rem;
+      max-width: 860px;
+      margin: 1.3em auto;
+      color: #d9c9a8;
+      letter-spacing: 0.03em;
     }
-    
-    ul {
+
+    li {
       list-style: none;
-      margin: 1.5rem 0;
+      margin: 1.4em 0;
     }
-    
+
     li:before {
-      content: "→ ";
-      color: var(--accent);
-      margin-right: 0.6rem;
+      content: "· ";
+      color: var(--gold);
+      font-size: 2rem;
+      margin-right: 1rem;
+      vertical-align: middle;
     }
-    
+
     hr {
-      border: 0;
-      height: 2px;
-      background: linear-gradient(to right, transparent, #444, transparent);
-      margin: 5rem 0;
+      border: none;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #4a3a22, transparent);
+      margin: 7rem 0;
     }
-    
+
     footer {
       text-align: center;
-      margin-top: 10vh;
-      font-size: 0.95rem;
-      color: #666;
+      font-size: 1.2rem;
+      color: #6b5a3a;
+      letter-spacing: 0.06em;
+      margin-top: 14vh;
     }
-    
-    @media (max-width: 640px) {
-      body { padding: 4vh 6vw; }
-      h1 { font-size: clamp(3.8rem, 14vw, 6.5rem); }
-      .cta { padding: 0.9rem 2.4rem; font-size: 1.3rem; }
+
+    @media (max-width: 680px) {
+      body { padding: 6vh 7vw; }
+      h1 { font-size: clamp(4.5rem, 18vw, 9rem); }
+      .cta { padding: 1.2rem 3.5rem; font-size: 2rem; }
     }
   </style>
 </head>
@@ -177,52 +191,52 @@
 
   <header>
     <h1>GORWELD</h1>
-    <div class="tagline">The Furnace Never Sleeps</div>
+    <div class="subtitle">The Furnace Never Sleeps</div>
     <p class="intro">
-      Born in scrap.<br>
-      Forged in fire.<br>
-      The market bends. Steel does not.
+      VRBANI EX SCRAPO · FVLCITVS IN IGNE<br>
+      FORNAX NVNQVAM DORMIT
     </p>
-    
-    <a href="#forge" class="cta">ENTER THE FORGE</a>
-    
-    <a href="https://x.com/PrzemSas" target="_blank" class="social-link">
-      @PrzemSas on X – official account
+
+    <a href="#forge" class="cta">INGREDERE FORNACEM</a>
+
+    <a href="https://x.com/PrzemSas" target="_blank" class="social">
+      · @PrzemSas – QVOD IMPERIVM EST
     </a>
   </header>
 
   <section id="forge">
-    <h2>THE WELDER</h2>
-    
-    <h3>Reality</h3>
-    <p>Real steel. Real sparks.<br>
-    No filters. No borrowed identity.<br>
-    Work before words. Heat before hype.</p>
-    
-    <h3>Myth</h3>
-    <p>In the shadows stands the legend.<br>
-    Imperium Ferri.<br>
-    Structure forged under pressure.<br>
-    A chain built from scrap.</p>
+    <h2>FABER</h2>
+
+    <h3>VERITAS</h3>
+    <p>FERRVM VERVM · SCINTILLAE VERAE<br>
+    SINE FILTRIS · SINE ALIENA PERSONA<br>
+    LABOR ANTE VERBA · IGNIS ANTE HYPE</p>
+
+    <h3>FABVLA</h3>
+    <p>IN VMBRIS STAT LEGENDA<br>
+    IMPERIVM FERRI<br>
+    STRVCTVRA SVB PRESSVRA FVLCITA<br>
+    CATENA EX SCRAPO CONDITA</p>
   </section>
 
   <hr>
 
   <section>
     <h2>FABRICA CATENAE</h2>
-    
-    <h3>Dumpster</h3>
-    <p>Scrap feeds the furnace. Nothing is wasted.</p>
-    
-    <h3>ScrapCoin</h3>
-    <p>Fuel of circulation. Melted under pressure.</p>
-    
-    <h3>Chain</h3>
-    <p>Weld by weld. Link by link.<br>Structure over chaos.</p>
+
+    <h3>DVMPSTER</h3>
+    <p>SCRAPVS PALENISKO ALIT · NIHIL PERDITVR</p>
+
+    <h3>SCRAPCOIN</h3>
+    <p>CVRRICVLI FOMES · SVB PRESSVRA LIQVEFACTVM</p>
+
+    <h3>CATENA</h3>
+    <p>IVNCTVRA POST IVNCTVRAM · ANVLVS POST ANVLVM<br>
+    ORDO SVPER CHAOS</p>
   </section>
 
   <footer>
-    GorWeld – no filters, no mercy
+    GORWELD · SINE MISERICORDIA · SINE FALSO
   </footer>
 
 </div>

@@ -228,3 +228,491 @@
             flex-wrap: wrap;
             justify-content: center;
         }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: var(--spacing-md);
+            font-size: 2rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn-forge {
+            display: inline-block;
+            padding: 16px 32px;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            border: 2px solid var(--forge-red);
+            background: var(--forge-red);
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-forge::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: var(--molten-orange);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            z-index: -1;
+        }
+
+        .btn-forge:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-forge:hover {
+            box-shadow: 
+                0 0 20px var(--forge-red),
+                0 0 40px var(--molten-orange);
+            transform: translateY(-2px);
+        }
+
+        .btn-forge.secondary {
+            background: transparent;
+            border: 2px solid var(--molten-orange);
+        }
+
+        .btn-forge.small {
+            padding: 10px 20px;
+            font-size: 0.875rem;
+        }
+
+        /* ========== STATS TICKER ========== */
+        .stats-ticker {
+            background: rgba(42, 42, 42, 0.9);
+            padding: var(--spacing-sm);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            border-top: 2px solid var(--forge-red);
+            border-bottom: 2px solid var(--forge-red);
+            position: sticky;
+            top: 70px;
+            z-index: 999;
+        }
+
+        .ticker-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px;
+        }
+
+        .ticker-label {
+            font-size: 0.75rem;
+            color: var(--molten-orange);
+            margin-bottom: 4px;
+        }
+
+        .ticker-value {
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            color: var(--white);
+        }
+
+        /* ========== SECTIONS ========== */
+        .section {
+            padding: var(--spacing-xl) var(--spacing-md);
+            position: relative;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            text-align: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--molten-orange);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* ========== FORGE SECTION ========== */
+        .forge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .forge-card {
+            background: rgba(42, 42, 42, 0.8);
+            border: 2px solid var(--forge-red);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .forge-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 
+                0 10px 30px rgba(255, 68, 0, 0.3),
+                0 0 20px var(--forge-red);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .forge-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--molten-orange);
+        }
+
+        .price-display {
+            margin: var(--spacing-md) 0;
+        }
+
+        .price-large {
+            display: block;
+            font-size: 2rem;
+            font-family: var(--font-primary);
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .price-change {
+            font-size: 1.2rem;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .price-change.up {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+        }
+
+        .price-change.down {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+        }
+
+        .forge-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .contract-box {
+            background: var(--dark-bg);
+            padding: var(--spacing-sm);
+            border: 1px solid var(--forge-red);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: var(--spacing-sm) 0;
+        }
+
+        .contract-box code {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-copy {
+            background: var(--forge-red);
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: var(--molten-orange);
+        }
+
+        .contract-note {
+            font-size: 0.875rem;
+            color: var(--spark-yellow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--molten-orange);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-family: var(--font-primary);
+            font-size: 1.2rem;
+        }
+
+        /* ========== WELDER SECTION ========== */
+        .welder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .welder-card {
+            background: rgba(42, 42, 42, 0.6);
+            border: 2px solid var(--steel-gray);
+            padding: var(--spacing-lg);
+            line-height: 2;
+        }
+
+        .welder-card.myth {
+            border-color: var(--forge-red);
+            background: rgba(255, 68, 0, 0.1);
+        }
+
+        .welder-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--molten-orange);
+        }
+
+        .welder-card .highlight {
+            color: var(--forge-red);
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px var(--forge-red);
+        }
+
+        .welder-quote {
+            background: var(--dark-bg);
+            border-left: 4px solid var(--forge-red);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .welder-quote blockquote {
+            font-size: 1.5rem;
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .welder-quote cite {
+            display: block;
+            margin-top: var(--spacing-sm);
+            color: var(--molten-orange);
+            font-size: 1.2rem;
+        }
+
+        /* ========== CHAIN SECTION ========== */
+        .chain-process {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+        }
+
+        .chain-link {
+            background: rgba(42, 42, 42, 0.8);
+            border: 2px solid var(--steel-gray);
+            padding: var(--spacing-lg);
+            text-align: center;
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .chain-link:hover {
+            border-color: var(--forge-red);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--forge-red);
+        }
+
+        .link-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--forge-red);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-primary);
+            font-size: 1.2rem;
+        }
+
+        .link-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .chain-link h3 {
+            font-size: 1.8rem;
+            color: var(--molten-orange);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .link-connector {
+            font-size: 3rem;
+            color: var(--forge-red);
+            margin-top: var(--spacing-sm);
+        }
+
+        .weld-counter {
+            background: linear-gradient(135deg, var(--dark-bg), var(--steel-gray));
+            border: 3px solid var(--forge-red);
+            padding: var(--spacing-lg);
+            text-align: center;
+            margin-top: var(--spacing-xl);
+        }
+
+        .weld-counter h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .counter {
+            font-family: var(--font-primary);
+            font-size: 4rem;
+            color: var(--molten-orange);
+            text-shadow: 0 0 20px var(--forge-red);
+            margin: var(--spacing-md) 0;
+            animation: counter-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes counter-glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ========== ROADMAP SECTION ========== */
+        .roadmap-timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .roadmap-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--steel-gray);
+            transform: translateX(-50%);
+        }
+
+        .forge-stage {
+            display: flex;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+
+        .forge-stage.completed .stage-marker {
+            background: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .forge-stage.active .stage-marker {
+            background: var(--forge-red);
+            border-color: var(--molten-orange);
+            box-shadow: 0 0 20px var(--forge-red);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .stage-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--steel-gray);
+            border: 4px solid var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .stage-icon {
+            font-size: 2rem;
+        }
+
+        .stage-content {
+            flex: 1;
+            background: rgba(42, 42, 42, 0.8);
+            border: 2px solid var(--steel-gray);
+            padding: var(--spacing-md);
+            margin-left: calc(50% + 50px);
+        }
+
+        .forge-stage:nth-child(even) .stage-content {
+            margin-left: 0;
+            margin-right: calc(50% + 50px);
+        }
+
+        .stage-content h3 {
+            font-size: 1.5rem;
+            color: var(--molten-orange);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stage-content ul {
+            list-style: none;
+            padding: 0;
+            margin-top: var(--spacing-sm);
+        }
+
+        .stage-content li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .stage-content li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;

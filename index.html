@@ -1,718 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GORWELD - The Furnace Never Sleeps. Born in scrap. Forged in fire. Real steel blockchain.">
-    <meta name="keywords" content="GORWELD, GOR, blockchain, crypto, DeFi, Imperium Ferri">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="GorWeld – Born in scrap. Forged in fire. The furnace never sleeps."/>
+  <title>GorWeld | The Furnace Never Sleeps</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #e8e8e8;
+      --accent: #ff4400;
+      --accent-glow: #ff660033;
+      --metal: #b0b0b0;
+      --metal-dark: #444;
+    }
     
-    <!-- Open Graph -->
-    <meta property="og:title" content="GORWELD - The Furnace Never Sleeps">
-    <meta property="og:description" content="Born in scrap. Forged in fire. The market bends. Steel does not.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://gorweld.com">
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
-    <title>GORWELD | The Furnace Never Sleeps</title>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Roboto Mono', monospace;
+      line-height: 1.55;
+      min-height: 100vh;
+      padding: 4vh 5vw;
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, var(--accent-glow) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
     
-    <style>
-        /* ==========================================
-           GORWELD.COM - COMPLETE STYLESHEET
-           The Furnace Never Sleeps
-           ========================================== */
-
-        /* ========== ROOT VARIABLES ========== */
-        :root {
-            --forge-red: #ff4400;
-            --molten-orange: #ff6600;
-            --spark-yellow: #ffaa00;
-            --steel-gray: #2a2a2a;
-            --dark-bg: #0a0a0a;
-            --light-text: #e0e0e0;
-            --white: #ffffff;
-            --spacing-xs: 8px;
-            --spacing-sm: 16px;
-            --spacing-md: 32px;
-            --spacing-lg: 64px;
-            --spacing-xl: 128px;
-            --font-primary: 'Rubik Mono One', sans-serif;
-            --font-secondary: 'Share Tech Mono', monospace;
-        }
-
-        /* ========== RESET & BASE ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-secondary);
-            background: linear-gradient(180deg, var(--dark-bg) 0%, #1a1a1a 100%);
-            color: var(--light-text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ========== TYPOGRAPHY ========== */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-primary);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .glow-text {
-            text-shadow: 
-                0 0 10px var(--forge-red),
-                0 0 20px var(--forge-red),
-                0 0 30px var(--molten-orange);
-            animation: glow-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes glow-pulse {
-            0%, 100% {
-                text-shadow: 
-                    0 0 10px var(--forge-red),
-                    0 0 20px var(--forge-red),
-                    0 0 30px var(--molten-orange);
-            }
-            50% {
-                text-shadow: 
-                    0 0 20px var(--forge-red),
-                    0 0 40px var(--molten-orange),
-                    0 0 60px var(--spark-yellow);
-            }
-        }
-
-        /* ========== SPARKS BACKGROUND ========== */
-        .sparks-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .spark {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: var(--spark-yellow);
-            border-radius: 50%;
-            opacity: 0;
-            animation: spark-rise 2s ease-out infinite;
-        }
-
-        @keyframes spark-rise {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-150px) scale(0);
-            }
-        }
-
-        /* ========== NAVIGATION ========== */
-        .forge-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            padding: var(--spacing-sm) var(--spacing-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            border-bottom: 2px solid var(--forge-red);
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: var(--font-primary);
-            font-size: 1.5rem;
-        }
-
-        .logo-icon {
-            font-size: 2rem;
-            animation: flicker 3s ease-in-out infinite;
-        }
-
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        .nav-links {
-            display: flex;
-            gap: var(--spacing-md);
-        }
-
-        .nav-links a {
-            color: var(--light-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            padding: 8px 16px;
-            border: 1px solid transparent;
-        }
-
-        .nav-links a:hover {
-            color: var(--molten-orange);
-            border: 1px solid var(--forge-red);
-            box-shadow: 0 0 10px var(--forge-red);
-        }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: 2px solid var(--forge-red);
-            color: var(--light-text);
-            font-size: 1.5rem;
-            padding: 8px 16px;
-            cursor: pointer;
-        }
-
-        /* ========== HERO SECTION ========== */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: var(--spacing-xl) var(--spacing-md);
-            position: relative;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(255, 68, 0, 0.1) 0%, transparent 50%),
-                linear-gradient(180deg, var(--dark-bg) 0%, #1a1a1a 100%);
-        }
-
-        .hero-title {
-            font-size: clamp(3rem, 10vw, 8rem);
-            margin-bottom: var(--spacing-sm);
-            line-height: 1;
-        }
-
-        .hero-subtitle {
-            font-size: clamp(1.5rem, 4vw, 3rem);
-            color: var(--molten-orange);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .hero-text {
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            line-height: 2;
-            margin-bottom: var(--spacing-lg);
-            max-width: 600px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: var(--spacing-sm);
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: var(--spacing-md);
-            font-size: 2rem;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        /* ========== BUTTONS ========== */
-        .btn-forge {
-            display: inline-block;
-            padding: 16px 32px;
-            font-family: var(--font-primary);
-            font-size: 1rem;
-            text-decoration: none;
-            text-transform: uppercase;
-            border: 2px solid var(--forge-red);
-            background: var(--forge-red);
-            color: var(--white);
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-forge::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: var(--molten-orange);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-            z-index: -1;
-        }
-
-        .btn-forge:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-forge:hover {
-            box-shadow: 
-                0 0 20px var(--forge-red),
-                0 0 40px var(--molten-orange);
-            transform: translateY(-2px);
-        }
-
-        .btn-forge.secondary {
-            background: transparent;
-            border: 2px solid var(--molten-orange);
-        }
-
-        .btn-forge.small {
-            padding: 10px 20px;
-            font-size: 0.875rem;
-        }
-
-        /* ========== STATS TICKER ========== */
-        .stats-ticker {
-            background: rgba(42, 42, 42, 0.9);
-            padding: var(--spacing-sm);
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            border-top: 2px solid var(--forge-red);
-            border-bottom: 2px solid var(--forge-red);
-            position: sticky;
-            top: 70px;
-            z-index: 999;
-        }
-
-        .ticker-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 150px;
-        }
-
-        .ticker-label {
-            font-size: 0.75rem;
-            color: var(--molten-orange);
-            margin-bottom: 4px;
-        }
-
-        .ticker-value {
-            font-family: var(--font-primary);
-            font-size: 1rem;
-            color: var(--white);
-        }
-
-        /* ========== SECTIONS ========== */
-        .section {
-            padding: var(--spacing-xl) var(--spacing-md);
-            position: relative;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            font-size: clamp(2rem, 5vw, 4rem);
-            text-align: center;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--molten-orange);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        /* ========== FORGE SECTION ========== */
-        .forge-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-md);
-        }
-
-        .forge-card {
-            background: rgba(42, 42, 42, 0.8);
-            border: 2px solid var(--forge-red);
-            padding: var(--spacing-md);
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .forge-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 
-                0 10px 30px rgba(255, 68, 0, 0.3),
-                0 0 20px var(--forge-red);
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .forge-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: var(--spacing-sm);
-            color: var(--molten-orange);
-        }
-
-        .price-display {
-            margin: var(--spacing-md) 0;
-        }
-
-        .price-large {
-            display: block;
-            font-size: 2rem;
-            font-family: var(--font-primary);
-            color: var(--white);
-            margin-bottom: 8px;
-        }
-
-        .price-change {
-            font-size: 1.2rem;
-            padding: 4px 12px;
-            border-radius: 4px;
-        }
-
-        .price-change.up {
-            background: rgba(0, 255, 0, 0.2);
-            color: #00ff00;
-        }
-
-        .price-change.down {
-            background: rgba(255, 0, 0, 0.2);
-            color: #ff0000;
-        }
-
-        .forge-actions {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .contract-box {
-            background: var(--dark-bg);
-            padding: var(--spacing-sm);
-            border: 1px solid var(--forge-red);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: var(--spacing-sm) 0;
-        }
-
-        .contract-box code {
-            flex: 1;
-            font-family: monospace;
-            font-size: 0.875rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .btn-copy {
-            background: var(--forge-red);
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-            color: white;
-        }
-
-        .btn-copy:hover {
-            background: var(--molten-orange);
-        }
-
-        .contract-note {
-            font-size: 0.875rem;
-            color: var(--spark-yellow);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-sm);
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--molten-orange);
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-family: var(--font-primary);
-            font-size: 1.2rem;
-        }
-
-        /* ========== WELDER SECTION ========== */
-        .welder-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .welder-card {
-            background: rgba(42, 42, 42, 0.6);
-            border: 2px solid var(--steel-gray);
-            padding: var(--spacing-lg);
-            line-height: 2;
-        }
-
-        .welder-card.myth {
-            border-color: var(--forge-red);
-            background: rgba(255, 68, 0, 0.1);
-        }
-
-        .welder-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: var(--spacing-md);
-            color: var(--molten-orange);
-        }
-
-        .welder-card .highlight {
-            color: var(--forge-red);
-            font-family: var(--font-primary);
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px var(--forge-red);
-        }
-
-        .welder-quote {
-            background: var(--dark-bg);
-            border-left: 4px solid var(--forge-red);
-            padding: var(--spacing-md);
-            margin-top: var(--spacing-lg);
-        }
-
-        .welder-quote blockquote {
-            font-size: 1.5rem;
-            font-style: italic;
-            line-height: 1.8;
-        }
-
-        .welder-quote cite {
-            display: block;
-            margin-top: var(--spacing-sm);
-            color: var(--molten-orange);
-            font-size: 1.2rem;
-        }
-
-        /* ========== CHAIN SECTION ========== */
-        .chain-process {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-xl);
-            flex-wrap: wrap;
-        }
-
-        .chain-link {
-            background: rgba(42, 42, 42, 0.8);
-            border: 2px solid var(--steel-gray);
-            padding: var(--spacing-lg);
-            text-align: center;
-            flex: 1;
-            min-width: 250px;
-            max-width: 350px;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .chain-link:hover {
-            border-color: var(--forge-red);
-            transform: scale(1.05);
-            box-shadow: 0 0 30px var(--forge-red);
-        }
-
-        .link-number {
-            position: absolute;
-            top: -15px;
-            left: -15px;
-            background: var(--forge-red);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-primary);
-            font-size: 1.2rem;
-        }
-
-        .link-icon {
-            font-size: 4rem;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .chain-link h3 {
-            font-size: 1.8rem;
-            color: var(--molten-orange);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .link-connector {
-            font-size: 3rem;
-            color: var(--forge-red);
-            margin-top: var(--spacing-sm);
-        }
-
-        .weld-counter {
-            background: linear-gradient(135deg, var(--dark-bg), var(--steel-gray));
-            border: 3px solid var(--forge-red);
-            padding: var(--spacing-lg);
-            text-align: center;
-            margin-top: var(--spacing-xl);
-        }
-
-        .weld-counter h3 {
-            font-size: 1.5rem;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .counter {
-            font-family: var(--font-primary);
-            font-size: 4rem;
-            color: var(--molten-orange);
-            text-shadow: 0 0 20px var(--forge-red);
-            margin: var(--spacing-md) 0;
-            animation: counter-glow 2s ease-in-out infinite;
-        }
-
-        @keyframes counter-glow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* ========== ROADMAP SECTION ========== */
-        .roadmap-timeline {
-            position: relative;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .roadmap-timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--steel-gray);
-            transform: translateX(-50%);
-        }
-
-        .forge-stage {
-            display: flex;
-            margin-bottom: var(--spacing-xl);
-            position: relative;
-        }
-
-        .forge-stage.completed .stage-marker {
-            background: #00ff00;
-            border-color: #00ff00;
-            box-shadow: 0 0 20px #00ff00;
-        }
-
-        .forge-stage.active .stage-marker {
-            background: var(--forge-red);
-            border-color: var(--molten-orange);
-            box-shadow: 0 0 20px var(--forge-red);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        .stage-marker {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--steel-gray);
-            border: 4px solid var(--dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-        }
-
-        .stage-icon {
-            font-size: 2rem;
-        }
-
-        .stage-content {
-            flex: 1;
-            background: rgba(42, 42, 42, 0.8);
-            border: 2px solid var(--steel-gray);
-            padding: var(--spacing-md);
-            margin-left: calc(50% + 50px);
-        }
-
-        .forge-stage:nth-child(even) .stage-content {
-            margin-left: 0;
-            margin-right: calc(50% + 50px);
-        }
-
-        .stage-content h3 {
-            font-size: 1.5rem;
-            color: var(--molten-orange);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .stage-content ul {
-            list-style: none;
-            padding: 0;
-            margin-top: var(--spacing-sm);
-        }
-
-        .stage-content li {
-            padding: 4px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .stage-content li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
+    header {
+      text-align: center;
+      margin: 8vh 0 10vh;
+    }
+    
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(4.5rem, 12vw, 9rem);
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 
+        0 0 20px var(--accent),
+        0 0 60px var(--accent-glow);
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+    }
+    
+    .tagline {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 700;
+      color: #ffaa66;
+      margin: 1.2rem 0 2.4rem;
+      text-shadow: 0 0 12px #ff5500aa;
+    }
+    
+    .intro {
+      font-size: 1.35rem;
+      max-width: 720px;
+      margin: 0 auto 4rem;
+      opacity: 0.92;
+    }
+    
+    .cta {
+      display: inline-block;
+      margin: 2.5rem 0 1.2rem;
+      padding: 1.1rem 3.2rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(145deg, #ff4400, #cc3300);
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      box-shadow: 0 0 30px #ff440066;
+      transition: all 0.25s ease;
+    }
+    
+    .cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px #ff4400aa;
+      background: linear-gradient(145deg, #ff5500, #dd4400);
+    }
+    
+    .social-link {
+      display: block;
+      margin: 0.8rem 0 4rem;
+      font-size: 1.3rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+    
+    .social-link:hover {
+      color: #ffaa66;
+      text-shadow: 0 0 12px var(--accent-glow);
+    }
+    
+    section {
+      margin: 8vh 0;
+      padding: 3rem 0;
+      border-top: 1px solid #222;
+    }
+    
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.8rem;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      text-shadow: 0 0 15px var(--accent-glow);
+    }
+    
+    h3 {
+      font-size: 1.7rem;
+      color: #ffaa66;
+      margin: 2.2rem 0 1rem;
+    }
+    
+    p, li {
+      font-size: 1.18rem;
+      max-width: 780px;
+      margin: 0.9em auto;
+      color: #ddd;
+    }
+    
+    ul {
+      list-style: none;
+      margin: 1.5rem 0;
+    }
+    
+    li:before {
+      content: "→ ";
+      color: var(--accent);
+      margin-right: 0.6rem;
+    }
+    
+    hr {
+      border: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #444, transparent);
+      margin: 5rem 0;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 10vh;
+      font-size: 0.95rem;
+      color: #666;
+    }
+    
+    @media (max-width: 640px) {
+      body { padding: 4vh 6vw; }
+      h1 { font-size: clamp(3.8rem, 14vw, 6.5rem); }
+      .cta { padding: 0.9rem 2.4rem; font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>GORWELD</h1>
+    <div class="tagline">The Furnace Never Sleeps</div>
+    <p class="intro">
+      Born in scrap.<br>
+      Forged in fire.<br>
+      The market bends. Steel does not.
+    </p>
+    
+    <a href="#forge" class="cta">ENTER THE FORGE</a>
+    
+    <a href="https://x.com/PrzemSas" target="_blank" class="social-link">
+      @PrzemSas on X – official account
+    </a>
+  </header>
+
+  <section id="forge">
+    <h2>THE WELDER</h2>
+    
+    <h3>Reality</h3>
+    <p>Real steel. Real sparks.<br>
+    No filters. No borrowed identity.<br>
+    Work before words. Heat before hype.</p>
+    
+    <h3>Myth</h3>
+    <p>In the shadows stands the legend.<br>
+    Imperium Ferri.<br>
+    Structure forged under pressure.<br>
+    A chain built from scrap.</p>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>FABRICA CATENAE</h2>
+    
+    <h3>Dumpster</h3>
+    <p>Scrap feeds the furnace. Nothing is wasted.</p>
+    
+    <h3>ScrapCoin</h3>
+    <p>Fuel of circulation. Melted under pressure.</p>
+    
+    <h3>Chain</h3>
+    <p>Weld by weld. Link by link.<br>Structure over chaos.</p>
+  </section>
+
+  <footer>
+    GorWeld – no filters, no mercy
+  </footer>
+
+</div>
+
+</body>
+</html>

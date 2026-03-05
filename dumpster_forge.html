@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUMPSTER FORGE - Cinematic Scene</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(40, 15, 5, 0.25) 0%,
+                rgba(0, 0, 0, 0) 50%,
+                rgba(0, 0, 0, 0.5) 100%
+            );
+            z-index: 5;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.5) 100%
+            );
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .title {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff8844;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(255, 100, 50, 0.5),
+                         0 0 60px rgba(255, 100, 50, 0.3);
+            font-family: Georgia, serif;
+            z-index: 10;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px rgba(255, 100, 50, 0.5), 0 0 60px rgba(255, 100, 50, 0.3); }
+            50% { text-shadow: 0 0 40px rgba(255, 100, 50, 0.7), 0 0 80px rgba(255, 100, 50, 0.5); }
+        }
+
+        .subtitle {
+            position: absolute;
+            top: 110px;
+            left: 40px;
+            font-size: 11px;
+            color: #666;
+            letter-spacing: 2px;
+            line-height: 2;
+            font-family: monospace;
+            z-index: 10;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 20;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .play-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #ff6633 0%, #ff8844 100%);
+            color: #fff;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 100, 50, 0.3),
+                       inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .play-btn:hover {
+            background: linear-gradient(135deg, #ff7744 0%, #ff9955 100%);
+            box-shadow: 0 0 30px rgba(255, 100, 50, 0.5),
+                       inset 0 0 15px rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .play-btn:active {
+            transform: scale(0.98);
+        }
+
+        .timeline {
+            width: 240px;
+            height: 5px;
+            background: #222;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid #444;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6633 0%, #ff8844 100%);
+            width: 0%;
+            transition: width 0.05s linear;
+            box-shadow: 0 0 10px rgba(255, 100, 50, 0.6);
+        }
+
+        .time-display {
+            color: #ff8844;
+            font-size: 12px;
+            font-family: monospace;
+            letter-spacing: 1px;
+            min-width: 50px;
+            text-align: right;
+            text-shadow: 0 0 10px rgba(255, 100, 50, 0.4);
+        }
+
+        .stats {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            font-size: 11px;
+            color: #666;
+            letter-spacing: 1px;
+            line-height: 2;
+            font-family: monospace;
+            z-index: 10;
+            text-align: right;
+        }
+
+        .fps {
+            color: #ff8844;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03),
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 6;
+        }
+
+        .grain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.02;
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise"/></filter><rect width="100" height="100" fill="white" filter="url(%23noise)"/></svg>');
+            z-index: 6;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #444;
+            padding: 16px;
+            font-size: 10px;
+            color: #888;
+            letter-spacing: 1px;
+            line-height: 1.8;
+            max-width: 220px;
+            font-family: monospace;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-panel span {
+            color: #ff8844;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="overlay"></div>
+    <div class="vignette"></div>
+    <div class="scanline"></div>
+    <div class="grain"></div>
+
+    <div class="title">DUMPSTER FORGE</div>
+    <div class="subtitle">
+        GORWELD INDUSTRIES<br>
+        POST-APOCALYPTIC SCRAPYARD<br>
+        STRUCTURAL &amp; THERMAL DESIGN
+    </div>
+
+    <div class="stats">
+        <div>RESOLUTION: 8K</div>
+        <div class="fps">FPS: <span id="fps">24</span></div>
+        <div>RENDER TIME: <span id="renderTime">0</span>ms</div>
+    </div>
+
+    <div class="controls">
+        <button class="play-btn" id="playBtn">▶ PLAY SCENE</button>
+        <div class="timeline">
+            <div class="timeline-progress" id="progress"></div>
+        </div>
+        <div class="time-display" id="timeDisplay">0.0s</div>
+    </div>
+
+    <div class="info-panel">
+        <div>CHAMBER: <span>16mm Dia Pipe</span></div>
+        <div>FRAME: <span>I-BEAM 300mm</span></div>
+        <div>INSULATION: <span>Double Layer</span></div>
+        <div>HEAT SHIELD: <span>Reinforced</span></div>
+        <div style="margin-top: 8px; border-top: 1px solid #444; padding-top: 8px;">
+            <div>STATUS: <span>OPERATIONAL</span></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer;
+        let playState = false;
+        let frameCount = 0;
+        let targetDuration = 15000;
+        let fps = 24;
+        let frameDuration = 1000 / fps;
+        let lastTime = Date.now();
+        let fpsCounter = 0;
+
+        const playBtn = document.getElementById('playBtn');
+        const progress = document.getElementById('progress');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const fpsDisplay = document.getElementById('fps');
+        const renderTime = document.getElementById('renderTime');
+
+        function initScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+            scene.fog = new THREE.Fog(0x1a1a1a, 120, 350);
+
+            camera = new THREE.PerspectiveCamera(
+                50,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 25, 40);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            document.getElementById('canvas').parentElement.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x333333, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(60, 80, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.far = 300;
+            directionalLight.shadow.camera.left = -100;
+            directionalLight.shadow.camera.right = 100;
+            directionalLight.shadow.camera.top = 100;
+            directionalLight.shadow.camera.bottom = -100;
+            scene.add(directionalLight);
+
+            const forgeLight = new THREE.PointLight(0xff6633, 0, 80);
+            forgeLight.position.set(0, 8, 0);
+            scene.userData.forgeLight = forgeLight;
+            scene.add(forgeLight);
+
+            // Ground
+            const groundGeometry = new THREE.PlaneGeometry(200, 200);
+            const groundMaterial = new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                roughness: 0.95,
+                metalness: 0
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Base Frame
+            createBaseFrame();
+
+            // Chamber
+            const chamberGeometry = new THREE.CylinderGeometry(12, 12, 16, 32);
+            const chamberMaterial = new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                roughness: 0.4,
+                metalness: 0.8,
+                emissive: 0x443322,
+                emissiveIntensity: 0.3
+            });
+            const chamber = new THREE.Mesh(chamberGeometry, chamberMaterial);
+            chamber.position.y = 10;
+            chamber.castShadow = true;
+            chamber.receiveShadow = true;
+            scene.add(chamber);
+            scene.userData.chamber = chamber;
+
+            // Door
+            const doorGeometry = new THREE.BoxGeometry(10, 10, 0.8);
+            const doorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x0a0a0a,
+                roughness: 0.3,
+                metalness: 0.95,
+                emissive: 0x663322
+            });
+            const door = new THREE.Mesh(doorGeometry, doorMaterial);
+            door.position.set(-12.5, 10, 0);
+            door.castShadow = true;
+            scene.add(door);
+            scene.userData.door = door;
+            scene.userData.doorMaterial = doorMaterial;
+
+            // Chimney
+            const chimneyGeometry = new THREE.CylinderGeometry(3.5, 4, 20, 16);
+            const chimneyMaterial = new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                roughness: 0.6,
+                metalness: 0.6
+            });
+            const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
+            chimney.position.set(0, 22, 0);
+            chimney.castShadow = true;
+            scene.add(chimney);
+            scene.userData.chimneyMaterial = chimneyMaterial;
+
+            // Particles
+            createParticles();
+
+            // Scrap piles
+            createScrapPiles();
+        }
+
+        function createBaseFrame() {
+            const beamMaterial = new THREE.MeshStandardMaterial({
+                color: 0x3a3a3a,
+                roughness: 0.3,
+                metalness: 0.9
+            });
+
+            const ibeamGeom = new THREE.BoxGeometry(50, 2.5, 50);
+            const ibeam = new THREE.Mesh(ibeamGeom, beamMaterial);
+            ibeam.castShadow = true;
+            ibeam.receiveShadow = true;
+            ibeam.position.y = 0.5;
+            scene.add(ibeam);
+
+            const bracingMaterial = new THREE.MeshStandardMaterial({
+                color: 0x4a4a4a,
+                roughness: 0.25,
+                metalness: 0.95
+            });
+
+            for (let i = 0; i < 4; i++) {
+                const brace = new THREE.BoxGeometry(2, 1.5, 45);
+                const braceMesh = new THREE.Mesh(brace, bracingMaterial);
+                braceMesh.castShadow = true;
+                braceMesh.receiveShadow = true;
+                braceMesh.position.y = 2;
+                braceMesh.position.x = -15 + i * 10;
+                scene.add(braceMesh);
+            }
+        }
+
+        function createParticles() {
+            const particleCount = 300;
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 30;
+                positions[i * 3 + 1] = 8 + Math.random() * 15;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+
+                velocities.push({
+                    x: (Math.random() - 0.5) * 0.15,
+                    y: 0.05 + Math.random() * 0.1,
+                    z: (Math.random() - 0.5) * 0.15,
+                    life: 0,
+                    lifespan: 100 + Math.random() * 200
+                });
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0xff8844,
+                size: 0.3,
+                sizeAttenuation: true,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+            scene.userData.particles = { points, geometry, material, velocities, count: particleCount };
+        }
+
+        function createScrapPiles() {
+            const scrapMaterial = new THREE.MeshStandardMaterial({
+                color: 0x3a3a3a,
+                roughness: 0.7,
+                metalness: 0.6
+            });
+
+            const positions = [
+                [-40, 5, -30], [35, 4, -35], [-35, 6, 35], [40, 5, 30]
+            ];
+
+            positions.forEach(pos => {
+                const scale = 8 + Math.random() * 6;
+                const box = new THREE.BoxGeometry(scale, scale * 0.7, scale);
+                const scrap = new THREE.Mesh(box, scrapMaterial);
+                scrap.position.set(pos[0], pos[1], pos[2]);
+                scrap.rotation.set(
+                    Math.random() * 0.3,
+                    Math.random() * Math.PI,
+                    Math.random() * 0.3
+                );
+                scrap.castShadow = true;
+                scrap.receiveShadow = true;
+                scene.add(scrap);
+            });
+        }
+
+        function updateAnimation() {
+            if (!playState) return;
+
+            frameCount += frameDuration;
+            if (frameCount > targetDuration) {
+                frameCount = 0;
+            }
+
+            const t = frameCount / targetDuration;
+            const percent = (t * 100);
+            progress.style.width = percent + '%';
+            timeDisplay.textContent = (t * 15).toFixed(1) + 's';
+
+            // Camera movement
+            if (t < 0.2) {
+                camera.position.y = 25 - (t / 0.2) * 8;
+                camera.position.z = 40 + (t / 0.2) * 20;
+            } else if (t < 0.6) {
+                camera.position.z = 60 - ((t - 0.2) / 0.4) * 30;
+            } else {
+                const zoomT = (t - 0.6) / 0.4;
+                camera.position.z = 30 - zoomT * 20;
+                camera.position.y = 17 + zoomT * 8;
+            }
+            camera.lookAt(0, 10, 0);
+
+            // Forge glow
+            const glowIntensity = 2 + Math.sin(t * Math.PI * 4) * 1.5;
+            scene.userData.forgeLight.intensity = glowIntensity;
+            scene.userData.doorMaterial.emissiveIntensity = 0.3 + Math.sin(t * Math.PI * 3) * 0.4;
+
+            // Door animation
+            if (t > 0.7) {
+                const doorT = (t - 0.7) / 0.3;
+                scene.userData.door.position.x = -12.5 + doorT * 5;
+            }
+
+            // Particles
+            const particleData = scene.userData.particles;
+            if (particleData) {
+                const positions = particleData.geometry.attributes.position.array;
+                for (let i = 0; i < particleData.count; i++) {
+                    const vel = particleData.velocities[i];
+                    vel.life += 1;
+
+                    if (vel.life > vel.lifespan) {
+                        vel.life = 0;
+                        positions[i * 3] = (Math.random() - 0.5) * 25;
+                        positions[i * 3 + 1] = 8 + Math.random() * 12;
+                        positions[i * 3 + 2] = (Math.random() - 0.5) * 25;
+                    } else {
+                        positions[i * 3] += vel.x;
+                        positions[i * 3 + 1] += vel.y;
+                        positions[i * 3 + 2] += vel.z;
+                    }
+                }
+                particleData.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Chimney glow
+            scene.userData.chimneyMaterial.emissiveIntensity = 0.2 + Math.sin(t * Math.PI * 2) * 0.15;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const startTime = performance.now();
+            updateAnimation();
+            renderer.render(scene, camera);
+            const endTime = performance.now();
+
+            fpsCounter++;
+            if (fpsCounter >= fps) {
+                renderTime.textContent = (endTime - startTime).toFixed(1);
+                fpsCounter = 0;
+            }
+        }
+
+        playBtn.addEventListener('click', () => {
+            playState = !playState;
+            playBtn.textContent = playState ? '⏸ PAUSE' : '▶ PLAY SCENE';
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        initScene();
+        animate();
+    </script>
+</body>
+</html>

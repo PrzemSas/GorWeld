@@ -1,1 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Scrap Scavenger — Dumpster Forge Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#1a1a2e}
+::-webkit-scrollbar-thumb{background:#39FF1444;border-radius:2px}
+body{background:#0a0a12;display:flex;justify-content:center;min-height:100vh;font-family:'Share Tech Mono','Courier New',monospace;color:#e0e0e0}
+#game{width:100%;max-width:500px;min-height:100vh;background:linear-gradient(180deg,#0d0d1a 0%,#1a1a2e 40%,#12121f 100%);position:relative;overflow-x:hidden}
 
+.scanline{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:998;overflow:hidden}
+.scanline::after{content:'';position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,#39FF1411,transparent);animation:scan 4s linear infinite}
+
+@keyframes scan{0%{top:-100%}100%{top:200%}}
+@keyframes spark-fly{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx),var(--ty))}}
+@keyframes coin-float{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.3)}}
+@keyframes pulse-glow{0%,100%{filter:brightness(1) drop-shadow(0 0 3px var(--glow))}50%{filter:brightness(1.3) drop-shadow(0 0 10px var(--glow))}}
+@keyframes fire-flicker{0%,100%{opacity:0.8;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.08)}}
+@keyframes slide-in{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes drop-in{0%{opacity:0;transform:scale(0.6) rotate(-10deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes legendary-spin{0%{filter:hue-rotate(0deg) brightness(1.2)}50%{filter:hue-rotate(30deg) brightness(1.5)}100%{filter:hue-rotate(0deg) brightness(1.2)}}
+@keyframes relic-reveal{0%{transform:scale(0) rotate(-180deg);opacity:0}60%{transform:scale(1.15) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes float-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes conveyor{0%{background-position:0 0}100%{background-position:20px 0}}
+@keyframes smelt-glow{0%,100%{box-shadow:0 0 20px #FF2D0033,inset 0 0 30px #FF2D0011}50%{box-shadow:0 0 40px #FF6B3544,inset 0 0 50px #FF2D0022}}
+
+.hud{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #39FF1422;background:linear-gradient(180deg,#1a1a2eee,#0d0d1acc);backdrop-filter:blur(4px)}
+.hud-left .title{font-family:'Teko',sans-serif;font-size:24px;font-weight:700;color:#39FF14;letter-spacing:3px;text-shadow:0 0 12px #39FF1455;line-height:1}
+.hud-left .sub{font-size:8px;color:#555;letter-spacing:3px;margin-top:2px}
+.hud-right .coins{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#FFD700;text-shadow:0 0 10px #FFD70044;line-height:1;text-align:right}
+.hud-right .label{font-size:8px;color:#555;letter-spacing:2px;text-align:right;margin-top:2px}
+
+.inv-bar{padding:6px 10px;display:flex;gap:2px;align-items:center;border-bottom:1px solid #ffffff06;background:#0a0a1288}
+.inv-label{font-size:8px;color:#555;margin-right:6px;white-space:nowrap;font-family:'Orbitron',monospace}
+.inv-slots{display:flex;gap:2px;flex-wrap:wrap;flex:1}
+.inv-slot{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;position:relative;overflow:hidden}
+.inv-slot.empty{background:#0a0a12;border:1px solid #ffffff08}
+.inv-slot.filled{cursor:pointer;background:#151528;border:1px solid var(--rcolor,#333)}
+.inv-slot.filled:hover{transform:scale(1.2);z-index:5;filter:brightness(1.3)}
+.inv-slot .item-svg{width:22px;height:22px}
+
+.tabs{display:flex;border-bottom:1px solid #ffffff08}
+.tab{flex:1;padding:11px 0;text-align:center;cursor:pointer;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all 0.25s;color:#444;background:transparent}
+.tab.active{background:linear-gradient(180deg,#1e1e35,#1a1a2e);color:#39FF14;border-bottom-color:#39FF14;text-shadow:0 0 10px #39FF1466}
+.tab:hover:not(.active){color:#777}
+
+.content{min-height:430px;position:relative;padding:12px}
+.slabel{font-size:9px;color:#555;letter-spacing:1px;margin-bottom:8px;font-family:'Orbitron',monospace}
+
+/* YARD */
+.yard{position:relative;height:350px;border-radius:10px;border:1px solid #39FF1412;overflow:hidden;
+background:radial-gradient(ellipse at 50% 100%,#2a1a0f22,#0a0a12),
+repeating-linear-gradient(0deg,transparent,transparent 49px,#ffffff03 49px,#ffffff03 50px),
+repeating-linear-gradient(90deg,transparent,transparent 49px,#ffffff02 49px,#ffffff02 50px)}
+.yard-item{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.12s;animation:float-bob 3s ease-in-out infinite;border-radius:8px;padding:4px}
+.yard-item:hover{transform:scale(1.2)!important;z-index:5}
+.yard-item:active{transform:scale(0.9)!important}
+.yard-item .gfx{width:42px;height:42px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--rcolor,#333);background:#111122cc;backdrop-filter:blur(2px);box-shadow:0 0 8px var(--rglow,transparent);transition:box-shadow 0.2s}
+.yard-item .gfx svg{width:28px;height:28px}
+.yard-item .valtag{font-size:7px;color:var(--rcolor,#888);margin-top:2px;font-family:'Orbitron',monospace;text-shadow:0 0 4px var(--rglow,transparent)}
+.yard-zone{position:absolute;bottom:8px;left:12px;font-size:8px;color:#39FF1422;font-family:'Orbitron',monospace;letter-spacing:2px}
+.yard-zone-r{position:absolute;bottom:8px;right:12px;font-size:8px;color:#ffffff11;font-family:'Orbitron',monospace}
+
+/* SORTING */
+.sort-stats{font-size:9px;font-family:'Orbitron',monospace}
+.sort-unsorted{display:flex;gap:4px;flex-wrap:wrap;min-height:50px;padding:8px;border-radius:8px;border:1px solid #ffffff08;background:#0a0a1266;margin-bottom:12px}
+.drag-item{width:44px;height:44px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;background:#151528;border:1px solid var(--rcolor,#333);transition:all 0.15s}
+.drag-item:hover{filter:brightness(1.3);transform:scale(1.08)}
+.drag-item.dragging{opacity:0.4}
+.drag-item svg{width:24px;height:24px}
+.drag-item .dn{font-size:6px;color:#666;margin-top:1px}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bin{padding:18px 8px;border-radius:10px;text-align:center;border:2px dashed #ffffff12;background:#0a0a1288;transition:all 0.25s}
+.bin.dragover{border-style:solid;transform:scale(1.04);background:#ffffff08}
+.bin .bicon{font-size:32px;margin-bottom:6px;filter:drop-shadow(0 0 4px var(--bc))}
+.bin .bname{font-size:9px;font-weight:700;letter-spacing:1px;font-family:'Orbitron',monospace;color:var(--bc)}
+.sorted-section{margin-top:12px;padding:8px;border-radius:8px;border:1px solid #39FF1418;background:#39FF1406}
+.sorted-label{font-size:8px;color:#39FF14;letter-spacing:1px;margin-bottom:6px;font-family:'Orbitron',monospace}
+.sorted-chip{padding:4px 8px;border-radius:6px;cursor:pointer;border:1px solid #39FF1433;background:#151528;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s;margin:2px}
+.sorted-chip:hover{background:#39FF1418;border-color:#39FF14}
+.sorted-chip svg{width:18px;height:18px}
+.sorted-chip .sv{font-size:9px;color:#39FF14;font-family:'Orbitron',monospace}
+
+/* FURNACE */
+.furnace-box{padding:24px 16px;border-radius:12px;text-align:center;transition:all 0.5s;position:relative;overflow:hidden}
+.furnace-box.idle{border:1px solid #ffffff0a;background:linear-gradient(180deg,#151528,#0a0a12)}
+.furnace-box.active{border:1px solid #FF2D0044;background:radial-gradient(ellipse at 50% 90%,#FF2D0015,#151528);animation:smelt-glow 2s infinite}
+.furnace-svg{width:64px;height:64px;margin:0 auto 10px}
+.furnace-svg.active{animation:fire-flicker 0.5s infinite}
+.furnace-mat{font-size:11px;color:#FF6B35;font-family:'Orbitron',monospace;margin-bottom:8px;letter-spacing:1px}
+.progress-track{height:10px;border-radius:5px;background:#0a0a12;border:1px solid #FF2D0022;overflow:hidden;margin:0 20px 6px}
+.progress-fill{height:100%;border-radius:5px;transition:width 0.08s linear;background:linear-gradient(90deg,#FF2D00,#FF6B35,#FFD700);box-shadow:0 0 12px #FF6B3566}
+.furnace-pct{font-size:11px;color:#FF6B35;font-family:'Orbitron',monospace;font-weight:700}
+.furnace-idle-text{font-size:10px;color:#333}
+.queue-slots{display:flex;gap:8px;margin-top:8px}
+.qslot{width:58px;height:58px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.qslot.filled{border:1px solid #FF6B3533;background:#1a1520}
+.qslot.empty{border:1px dashed #ffffff0a;background:#0a0a1244}
+.qslot svg{width:28px;height:28px}
+.qslot .qt{font-size:7px;color:#FF6B35;font-family:'Orbitron',monospace;margin-top:2px}
+.ingots-section{margin-top:14px}
+.ingot-chip{padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid #FFD70033;background:#FFD70006;display:inline-flex;align-items:center;gap:8px;transition:all 0.15s;margin:3px}
+.ingot-chip:hover{background:#FFD70018;transform:scale(1.03)}
+.ingot-chip svg{width:24px;height:24px}
+.ingot-type{font-size:8px;color:#FFD700;font-weight:700;font-family:'Orbitron',monospace;letter-spacing:1px}
+.ingot-val{font-size:11px;color:#39FF14;font-family:'Orbitron',monospace;font-weight:700}
+.sell-all-btn{padding:6px 16px;border-radius:6px;border:1px solid #39FF14;background:#39FF1412;color:#39FF14;font-family:'Orbitron',monospace;font-size:10px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.15s}
+.sell-all-btn:hover{background:#39FF1428;box-shadow:0 0 12px #39FF1422}
+.load-section{margin-top:12px;padding:8px;border-radius:8px;border:1px dashed #39FF1418;background:#39FF1404}
+
+/* SHOP */
+.upgrade-card{padding:14px;border-radius:10px;display:flex;align-items:center;gap:12px;margin-bottom:8px;border:1px solid #ffffff08;background:#0a0a1266;transition:all 0.2s}
+.upgrade-card.maxed{border-color:#39FF1433;background:#39FF1406}
+.up-icon{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#151528;border:1px solid #ffffff11}
+.up-icon svg{width:28px;height:28px}
+.up-info{flex:1}
+.up-name{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:0.5px}
+.up-desc{font-size:9px;color:#555;margin-top:3px}
+.up-pips{display:flex;gap:2px;margin-top:5px}
+.pip{width:14px;height:3px;border-radius:1.5px}
+.pip.on{background:#39FF14;box-shadow:0 0 4px #39FF1444}
+.pip.off{background:#ffffff0a}
+.buy-btn{padding:8px 16px;border-radius:8px;border:none;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;transition:all 0.15s;cursor:pointer;letter-spacing:0.5px}
+.buy-btn.can{background:linear-gradient(135deg,#39FF14,#2bcc10);color:#0a0a12;box-shadow:0 2px 12px #39FF1433}
+.buy-btn.can:hover{filter:brightness(1.15);transform:scale(1.03)}
+.buy-btn.cant{background:#1a1a2e;color:#444;cursor:default}
+.buy-btn.max{background:#39FF1418;color:#39FF1488;cursor:default}
+.stats-box{margin-top:16px;padding:14px;border-radius:10px;border:1px solid #ffffff06;background:#0a0a1244}
+.stats-title{font-family:'Orbitron',monospace;font-size:9px;color:#444;margin-bottom:10px;letter-spacing:2px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px}
+.stats-grid span{font-family:'Orbitron',monospace}
+
+/* RELIC POPUP */
+.relic-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000000cc;z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;animation:slide-in 0.3s ease}
+.relic-card{width:260px;border-radius:16px;overflow:hidden;border:2px solid #FFD700;box-shadow:0 0 40px #FFD70033,0 0 80px #FFD70011;animation:relic-reveal 0.6s ease-out}
+.relic-img{width:100%;height:260px;object-fit:cover;background:#1a1a2e}
+.relic-info{padding:16px;background:linear-gradient(180deg,#1a1520,#0d0d1a);text-align:center}
+.relic-title{font-family:'Teko',sans-serif;font-size:22px;color:#FFD700;letter-spacing:2px;text-shadow:0 0 10px #FFD70044}
+.relic-sub{font-size:9px;color:#39FF14;font-family:'Orbitron',monospace;margin-top:4px;letter-spacing:1px}
+.relic-dismiss{margin-top:16px;font-size:10px;color:#555;cursor:pointer;font-family:'Orbitron',monospace;letter-spacing:1px}
+.relic-dismiss:hover{color:#FFD700}
+
+.notif{position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:8px;background:#FF2D00cc;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;animation:slide-in 0.2s ease;z-index:999;text-align:center;box-shadow:0 4px 24px #FF2D0044;border:1px solid #FF6B35;pointer-events:none;letter-spacing:0.5px}
+.coin-pop{position:fixed;pointer-events:none;z-index:999;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;animation:coin-float 0.8s ease-out forwards}
+.coin-pop.pos{color:#39FF14;text-shadow:0 0 10px #39FF14}
+.coin-pop.neg{color:#FF6B35;text-shadow:0 0 10px #FF6B35}
+.spark{position:fixed;border-radius:50%;animation:spark-fly ease-out forwards}
+.footer{padding:14px 16px;text-align:center;border-top:1px solid #ffffff04;font-size:7px;color:#282828;letter-spacing:3px;font-family:'Orbitron',monospace}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div id="game">
+  <div class="hud">
+    <div class="hud-left">
+      <div class="title">SCRAP SCAVENGER</div>
+      <div class="sub">DUMPSTER FORGE // GORWELD</div>
+    </div>
+    <div class="hud-right">
+      <div class="coins" id="coinDisplay">0</div>
+      <div class="label">SCRAP COINS</div>
+    </div>
+  </div>
+  <div class="inv-bar">
+    <span class="inv-label" id="invLabel">INV 0/8</span>
+    <div class="inv-slots" id="invSlots"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="yard" onclick="switchTab('yard')">⛏ YARD</div>
+    <div class="tab" data-tab="sort" onclick="switchTab('sort')">♻ SORT</div>
+    <div class="tab" data-tab="forge" onclick="switchTab('forge')">🔥 FORGE</div>
+    <div class="tab" data-tab="shop" onclick="switchTab('shop')">🛒 SHOP</div>
+  </div>
+  <div class="content">
+    <div id="panel-yard" class="panel">
+      <div class="slabel">CLICK SCRAP TO COLLECT • POWER: <span id="clickPowerLabel">1</span></div>
+      <div class="yard" id="yardField">
+        <div class="yard-zone">ZONE-A // SCRAPYARD</div>
+        <div class="yard-zone-r" id="yardCount">6 ITEMS</div>
+      </div>
+    </div>
+    <div id="panel-sort" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span class="slabel">DRAG TO BIN</span>
+        <span class="slabel sort-stats" id="sortStats">STREAK: 0 • ACC: 0%</span>
+      </div>
+      <div style="font-size:8px;color:#444;margin-bottom:4px;font-family:'Orbitron',monospace">UNSORTED (<span id="unsortedCount">0</span>)</div>
+      <div class="sort-unsorted" id="unsortedList"></div>
+      <div class="bins" id="binsContainer"></div>
+      <div class="sorted-section hidden" id="sortedSection">
+        <div class="sorted-label">✓ SORTED — click to load furnace</div>
+        <div id="sortedList"></div>
+      </div>
+    </div>
+    <div id="panel-forge" class="panel hidden">
+      <div class="slabel">SMELTING • SPEED: +<span id="speedBonus">0</span>%</div>
+      <div class="furnace-box idle" id="furnaceBox">
+        <div class="furnace-svg" id="furnaceIcon"></div>
+        <div id="furnaceStatus"><div class="furnace-idle-text">Load sorted material to begin smelting</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="slabel">QUEUE (<span id="queueCount">0</span>/3)</div>
+        <div class="queue-slots" id="queueSlots"></div>
+      </div>
+      <div class="ingots-section hidden" id="ingotsSection">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="slabel" style="color:#FFD700;margin:0">INGOTS READY</span>
+          <button class="sell-all-btn" id="sellAllBtn" onclick="sellAllIngots(event)">SELL ALL</button>
+        </div>
+        <div id="ingotsList"></div>
+      </div>
+      <div class="load-section hidden" id="forgeLoadSection">
+        <div style="font-size:8px;color:#555;margin-bottom:4px;font-family:'Orbitron',monospace">LOAD FROM SORTED:</div>
+        <div id="forgeLoadList" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+    <div id="panel-shop" class="panel hidden">
+      <div class="slabel">UPGRADES • <span style="color:#FFD700" id="shopCoins">0</span> COINS</div>
+      <div id="upgradesList"></div>
+      <div class="stats-box">
+        <div class="stats-title">STATISTICS</div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">DUMPSTER FORGE // GORWELD // v0.3 DEMO</div>
+</div>
+<div id="notifContainer"></div>
+<div id="fxContainer" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999"></div>
+<div id="relicOverlay"></div>
+
+<script>
+// ======================== SVG ITEM GRAPHICS ========================
+const SVG = {
+  can: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#808080"/></linearGradient></defs><rect x="10" y="6" width="20" height="28" rx="3" fill="url(#gc)" stroke="#666" stroke-width="1"/><rect x="10" y="6" width="20" height="6" rx="3" fill="#aaa" stroke="#666" stroke-width="1"/><line x1="12" y1="18" x2="28" y2="18" stroke="#999" stroke-width="0.5"/><line x1="12" y1="22" x2="28" y2="22" stroke="#999" stroke-width="0.5"/><ellipse cx="20" cy="9" rx="6" ry="2" fill="#bbb" stroke="#888" stroke-width="0.5"/></svg>`,
+  bolt: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#999"/><stop offset="100%" stop-color="#555"/></linearGradient></defs><circle cx="20" cy="16" r="8" fill="url(#gb)" stroke="#444" stroke-width="1"/><circle cx="20" cy="16" r="4" fill="#333" stroke="#555" stroke-width="0.5"/><rect x="17" y="22" width="6" height="14" rx="1" fill="#777" stroke="#555" stroke-width="0.8"/><line x1="18" y1="26" x2="22" y2="26" stroke="#555" stroke-width="0.5"/><line x1="18" y1="29" x2="22" y2="29" stroke="#555" stroke-width="0.5"/><line x1="18" y1="32" x2="22" y2="32" stroke="#555" stroke-width="0.5"/></svg>`,
+  pipe: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8a8a8a"/><stop offset="50%" stop-color="#666"/><stop offset="100%" stop-color="#8a8a8a"/></linearGradient></defs><rect x="4" y="14" width="32" height="12" rx="6" fill="url(#gp)" stroke="#555" stroke-width="1"/><ellipse cx="6" cy="20" rx="3" ry="6" fill="#777" stroke="#555" stroke-width="0.8"/><ellipse cx="34" cy="20" rx="3" ry="6" fill="#777" stroke="#555" stroke-width="0.8"/><line x1="10" y1="16" x2="30" y2="16" stroke="#7a7a7a" stroke-width="0.4"/><circle cx="15" cy="20" r="1" fill="#8B4513" opacity="0.6"/><circle cx="25" cy="22" r="1.5" fill="#8B4513" opacity="0.5"/></svg>`,
+  cable: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gca" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#B87333"/><stop offset="50%" stop-color="#DA8A67"/><stop offset="100%" stop-color="#B87333"/></linearGradient></defs><path d="M8 10 Q15 18 12 24 Q9 30 16 34 Q23 38 28 32 Q33 26 30 18 Q27 10 34 6" fill="none" stroke="url(#gca)" stroke-width="4" stroke-linecap="round"/><path d="M8 10 Q15 18 12 24 Q9 30 16 34 Q23 38 28 32 Q33 26 30 18 Q27 10 34 6" fill="none" stroke="#DA8A67" stroke-width="2" stroke-linecap="round" opacity="0.5"/><circle cx="8" cy="10" r="2" fill="#FFD700" opacity="0.6"/><circle cx="34" cy="6" r="2" fill="#FFD700" opacity="0.6"/></svg>`,
+  battery: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gbt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a2a2a"/><stop offset="100%" stop-color="#1a1a1a"/></linearGradient></defs><rect x="10" y="8" width="20" height="28" rx="2" fill="url(#gbt)" stroke="#39FF14" stroke-width="1"/><rect x="15" y="4" width="10" height="5" rx="1" fill="#333" stroke="#39FF14" stroke-width="0.5"/><text x="20" y="20" text-anchor="middle" font-size="6" fill="#39FF14" font-family="monospace" font-weight="bold">+</text><rect x="13" y="24" width="14" height="8" rx="1" fill="#39FF1422" stroke="#39FF1444" stroke-width="0.5"/><rect x="13" y="24" width="9" height="8" rx="1" fill="#39FF1444"/></svg>`,
+  motor: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gm" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#666"/><stop offset="100%" stop-color="#333"/></linearGradient></defs><circle cx="20" cy="20" r="14" fill="url(#gm)" stroke="#4FC3F7" stroke-width="1"/><circle cx="20" cy="20" r="8" fill="#222" stroke="#4FC3F7" stroke-width="0.5"/><circle cx="20" cy="20" r="3" fill="#4FC3F7" opacity="0.3"/><line x1="20" y1="12" x2="20" y2="8" stroke="#4FC3F7" stroke-width="1.5"/><line x1="20" y1="28" x2="20" y2="32" stroke="#4FC3F7" stroke-width="1.5"/><line x1="12" y1="20" x2="8" y2="20" stroke="#4FC3F7" stroke-width="1.5"/><line x1="28" y1="20" x2="32" y2="20" stroke="#4FC3F7" stroke-width="1.5"/><path d="M16 14 L24 14 L26 16 L26 24 L24 26 L16 26 L14 24 L14 16 Z" fill="none" stroke="#4FC3F755" stroke-width="0.5"/></svg>`,
+  gold: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD700"/><stop offset="50%" stop-color="#FFA500"/><stop offset="100%" stop-color="#FFD700"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><polygon points="20,4 24,14 35,16 27,24 29,35 20,30 11,35 13,24 5,16 16,14" fill="url(#gg)" stroke="#CC8800" stroke-width="0.8" filter="url(#glow)"/><polygon points="20,10 22,16 28,17 24,22 25,28 20,25 15,28 16,22 12,17 18,16" fill="#FFEE88" opacity="0.4"/></svg>`,
+  // Ingot versions
+  ingot_al: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gia" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d0d0d0"/><stop offset="100%" stop-color="#909090"/></linearGradient></defs><path d="M6 28 L14 12 L34 12 L34 22 L26 28 Z" fill="url(#gia)" stroke="#aaa" stroke-width="1"/><path d="M14 12 L34 12 L34 22 L26 28 L6 28 L14 12" fill="none" stroke="#ccc" stroke-width="0.3"/><text x="22" y="23" text-anchor="middle" font-size="7" fill="#666" font-family="monospace" font-weight="bold">Al</text></svg>`,
+  ingot_st: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gis" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8a8a8a"/><stop offset="100%" stop-color="#4a4a4a"/></linearGradient></defs><path d="M6 28 L14 12 L34 12 L34 22 L26 28 Z" fill="url(#gis)" stroke="#666" stroke-width="1"/><text x="22" y="23" text-anchor="middle" font-size="7" fill="#aaa" font-family="monospace" font-weight="bold">Fe</text></svg>`,
+  ingot_cu: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gic" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#DA8A67"/><stop offset="100%" stop-color="#B87333"/></linearGradient></defs><path d="M6 28 L14 12 L34 12 L34 22 L26 28 Z" fill="url(#gic)" stroke="#996633" stroke-width="1"/><text x="22" y="23" text-anchor="middle" font-size="7" fill="#FFD700" font-family="monospace" font-weight="bold">Cu</text></svg>`,
+  ingot_pb: `<svg viewBox="0 0 40 40"><defs><linearGradient id="gip" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#555"/><stop offset="100%" stop-color="#2a2a2a"/></linearGradient></defs><path d="M6 28 L14 12 L34 12 L34 22 L26 28 Z" fill="url(#gip)" stroke="#444" stroke-width="1"/><text x="22" y="23" text-anchor="middle" font-size="7" fill="#39FF14" font-family="monospace" font-weight="bold">Pb</text></svg>`,
+  ingot_el: `<svg viewBox="0 0 40 40"><rect x="8" y="10" width="24" height="20" rx="2" fill="#1a3a1a" stroke="#39FF14" stroke-width="0.8"/><line x1="12" y1="16" x2="20" y2="16" stroke="#39FF1466" stroke-width="0.5"/><line x1="12" y1="19" x2="28" y2="19" stroke="#39FF1466" stroke-width="0.5"/><line x1="12" y1="22" x2="24" y2="22" stroke="#39FF1466" stroke-width="0.5"/><circle cx="27" cy="15" r="2" fill="#39FF1444" stroke="#39FF14" stroke-width="0.5"/><rect x="14" y="24" width="4" height="3" fill="#333" stroke="#39FF1444" stroke-width="0.3"/><rect x="22" y="24" width="4" height="3" fill="#333" stroke="#39FF1444" stroke-width="0.3"/></svg>`,
+  ingot_au: `<svg viewBox="0 0 40 40"><defs><linearGradient id="giau" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD700"/><stop offset="50%" stop-color="#FFAA00"/><stop offset="100%" stop-color="#FFD700"/></linearGradient><filter id="auglow"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M6 28 L14 12 L34 12 L34 22 L26 28 Z" fill="url(#giau)" stroke="#CC8800" stroke-width="1" filter="url(#auglow)"/><text x="22" y="23" text-anchor="middle" font-size="7" fill="#8B6914" font-family="monospace" font-weight="bold">Au</text></svg>`,
+  furnace_idle: `<svg viewBox="0 0 64 64"><rect x="12" y="20" width="40" height="36" rx="4" fill="#2a2a3e" stroke="#444" stroke-width="1.5"/><rect x="8" y="16" width="48" height="8" rx="3" fill="#333" stroke="#555" stroke-width="1"/><rect x="20" y="30" width="24" height="16" rx="2" fill="#1a1a2e" stroke="#333" stroke-width="1"/><rect x="28" y="8" width="8" height="12" rx="2" fill="#333" stroke="#444" stroke-width="1"/><circle cx="32" cy="38" r="4" fill="#39FF1422" stroke="#39FF1444" stroke-width="0.5"/></svg>`,
+  furnace_active: `<svg viewBox="0 0 64 64"><rect x="12" y="20" width="40" height="36" rx="4" fill="#2a1a1a" stroke="#FF6B35" stroke-width="1.5"/><rect x="8" y="16" width="48" height="8" rx="3" fill="#3a2020" stroke="#FF6B3566" stroke-width="1"/><rect x="20" y="30" width="24" height="16" rx="2" fill="#FF2D0022" stroke="#FF6B3566" stroke-width="1"/><rect x="28" y="4" width="8" height="16" rx="2" fill="#444" stroke="#FF6B3555" stroke-width="1"/><path d="M26 42 Q28 32 32 36 Q36 32 38 42" fill="#FF6B35" opacity="0.8"/><path d="M28 42 Q30 35 32 38 Q34 35 36 42" fill="#FFD700" opacity="0.6"/><circle cx="32" cy="38" r="6" fill="#FF2D0033"/></svg>`,
+};
+
+const INGOT_SVG = { aluminum:"ingot_al", steel:"ingot_st", copper:"ingot_cu", lead:"ingot_pb", electronics:"ingot_el", gold:"ingot_au" };
+
+// ======================== NFT BURN RELICS ========================
+const IPFS_GW = "https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
+const BURN_RELICS = [
+  { id:1, name:"BURN RELIC #001", desc:"Genesis Collection" },
+  { id:2, name:"BURN RELIC #002", desc:"Genesis Collection" },
+  { id:3, name:"BURN RELIC #003", desc:"Genesis Collection" },
+  { id:4, name:"BURN RELIC #004", desc:"Genesis Collection" },
+  { id:5, name:"BURN RELIC #005", desc:"Genesis Collection" },
+  { id:6, name:"BURN RELIC #006", desc:"Genesis Collection" },
+  { id:7, name:"BURN RELIC #007", desc:"Genesis Collection" },
+  { id:8, name:"BURN RELIC #008", desc:"Genesis Collection" },
+  { id:9, name:"BURN RELIC #009", desc:"Genesis Collection" },
+  { id:10, name:"BURN RELIC #010", desc:"Genesis Collection" },
+];
+let relicsFound = [];
+const RELIC_CHANCE = 0.08; // 8% on legendary find
+
+// ======================== DATA ========================
+const SCRAP_TYPES = [
+  { id:"can",name:"Aluminum Can",svg:"can",value:1,weight:35,rarity:0,bin:"non_ferrous",material:"aluminum",smeltTime:5,smeltMult:2.0 },
+  { id:"bolt",name:"Bolt",svg:"bolt",value:1,weight:25,rarity:0,bin:"ferrous",material:"steel",smeltTime:10,smeltMult:2.5 },
+  { id:"pipe",name:"Steel Pipe",svg:"pipe",value:3,weight:15,rarity:0,bin:"ferrous",material:"steel",smeltTime:10,smeltMult:2.5 },
+  { id:"cable",name:"Copper Cable",svg:"cable",value:5,weight:12,rarity:1,bin:"non_ferrous",material:"copper",smeltTime:8,smeltMult:3.0 },
+  { id:"battery",name:"Battery",svg:"battery",value:8,weight:8,rarity:1,bin:"electronics",material:"lead",smeltTime:12,smeltMult:2.0 },
+  { id:"motor",name:"Motor",svg:"motor",value:15,weight:4,rarity:2,bin:"electronics",material:"electronics",smeltTime:15,smeltMult:3.5 },
+  { id:"gold",name:"Gold Part",svg:"gold",value:50,weight:1,rarity:3,bin:"precious",material:"gold",smeltTime:20,smeltMult:5.0 },
+];
+const BINS = [
+  { id:"ferrous",name:"FERROUS",icon:"🏗️",color:"#8899aa" },
+  { id:"electronics",name:"ELECTRO",icon:"⚡",color:"#4FC3F7" },
+  { id:"non_ferrous",name:"NON-FE",icon:"🟠",color:"#FF8A65" },
+  { id:"precious",name:"PRECIOUS",icon:"💎",color:"#FFD700" },
+];
+const RARITY_C = ["#666","#39FF14","#4FC3F7","#FFD700"];
+const RARITY_G = ["transparent","#39FF1444","#4FC3F766","#FFD70066"];
+const UPGRADES = [
+  { id:"bag",name:"Bigger Bag",desc:"+2 slots",svgIcon:`<svg viewBox="0 0 40 40"><rect x="8" y="10" width="24" height="22" rx="3" fill="#2a2a3e" stroke="#39FF14" stroke-width="1"/><path d="M14 10 L14 6 L26 6 L26 10" fill="none" stroke="#39FF14" stroke-width="1"/><line x1="14" y1="18" x2="26" y2="18" stroke="#39FF1444" stroke-width="0.5"/><line x1="14" y1="22" x2="26" y2="22" stroke="#39FF1444" stroke-width="0.5"/></svg>`,base:30,mult:1.7,max:8 },
+  { id:"click",name:"Click Power",desc:"+1 per click",svgIcon:`<svg viewBox="0 0 40 40"><path d="M12 28 L20 6 L28 28" fill="none" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="22" x2="25" y2="22" stroke="#FF6B35" stroke-width="1.5"/><circle cx="20" cy="32" r="3" fill="#FF6B3544" stroke="#FF6B35" stroke-width="0.8"/></svg>`,base:60,mult:2.0,max:5 },
+  { id:"luck",name:"Lucky Find",desc:"+3% rare chance",svgIcon:`<svg viewBox="0 0 40 40"><path d="M20 6 C10 6 6 16 12 22 L20 34 L28 22 C34 16 30 6 20 6Z" fill="#39FF1422" stroke="#39FF14" stroke-width="1"/><circle cx="18" cy="16" r="2" fill="#39FF1444"/><path d="M16 20 Q20 24 24 20" fill="none" stroke="#39FF1466" stroke-width="0.8"/></svg>`,base:100,mult:2.2,max:6 },
+  { id:"speed",name:"Fast Furnace",desc:"-15% smelt time",svgIcon:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="#1a1a2e" stroke="#FF6B35" stroke-width="1.5"/><line x1="20" y1="10" x2="20" y2="20" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round"/><line x1="20" y1="20" x2="27" y2="24" stroke="#FFD700" stroke-width="1" stroke-linecap="round"/><circle cx="20" cy="20" r="2" fill="#FF6B35"/></svg>`,base:120,mult:1.9,max:8 },
+];
+
+// ======================== STATE ========================
+let uid=0;const nuid=()=>++uid;
+let S={coins:0,inv:[],maxSlots:8,sorted:[],fQueue:[],smelting:null,smeltStart:0,smeltDur:0,fProg:0,ingots:[],streak:0,tSorted:0,cSorted:0,clickPow:1,ups:{bag:0,click:0,luck:0,speed:0},yard:[],tab:"yard",dragItem:null};
+
+// ======================== HELPERS ========================
+function rollScrap(){
+  const luck=S.ups.luck*0.03;
+  const tot=SCRAP_TYPES.reduce((s,t)=>s+t.weight,0);
+  let r=Math.random()*tot,c=0,p=SCRAP_TYPES[0];
+  for(const t of SCRAP_TYPES){c+=t.weight;if(r<=c){p=t;break}}
+  if(Math.random()<luck&&p.rarity<3){const b=SCRAP_TYPES.find(s=>s.rarity===p.rarity+1);if(b)p=b}
+  return{...p,uid:nuid(),x:6+Math.random()*84,y:8+Math.random()*74};
+}
+function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"K":n.toString()}
+function notify(m){const e=document.createElement("div");e.className="notif";e.textContent=m;document.getElementById("notifContainer").appendChild(e);setTimeout(()=>e.remove(),2000)}
+function sparks(x,y){const c=document.getElementById("fxContainer");for(let i=0;i<12;i++){const s=document.createElement("div");s.className="spark";const a=(Math.PI*2*i)/12+(Math.random()-0.5)*0.6,sp=20+Math.random()*50,l=0.2+Math.random()*0.35,sz=2+Math.random()*3;s.style.cssText=`left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;background:${["#FF6B35","#39FF14","#FFD700","#FF2D00"][Math.floor(Math.random()*4)]};animation-duration:${l}s;--tx:${Math.cos(a)*sp}px;--ty:${Math.sin(a)*sp}px`;c.appendChild(s);setTimeout(()=>s.remove(),l*1000+50)}}
+function coinPop(x,y,n){const e=document.createElement("div");e.className="coin-pop "+(n>=0?"pos":"neg");e.textContent=(n>=0?"+":"")+n;e.style.left=x+"px";e.style.top=y+"px";document.getElementById("fxContainer").appendChild(e);setTimeout(()=>e.remove(),900)}
+
+function checkRelicDrop(){
+  if(Math.random()<RELIC_CHANCE){
+    const available=BURN_RELICS.filter(r=>!relicsFound.includes(r.id));
+    if(available.length===0)return;
+    const relic=available[Math.floor(Math.random()*available.length)];
+    relicsFound.push(relic.id);
+    showRelic(relic);
+  }
+}
+
+function showRelic(relic){
+  const overlay=document.getElementById("relicOverlay");
+  // Try multiple IPFS gateways and image extensions
+  const imgUrls=[
+    `${IPFS_GW}/${relic.id}.png`,
+    `${IPFS_GW}/${relic.id}.jpg`,
+    `https://gateway.pinata.cloud/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty/${relic.id}.png`,
+    `https://nftstorage.link/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty/${relic.id}.png`,
+  ];
+  overlay.innerHTML=`
+    <div class="relic-overlay" onclick="closeRelic()">
+      <div class="relic-card" onclick="event.stopPropagation()">
+        <img class="relic-img" id="relicImg" src="${imgUrls[0]}" onerror="tryNextRelicImg(this)" data-urls='${JSON.stringify(imgUrls)}' data-idx="0" alt="${relic.name}"/>
+        <div class="relic-info">
+          <div class="relic-title">${relic.name}</div>
+          <div class="relic-sub">BURN RELICS GENESIS // GORBAGANA</div>
+          <div style="font-size:8px;color:#666;margin-top:6px">NFT Collection by GORWELD</div>
+        </div>
+      </div>
+      <div class="relic-dismiss" onclick="closeRelic()">TAP TO CONTINUE</div>
+    </div>`;
+}
+function tryNextRelicImg(img){
+  const urls=JSON.parse(img.dataset.urls);
+  let idx=parseInt(img.dataset.idx)+1;
+  if(idx<urls.length){img.dataset.idx=idx;img.src=urls[idx]}
+  else{img.style.background="linear-gradient(135deg,#FFD70022,#FF6B3522)";img.alt="BURN RELIC";img.style.display="flex";img.outerHTML=`<div class="relic-img" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1520,#2a1a2e);font-size:48px">🔥</div>`}
+}
+function closeRelic(){document.getElementById("relicOverlay").innerHTML=""}
+
+// ======================== GAME LOGIC ========================
+function collectScrap(item,e){
+  if(S.inv.length>=S.maxSlots){notify("Inventory full!");return}
+  const r=e.currentTarget.getBoundingClientRect();
+  sparks(r.left+r.width/2,r.top+r.height/2);
+  for(let i=0;i<S.clickPow;i++){if(S.inv.length<S.maxSlots)S.inv.push({...item,uid:nuid()})}
+  S.yard=S.yard.filter(s=>s.uid!==item.uid);
+  if(item.rarity>=3)checkRelicDrop();
+  renderAll();
+}
+
+function scheduleRespawn(){
+  if(S.yard.length<6){setTimeout(()=>{if(S.yard.length<6){S.yard.push(rollScrap());if(S.tab==="yard")renderYard();scheduleRespawn()}},700)}
+}
+setInterval(()=>{if(S.yard.length<6){S.yard.push(rollScrap());if(S.tab==="yard")renderYard()}},1500);
+
+function handleSort(binId,e){
+  if(!S.dragItem)return;
+  const ok=S.dragItem.bin===binId;
+  S.tSorted++;
+  if(ok){S.cSorted++;S.streak++;const sb=1+Math.min(S.streak*0.05,0.5);const sv=Math.round(S.dragItem.value*1.8*sb);S.sorted.push({...S.dragItem,sortedValue:sv,uid:nuid()});const r=e.currentTarget.getBoundingClientRect();coinPop(r.left+30,r.top,sv)}
+  else{S.streak=0;notify("Wrong bin! Material lost.")}
+  S.inv=S.inv.filter(i=>i.uid!==S.dragItem.uid);S.dragItem=null;renderAll();
+}
+
+function loadFurnace(item){
+  if(S.fQueue.length>=3){notify("Queue full!");return}
+  S.fQueue.push(item);S.sorted=S.sorted.filter(s=>s.uid!==item.uid);tryStartSmelt();renderAll();
+}
+function tryStartSmelt(){
+  if(S.smelting||S.fQueue.length===0)return;
+  const n=S.fQueue.shift();const sm=1+S.ups.speed*0.15;
+  S.smelting=n;S.smeltStart=performance.now();S.smeltDur=(n.smeltTime/sm)*1000;S.fProg=0;
+}
+function furnaceTick(){
+  if(!S.smelting){tryStartSmelt();return}
+  S.fProg=Math.min((performance.now()-S.smeltStart)/S.smeltDur,1);
+  if(S.fProg>=1){const v=Math.round(S.smelting.value*S.smelting.smeltMult*2);S.ingots.push({...S.smelting,ingotValue:v,uid:nuid()});S.smelting=null;S.fProg=0;tryStartSmelt()}
+  renderFurnace();
+}
+function sellIngot(item,e){S.coins+=item.ingotValue;const r=e.currentTarget.getBoundingClientRect();coinPop(r.left+20,r.top,item.ingotValue);S.ingots=S.ingots.filter(i=>i.uid!==item.uid);renderAll()}
+function sellAllIngots(e){const t=S.ingots.reduce((s,i)=>s+i.ingotValue,0);if(!t)return;S.coins+=t;const r=e.currentTarget.getBoundingClientRect();coinPop(r.left+40,r.top,t);S.ingots=[];renderAll()}
+function sellRaw(item,e){S.coins+=item.value;const r=e.currentTarget.getBoundingClientRect();coinPop(r.left+10,r.top,item.value);S.inv=S.inv.filter(i=>i.uid!==item.uid);renderAll()}
+function buyUpgrade(up,e){const l=S.ups[up.id];if(l>=up.max)return;const cost=Math.round(up.base*Math.pow(up.mult,l));if(S.coins<cost){notify("Not enough coins!");return}S.coins-=cost;S.ups[up.id]++;const r=e.currentTarget.getBoundingClientRect();coinPop(r.left+20,r.top,-cost);if(up.id==="bag")S.maxSlots+=2;if(up.id==="click")S.clickPow++;renderAll()}
+
+// ======================== TABS ========================
+function switchTab(t){S.tab=t;document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("active",e.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));const p=document.getElementById("panel-"+t);p.classList.remove("hidden");p.style.animation="none";p.offsetHeight;p.style.animation="slide-in 0.3s ease";renderAll()}
+
+// ======================== RENDERING ========================
+function renderAll(){renderHUD();renderInv();if(S.tab==="yard")renderYard();if(S.tab==="sort")renderSort();if(S.tab==="forge")renderFurnace();if(S.tab==="shop")renderShop()}
+
+function renderHUD(){document.getElementById("coinDisplay").textContent=fmt(S.coins);document.getElementById("invLabel").textContent=`${S.inv.length}/${S.maxSlots}`}
+
+function renderInv(){
+  const c=document.getElementById("invSlots");c.innerHTML="";
+  for(let i=0;i<S.maxSlots;i++){const item=S.inv[i];const sl=document.createElement("div");sl.className="inv-slot "+(item?"filled":"empty");
+    if(item){sl.style.setProperty("--rcolor",RARITY_C[item.rarity]);sl.style.border=`1px solid ${RARITY_C[item.rarity]}55`;sl.style.boxShadow=`0 0 6px ${RARITY_G[item.rarity]}`;sl.innerHTML=`<div class="item-svg">${SVG[item.svg]}</div>`;sl.title=`${item.name} (${item.value}c)`;sl.onclick=e=>sellRaw(item,e)}
+    c.appendChild(sl)}
+}
+
+function renderYard(){
+  const f=document.getElementById("yardField");f.querySelectorAll(".yard-item").forEach(e=>e.remove());
+  S.yard.forEach(item=>{const el=document.createElement("div");el.className="yard-item";el.style.left=item.x+"%";el.style.top=item.y+"%";el.style.setProperty("--rcolor",RARITY_C[item.rarity]);el.style.setProperty("--glow",RARITY_G[item.rarity]);el.style.animationDelay=Math.random()*2+"s";
+    if(item.rarity>=2)el.style.animation="float-bob 2s ease-in-out infinite, pulse-glow 2s infinite";
+    if(item.rarity>=3)el.style.animation="float-bob 1.5s ease-in-out infinite, legendary-spin 3s infinite";
+    el.innerHTML=`<div class="gfx" style="border-color:${RARITY_C[item.rarity]}44;box-shadow:0 0 10px ${RARITY_G[item.rarity]}">${SVG[item.svg]}</div><div class="valtag" style="--rcolor:${RARITY_C[item.rarity]};--rglow:${RARITY_G[item.rarity]}">${item.value}c</div>`;
+    el.onclick=e=>collectScrap(item,e);f.appendChild(el)});
+  document.getElementById("yardCount").textContent=S.yard.length+" ITEMS";
+  document.getElementById("clickPowerLabel").textContent=S.clickPow;
+}
+
+function renderSort(){
+  const acc=S.tSorted?Math.round(S.cSorted/S.tSorted*100):0;
+  document.getElementById("sortStats").innerHTML=`STREAK: ${S.streak}${S.streak>3?" <span style='color:#FF6B35'>🔥</span>":""} • ACC: ${acc}%`;
+  document.getElementById("unsortedCount").textContent=S.inv.length;
+  const ul=document.getElementById("unsortedList");ul.innerHTML="";
+  if(!S.inv.length){ul.innerHTML='<span style="font-size:10px;color:#333;padding:8px">Collect scrap at the yard first...</span>'}
+  else S.inv.forEach(item=>{const el=document.createElement("div");el.className="drag-item";el.style.setProperty("--rcolor",RARITY_C[item.rarity]);el.style.border=`1px solid ${RARITY_C[item.rarity]}44`;el.style.boxShadow=`0 0 6px ${RARITY_G[item.rarity]}`;el.innerHTML=`${SVG[item.svg]}<div class="dn">${item.name.slice(0,8)}</div>`;el.draggable=true;
+    el.ondragstart=e=>{S.dragItem=item;el.classList.add("dragging");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",item.uid)};
+    el.ondragend=()=>el.classList.remove("dragging");
+    el.ontouchstart=()=>{S.dragItem=item;el.classList.add("dragging")};
+    ul.appendChild(el)});
+  const bc=document.getElementById("binsContainer");
+  if(!bc.children.length)BINS.forEach(bin=>{const el=document.createElement("div");el.className="bin";el.style.setProperty("--bc",bin.color);el.innerHTML=`<div class="bicon">${bin.icon}</div><div class="bname">${bin.name}</div>`;
+    el.ondragover=e=>{e.preventDefault();el.classList.add("dragover");el.style.borderColor=bin.color};
+    el.ondragleave=()=>{el.classList.remove("dragover");el.style.borderColor=""};
+    el.ondrop=e=>{e.preventDefault();el.classList.remove("dragover");el.style.borderColor="";handleSort(bin.id,e)};
+    el.ontouchend=e=>{if(S.dragItem){e.preventDefault();handleSort(bin.id,{currentTarget:el,getBoundingClientRect:()=>el.getBoundingClientRect()});document.querySelectorAll(".drag-item.dragging").forEach(d=>d.classList.remove("dragging"))}};
+    bc.appendChild(el)});
+  const ss=document.getElementById("sortedSection"),sl=document.getElementById("sortedList");
+  if(S.sorted.length){ss.classList.remove("hidden");sl.innerHTML="";S.sorted.forEach(item=>{const el=document.createElement("div");el.className="sorted-chip";el.innerHTML=`<div style="width:18px;height:18px">${SVG[item.svg]}</div><span class="sv">${item.sortedValue}c</span>`;el.onclick=()=>{loadFurnace(item);switchTab("forge")};sl.appendChild(el)})}
+  else ss.classList.add("hidden");
+}
+
+function renderFurnace(){
+  const box=document.getElementById("furnaceBox"),icon=document.getElementById("furnaceIcon"),status=document.getElementById("furnaceStatus");
+  document.getElementById("speedBonus").textContent=S.ups.speed*15;
+  if(S.smelting){box.className="furnace-box active";icon.className="furnace-svg active";icon.innerHTML=SVG.furnace_active;
+    status.innerHTML=`<div class="furnace-mat">SMELTING: ${S.smelting.name.toUpperCase()}</div><div class="progress-track"><div class="progress-fill" style="width:${S.fProg*100}%"></div></div><div class="furnace-pct">${Math.round(S.fProg*100)}%</div>`}
+  else{box.className="furnace-box idle";icon.className="furnace-svg";icon.innerHTML=SVG.furnace_idle;status.innerHTML='<div class="furnace-idle-text">Load sorted material to begin smelting</div>'}
+  document.getElementById("queueCount").textContent=S.fQueue.length;
+  const qs=document.getElementById("queueSlots");qs.innerHTML="";
+  for(let i=0;i<3;i++){const item=S.fQueue[i];const el=document.createElement("div");el.className="qslot "+(item?"filled":"empty");
+    if(item){const t=Math.round(item.smeltTime/(1+S.ups.speed*0.15));el.innerHTML=`<div style="width:28px;height:28px">${SVG[item.svg]}</div><div class="qt">${t}s</div>`}
+    else el.innerHTML='<span style="font-size:16px;color:#1a1a2e">—</span>';qs.appendChild(el)}
+  const is=document.getElementById("ingotsSection"),il=document.getElementById("ingotsList");
+  if(S.ingots.length){is.classList.remove("hidden");const tot=S.ingots.reduce((s,i)=>s+i.ingotValue,0);document.getElementById("sellAllBtn").textContent=`SELL ALL (${tot}c)`;il.innerHTML="";
+    S.ingots.forEach(item=>{const isvg=INGOT_SVG[item.material]||"ingot_st";const el=document.createElement("div");el.className="ingot-chip";el.innerHTML=`<div style="width:24px;height:24px">${SVG[isvg]}</div><div><div class="ingot-type">${item.material.toUpperCase()}</div><div class="ingot-val">${item.ingotValue}c</div></div>`;el.onclick=e=>sellIngot(item,e);il.appendChild(el)})}
+  else is.classList.add("hidden");
+  const ls=document.getElementById("forgeLoadSection"),ll=document.getElementById("forgeLoadList");
+  if(S.sorted.length){ls.classList.remove("hidden");ll.innerHTML="";S.sorted.forEach(item=>{const el=document.createElement("div");el.className="load-item";el.style.cssText="padding:4px 6px;border-radius:4px;cursor:pointer;border:1px solid #ffffff11;background:#151528;transition:all 0.15s;width:32px;height:32px;display:flex;align-items:center;justify-content:center";el.innerHTML=`<div style="width:20px;height:20px">${SVG[item.svg]}</div>`;el.onmouseenter=()=>{el.style.background="#39FF1418";el.style.borderColor="#39FF1444"};el.onmouseleave=()=>{el.style.background="#151528";el.style.borderColor="#ffffff11"};el.onclick=()=>loadFurnace(item);ll.appendChild(el)})}
+  else ls.classList.add("hidden");
+}
+
+function renderShop(){
+  document.getElementById("shopCoins").textContent=fmt(S.coins);
+  const list=document.getElementById("upgradesList");list.innerHTML="";
+  UPGRADES.forEach(up=>{const l=S.ups[up.id],mx=l>=up.max,cost=mx?0:Math.round(up.base*Math.pow(up.mult,l)),can=!mx&&S.coins>=cost;
+    const card=document.createElement("div");card.className="upgrade-card"+(mx?" maxed":"");
+    let pips="";for(let i=0;i<up.max;i++)pips+=`<div class="pip ${i<l?"on":"off"}"></div>`;
+    card.innerHTML=`<div class="up-icon">${up.svgIcon}</div><div class="up-info"><div class="up-name" style="color:${mx?"#39FF14":"#e0e0e0"}">${up.name}</div><div class="up-desc">${up.desc} • Lvl ${l}/${up.max}</div><div class="up-pips">${pips}</div></div>`;
+    const btn=document.createElement("button");btn.className="buy-btn "+(mx?"max":can?"can":"cant");btn.textContent=mx?"MAX":cost+"c";
+    if(can)btn.onclick=e=>buyUpgrade(up,e);card.appendChild(btn);list.appendChild(card)});
+  const acc=S.tSorted?Math.round(S.cSorted/S.tSorted*100):0;
+  document.getElementById("statsGrid").innerHTML=`
+    <div>Sorted: <span style="color:#39FF14">${S.tSorted}</span></div>
+    <div>Accuracy: <span style="color:#39FF14">${acc}%</span></div>
+    <div>Streak: <span style="color:#FFD700">${S.streak}</span></div>
+    <div>Slots: <span style="color:#4FC3F7">${S.maxSlots}</span></div>
+    <div>Power: <span style="color:#FF6B35">${S.clickPow}</span></div>
+    <div>Speed: <span style="color:#FF6B35">+${S.ups.speed*15}%</span></div>
+    <div>Relics: <span style="color:#FFD700">${relicsFound.length}/10</span></div>
+    <div>Ingots: <span style="color:#FFD700">${S.ingots.length}</span></div>`;
+}
+
+// ======================== INIT ========================
+for(let i=0;i<6;i++)S.yard.push(rollScrap());
+renderAll();
+setInterval(furnaceTick,50);
+</script>
+</body>
+</html>

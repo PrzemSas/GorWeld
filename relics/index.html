@@ -286,6 +286,7 @@ footer{padding:30px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
     <div class="coll-stat"><div class="csv">🔒</div><div class="csl">FROZEN</div></div>
     <div class="coll-stat"><div class="csv">3</div><div class="csl">LEGENDARY</div></div>
     <div class="coll-stat"><div class="csv">3</div><div class="csl">RARE</div></div>
+    <div class="coll-stat"><div class="csv">4</div><div class="csl">COMMON</div></div>
   </div>
 
   <div class="coll-addr">
@@ -349,16 +350,16 @@ footer{padding:30px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 <script>
 // ==================== NFT DATA ====================
 const NFTS=[
-  {id:1,name:"Flame of Genesis",tier:"Legendary",element:"Fire",desc:"The first flame that ignited the Dumpster Forge. Born from the 500 billion token sacrifice. Where everything started."},
-  {id:2,name:"The Welding Mask",tier:"Legendary",element:"Metal",desc:"Worn by the welder himself. Scarred by a thousand sparks. The face of GORWELD — protection and identity forged as one."},
-  {id:3,name:"Molten Core",tier:"Legendary",element:"Fire",desc:"The heart of the forge. Liquid metal at 1,538°C. Nothing survives this heat — nothing except what's meant to be reborn."},
-  {id:4,name:"Rusty Gear",tier:"Rare",element:"Metal",desc:"Found in the deepest layer of the scrapyard. Still turns. Still works. The old world's machinery refusing to die."},
-  {id:5,name:"Neon Circuit",tier:"Rare",element:"Electric",desc:"A circuit board that glows with green neon light. The bridge between the old industrial world and the new digital chain."},
-  {id:6,name:"Scrap Crown",tier:"Rare",element:"Metal",desc:"A crown welded from the finest scrap. Worn by no king — only by those who build empires from nothing."},
-  {id:7,name:"Ash Coin",tier:"Common",element:"Ash",desc:"What remains after the burn. A coin blackened by fire. Proof that something existed, something was sacrificed."},
-  {id:8,name:"Dumpster Lid",tier:"Common",element:"Metal",desc:"Every forge has a door. Rusted. Tagged. The Dumpster Forge started here. OG relic."},
-  {id:9,name:"Scrapcoin Token",tier:"Common",element:"Metal",desc:"The physical form of $SCRAPCOIN. 1 billion exist, 4 million max per wallet. Cracked metal, molten core, forged S."},
-  {id:10,name:"The Burn TX",tier:"Common",element:"Stone",desc:"The transaction. Carved in stone. 500,000,000,000 $GORWELDD burned on March 17, 2026. On Gorbagana Chain forever."},
+  {id:1,name:"The Forge Hammer",tier:"Legendary",edition:"1/1",element:"Metal",desc:"The hammer that struck the first spark. Legendary tool of the Dumpster Forge. There is only one — and it belongs to the welder."},
+  {id:2,name:"Gorweld Mask",tier:"Legendary",edition:"1/1",element:"Metal",desc:"The face of GORWELD. Scarred by a thousand sparks, forged in fire. Protection and identity welded as one. 1 of 1."},
+  {id:3,name:"Gorius Skull",tier:"Legendary",edition:"1/1",element:"Fire",desc:"The skull of GORIUS TRASHINUS. Pulled from the deepest layer of the forge. Eyes still glow with molten fire. Legendary. Unique."},
+  {id:4,name:"Scrap Fragment",tier:"Rare",edition:"2/10",element:"Metal",desc:"A fragment of the original scrap pile. Twisted metal, sharp edges, raw potential. Only 10 exist. This is number 2."},
+  {id:5,name:"Forge Flame",tier:"Rare",edition:"2/10",element:"Fire",desc:"Captured flame from the Dumpster Forge. Burns eternal. The heat that melts everything into something new. 2 of 10."},
+  {id:6,name:"Chain Link",tier:"Rare",edition:"2/10",element:"Metal",desc:"A single link from the chain that binds the forge. Unbreakable. Connecting all relics together. 2 of 10."},
+  {id:7,name:"Ash Coin",tier:"Common",edition:"1/10",element:"Ash",desc:"What remains after the burn. A coin blackened by fire. Proof that something existed, something was sacrificed."},
+  {id:8,name:"Dumpster Lid",tier:"Common",edition:"1/10",element:"Metal",desc:"Every forge has a door. Rusted. Tagged. The Dumpster Forge started here. OG relic. 1 of 10."},
+  {id:9,name:"Scrapcoin Token",tier:"Common",edition:"1/10",element:"Metal",desc:"The physical form of $SCRAPCOIN. 1 billion exist, 4 million max per wallet. Cracked metal, molten core, forged S."},
+  {id:10,name:"The Burn TX",tier:"Common",edition:"1/10",element:"Stone",desc:"The transaction. Carved in stone. 500,000,000,000 $GORWELDD burned on March 17, 2026. On Gorbagana Chain forever."},
 ];
 
 const MINTS=["FBV9TBZsvgD5mRVetvuL6k5vZtUiPhSqzhBPgWky1AEi","Fx4t4S1kn71URo23XgR3zeQ5Fe66Kvzx3diC3zdPcWre","CqryM8g2hK4gb4b8Nbpt9FLGJV3mdLy2rb6xDhWxJvCn","BLSp1anLbxrJcvvSiH2VYXY7sc1Qx8E27utporgHYbSN","UKSBe8tMvP7frk8N7cTw1zxxGrPBQQqSRWZnQ8KuhMn","HjSEPmEmDVAwq3F6xBVnWmpsHFLHaXuUmF8UTUxBTjWU","8RDyHcHt7zpS9L6AkHktHExDWnfSH3FiLqAJK1W76KQT","2o9S1mnsToheXG99oNAzzG5z1Goem3GfAQdoGtrGXE5g","5XaYxUM4mkFvWmUKmjNW85Y9ZbRW3xSKCg3w4kaiNf16","9cKwMmQD3Fo4nUM4poucifpxpnV2k2JD7R5J1PNm3wUu"];
@@ -406,7 +407,7 @@ function updateDots(){const idx=getActiveIndex();currentIndex=idx;const dots=dot
 function openDetail(i){
   const nft=NFTS[i];const c=tierColors[nft.tier];
   detailEl.style.border=`1px solid ${c}44`;detailEl.style.boxShadow=`0 0 40px ${c}33`;
-  detailEl.innerHTML=`<img src="${BASE}/${nft.id}.png" alt="${nft.name}"><div class="detail-body"><div class="detail-tier" style="color:${c}">${nft.tier} · ${nft.element}</div><div class="detail-title" style="text-shadow:0 0 15px ${c}33">#${String(nft.id).padStart(3,'0')} — ${nft.name}</div><div class="detail-desc">${nft.desc}<br><br>BURN RELICS GENESIS · GORBAGANA CHAIN<br>500B $GORWELDD BURNED — 17.03.2026</div><div class="detail-mint" onclick="navigator.clipboard.writeText('${MINTS[i]}');this.textContent='✓ Copied!';this.style.color='#39FF14'">${MINTS[i]}</div><div class="detail-btns"><div class="detail-btn detail-btn-close" onclick="closeDetail()">✕ CLOSE</div><a href="https://trashscan.io/token/${MINTS[i]}" target="_blank" class="detail-btn detail-btn-scan" style="text-decoration:none">TRASHSCAN ↗</a></div></div>`;
+  detailEl.innerHTML=`<img src="${BASE}/${nft.id}.png" alt="${nft.name}"><div class="detail-body"><div class="detail-tier" style="color:${c}">${nft.tier} · ${nft.edition} · ${nft.element}</div><div class="detail-title" style="text-shadow:0 0 15px ${c}33">#${String(nft.id).padStart(3,'0')} — ${nft.name}</div><div class="detail-desc">${nft.desc}<br><br>BURN RELICS GENESIS · GORBAGANA CHAIN<br>500B $GORWELDD BURNED — 17.03.2026</div><div class="detail-mint" onclick="navigator.clipboard.writeText('${MINTS[i]}');this.textContent='✓ Copied!';this.style.color='#39FF14'">${MINTS[i]}</div><div class="detail-btns"><div class="detail-btn detail-btn-close" onclick="closeDetail()">✕ CLOSE</div><a href="https://trashscan.io/token/${MINTS[i]}" target="_blank" class="detail-btn detail-btn-scan" style="text-decoration:none">TRASHSCAN ↗</a></div></div>`;
   overlay.classList.add('active');autoPlay=false;updateAutoUI();
 }
 function closeDetail(){overlay.classList.remove('active')}
@@ -458,10 +459,11 @@ NFTS.forEach((nft,i)=>{
     </div>
     <div class="nft-details">
       <div class="nft-name">${nft.name.toUpperCase()}</div>
-      <div class="nft-el">${nft.tier} · ${nft.element}</div>
+      <div class="nft-el">${nft.tier} · ${nft.edition} · ${nft.element}</div>
       <div class="nft-desc-text">${nft.desc}</div>
       <div class="nft-meta">
-        <div class="nft-meta-row"><span class="ml">RELIC</span><span class="mv">${nft.id} / 10</span></div>
+        <div class="nft-meta-row"><span class="ml">RELIC</span><span class="mv">#${String(nft.id).padStart(3,'0')}</span></div>
+        <div class="nft-meta-row"><span class="ml">EDITION</span><span class="mv">${nft.edition}</span></div>
         <div class="nft-meta-row"><span class="ml">STATUS</span><span class="mv" style="color:#39FF14">FROZEN ❄</span></div>
       </div>
       <div class="nft-mint" onclick="navigator.clipboard.writeText('${MINTS[i]}');this.textContent='✓ Copied!';this.style.color='#39FF14';setTimeout(()=>{this.textContent='${MINTS[i]}';this.style.color=''},1500)">${MINTS[i]}</div>

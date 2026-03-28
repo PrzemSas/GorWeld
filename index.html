@@ -4,577 +4,287 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GORWELD — Dumpster Forge Industries</title>
-<meta name="description" content="GORWELD - Post-apocalyptic crypto ecosystem on Gorbagana Chain. $GORWELDD, $SCRAPCOIN, Burn Relics NFT, Scrap Scavenger.">
-<meta property="og:title" content="GORWELD — Dumpster Forge Industries">
-<meta property="og:description" content="Welding the future from the scraps of the old world.">
+<meta name="description" content="GORWELD - Post-apocalyptic crypto ecosystem on Gorbagana Chain.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@GorWeld">
-<meta name="twitter:creator" content="@Przemsas">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Teko:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--n:#39FF14;--nd:#39FF1466;--ng:#39FF1433;--f:#FF6B35;--h:#FF2D00;--g:#FFD700;--b0:#050510;--b1:#0a0a18;--b2:#0e0e1e;--b3:#141428;--t:#e0e0e0;--td:#555570;--td2:#333348}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--b0);color:var(--t);font-family:'Share Tech Mono','Courier New',monospace;overflow-x:hidden}
-::selection{background:var(--n);color:var(--b0)}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--b0)}
-::-webkit-scrollbar-thumb{background:var(--nd);border-radius:3px}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:#000;font-family:'Share Tech Mono',monospace;color:#e0e0e0;overflow-x:hidden}::selection{background:#ff6a00;color:#000}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#ff6a0044;border-radius:3px}a{color:inherit;text-decoration:none}
+@keyframes emberFloat{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:0}5%{opacity:.8}50%{opacity:1;transform:translateY(-50vh) rotate(360deg) scale(.8)}90%{opacity:.3}100%{transform:translateY(-105vh) rotate(720deg) scale(.2);opacity:0}}
+@keyframes floorPulse{0%,100%{opacity:.4}50%{opacity:.9}}
+@keyframes titlePulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes titleGlitch{0%,88%,92%,96%,100%{transform:translate(0);filter:none}89%{transform:translate(-3px,1px);filter:hue-rotate(20deg)}91%{transform:translate(3px,-1px);filter:hue-rotate(-20deg)}93%{transform:translate(-1px,2px) skewX(1deg)}95%{transform:translate(2px,-1px) skewX(-1deg)}}
 @keyframes scan{0%{top:-100%}100%{top:200%}}
-@keyframes glowPulse{0%,100%{text-shadow:0 0 20px var(--ng),0 0 40px #39FF1411}50%{text-shadow:0 0 30px var(--nd),0 0 60px var(--ng),0 0 80px #39FF1409}}
-@keyframes flicker{0%,100%{opacity:1}7%{opacity:.88}10%{opacity:1}42%{opacity:.92}44%{opacity:1}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-@keyframes slideUp{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes fireGlow{0%,100%{box-shadow:0 0 15px #ff6a0022}50%{box-shadow:0 0 30px #ff6a0033,0 0 60px #ff3c0011}}
 @keyframes fireBreathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
-@keyframes rotSlow{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-@keyframes borderShift{0%{background-position:0 0}100%{background-position:200% 0}}
-@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
-@keyframes sparkRise{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(0)}}
-.vis{animation:slideUp .7s ease forwards}
-
-/* Overlays */
-.scan{position:fixed;inset:0;pointer-events:none;z-index:9999}
-.scan::after{content:'';position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,#39FF1406,transparent);animation:scan 5s linear infinite}
-.grain{position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
-
-/* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;background:linear-gradient(180deg,#050510ee,transparent)}
-nav.s{background:#050510ee;backdrop-filter:blur(10px);border-bottom:1px solid #39FF1409}
-.nlogo{font-family:'Teko',sans-serif;font-size:26px;font-weight:700;color:var(--n);letter-spacing:5px;text-shadow:0 0 10px var(--ng)}
-.nlinks{display:flex;gap:20px;align-items:center}
-.nlinks a{color:var(--td);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s;padding:6px 0}
-.nlinks a:hover{color:var(--n);text-shadow:0 0 8px var(--ng)}
-.ncta{padding:7px 18px!important;border:1px solid var(--n)!important;border-radius:3px;color:var(--n)!important}
-.ncta:hover{background:var(--n)!important;color:var(--b0)!important}
-.mmenu{display:none;cursor:pointer;font-size:22px;color:var(--n);background:none;border:none}
-
-/* Hero */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:100px 24px 80px;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,#39FF1405 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,#FF6B3504 0%,transparent 40%),radial-gradient(ellipse at 20% 70%,#FF2D0003 0%,transparent 40%)}
-.hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 79px,#39FF1404 79px,#39FF1404 80px),repeating-linear-gradient(90deg,transparent,transparent 79px,#39FF1404 79px,#39FF1404 80px)}
-.hero-vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 20%,var(--b0) 75%)}
-
-/* Welding sparks in hero */
-.sparks-container{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.spark-p{position:absolute;width:3px;height:3px;border-radius:50%;animation:sparkRise linear infinite}
-
-.hero-forge-svg{position:relative;z-index:1;width:180px;height:180px;margin-bottom:20px;animation:float 4s ease-in-out infinite}
-.hero-badge{position:relative;z-index:1;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:5px;color:var(--td);margin-bottom:16px;padding:5px 18px;border:1px solid #ffffff08;border-radius:20px;background:#ffffff03}
-.hero-title{position:relative;z-index:1;font-family:'Teko',sans-serif;font-size:clamp(80px,16vw,180px);font-weight:700;line-height:.82;color:var(--n);letter-spacing:10px;animation:glowPulse 4s infinite,flicker 10s infinite}
-.hero-title small{display:block;font-size:.3em;color:var(--td);letter-spacing:14px;text-shadow:none;font-weight:400;margin-top:6px}
-.hero-sub{position:relative;z-index:1;font-family:'Rajdhani',sans-serif;font-size:clamp(13px,2.2vw,18px);color:var(--td);margin-top:20px;letter-spacing:2px;max-width:560px;line-height:1.7}
-.hero-sub b{color:var(--f);font-weight:600}
-
-.hero-stats{position:relative;z-index:1;display:flex;gap:36px;margin-top:36px;flex-wrap:wrap;justify-content:center}
-.hs{text-align:center}
-.hs .hv{font-family:'Orbitron',monospace;font-size:22px;font-weight:800;color:var(--n)}
-.hs .hl{font-size:8px;color:var(--td);letter-spacing:2px;margin-top:4px;font-family:'Orbitron',monospace}
-
-.hero-btns{position:relative;z-index:1;display:flex;gap:14px;margin-top:36px;flex-wrap:wrap;justify-content:center}
-.btn{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 28px;border-radius:4px;transition:all .3s;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px}
-.btn1{background:var(--n);color:var(--b0);box-shadow:0 0 20px var(--ng)}
-.btn1:hover{box-shadow:0 0 30px var(--nd),0 0 60px var(--ng);transform:translateY(-2px)}
-.btn2{background:transparent;color:var(--n);border:1px solid var(--nd)}
-.btn2:hover{background:#39FF140a;border-color:var(--n);box-shadow:0 0 20px var(--ng)}
-.btn3{background:linear-gradient(135deg,var(--h),var(--f));color:#fff;box-shadow:0 0 20px #FF6B3533}
-.btn3:hover{box-shadow:0 0 30px #FF6B3555;transform:translateY(-2px)}
-
-.scroll-h{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);color:var(--td2);font-size:9px;letter-spacing:3px;font-family:'Orbitron',monospace;animation:float 2.5s ease-in-out infinite;z-index:1}
-.scroll-h::after{content:'';display:block;width:1px;height:28px;background:linear-gradient(180deg,var(--nd),transparent);margin:8px auto 0}
-
-/* Ticker */
-.ticker{border-top:1px solid #39FF140a;border-bottom:1px solid #39FF140a;background:#39FF1404;overflow:hidden}
+@keyframes sparkRise{0%{opacity:.7;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(0)}}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.vis{animation:slideUp .6s ease forwards}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.06) 1px,rgba(0,0,0,.06) 3px)}
+.scan-after{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
+.scan-after::after{content:'';position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,#ff6a0006,transparent);animation:scan 5s linear infinite}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;background:transparent}
+nav.s{background:#000000dd;backdrop-filter:blur(10px);border-bottom:1px solid #ff6a0011}
+.nlogo{font-family:'Teko',sans-serif;font-size:24px;font-weight:700;color:#ff6a00;letter-spacing:5px;text-shadow:0 0 12px #ff6a0044}
+.nlinks{display:flex;gap:18px;align-items:center}
+.nlinks a{color:#444;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s}
+.nlinks a:hover{color:#ff6a00}
+.ncta{padding:6px 16px!important;border:1px solid #ff6a00!important;border-radius:3px;color:#ff6a00!important}
+.ncta:hover{background:#ff6a00!important;color:#000!important}
+.mmenu{display:none;cursor:pointer;font-size:20px;color:#ff6a00;background:none;border:none}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:100px 24px 80px;overflow:hidden;background:radial-gradient(ellipse at 50% 130%,#1a0800 0%,#080200 40%,#000 70%)}
+.hero-vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.hero-floor{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:80%;height:200px;background:radial-gradient(ellipse at center,rgba(255,80,0,.12) 0%,transparent 70%);pointer-events:none;animation:floorPulse 4s ease-in-out infinite}
+.hero-embers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ember{position:absolute;border-radius:50%;bottom:-10px;animation:emberFloat linear infinite}
+.hero-forge{position:relative;z-index:1;width:150px;height:150px;margin-bottom:14px;animation:float 4s ease-in-out infinite}
+.hero-badge{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:5px;color:#555;padding:5px 16px;border:1px solid #ff6a0015;border-radius:20px;background:#ff6a0006;margin-bottom:12px}
+.hero-t{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:clamp(36px,8vw,72px);font-weight:900;color:#fff;letter-spacing:8px;text-shadow:0 0 30px rgba(255,106,0,.5),0 0 60px rgba(255,106,0,.25),0 0 120px rgba(255,60,0,.1);animation:titleGlitch 6s infinite;line-height:1}
+.hero-t small{display:block;font-size:.28em;color:#ff6a00;letter-spacing:12px;margin-top:8px;text-shadow:none;font-weight:700;animation:titlePulse 3s ease-in-out infinite}
+.hero-sub{position:relative;z-index:1;font-family:'Rajdhani',sans-serif;font-size:clamp(13px,2vw,17px);color:#555;margin-top:16px;letter-spacing:2px;max-width:500px;line-height:1.7}
+.hero-sub b{color:#ff6a00}
+.hero-stats{position:relative;z-index:1;display:flex;gap:28px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.hs{text-align:center}.hs .hv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#ff6a00;text-shadow:0 0 10px #ff6a0033}.hs .hl{font-size:7px;color:#444;letter-spacing:2px;margin-top:3px;font-family:'Orbitron',sans-serif}
+.hero-btns{position:relative;z-index:1;display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.btn{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;border-radius:4px;transition:all .3s;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px}
+.btn1{background:linear-gradient(135deg,#ff3c00,#ff6a00);color:#000;box-shadow:0 0 20px #ff6a0033}
+.btn1:hover{box-shadow:0 0 30px #ff6a0055;transform:translateY(-2px)}
+.btn2{background:transparent;color:#ff6a00;border:1px solid #ff6a0044}
+.btn2:hover{background:#ff6a000a;border-color:#ff6a00}
+.btn3{background:transparent;color:#00e5ff;border:1px solid #00e5ff33}
+.btn3:hover{background:#00e5ff08;border-color:#00e5ff}
+.scroll-h{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:1;animation:float 2s ease-in-out infinite;cursor:pointer}
+.scroll-h svg{width:24px;height:24px}
+.ticker{border-top:1px solid #ff6a000a;border-bottom:1px solid #ff6a000a;background:#ff6a0004;overflow:hidden}
 .ticker-track{display:flex;animation:marquee 35s linear infinite;white-space:nowrap}
-.ticker-i{padding:10px 36px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:var(--td);flex-shrink:0}
-.ticker-i .c1{color:var(--n)}
-.ticker-i .c2{color:var(--f)}
-.ticker-i .c3{color:var(--g)}
-
-/* Sections */
-section{padding:100px 24px;position:relative}
-.si{max-width:1100px;margin:0 auto}
-.stag{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:4px;color:var(--f);margin-bottom:10px}
-.stitle{font-family:'Teko',sans-serif;font-size:clamp(40px,7vw,72px);font-weight:700;color:var(--t);line-height:.95;margin-bottom:14px}
-.stitle em{color:var(--n);font-style:normal}
-.sdesc{color:var(--td);font-size:13px;line-height:1.7;max-width:560px;margin-bottom:44px}
-.sdiv{width:36px;height:2px;background:var(--n);margin-bottom:20px;box-shadow:0 0 6px var(--ng)}
-
-/* About */
-.about-g{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
-.forge-visual{position:relative;border-radius:12px;overflow:hidden;border:1px solid #39FF1412;background:var(--b2);padding:20px;text-align:center}
-.forge-svg-main{width:100%;max-width:360px;margin:0 auto}
-.forge-label{font-family:'Orbitron',monospace;font-size:8px;color:var(--td);letter-spacing:3px;margin-top:12px}
-.feats{display:flex;flex-direction:column;gap:16px}
-.feat{padding:16px 20px;border-left:2px solid var(--nd);background:linear-gradient(90deg,#39FF1406,transparent);transition:all .3s}
-.feat:hover{border-left-color:var(--n);background:linear-gradient(90deg,#39FF140d,transparent);transform:translateX(4px)}
-.feat .ft{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--n);margin-bottom:5px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
-.feat .ft svg{width:18px;height:18px;flex-shrink:0}
-.feat .fd{font-size:11px;color:var(--td);line-height:1.6}
-
-/* Tokens */
-.tok-g{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.tok{border:1px solid #ffffff08;border-radius:14px;padding:28px 24px;background:var(--b2);position:relative;overflow:hidden;transition:all .4s}
-.tok::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac);opacity:.6}
-.tok:hover{border-color:color-mix(in srgb,var(--ac) 40%,transparent);transform:translateY(-4px);box-shadow:0 10px 40px #00000055}
-.tok-icon{width:48px;height:48px;margin-bottom:14px}
-.tok-sym{font-family:'Teko',sans-serif;font-size:34px;font-weight:700;color:var(--ac);line-height:1}
-.tok-name{font-family:'Orbitron',monospace;font-size:9px;color:var(--td);letter-spacing:2px;margin-top:4px}
-.tok-data{margin-top:16px;padding-top:14px;border-top:1px solid #ffffff08}
-.tok-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.tok-row .tl{font-size:8px;color:var(--td);letter-spacing:1px;font-family:'Orbitron',monospace}
-.tok-row .tv{font-family:'Orbitron',monospace;font-size:13px;color:var(--t);font-weight:600}
-.tok-tag{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:3px;font-size:8px;letter-spacing:1px;font-family:'Orbitron',monospace}
-
-/* NFT Preview (links to /relics) */
-.nft-prev{background:linear-gradient(180deg,var(--b0),#0c0816,var(--b0))}
-.nft-showcase{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:36px}
-.nft-thumb{border-radius:10px;overflow:hidden;border:1px solid #FFD70015;background:var(--b2);transition:all .4s;cursor:pointer;position:relative}
-.nft-thumb:hover{border-color:#FFD70050;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 40px #FFD70010}
-.nft-thumb-img{width:100%;aspect-ratio:1;object-fit:cover;background:linear-gradient(135deg,#1a1520,#2a1a2e)}
-.nft-thumb-fb{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,#1a1520,#2a1a2e);color:#FFD70033}
-.nft-thumb-id{padding:8px 10px;font-family:'Orbitron',monospace;font-size:8px;color:var(--g);letter-spacing:1px}
-
-/* Game */
-.game-sec{background:linear-gradient(180deg,var(--b0),#081210,var(--b0))}
-.game-card{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;padding:36px;border:1px solid #39FF1414;border-radius:16px;background:linear-gradient(135deg,#080a18,#0c1812)}
-.game-vis{border-radius:12px;overflow:hidden;border:1px solid #39FF1420;aspect-ratio:4/3;background:var(--b2);display:flex;align-items:center;justify-content:center;position:relative}
-.game-vis-inner{text-align:center;padding:24px}
-.gv-svg{width:80px;height:80px;margin:0 auto 12px;animation:fireBreathe 2.5s infinite}
-.gv-t{font-family:'Teko',sans-serif;font-size:26px;color:var(--n);letter-spacing:3px}
-.gv-s{font-size:9px;color:var(--td);letter-spacing:2px;font-family:'Orbitron',monospace;margin-top:4px}
-.gfeats{display:flex;flex-direction:column;gap:14px;margin-top:20px}
-.gf{display:flex;align-items:flex-start;gap:12px}
-.gf-ic{width:36px;height:36px;border-radius:6px;background:#39FF140a;border:1px solid #39FF1418;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.gf-ic svg{width:20px;height:20px}
-.gf-t{font-family:'Orbitron',monospace;font-size:9px;color:var(--n);letter-spacing:1px;margin-bottom:3px}
-.gf-d{font-size:10px;color:var(--td);line-height:1.5}
-
-/* Sovereign */
-.sov{padding:32px;border:1px solid #FF6B3518;border-radius:16px;background:linear-gradient(135deg,#14100a,#0e0e1e);display:grid;grid-template-columns:5fr 2fr;gap:28px;align-items:center}
-.sov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.sov-s{padding:14px;border-radius:8px;background:#ffffff03;border:1px solid #ffffff06}
-.sov-s .sl{font-size:7px;color:var(--td);letter-spacing:2px;font-family:'Orbitron',monospace}
-.sov-s .sv{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--f);margin-top:6px}
-.sov-bar{margin-top:16px}
-.sov-track{height:10px;border-radius:5px;background:#ffffff06;overflow:hidden}
-.sov-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--f),var(--g));box-shadow:0 0 10px #FF6B3544}
-.sov-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:8px;color:var(--td);font-family:'Orbitron',monospace}
-
-/* Community */
-.soc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.soc{padding:24px;border-radius:12px;border:1px solid #ffffff08;background:var(--b2);text-align:center;transition:all .3s;display:block}
-.soc:hover{border-color:var(--nd);transform:translateY(-3px);box-shadow:0 8px 30px #00000033}
-.soc-ic{margin-bottom:10px}
-.soc-ic svg{width:36px;height:36px;margin:0 auto}
-.soc-h{font-family:'Orbitron',monospace;font-size:10px;color:var(--n);letter-spacing:1px}
-.soc-d{font-size:9px;color:var(--td);margin-top:4px}
-
-/* Footer */
-footer{padding:36px 24px;border-top:1px solid #39FF140a;text-align:center;background:var(--b0)}
-.flogo{font-family:'Teko',sans-serif;font-size:30px;color:var(--n);letter-spacing:6px;text-shadow:0 0 10px var(--ng)}
-.flinks{display:flex;gap:20px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.flinks a{color:var(--td);font-size:9px;letter-spacing:1px;font-family:'Orbitron',monospace;transition:color .3s}
-.flinks a:hover{color:var(--n)}
-.fcopy{margin-top:20px;font-size:8px;color:var(--td2);letter-spacing:2px;font-family:'Orbitron',monospace}
-
-@media(max-width:900px){
-  .about-g,.game-card,.sov{grid-template-columns:1fr}
-  .tok-g{grid-template-columns:1fr}
-  .nft-showcase{grid-template-columns:repeat(2,1fr)}
-  .soc-g{grid-template-columns:1fr}
-  .sov-grid{grid-template-columns:1fr 1fr}
-  .nlinks{display:none}
-  .nlinks.open{display:flex;flex-direction:column;position:absolute;top:56px;right:16px;background:#0a0a18ee;border:1px solid #39FF1418;border-radius:8px;padding:14px;backdrop-filter:blur(12px)}
-  .mmenu{display:block}
-}
-@media(max-width:600px){
-  .nft-showcase{grid-template-columns:repeat(2,1fr)}
-  .hero-btns{flex-direction:column;align-items:center}
-  .btn{width:100%;max-width:260px;justify-content:center}
-  .sov-grid{grid-template-columns:1fr}
-  .hero-stats{gap:18px}
-}
+.ticker-i{padding:10px 36px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#444;flex-shrink:0}
+.ticker-i .c1{color:#ff6a00}.ticker-i .c2{color:#00e5ff}.ticker-i .c3{color:#FFD700}
+section{padding:80px 24px;position:relative}.si{max-width:1100px;margin:0 auto}
+.stag{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;color:#ff6a00;margin-bottom:10px}
+.stitle{font-family:'Teko',sans-serif;font-size:clamp(38px,7vw,64px);font-weight:700;color:#fff;line-height:.95;margin-bottom:12px}
+.stitle em{color:#ff6a00;font-style:normal}
+.sdesc{color:#555;font-size:12px;line-height:1.7;max-width:520px;margin-bottom:36px}
+.sdiv{width:36px;height:2px;background:#ff6a00;margin-bottom:18px;box-shadow:0 0 8px #ff6a0044}
+.sec-dark{background:linear-gradient(180deg,#000,#050506,#000)}
+.about-g{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.forge-vis{border-radius:12px;border:1px solid #ff6a0012;background:#060606;padding:16px;text-align:center}
+.forge-vis svg{width:100%;max-width:320px;margin:0 auto}
+.forge-lbl{font-family:'Orbitron',sans-serif;font-size:7px;color:#333;letter-spacing:3px;margin-top:10px}
+.feats{display:flex;flex-direction:column;gap:12px}
+.feat{padding:14px 16px;border-left:2px solid #ff6a0033;background:linear-gradient(90deg,#ff6a0004,transparent);transition:all .3s}
+.feat:hover{border-left-color:#ff6a00;background:linear-gradient(90deg,#ff6a000a,transparent);transform:translateX(4px)}
+.feat .ft{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#ff6a00;margin-bottom:4px;letter-spacing:1px}
+.feat .fd{font-size:10px;color:#555;line-height:1.6}
+.tok-g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tok{border-radius:12px;padding:22px 18px;background:#060606;position:relative;overflow:hidden;transition:all .4s;border:1px solid #ffffff06}
+.tok::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--tc);opacity:.5}
+.tok:hover{transform:translateY(-4px);box-shadow:0 8px 30px #00000066}
+.tok-sym{font-family:'Teko',sans-serif;font-size:30px;font-weight:700;color:var(--tc);line-height:1}
+.tok-name{font-family:'Orbitron',sans-serif;font-size:8px;color:#444;letter-spacing:2px;margin-top:3px}
+.tok-data{margin-top:12px;padding-top:10px;border-top:1px solid #ffffff06}
+.tok-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.tok-row .tl{font-size:7px;color:#444;letter-spacing:1px;font-family:'Orbitron',sans-serif}
+.tok-row .tv{font-family:'Orbitron',sans-serif;font-size:12px;color:#888;font-weight:600}
+.tok-tag{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:3px;font-size:7px;letter-spacing:1px;font-family:'Orbitron',sans-serif}
+.nft-showcase{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:28px}
+.nft-th{border-radius:8px;overflow:hidden;border:1px solid #ff6a0012;background:#060606;transition:all .4s;cursor:pointer}
+.nft-th:hover{border-color:#ff6a0044;transform:translateY(-4px);box-shadow:0 8px 24px #ff6a000e}
+.nft-th img{width:100%;aspect-ratio:1;object-fit:cover;background:linear-gradient(135deg,#1a0f08,#060606)}
+.nft-th-fb{width:100%;aspect-ratio:1;display:none;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#1a0f08,#060606);color:#ff6a0033}
+.nft-th-id{padding:6px 8px;font-family:'Orbitron',sans-serif;font-size:7px;color:#ff6a00;letter-spacing:1px}
+.game-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px;border:1px solid #ff6a0012;border-radius:14px;background:#060606}
+.game-vis{border-radius:10px;border:1px solid #ff6a0018;aspect-ratio:4/3;background:#0a0a0a;display:flex;align-items:center;justify-content:center}
+.game-vis-in{text-align:center;padding:20px}
+.gv-ic{font-size:52px;animation:fireBreathe 2s infinite}
+.gv-t{font-family:'Teko',sans-serif;font-size:22px;color:#ff6a00;letter-spacing:3px;margin-top:8px}
+.gv-s{font-size:8px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif;margin-top:3px}
+.gfeats{display:flex;flex-direction:column;gap:11px;margin-top:14px}
+.gf{display:flex;gap:10px;align-items:flex-start}
+.gf-ic{width:30px;height:30px;border-radius:6px;background:#ff6a0008;border:1px solid #ff6a0012;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.gf-t{font-family:'Orbitron',sans-serif;font-size:8px;color:#ff6a00;letter-spacing:1px;margin-bottom:2px}
+.gf-d{font-size:9px;color:#555;line-height:1.5}
+.sov{padding:24px;border:1px solid #ff6a0015;border-radius:14px;background:#060606;display:grid;grid-template-columns:5fr 2fr;gap:24px;align-items:center}
+.sov-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sov-s{padding:12px;border-radius:6px;background:#0a0a0a;border:1px solid #ffffff05}
+.sov-s .sl{font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif}
+.sov-s .sv{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#ff6a00;margin-top:4px}
+.sov-bar{margin-top:12px}
+.sov-track{height:8px;border-radius:4px;background:#111;overflow:hidden}
+.sov-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#ff3c00,#ff6a00,#FFD700);box-shadow:0 0 10px #ff6a0044}
+.sov-lbl{display:flex;justify-content:space-between;margin-top:4px;font-size:7px;color:#444;font-family:'Orbitron',sans-serif}
+.soc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.soc{padding:20px;border-radius:10px;border:1px solid #ffffff08;background:#060606;text-align:center;transition:all .3s;display:block}
+.soc:hover{border-color:#ff6a0033;transform:translateY(-3px)}
+.soc-ic{font-size:26px;margin-bottom:6px}
+.soc-h{font-family:'Orbitron',sans-serif;font-size:9px;color:#ff6a00;letter-spacing:1px}
+.soc-d{font-size:8px;color:#444;margin-top:3px}
+footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;background:#000}
+.flogo{font-family:'Teko',sans-serif;font-size:24px;color:#ff6a00;letter-spacing:5px}
+.flinks{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.flinks a{color:#444;font-size:8px;letter-spacing:1px;font-family:'Orbitron',sans-serif;transition:color .3s}
+.flinks a:hover{color:#ff6a00}
+.fcopy{margin-top:14px;font-size:7px;color:#222;letter-spacing:3px;font-family:'Orbitron',sans-serif}
+@media(max-width:900px){.about-g,.game-card,.sov{grid-template-columns:1fr}.tok-g{grid-template-columns:1fr}.nft-showcase{grid-template-columns:repeat(2,1fr)}.soc-g{grid-template-columns:1fr}.sov-g{grid-template-columns:1fr 1fr}.nlinks{display:none}.nlinks.open{display:flex;flex-direction:column;position:absolute;top:50px;right:12px;background:#000000ee;border:1px solid #ff6a0018;border-radius:8px;padding:14px;backdrop-filter:blur(12px)}.mmenu{display:block}}
+@media(max-width:600px){.hero-btns{flex-direction:column;align-items:center}.btn{width:100%;max-width:260px;justify-content:center}.sov-g{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="scan"></div>
-<div class="grain"></div>
+<div class="scanlines"></div>
+<div class="scan-after"></div>
+<nav id="nav"><a href="#" class="nlogo">GORWELD</a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><a href="#about">About</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="#sovereign">Sovereign</a><a href="#community">Community</a><a href="/demo" class="ncta">▶ Play Demo</a></div></nav>
 
-<nav id="nav">
-  <a href="#" class="nlogo">GORWELD</a>
-  <button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button>
-  <div class="nlinks">
-    <a href="#about">About</a>
-    <a href="#tokens">Tokens</a>
-    <a href="/relics">Burn Relics</a>
-    <a href="#game">Game</a>
-    <a href="#sovereign">Sovereign</a>
-    <a href="#community">Community</a>
-    <a href="/demo" class="ncta">▶ Play Demo</a>
-  </div>
-</nav>
-
-<!-- ==================== HERO ==================== -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-vig"></div>
-  <div class="sparks-container" id="sparksC"></div>
-
-  <!-- Forge SVG logo -->
-  <div class="hero-forge-svg">
-    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#39FF14" stop-opacity=".2"/><stop offset="100%" stop-color="#39FF14" stop-opacity=".05"/></linearGradient>
-        <linearGradient id="fg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF6B35"/><stop offset="100%" stop-color="#FF2D00"/></linearGradient>
-        <filter id="fglow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      <!-- Outer ring -->
-      <circle cx="100" cy="100" r="90" stroke="#39FF14" stroke-width="1" fill="url(#fg1)" opacity=".6"/>
-      <circle cx="100" cy="100" r="80" stroke="#39FF14" stroke-width=".5" fill="none" opacity=".2" stroke-dasharray="4 6"/>
-      <!-- Anvil body -->
-      <path d="M60 110 L65 80 L135 80 L140 110 L150 130 L50 130 Z" fill="#1a1a2e" stroke="#39FF14" stroke-width="1.2" filter="url(#fglow)"/>
-      <path d="M65 80 L135 80 L130 90 L70 90 Z" fill="#222240" stroke="#39FF1466" stroke-width=".5"/>
-      <!-- Horn -->
-      <path d="M60 110 L35 105 L38 100 L60 100" fill="#1a1a2e" stroke="#39FF14" stroke-width="1"/>
-      <!-- Base -->
-      <rect x="55" y="130" width="90" height="16" rx="3" fill="#111128" stroke="#39FF14" stroke-width=".8"/>
-      <rect x="70" y="146" width="60" height="20" rx="2" fill="#0e0e22" stroke="#39FF1444" stroke-width=".5"/>
-      <!-- Flame -->
-      <path d="M90 78 Q95 50 100 60 Q105 50 110 78" fill="url(#fg2)" opacity=".7" style="animation:fireBreathe 1.5s infinite"/>
-      <path d="M94 78 Q98 58 100 64 Q102 58 106 78" fill="#FFD700" opacity=".4" style="animation:fireBreathe 1.2s infinite"/>
-      <!-- Sparks from flame -->
-      <circle cx="88" cy="55" r="1.5" fill="#FF6B35" opacity=".6" style="animation:sparkRise 1.8s infinite"/>
-      <circle cx="112" cy="48" r="1" fill="#FFD700" opacity=".5" style="animation:sparkRise 2.2s .3s infinite"/>
-      <circle cx="96" cy="42" r="1.2" fill="#39FF14" opacity=".4" style="animation:sparkRise 2s .6s infinite"/>
-      <!-- Welding mask outline -->
-      <circle cx="100" cy="100" r="95" stroke="#39FF14" stroke-width=".3" fill="none" opacity=".15" stroke-dasharray="2 8"/>
-      <!-- Text arc -->
-      <text font-family="Orbitron,monospace" font-size="7" fill="#39FF14" opacity=".3" letter-spacing="4">
-        <textPath href="#textCircle" startOffset="10%">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN •</textPath>
-      </text>
-      <path id="textCircle" d="M100,10 a90,90 0 1,1 0,180 a90,90 0 1,1 0,-180" fill="none"/>
-    </svg>
-  </div>
-
+  <div class="hero-vig"></div><div class="hero-floor"></div><div class="hero-embers" id="heroEmbers"></div>
+  <svg class="hero-forge" viewBox="0 0 200 200" fill="none">
+    <defs><linearGradient id="hfire" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#ff2d00"/><stop offset="50%" stop-color="#ff6a00"/><stop offset="100%" stop-color="#ffd700"/></linearGradient><filter id="hglow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <circle cx="100" cy="100" r="88" stroke="#ff6a00" stroke-width=".8" fill="none" opacity=".15"/>
+    <circle cx="100" cy="100" r="78" stroke="#ff6a00" stroke-width=".4" fill="none" opacity=".08" stroke-dasharray="4 8"/>
+    <path d="M60 110 L65 80 L135 80 L140 110 L150 128 L50 128 Z" fill="#111" stroke="#ff6a00" stroke-width="1" opacity=".8" filter="url(#hglow)"/>
+    <path d="M65 80 L135 80 L130 90 L70 90 Z" fill="#1a1a1a" stroke="#ff6a0044" stroke-width=".5"/>
+    <path d="M60 110 L38 106 L40 100 L60 102" fill="#111" stroke="#ff6a00" stroke-width=".8" opacity=".6"/>
+    <rect x="55" y="128" width="90" height="14" rx="3" fill="#0a0a0a" stroke="#ff6a0044" stroke-width=".5"/>
+    <rect x="70" y="142" width="60" height="18" rx="2" fill="#080808" stroke="#ff6a0033" stroke-width=".4"/>
+    <path d="M90 78 Q95 48 100 58 Q105 48 110 78" fill="url(#hfire)" opacity=".7" style="animation:fireBreathe 1.5s infinite"/>
+    <path d="M94 78 Q98 56 100 62 Q102 56 106 78" fill="#ffd700" opacity=".35" style="animation:fireBreathe 1.2s infinite"/>
+    <circle cx="88" cy="52" r="1.5" fill="#ff6a00" opacity=".5" style="animation:sparkRise 1.8s infinite"/>
+    <circle cx="112" cy="46" r="1" fill="#ffd700" opacity=".4" style="animation:sparkRise 2.2s .3s infinite"/>
+    <circle cx="96" cy="40" r="1.2" fill="#ff3300" opacity=".4" style="animation:sparkRise 2s .6s infinite"/>
+    <text font-family="Orbitron,sans-serif" font-size="6" fill="#ff6a00" opacity=".2" letter-spacing="4"><textPath href="#tc" startOffset="8%">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN •</textPath></text>
+    <path id="tc" d="M100,8 a92,92 0 1,1 0,184 a92,92 0 1,1 0,-184" fill="none"/>
+  </svg>
   <div class="hero-badge">GORBAGANA CHAIN // EST. 2025</div>
-  <h1 class="hero-title">GORWELD<small>DUMPSTER FORGE INDUSTRIES</small></h1>
+  <h1 class="hero-t">GORWELD<small>DUMPSTER FORGE INDUSTRIES</small></h1>
   <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged on Gorbagana Chain.</p>
-
-  <div class="hero-stats">
-    <div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div>
-    <div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div>
-    <div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div>
-    <div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div>
-  </div>
-
-  <div class="hero-btns">
-    <a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a>
-    <a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a>
-    <a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn3">Sovereign #9</a>
-  </div>
-  <div class="scroll-h">SCROLL</div>
+  <div class="hero-stats"><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div></div>
+  <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a><a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn3">Sovereign #9</a></div>
+  <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#ff6a00" stroke-width="2" stroke-linecap="round"/></svg></a>
 </section>
 
-<!-- Ticker -->
-<div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+<div class="ticker"><div class="ticker-track" id="ticker"></div></div>
 
-<!-- ==================== ABOUT ==================== -->
-<section id="about">
-<div class="si">
-<div class="about-g">
-  <div>
-    <div class="stag">// ABOUT</div>
-    <div class="sdiv"></div>
-    <h2 class="stitle">Forged in the <em>Dumpster</em></h2>
-    <p class="sdesc">One-man ecosystem built from scratch. Three tokens, NFT collections, a playable game — everything welded together with industrial precision on Gorbagana Chain.</p>
-    <div class="feats">
-      <div class="feat">
-        <div class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> THE WELDER</div>
-        <div class="fd">@Przemsas — the visionary spawacz behind the forge. Polish roots, global vision. Building daily.</div>
-      </div>
-      <div class="feat">
-        <div class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0110 0v2"/><circle cx="12" cy="15" r="2"/></svg> DUMPSTER FORGE</div>
-        <div class="fd">The ecosystem product. $GORWELDD, $SCRAPCOIN, $GORIUS TRASHINUS — interconnected scrapyard economy.</div>
-      </div>
-      <div class="feat">
-        <div class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> GORBAGANA CHAIN</div>
-        <div class="fd">Solana-compatible blockchain. Fast, cheap, built for builders. All assets live on-chain.</div>
-      </div>
-      <div class="feat">
-        <div class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg> 500B BURNED</div>
-        <div class="fd">Half the $GORWELDD supply — permanently destroyed. Commemorated with the Burn Relics Genesis NFT collection.</div>
-      </div>
-    </div>
-  </div>
-  <div class="forge-visual">
-    <!-- Big detailed forge SVG -->
-    <svg class="forge-svg-main" viewBox="0 0 300 320" fill="none">
-      <defs>
-        <linearGradient id="metal1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2a2a44"/><stop offset="100%" stop-color="#16162e"/></linearGradient>
-        <linearGradient id="fire1" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#FF2D00"/><stop offset="50%" stop-color="#FF6B35"/><stop offset="100%" stop-color="#FFD700"/></linearGradient>
-        <filter id="glow2"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      <!-- Chimney -->
-      <rect x="125" y="10" width="50" height="80" rx="4" fill="url(#metal1)" stroke="#39FF1433" stroke-width="1"/>
-      <rect x="120" y="6" width="60" height="12" rx="3" fill="#222240" stroke="#39FF1444" stroke-width=".8"/>
-      <!-- Smoke -->
-      <circle cx="145" cy="0" r="6" fill="#39FF1408"/><circle cx="155" cy="-10" r="8" fill="#39FF1406"/><circle cx="140" cy="-20" r="10" fill="#39FF1404"/>
-      <!-- Main body -->
-      <rect x="50" y="90" width="200" height="140" rx="8" fill="url(#metal1)" stroke="#39FF1433" stroke-width="1.5"/>
-      <!-- Rivets -->
-      <circle cx="65" cy="105" r="3" fill="#1a1a30" stroke="#39FF1422" stroke-width=".5"/>
-      <circle cx="235" cy="105" r="3" fill="#1a1a30" stroke="#39FF1422" stroke-width=".5"/>
-      <circle cx="65" cy="215" r="3" fill="#1a1a30" stroke="#39FF1422" stroke-width=".5"/>
-      <circle cx="235" cy="215" r="3" fill="#1a1a30" stroke="#39FF1422" stroke-width=".5"/>
-      <!-- Fire window -->
-      <rect x="90" y="120" width="120" height="80" rx="6" fill="#0a0810" stroke="#FF6B3544" stroke-width="1"/>
-      <rect x="95" y="125" width="110" height="70" rx="4" fill="#FF2D0008"/>
-      <!-- Fire -->
-      <path d="M120 190 Q130 150 150 165 Q160 140 170 155 Q180 140 180 190" fill="url(#fire1)" opacity=".6" filter="url(#glow2)" style="animation:fireBreathe 1.5s infinite"/>
-      <path d="M130 190 Q140 160 150 170 Q155 155 165 165 Q170 155 170 190" fill="#FFD700" opacity=".3" style="animation:fireBreathe 1.2s infinite"/>
-      <!-- Grate -->
-      <line x1="100" y1="190" x2="200" y2="190" stroke="#39FF1444" stroke-width="1"/>
-      <line x1="120" y1="125" x2="120" y2="195" stroke="#39FF1411" stroke-width=".5"/>
-      <line x1="150" y1="125" x2="150" y2="195" stroke="#39FF1411" stroke-width=".5"/>
-      <line x1="180" y1="125" x2="180" y2="195" stroke="#39FF1411" stroke-width=".5"/>
-      <!-- Control panel -->
-      <rect x="70" y="135" width="14" height="40" rx="3" fill="#111128" stroke="#39FF1433" stroke-width=".5"/>
-      <circle cx="77" cy="148" r="3" fill="#39FF14" opacity=".5"/><circle cx="77" cy="158" r="3" fill="#FF6B35" opacity=".3"/><circle cx="77" cy="168" r="3" fill="#FF2D00" opacity=".2"/>
-      <!-- Temp display -->
-      <rect x="216" y="135" width="18" height="24" rx="2" fill="#0a0810" stroke="#39FF1433" stroke-width=".5"/>
-      <text x="225" y="151" text-anchor="middle" font-family="Orbitron,monospace" font-size="6" fill="#39FF14">1538</text>
-      <text x="225" y="157" text-anchor="middle" font-family="Orbitron,monospace" font-size="4" fill="#39FF1466">°C</text>
-      <!-- Base / legs -->
-      <rect x="60" y="230" width="180" height="14" rx="3" fill="#1a1a30" stroke="#39FF1422" stroke-width=".8"/>
-      <rect x="70" y="244" width="30" height="40" rx="2" fill="#111128" stroke="#39FF1418" stroke-width=".5"/>
-      <rect x="200" y="244" width="30" height="40" rx="2" fill="#111128" stroke="#39FF1418" stroke-width=".5"/>
-      <!-- Floor line -->
-      <line x1="30" y1="284" x2="270" y2="284" stroke="#39FF1418" stroke-width="1"/>
-      <!-- Status text -->
-      <text x="150" y="305" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" fill="#39FF14" opacity=".4" letter-spacing="3">OPERATIONAL</text>
-    </svg>
-    <div class="forge-label">DUMPSTER FORGE SMELTER // STATUS: ONLINE</div>
+<section id="about" class="sec-dark"><div class="si"><div class="about-g"><div>
+  <div class="stag">// ABOUT</div><div class="sdiv"></div>
+  <h2 class="stitle">Forged in the <em>Dumpster</em></h2>
+  <p class="sdesc">One-man ecosystem built from scratch. Three tokens, NFT collections, a playable game — everything welded with industrial precision on Gorbagana Chain.</p>
+  <div class="feats">
+    <div class="feat"><div class="ft">🔥 THE WELDER</div><div class="fd">@Przemsas — the visionary behind the forge. Polish builder, global vision. Hammering daily.</div></div>
+    <div class="feat"><div class="ft">🏭 DUMPSTER FORGE</div><div class="fd">The ecosystem product. $GORWELDD, $SCRAPCOIN, $GORIUS TRASHINUS — an interconnected scrapyard economy.</div></div>
+    <div class="feat"><div class="ft">⛓ GORBAGANA CHAIN</div><div class="fd">Solana-compatible blockchain. Fast, cheap, built for builders. All assets live on-chain.</div></div>
+    <div class="feat"><div class="ft">💀 500B BURNED</div><div class="fd">Half the total $GORWELDD supply — permanently destroyed. Commemorated with the Burn Relics Genesis NFT collection.</div></div>
   </div>
 </div>
-</div>
-</section>
+<div class="forge-vis">
+  <svg viewBox="0 0 300 300" fill="none">
+    <defs><linearGradient id="af" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#ff2d00"/><stop offset="50%" stop-color="#ff6a00"/><stop offset="100%" stop-color="#ffd700"/></linearGradient><filter id="ag"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <rect x="125" y="10" width="50" height="72" rx="4" fill="#0d0d0d" stroke="#ff6a0033" stroke-width="1"/>
+    <rect x="120" y="6" width="60" height="10" rx="3" fill="#111" stroke="#ff6a0044" stroke-width=".8"/>
+    <rect x="50" y="82" width="200" height="130" rx="8" fill="#0d0d0d" stroke="#ff6a0033" stroke-width="1.2"/>
+    <circle cx="65" cy="96" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/><circle cx="235" cy="96" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/>
+    <circle cx="65" cy="200" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/><circle cx="235" cy="200" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/>
+    <rect x="90" y="110" width="120" height="72" rx="5" fill="#050505" stroke="#ff6a0033" stroke-width=".8"/>
+    <path d="M120 178 Q130 145 150 158 Q160 135 170 148 Q180 135 180 178" fill="url(#af)" opacity=".6" filter="url(#ag)" style="animation:fireBreathe 1.5s infinite"/>
+    <path d="M130 178 Q140 155 150 162 Q155 148 165 158 Q170 148 170 178" fill="#ffd700" opacity=".25" style="animation:fireBreathe 1.2s infinite"/>
+    <rect x="70" y="124" width="12" height="36" rx="3" fill="#080808" stroke="#ff6a0033" stroke-width=".4"/>
+    <circle cx="76" cy="134" r="2.5" fill="#ff6a00" opacity=".4"/><circle cx="76" cy="142" r="2.5" fill="#ff3300" opacity=".25"/>
+    <rect x="218" y="124" width="14" height="20" rx="2" fill="#050505" stroke="#ff6a0033" stroke-width=".4"/>
+    <text x="225" y="137" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="5.5" fill="#ff6a00" opacity=".6">1538</text>
+    <text x="225" y="142" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="3.5" fill="#ff6a0044">°C</text>
+    <rect x="60" y="212" width="180" height="12" rx="3" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".6"/>
+    <rect x="70" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#ff6a0018" stroke-width=".4"/>
+    <rect x="202" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#ff6a0018" stroke-width=".4"/>
+    <line x1="40" y1="258" x2="260" y2="258" stroke="#ff6a0015" stroke-width=".8"/>
+    <text x="150" y="278" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="7" fill="#ff6a00" opacity=".25" letter-spacing="4">OPERATIONAL</text>
+  </svg>
+  <div class="forge-lbl">DUMPSTER FORGE SMELTER // STATUS: ONLINE</div>
+</div></div></div></section>
 
-<!-- ==================== TOKENS ==================== -->
-<section id="tokens">
-<div class="si">
-  <div class="stag">// ECOSYSTEM TOKENS</div>
-  <div class="sdiv"></div>
+<section id="tokens" class="sec-dark"><div class="si">
+  <div class="stag">// ECOSYSTEM TOKENS</div><div class="sdiv"></div>
   <h2 class="stitle">Three tokens. <em>One forge.</em></h2>
-  <p class="sdesc">Each token has a role in the Dumpster Forge economy. Burned, scarce, and welded to last.</p>
+  <p class="sdesc">Each token has a role in the Dumpster Forge economy. Burned, scarce, welded to last.</p>
   <div class="tok-g">
-    <!-- GORWELDD -->
-    <div class="tok" style="--ac:#39FF14">
-      <svg class="tok-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#39FF1411" stroke="#39FF14" stroke-width="1.5"/><text x="24" y="28" text-anchor="middle" font-family="Teko,sans-serif" font-size="14" font-weight="700" fill="#39FF14">GW</text></svg>
-      <div class="tok-sym">$GORWELDD</div>
-      <div class="tok-name">PRIMARY TOKEN</div>
-      <div class="tok-data">
-        <div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div>
-        <div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:var(--f)">500,000,000,000</span></div>
-      </div>
-      <div class="tok-tag" style="background:#39FF1414;color:#39FF14">DEFLATIONARY 🔥</div>
-    </div>
-    <!-- SCRAPCOIN -->
-    <div class="tok" style="--ac:#FF6B35">
-      <svg class="tok-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#FF6B3511" stroke="#FF6B35" stroke-width="1.5"/><path d="M16 20 L24 14 L32 20 L28 28 L20 28Z" fill="none" stroke="#FF6B35" stroke-width="1.2"/><circle cx="24" cy="22" r="3" fill="#FF6B3544"/></svg>
-      <div class="tok-sym">$SCRAPCOIN</div>
-      <div class="tok-name">UTILITY TOKEN</div>
-      <div class="tok-data">
-        <div class="tok-row"><span class="tl">TOTAL SUPPLY</span><span class="tv">1,000,000,000</span></div>
-        <div class="tok-row"><span class="tl">WALLET CAP</span><span class="tv" style="color:var(--f)">4,000,000</span></div>
-      </div>
-      <div class="tok-tag" style="background:#FF6B3514;color:#FF6B35">4M MAX / WALLET ⚡</div>
-    </div>
-    <!-- GORIUS -->
-    <div class="tok" style="--ac:#FFD700">
-      <svg class="tok-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#FFD70011" stroke="#FFD700" stroke-width="1.5"/><text x="24" y="28" text-anchor="middle" font-family="Teko,sans-serif" font-size="11" font-weight="700" fill="#FFD700">GT</text></svg>
-      <div class="tok-sym" style="font-size:28px">$GORIUS</div>
-      <div class="tok-name">GORIUS TRASHINUS</div>
-      <div class="tok-data">
-        <div class="tok-row"><span class="tl">CURRENT SUPPLY</span><span class="tv">1,000,000,000</span></div>
-        <div class="tok-row"><span class="tl">TARGET</span><span class="tv" style="color:var(--g)">10,000,000</span></div>
-      </div>
-      <div class="tok-tag" style="background:#FFD70014;color:#FFD700">FUNDRAISING 🎯</div>
-    </div>
+    <div class="tok" style="--tc:#ff6a00"><div class="tok-sym">$GORWELDD</div><div class="tok-name">PRIMARY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div><div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:#ff3c00">500,000,000,000</span></div></div><div class="tok-tag" style="background:#ff6a0012;color:#ff6a00">DEFLATIONARY 🔥</div></div>
+    <div class="tok" style="--tc:#00e5ff"><div class="tok-sym">$SCRAPCOIN</div><div class="tok-name">UTILITY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">TOTAL SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">WALLET CAP</span><span class="tv" style="color:#00e5ff">4,000,000</span></div></div><div class="tok-tag" style="background:#00e5ff12;color:#00e5ff">4M MAX / WALLET ⚡</div></div>
+    <div class="tok" style="--tc:#FFD700"><div class="tok-sym" style="font-size:26px">$GORIUS</div><div class="tok-name">GORIUS TRASHINUS</div><div class="tok-data"><div class="tok-row"><span class="tl">CURRENT SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">TARGET</span><span class="tv" style="color:#FFD700">10,000,000</span></div></div><div class="tok-tag" style="background:#FFD70012;color:#FFD700">FUNDRAISING 🎯</div></div>
   </div>
-</div>
-</section>
+</div></section>
 
-<!-- ==================== NFT PREVIEW ==================== -->
-<section id="relics-preview" class="nft-prev">
-<div class="si">
-  <div class="stag">// NFT COLLECTIONS</div>
-  <div class="sdiv" style="background:var(--g)"></div>
+<section class="sec-dark"><div class="si">
+  <div class="stag">// NFT COLLECTIONS</div><div class="sdiv" style="background:#FFD700;box-shadow:0 0 8px #FFD70044"></div>
   <h2 class="stitle">Burn Relics <em>Genesis</em></h2>
-  <p class="sdesc">10 unique NFTs on Gorbagana commemorating the 500B $GORWELDD burn. Each forged from the ashes.</p>
+  <p class="sdesc">10 unique NFTs commemorating the 500B $GORWELDD burn. Each forged from the ashes of what was sacrificed.</p>
   <div class="nft-showcase" id="nftShowcase"></div>
-  <div style="text-align:center;margin-top:28px">
-    <a href="/relics" class="btn btn2" style="border-color:#FFD70055;color:#FFD700">🔥 View Full Collection & Mint Details</a>
-  </div>
-</div>
-</section>
+  <div style="text-align:center;margin-top:24px"><a href="/relics" class="btn btn2" style="border-color:#FFD70044;color:#FFD700">🔥 View Full Collection</a></div>
+</div></section>
 
-<!-- ==================== GAME ==================== -->
-<section id="game" class="game-sec">
-<div class="si">
-  <div class="stag">// SCRAP SCAVENGER</div>
-  <div class="sdiv"></div>
+<section id="game" class="sec-dark"><div class="si">
+  <div class="stag">// SCRAP SCAVENGER</div><div class="sdiv"></div>
   <h2 class="stitle">Play the <em>Demo</em></h2>
-  <p class="sdesc">Idle tycoon meets post-apo scrapyard. Collect, sort, smelt, sell — build your junk empire.</p>
+  <p class="sdesc">Idle tycoon meets post-apocalyptic scrapyard. Collect, sort, smelt, sell — build your junk empire.</p>
   <div class="game-card">
-    <div class="game-vis">
-      <div class="game-vis-inner">
-        <svg class="gv-svg" viewBox="0 0 80 80"><rect x="10" y="30" width="60" height="40" rx="4" fill="#1a1a2e" stroke="#39FF14" stroke-width="1.2"/><path d="M30 28 L40 10 L50 28" fill="none" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/><path d="M35 28 L40 16 L45 28" fill="#FFD700" opacity=".3"/><rect x="25" y="45" width="30" height="15" rx="2" fill="#0a0a12" stroke="#39FF1444" stroke-width=".8"/><circle cx="40" cy="52" r="4" fill="#FF6B3533" stroke="#FF6B35" stroke-width=".5"/><rect x="15" y="70" width="50" height="6" rx="2" fill="#111128" stroke="#39FF1422" stroke-width=".5"/></svg>
-        <div class="gv-t">SCRAP SCAVENGER</div>
-        <div class="gv-s">PLAYABLE IN BROWSER</div>
-        <a href="/demo" class="btn btn1" style="margin-top:16px;display:inline-flex">▶ PLAY NOW</a>
-      </div>
-    </div>
-    <div>
-      <div class="gfeats">
-        <div class="gf">
-          <div class="gf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><path d="M14 4l-4 16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div>
-          <div><div class="gf-t">SCRAPYARD</div><div class="gf-d">Click to collect — aluminum, copper, gold. Each has rarity and value.</div></div>
-        </div>
-        <div class="gf">
-          <div class="gf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h8"/><circle cx="18" cy="17" r="3"/></svg></div>
-          <div><div class="gf-t">SORTING TABLE</div><div class="gf-d">Drag to the right bin. Streaks give bonus. Wrong bin = lost material.</div></div>
-        </div>
-        <div class="gf">
-          <div class="gf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1" fill="#FF6B35"/><circle cx="15" cy="10" r="1" fill="#FF6B35"/></svg></div>
-          <div><div class="gf-t">FURNACE & SELL</div><div class="gf-d">Smelt into ingots — steel, copper, gold. Sell for maximum value.</div></div>
-        </div>
-        <div class="gf">
-          <div class="gf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="1.5"><polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9"/></svg></div>
-          <div><div class="gf-t">BURN RELIC DROPS</div><div class="gf-d">Find legendary items — unlock Burn Relics NFT cards. Collect all 10.</div></div>
-        </div>
-      </div>
-      <div style="margin-top:16px;font-size:9px;color:var(--td);font-family:'Orbitron',monospace;letter-spacing:1px">TARGET ENGINE: GODOT 4 • CURRENT: WEB PROTOTYPE v0.3</div>
-    </div>
+    <div class="game-vis"><div class="game-vis-in"><div class="gv-ic">⛏</div><div class="gv-t">SCRAP SCAVENGER</div><div class="gv-s">PLAYABLE IN BROWSER</div><a href="/demo" class="btn btn1" style="margin-top:14px;display:inline-flex">▶ PLAY NOW</a></div></div>
+    <div><div class="gfeats">
+      <div class="gf"><div class="gf-ic">⛏</div><div><div class="gf-t">SCRAPYARD</div><div class="gf-d">Click to collect — aluminum, copper, gold. Each piece has rarity and value.</div></div></div>
+      <div class="gf"><div class="gf-ic">♻️</div><div><div class="gf-t">SORTING TABLE</div><div class="gf-d">Drag to the right bin. Streaks give bonus. Wrong bin = lost material.</div></div></div>
+      <div class="gf"><div class="gf-ic">🔥</div><div><div class="gf-t">FURNACE</div><div class="gf-d">Smelt into ingots — steel, copper, gold. Sell for maximum value.</div></div></div>
+      <div class="gf"><div class="gf-ic">🛒</div><div><div class="gf-t">UPGRADES</div><div class="gf-d">Bigger bag, click power, lucky finds, faster furnace. Build piece by piece.</div></div></div>
+      <div class="gf"><div class="gf-ic">✨</div><div><div class="gf-t">RELIC DROPS</div><div class="gf-d">Find legendary items — unlock Burn Relics NFT cards. Collect all 10.</div></div></div>
+    </div><div style="margin-top:14px;font-size:8px;color:#333;font-family:'Orbitron',sans-serif;letter-spacing:1px">TARGET: GODOT 4 • CURRENT: WEB PROTOTYPE v0.3</div></div>
   </div>
-</div>
-</section>
+</div></section>
 
-<!-- ==================== SOVEREIGN ==================== -->
-<section id="sovereign">
-<div class="si">
-  <div class="stag">// SOVEREIGN PROTOCOL</div>
-  <div class="sdiv" style="background:var(--f)"></div>
+<section id="sovereign" class="sec-dark"><div class="si">
+  <div class="stag">// SOVEREIGN PROTOCOL</div><div class="sdiv"></div>
   <h2 class="stitle">Sovereign <em>#9</em></h2>
-  <p class="sdesc">BYO token bonding pool. 20% of $GORWELDD supply committed. Organic growth, community-backed liquidity.</p>
-  <div class="sov">
-    <div>
-      <div class="sov-grid">
-        <div class="sov-s"><div class="sl">COMMITTED</div><div class="sv">98B</div></div>
-        <div class="sov-s"><div class="sl">BOND TARGET</div><div class="sv">3.8M GOR</div></div>
-        <div class="sov-s"><div class="sl">DURATION</div><div class="sv">30 DAYS</div></div>
-        <div class="sov-s"><div class="sl">SWAP FEE</div><div class="sv">2.5%</div></div>
-      </div>
-      <div class="sov-bar">
-        <div class="sov-track"><div class="sov-fill" style="width:6.1%"></div></div>
-        <div class="sov-labels"><span>232,500 GOR • 5 depositors</span><span>6.1% bonded</span></div>
-      </div>
-      <div style="margin-top:8px;font-size:9px;color:var(--td)">10% LP bonus for post-bond distribution</div>
-    </div>
-    <div style="text-align:center">
-      <a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn3" style="width:100%;justify-content:center">View Sovereign #9</a>
-      <div style="font-size:8px;color:var(--td);margin-top:10px;font-family:'Orbitron',monospace;letter-spacing:1px">LIVE ON SOVEREIGN PROTOCOL</div>
-    </div>
-  </div>
-</div>
-</section>
+  <p class="sdesc">BYO token bonding pool. 20% of $GORWELDD supply committed. Organic growth, community-backed.</p>
+  <div class="sov"><div>
+    <div class="sov-g"><div class="sov-s"><div class="sl">COMMITTED</div><div class="sv">98B</div></div><div class="sov-s"><div class="sl">BOND TARGET</div><div class="sv">3.8M GOR</div></div><div class="sov-s"><div class="sl">DURATION</div><div class="sv">30 DAYS</div></div><div class="sov-s"><div class="sl">SWAP FEE</div><div class="sv">2.5%</div></div></div>
+    <div class="sov-bar"><div class="sov-track"><div class="sov-fill" style="width:6.1%"></div></div><div class="sov-lbl"><span>232,500 GOR • 5 depositors</span><span>6.1% bonded</span></div></div>
+    <div style="margin-top:6px;font-size:8px;color:#444">10% LP bonus for post-bond distribution</div>
+  </div><div style="text-align:center"><a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn1" style="width:100%;justify-content:center">View Sovereign #9</a><div style="font-size:7px;color:#333;margin-top:8px;font-family:'Orbitron',sans-serif;letter-spacing:2px">LIVE ON SOVEREIGN PROTOCOL</div></div></div>
+</div></section>
 
-<!-- ==================== COMMUNITY ==================== -->
-<section id="community">
-<div class="si">
-  <div class="stag">// CONNECT</div>
-  <div class="sdiv"></div>
+<section id="community" class="sec-dark"><div class="si">
+  <div class="stag">// CONNECT</div><div class="sdiv"></div>
   <h2 class="stitle">Join the <em>Forge</em></h2>
   <p class="sdesc">Follow the welder. Follow the brand. Enter the scrapyard.</p>
   <div class="soc-g">
-    <a href="https://x.com/Przemsas" target="_blank" class="soc">
-      <div class="soc-ic"><svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="18" fill="#39FF1409" stroke="#39FF14" stroke-width="1"/><text x="20" y="24" text-anchor="middle" font-family="Teko,sans-serif" font-size="12" font-weight="700" fill="#39FF14">P</text></svg></div>
-      <div class="soc-h">@PRZEMSAS</div>
-      <div class="soc-d">The Welder — visionary voice, PL/EN</div>
-    </a>
-    <a href="https://x.com/GorWeld" target="_blank" class="soc">
-      <div class="soc-ic"><svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="18" fill="#FF6B3509" stroke="#FF6B35" stroke-width="1"/><text x="20" y="24" text-anchor="middle" font-family="Teko,sans-serif" font-size="12" font-weight="700" fill="#FF6B35">GW</text></svg></div>
-      <div class="soc-h">@GORWELD</div>
-      <div class="soc-d">Official brand — ecosystem updates</div>
-    </a>
-    <a href="https://gorweld.fun" target="_blank" class="soc">
-      <div class="soc-ic"><svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="18" fill="#FFD70009" stroke="#FFD700" stroke-width="1"/><text x="20" y="24" text-anchor="middle" font-family="Teko,sans-serif" font-size="12" font-weight="700" fill="#FFD700">⚡</text></svg></div>
-      <div class="soc-h">GORWELD.FUN</div>
-      <div class="soc-d">Gorbagana ecosystem directory</div>
-    </a>
+    <a href="https://x.com/Przemsas" target="_blank" class="soc"><div class="soc-ic">🔥</div><div class="soc-h">@PRZEMSAS</div><div class="soc-d">The Welder — visionary voice</div></a>
+    <a href="https://x.com/GorWeld" target="_blank" class="soc"><div class="soc-ic">🏭</div><div class="soc-h">@GORWELD</div><div class="soc-d">Official brand account</div></a>
+    <a href="https://gorweld.fun" target="_blank" class="soc"><div class="soc-ic">⚡</div><div class="soc-h">GORWELD.FUN</div><div class="soc-d">Gorbagana ecosystem hub</div></a>
   </div>
-  <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <a href="https://trashscan.io" target="_blank" class="soc"><div class="soc-ic"><svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="18" fill="#4FC3F709" stroke="#4FC3F7" stroke-width="1"/><circle cx="18" cy="18" r="7" fill="none" stroke="#4FC3F7" stroke-width="1.2"/><line x1="23" y1="23" x2="30" y2="30" stroke="#4FC3F7" stroke-width="1.5"/></svg></div><div class="soc-h">TRASHSCAN.IO</div><div class="soc-d">Block explorer</div></a>
-    <a href="https://trashbin.fun" target="_blank" class="soc"><div class="soc-ic"><svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="18" fill="#9B59B609" stroke="#9B59B6" stroke-width="1"/><path d="M14 16h12l-1 14H15l-1-14z" fill="none" stroke="#9B59B6" stroke-width="1.2"/><line x1="12" y1="16" x2="28" y2="16" stroke="#9B59B6" stroke-width="1.2"/></svg></div><div class="soc-h">TRASHBIN.FUN</div><div class="soc-d">Swap, pool, DeFi</div></a>
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <a href="https://trashscan.io" target="_blank" class="soc"><div class="soc-ic">🔍</div><div class="soc-h">TRASHSCAN.IO</div><div class="soc-d">Block explorer</div></a>
+    <a href="https://trashbin.fun" target="_blank" class="soc"><div class="soc-ic">💰</div><div class="soc-h">TRASHBIN.FUN</div><div class="soc-d">Swap & DeFi</div></a>
   </div>
-</div>
-</section>
+</div></section>
 
-<!-- Footer -->
 <footer>
   <div class="flogo">GORWELD</div>
-  <div class="flinks">
-    <a href="#about">About</a>
-    <a href="#tokens">Tokens</a>
-    <a href="/relics">Burn Relics</a>
-    <a href="#game">Game</a>
-    <a href="/demo">Play Demo</a>
-    <a href="https://x.com/Przemsas" target="_blank">@Przemsas</a>
-    <a href="https://x.com/GorWeld" target="_blank">@GorWeld</a>
-  </div>
+  <div class="flinks"><a href="#about">About</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="/demo">Play Demo</a><a href="https://x.com/Przemsas" target="_blank">@Przemsas</a><a href="https://x.com/GorWeld" target="_blank">@GorWeld</a></div>
   <div class="fcopy">DUMPSTER FORGE INDUSTRIES // GORBAGANA CHAIN // 2025—2026</div>
 </footer>
 
 <script>
-// Nav scroll
-window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('s',scrollY>50));
-
-// Ticker build
-const tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c2">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','SOVEREIGN <span class="c2">#9</span> LIVE','<span class="c1">$SCRAPCOIN</span> 1B SUPPLY • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c2">$GORIUS TRASHINUS</span> 1B'];
-const tt=document.getElementById('tickerTrack');
-for(let r=0;r<2;r++)tItems.forEach(t=>{const d=document.createElement('div');d.className='ticker-i';d.innerHTML=t;tt.appendChild(d)});
-
-// NFT thumbnails
-const CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
-const GW=["https://ipfs.io/ipfs/"+CID,"https://gateway.pinata.cloud/ipfs/"+CID,"https://nftstorage.link/ipfs/"+CID,"https://cloudflare-ipfs.com/ipfs/"+CID];
-const MINTS=["FBV9TBZsvgD5mRVetvuL6k5vZtUiPhSqzhBPgWky1AEi","Fx4t4S1kn71URo23XgR3zeQ5Fe66Kvzx3diC3zdPcWre","CqryM8g2hK4gb4b8Nbpt9FLGJV3mdLy2rb6xDhWxJvCn","BLSp1anLbxrJcvvSiH2VYXY7sc1Qx8E27utporgHYbSN","UKSBe8tMvP7frk8N7cTw1zxxGrPBQQqSRWZnQ8KuhMn","HjSEPmEmDVAwq3F6xBVnWmpsHFLHaXuUmF8UTUxBTjWU","8RDyHcHt7zpS9L6AkHktHExDWnfSH3FiLqAJK1W76KQT","2o9S1mnsToheXG99oNAzzG5z1Goem3GfAQdoGtrGXE5g","5XaYxUM4mkFvWmUKmjNW85Y9ZbRW3xSKCg3w4kaiNf16","9cKwMmQD3Fo4nUM4poucifpxpnV2k2JD7R5J1PNm3wUu"];
-const ns=document.getElementById('nftShowcase');
-for(let i=1;i<=10;i++){
-  const c=document.createElement('div');c.className='nft-thumb';c.onclick=()=>location.href='/relics#relic-'+i;
-  const img=document.createElement('img');img.className='nft-thumb-img';img.loading='lazy';img.alt='Burn Relic #'+String(i).padStart(3,'0');img.dataset.gw=0;img.dataset.n=i;
-  img.src=GW[0]+'/'+i+'.png';
-  img.onerror=function(){let g=parseInt(this.dataset.gw)+1;if(g<GW.length){this.dataset.gw=g;this.src=GW[g]+'/'+this.dataset.n+'.png'}else{this.style.display='none';this.nextElementSibling.style.display='flex'}};
-  const fb=document.createElement('div');fb.className='nft-thumb-fb';fb.style.display='none';fb.textContent='🔥';
-  const info=document.createElement('div');info.className='nft-thumb-id';info.textContent='#'+String(i).padStart(3,'0');
-  c.append(img,fb,info);ns.appendChild(c);
-}
-
-// Hero sparks
-const sc=document.getElementById('sparksC');
-function addSpark(){const s=document.createElement('div');s.className='spark-p';const x=30+Math.random()*40;s.style.cssText=`left:${x}%;bottom:35%;width:${2+Math.random()*3}px;height:${2+Math.random()*3}px;background:${['#FF6B35','#39FF14','#FFD700','#FF2D00'][Math.floor(Math.random()*4)]};animation-duration:${1+Math.random()*2}s;animation-delay:${Math.random()}s;opacity:${.3+Math.random()*.5}`;sc.appendChild(s);setTimeout(()=>s.remove(),3000)}
-setInterval(addSpark,300);for(let i=0;i<8;i++)setTimeout(addSpark,i*100);
-
-// Scroll reveal
-const obs=new IntersectionObserver(e=>e.forEach(en=>{if(en.isIntersecting){en.target.classList.add('vis');obs.unobserve(en.target)}}),{threshold:.1});
-document.querySelectorAll('.tok,.feat,.gf,.soc,.sov-s,.nft-thumb').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(25px)';obs.observe(el)});
-
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.querySelector('.nlinks').classList.remove('open')}}));
+var he=document.getElementById('heroEmbers');var colors=['#ff6a00','#ff3300','#ffaa00','#ff8800','#ff4400'];
+for(var i=0;i<30;i++){var e=document.createElement('div');e.className='ember';var s=Math.random()*4+1;var c=colors[Math.floor(Math.random()*colors.length)];e.style.width=s+'px';e.style.height=s+'px';e.style.background=c;e.style.left=Math.random()*100+'%';e.style.animationDuration=(Math.random()*7+4)+'s';e.style.animationDelay=(Math.random()*7)+'s';e.style.boxShadow='0 0 '+(Math.random()*10+3)+'px '+c;he.appendChild(e)}
+var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','SOVEREIGN <span class="c1">#9</span> LIVE','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
+var tt=document.getElementById('ticker');for(var r=0;r<2;r++){for(var j=0;j<tItems.length;j++){var d=document.createElement('div');d.className='ticker-i';d.innerHTML=tItems[j];tt.appendChild(d)}}
+var CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
+var GW=["https://ipfs.io/ipfs/"+CID,"https://gateway.pinata.cloud/ipfs/"+CID,"https://nftstorage.link/ipfs/"+CID,"https://cloudflare-ipfs.com/ipfs/"+CID];
+var ns=document.getElementById('nftShowcase');
+for(var i=1;i<=10;i++){var c=document.createElement('div');c.className='nft-th';c.setAttribute('data-i',i);c.onclick=function(){location.href='/relics#relic-'+this.getAttribute('data-i')};
+var img=document.createElement('img');img.loading='lazy';img.alt='Burn Relic #'+String(i).padStart(3,'0');img.setAttribute('data-gw','0');img.setAttribute('data-n',i);img.src=GW[0]+'/'+i+'.png';
+img.onerror=function(){var g=parseInt(this.getAttribute('data-gw'))+1;if(g<GW.length){this.setAttribute('data-gw',g);this.src=GW[g]+'/'+this.getAttribute('data-n')+'.png'}else{this.style.display='none';this.nextElementSibling.style.display='flex'}};
+var fb=document.createElement('div');fb.className='nft-th-fb';fb.textContent='🔥';
+var id=document.createElement('div');id.className='nft-th-id';id.textContent='#'+String(i).padStart(3,'0');
+c.appendChild(img);c.appendChild(fb);c.appendChild(id);ns.appendChild(c)}
+window.addEventListener('scroll',function(){document.getElementById('nav').classList.toggle('s',scrollY>50)});
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('vis');obs.unobserve(en.target)}})},{threshold:.08});
+document.querySelectorAll('.tok,.feat,.gf,.soc,.sov-s,.nft-th').forEach(function(el){el.style.opacity='0';el.style.transform='translateY(25px)';obs.observe(el)});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.querySelector('.nlinks').classList.remove('open')}})});
 </script>
 </body>
 </html>

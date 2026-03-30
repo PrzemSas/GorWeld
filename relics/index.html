@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BURN RELICS — GORWELD | Dumpster Forge Industries</title>
-<meta name="description" content="10 unique 1/1 Burn Relics forged from 500B $GORWELDD — unlocked by Sovereign Bond #9">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -17,9 +16,7 @@ body {
   color:#e0e0e0;
   font-family:'Share Tech Mono', monospace;
   overflow-x:hidden;
-  min-height:100vh;
 }
-::selection { background:#ff6a00; color:#000; }
 
 /* NAV */
 nav {
@@ -33,7 +30,7 @@ nav.s { background:#000000dd; backdrop-filter:blur(10px); border-bottom:1px soli
   color:#ff6a00; letter-spacing:6px; text-shadow:0 0 15px #ff6a00;
 }
 
-/* HEADER + EMBERS */
+/* HEADER */
 header {
   padding:160px 24px 100px;
   text-align:center;
@@ -50,7 +47,6 @@ header {
 @keyframes emberFloat {
   0% { transform:translateY(0) scale(1); opacity:0; }
   10% { opacity:0.9; }
-  90% { opacity:0.6; }
   100% { transform:translateY(-120vh) scale(0.3); opacity:0; }
 }
 h1 {
@@ -58,54 +54,22 @@ h1 {
   font-size:clamp(52px, 11vw, 98px);
   font-weight:900;
   letter-spacing:8px;
-  color:#fff;
-  text-shadow:0 0 20px #ff6a00, 0 0 40px #ff3c00, 0 0 80px #ff6a0044;
-  animation:titleGlitch 5s infinite;
+  text-shadow:0 0 30px #ff6a00, 0 0 60px #ff3c00;
 }
 h1 span { color:#ff6a00; }
-.header-sub {
-  font-family:'Rajdhani', sans-serif;
-  font-size:17px; color:#ff6a00; letter-spacing:5px;
-  margin-top:10px; text-transform:uppercase;
-}
 
-/* PROGRESS + MILESTONES */
+/* Progress */
 .progress-bar {
   height:9px; background:#111; border:1px solid #333;
   border-radius:4px; overflow:hidden; margin:24px 0;
-  box-shadow:0 0 20px rgba(255,106,0,0.3);
 }
 .progress-fill {
   height:100%; width:7.9%;
   background:linear-gradient(90deg, #ff3c00, #ff6a00, #ffd700);
   box-shadow:0 0 25px #ff6a00;
-  position:relative;
-}
-.progress-fill::after {
-  content:''; position:absolute; right:-20px; top:0; bottom:0;
-  width:40px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
-  filter:blur(8px);
 }
 
-.milestones {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(92px, 1fr));
-  gap:10px;
-  margin-top:30px;
-}
-.ms {
-  background:#0a0a0a; border:1px solid #333; padding:16px 10px;
-  text-align:center; font-family:'Orbitron', sans-serif; font-size:10px;
-  transition:all .3s;
-}
-.ms.next {
-  border-color:#ff6a00; background:rgba(255,106,0,0.1);
-  box-shadow:0 0 25px rgba(255,106,0,0.5);
-  animation:pulse 1.8s infinite;
-}
-.ms-pct { font-size:19px; font-weight:700; color:#ff6a00; }
-
-/* RELICS */
+/* Relics */
 .relics-grid {
   display:grid;
   grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
@@ -117,13 +81,19 @@ h1 span { color:#ff6a00; }
   overflow:hidden; position:relative; transition:all .4s;
 }
 .relic-card:hover { border-color:#ff6a00; transform:translateY(-8px); }
-.relic-card.locked .relic-img { filter:brightness(0.2) grayscale(1); }
-.relic-card.locked::after {
-  content:'🔒'; position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%); font-size:52px; opacity:0.7; z-index:10;
+
+.relic-card.locked .relic-img {
+  filter: brightness(0.18) grayscale(0.95);
 }
+.relic-card.locked::after {
+  content:'🔒';
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  font-size:56px; opacity:0.75; z-index:10;
+}
+
 .relic-img {
-  width:100%; height:260px; object-fit:cover; display:block;
+  width:100%; height:260px; object-fit:cover;
 }
 .relic-info { padding:20px; }
 .relic-tier { font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
@@ -135,109 +105,96 @@ h1 span { color:#ff6a00; }
   margin:8px 0 10px; color:#fff;
 }
 .relic-status {
-  font-size:10px; padding:5px 12px; border:1px solid #444;
+  font-size:10px; padding:6px 14px; border:1px solid #444;
   display:inline-block;
 }
 .relic-card.unlocked .relic-status { border-color:#ff6a00; color:#ff6a00; }
 .relic-card.next-unlock .relic-status { border-color:#ffaa00; color:#ffaa00; animation:pulse 1.8s infinite; }
 
-@keyframes pulse { 0%,100% { opacity:0.8; } 50% { opacity:1; } }
-@keyframes titleGlitch {
-  0%,88%,92%,96%,100% { transform:translate(0); }
-  89% { transform:translate(-3px,2px); }
-  91% { transform:translate(3px,-2px); }
-}
+@keyframes pulse { 0%,100% { opacity:0.75; } 50% { opacity:1; } }
 </style>
 </head>
 <body>
 
 <nav id="nav">
   <a href="/" class="nlogo">GORWELD</a>
-  <div class="nlinks" style="display:flex; gap:24px; align-items:center;">
-    <a href="/" style="color:#888; font-size:10px; letter-spacing:2px;">ABOUT</a>
-    <a href="/#tokens" style="color:#888; font-size:10px; letter-spacing:2px;">TOKENS</a>
-    <a href="/relics/" class="active" style="color:#ff6a00; font-size:10px; letter-spacing:2px;">BURN RELICS</a>
-    <a href="/demo" style="color:#ff6a00; font-weight:700;">▶ PLAY DEMO</a>
+  <div style="display:flex; gap:24px;">
+    <a href="/" style="color:#888; font-size:10px;">ABOUT</a>
+    <a href="/#tokens" style="color:#888; font-size:10px;">TOKENS</a>
+    <a href="/relics/" style="color:#ff6a00; font-size:10px;">BURN RELICS</a>
+    <a href="/demo" style="color:#ff6a00;">▶ PLAY DEMO</a>
   </div>
 </nav>
 
 <header>
   <div class="hero-embers" id="heroEmbers"></div>
-  <p style="font-family:'Orbitron',sans-serif; font-size:10px; color:#555; letter-spacing:4px; margin-bottom:12px;">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN</p>
   <h1>BURN <span>RELICS</span></h1>
-  <p class="header-sub">GENESIS COLLECTION — 10 UNIQUE 1/1 NFTs</p>
-  <p style="max-width:680px; margin:30px auto 0; color:#777; font-size:15px;">
-    Forged from the ashes of <strong style="color:#ff6a00">500 billion $GORWELDD</strong>.<br>
-    Only the community can unlock them.
-  </p>
+  <p style="font-family:'Rajdhani',sans-serif; font-size:17px; color:#ff6a00; letter-spacing:5px; margin:12px 0;">GENESIS COLLECTION — 10 UNIQUE 1/1</p>
 </header>
 
-<main style="max-width:1180px; margin:0 auto; padding:0 24px 100px;">
+<main style="max-width:1180px; margin:0 auto; padding:0 24px 120px;">
   <section>
-    <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:#ff6a00; letter-spacing:3px; margin-bottom:12px;">// SOVEREIGN BOND #9</div>
-    <div style="font-family:'Teko',sans-serif; font-size:58px; font-weight:700; line-height:1; margin-bottom:20px;">The Forge <span style="color:#ff6a00;">Heats Up</span></div>
+    <div style="color:#ff6a00; font-size:10px; letter-spacing:3px;">// SOVEREIGN BOND #9</div>
+    <div style="font-family:'Teko',sans-serif; font-size:56px; font-weight:700; margin:16px 0;">The Forge <span style="color:#ff6a00;">Heats Up</span></div>
     
-    <p style="color:#aaa; max-width:700px; margin-bottom:30px;">
-      Current bonded: <strong style="color:#ff6a00">~292,500 GOR</strong> (7.9%)<br>
-      Next milestone at <strong style="color:#ff6a00">380,000 GOR</strong> — unlocks Relic #10
+    <p style="color:#aaa; max-width:720px;">
+      ~292,500 GOR bonded (7.9%)<br>
+      Next unlock at <strong style="color:#ff6a00">380,000 GOR</strong> → Relic #10 Common
     </p>
 
     <div class="progress-bar"><div class="progress-fill"></div></div>
 
-    <div class="milestones">
-      <div class="ms next"><span class="ms-pct">10%</span><span style="display:block;margin:6px 0 2px;">#10 Common</span><span style="font-size:9px;color:#555;">380K GOR</span></div>
-      <div class="ms"><span class="ms-pct">20%</span><span style="display:block;margin:6px 0 2px;">#9</span><span style="font-size:9px;color:#555;">760K</span></div>
-      <div class="ms"><span class="ms-pct">30%</span><span style="display:block;margin:6px 0 2px;">#8</span><span style="font-size:9px;color:#555;">1.14M</span></div>
-      <div class="ms"><span class="ms-pct">40%</span><span style="display:block;margin:6px 0 2px;">#7</span><span style="font-size:9px;color:#555;">1.52M</span></div>
-      <div class="ms"><span class="ms-pct">50%</span><span style="display:block;margin:6px 0 2px;">#6</span><span style="font-size:9px;color:#555;">1.9M</span></div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px,1fr)); gap:12px; margin-top:30px;">
+      <div style="background:#0a0a0a; border:1px solid #ff6a00; padding:14px; text-align:center;">10%<br><strong>#10</strong><br>380K</div>
+      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">20%<br>#9<br>760K</div>
+      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">30%<br>#8<br>1.14M</div>
+      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">40%<br>#7<br>1.52M</div>
+      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">50%<br>#6<br>1.9M</div>
     </div>
   </section>
 
   <section>
-    <div style="font-family:'Orbitron',sans-serif; font-size:10px; color:#ff6a00; letter-spacing:3px; margin-bottom:16px;">// GENESIS COLLECTION</div>
-    <div style="font-family:'Teko',sans-serif; font-size:54px; font-weight:700; margin-bottom:40px;">Burn Relics <span style="color:#ff6a00;">Genesis</span></div>
+    <div style="color:#ff6a00; font-size:10px; letter-spacing:3px; margin-bottom:20px;">// THE COLLECTION</div>
+    <div style="font-family:'Teko',sans-serif; font-size:52px; font-weight:700; margin-bottom:40px;">Burn Relics <span style="color:#ff6a00;">Genesis</span></div>
+    
     <div class="relics-grid" id="relicsGrid"></div>
   </section>
 </main>
 
-<footer style="text-align:center; padding:50px 20px; color:#333; font-size:9px; border-top:1px solid #222;">
-  500,000,000,000 $GORWELDD BURNED • MARCH 2026 • THE SCRAPS REMEMBER
-</footer>
-
 <script>
 const IMG_BASE = "https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
-const CURRENT_GOR = 292500;        // ← ZMIEŃ TĘ WARTOŚĆ gdy bond rośnie
+const CURRENT_GOR = 292500;   // ← Zmień na np. 390000 żeby odblokować #10
 const TARGET = 3800000;
 
 const relicsData = [
   {id:10, name:"The Burn TX", tier:"Common"},
-  {id:9,  name:"Scrapcoin Token", tier:"Common"},
-  {id:8,  name:"Dumpster Lid", tier:"Common"},
-  {id:7,  name:"Ash Coin", tier:"Common"},
-  {id:6,  name:"Chain Link", tier:"Rare"},
-  {id:5,  name:"Forge Flame", tier:"Rare"},
-  {id:4,  name:"Scrap Fragment", tier:"Rare"},
-  {id:3,  name:"GORIUS TRASHINUS", tier:"Legendary"},
-  {id:2,  name:"GORWELD Mask", tier:"Legendary"},
-  {id:1,  name:"The Forge Hammer", tier:"Legendary"}
+  {id:9, name:"Scrapcoin Token", tier:"Common"},
+  {id:8, name:"Dumpster Lid", tier:"Common"},
+  {id:7, name:"Ash Coin", tier:"Common"},
+  {id:6, name:"Chain Link", tier:"Rare"},
+  {id:5, name:"Forge Flame", tier:"Rare"},
+  {id:4, name:"Scrap Fragment", tier:"Rare"},
+  {id:3, name:"GORIUS TRASHINUS", tier:"Legendary"},
+  {id:2, name:"GORWELD Mask", tier:"Legendary"},
+  {id:1, name:"The Forge Hammer", tier:"Legendary"}
 ];
 
 const grid = document.getElementById('relicsGrid');
 
 relicsData.forEach(r => {
   const percent = Math.floor((CURRENT_GOR / TARGET) * 100);
-  const unlocked = percent >= r.id === 10 ? 10 : 999; // tylko #10 na razie
-  const isNext = r.id === 10 && percent < 10;
+  const isUnlocked = (r.id === 10 && percent >= 10);   // tylko #10 może się odblokować na razie
+  const isNext = (r.id === 10 && percent < 10);
 
   const card = document.createElement('div');
-  card.className = `relic-card ${unlocked ? 'unlocked' : isNext ? 'next-unlock' : 'locked'}`;
+  card.className = `relic-card ${isUnlocked ? 'unlocked' : isNext ? 'next-unlock' : 'locked'}`;
 
   card.innerHTML = `
     <img class="relic-img" src="${IMG_BASE}/${r.id}.png" alt="${r.name}" loading="lazy">
     <div class="relic-info">
       <div class="relic-tier ${r.tier.toLowerCase()}">${r.tier}</div>
       <div class="relic-name">#${String(r.id).padStart(3,'0')} — ${r.name}</div>
-      <div class="relic-status">${unlocked ? 'UNLOCKED 🔥' : isNext ? 'NEXT UNLOCK' : 'LOCKED'}</div>
+      <div class="relic-status">${isUnlocked ? 'UNLOCKED 🔥' : isNext ? 'NEXT UNLOCK' : 'LOCKED'}</div>
     </div>
   `;
   grid.appendChild(card);
@@ -245,25 +202,25 @@ relicsData.forEach(r => {
 
 // Embers
 function createEmbers() {
-  const container = document.getElementById('heroEmbers');
-  for(let i = 0; i < 35; i++) {
+  const cont = document.createElement('div');
+  cont.className = 'hero-embers';
+  document.querySelector('header').appendChild(cont);
+  for(let i = 0; i < 40; i++) {
     const e = document.createElement('div');
     e.className = 'ember';
-    const size = Math.random() * 5 + 2;
-    e.style.width = `${size}px`;
-    e.style.height = `${size}px`;
-    e.style.left = `${Math.random()*100}%`;
-    e.style.animationDuration = `${Math.random()*6 + 5}s`;
-    e.style.animationDelay = `-${Math.random()*8}s`;
-    e.style.opacity = Math.random() * 0.7 + 0.4;
-    container.appendChild(e);
+    const s = Math.random() * 4 + 2;
+    e.style.width = e.style.height = s + 'px';
+    e.style.left = Math.random() * 100 + '%';
+    e.style.animationDuration = (Math.random() * 7 + 5) + 's';
+    e.style.animationDelay = '-' + (Math.random() * 10) + 's';
+    cont.appendChild(e);
   }
 }
 createEmbers();
 
-// Nav scroll
+// Nav effect
 window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('s', window.scrollY > 40);
+  document.getElementById('nav').classList.toggle('s', window.scrollY > 50);
 });
 </script>
 </body>

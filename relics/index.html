@@ -2,225 +2,520 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BURN RELICS — GORWELD | Dumpster Forge Industries</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Burn Relics Genesis — GORWELD | Dumpster Forge</title>
+<meta name="description" content="10 unique NFTs unlocked by Sovereign Bond milestones. Forged from the 500B $GORWELDD burn on Gorbagana Chain.">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Open Graph / Twitter Cards -->
+<meta property="og:title" content="Burn Relics Genesis — GORWELD">
+<meta property="og:description" content="10 unique NFTs unlocked by Sovereign Bond milestones. Forged from the 500B $GORWELDD burn.">
+<meta property="og:image" content="https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty/1.png">
+<meta property="og:url" content="https://gorweld.com/relics/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@GorWeld">
+<meta name="twitter:title" content="Burn Relics Genesis — GORWELD">
+<meta name="twitter:description" content="10 unique NFTs unlocked by Sovereign Bond milestones on Gorbagana Chain.">
+<meta name="twitter:image" content="https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty/1.png">
 
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Teko:wght@300;400;500;600&family=Rajdhani:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #0a0a0a;
+  --bg2: #0f0f0f;
+  --bg3: #151515;
+  --bg4: #1a1a1a;
+  --border: #1e1e1e;
+  --border2: #2a2a2a;
+  --text: #e0e0e0;
+  --text-dim: #999;
+  --text-muted: #555;
+  --accent: #ff6a00;
+  --accent2: #ff8800;
+  --amber: #f5a623;
+  --gold: #ffcc44;
+  --legendary: #ff6a00;
+  --rare: #00ccff;
+  --common: #666;
+  --mono: 'Space Mono', 'Courier New', monospace;
+  --display: 'Bebas Neue', 'Teko', sans-serif;
+  --body: 'Rajdhani', 'Inter', sans-serif;
+  --tech: 'Orbitron', 'Space Mono', monospace;
+}
 
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
 body {
-  background:#000;
-  color:#e0e0e0;
-  font-family:'Share Tech Mono', monospace;
-  overflow-x:hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* NAV */
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent2); }
+strong { color: var(--amber); font-weight: 500; }
+
+/* ===== NAV (same as gorweld.com) ===== */
 nav {
-  position:fixed; top:0; left:0; right:0; z-index:300;
-  padding:12px 24px; display:flex; align-items:center; justify-content:space-between;
-  background:transparent; transition:all .3s;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 52px; padding: 0 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
 }
-nav.s { background:#000000dd; backdrop-filter:blur(10px); border-bottom:1px solid #ff6a0011; }
-.nlogo {
-  font-family:'Teko', sans-serif; font-size:26px; font-weight:700;
-  color:#ff6a00; letter-spacing:6px; text-shadow:0 0 15px #ff6a00;
+.nav-brand {
+  font-family: var(--tech); font-size: 14px; font-weight: 700;
+  color: var(--text); text-decoration: none; letter-spacing: 0.08em;
 }
+.nav-brand span { color: var(--accent); }
+.nav-links { display: flex; gap: 20px; align-items: center; }
+.nav-links a {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim); text-decoration: none;
+  letter-spacing: 0.06em; transition: color 0.2s;
+  text-transform: uppercase;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+.nav-cta {
+  font-family: var(--mono); font-size: 9px;
+  color: var(--bg) !important; background: var(--accent);
+  padding: 5px 12px; font-weight: 700;
+  letter-spacing: 0.08em; transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--accent2); }
 
-/* HEADER */
+/* ===== HEADER ===== */
 header {
-  padding:160px 24px 100px;
-  text-align:center;
-  background:radial-gradient(ellipse at 50% 20%, #2a0f00 0%, #0a0200 60%, #000 90%);
-  position:relative;
-  overflow:hidden;
+  padding: 100px 32px 48px;
+  max-width: 860px; margin: 0 auto;
+  border-bottom: 1px solid var(--border);
 }
-.hero-embers { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-.ember {
-  position:absolute; bottom:-10px; border-radius:50%;
-  background:#ff6a00; box-shadow:0 0 12px #ff6a00;
-  animation:emberFloat linear infinite;
+.h-tag {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-muted); letter-spacing: 0.25em;
+  text-transform: uppercase; margin-bottom: 16px;
 }
-@keyframes emberFloat {
-  0% { transform:translateY(0) scale(1); opacity:0; }
-  10% { opacity:0.9; }
-  100% { transform:translateY(-120vh) scale(0.3); opacity:0; }
-}
+.h-tag span { color: var(--accent); }
 h1 {
-  font-family:'Orbitron', sans-serif;
-  font-size:clamp(52px, 11vw, 98px);
-  font-weight:900;
-  letter-spacing:8px;
-  text-shadow:0 0 30px #ff6a00, 0 0 60px #ff3c00;
+  font-family: var(--display); font-size: clamp(56px, 11vw, 100px);
+  line-height: 0.92; letter-spacing: 0.02em; color: var(--text);
 }
-h1 span { color:#ff6a00; }
-
-/* Progress */
-.progress-bar {
-  height:9px; background:#111; border:1px solid #333;
-  border-radius:4px; overflow:hidden; margin:24px 0;
+h1 .a { color: var(--accent); }
+.h-sub {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text-muted); letter-spacing: 0.12em;
+  margin-top: 14px; text-transform: uppercase;
 }
-.progress-fill {
-  height:100%; width:7.9%;
-  background:linear-gradient(90deg, #ff3c00, #ff6a00, #ffd700);
-  box-shadow:0 0 25px #ff6a00;
+.h-desc {
+  font-size: 16px; color: var(--text-dim);
+  line-height: 1.7; margin-top: 20px; max-width: 580px;
+  font-family: var(--body);
 }
 
-/* Relics */
-.relics-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-  gap:18px;
-  margin-top:50px;
-}
-.relic-card {
-  background:#0a0a0a; border:1px solid #333;
-  overflow:hidden; position:relative; transition:all .4s;
-}
-.relic-card:hover { border-color:#ff6a00; transform:translateY(-8px); }
+/* ===== MAIN ===== */
+main { max-width: 860px; margin: 0 auto; padding: 0 32px 80px; }
 
-.relic-card.locked .relic-img {
-  filter: brightness(0.18) grayscale(0.95);
+.sec { padding: 56px 0; border-bottom: 1px solid var(--border); }
+.sec:last-child { border-bottom: none; }
+
+.sec-tag {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--accent); letter-spacing: 0.18em;
+  text-transform: uppercase; margin-bottom: 20px;
 }
-.relic-card.locked::after {
-  content:'🔒';
-  position:absolute; top:50%; left:50%;
-  transform:translate(-50%, -50%);
-  font-size:56px; opacity:0.75; z-index:10;
+.sec-title {
+  font-family: var(--display); font-size: 44px;
+  color: var(--text); letter-spacing: 0.02em; margin-bottom: 16px;
+}
+.sec-title em { font-style: normal; color: var(--accent); }
+.sec-desc {
+  font-size: 15px; color: var(--text-dim);
+  line-height: 1.8; max-width: 600px; font-family: var(--body);
 }
 
-.relic-img {
-  width:100%; height:260px; object-fit:cover;
+/* ===== STATS ===== */
+.stats {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: var(--border); margin-top: 28px;
 }
-.relic-info { padding:20px; }
-.relic-tier { font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
-.relic-tier.legendary { color:#ff6a00; }
-.relic-tier.rare { color:#00e5ff; }
-.relic-tier.common { color:#777; }
-.relic-name {
-  font-family:'Teko', sans-serif; font-size:23px;
-  margin:8px 0 10px; color:#fff;
+.st {
+  background: var(--bg); padding: 24px 16px; text-align: center;
 }
-.relic-status {
-  font-size:10px; padding:6px 14px; border:1px solid #444;
-  display:inline-block;
+.st-n {
+  font-family: var(--display); font-size: 38px;
+  color: var(--accent); line-height: 1;
 }
-.relic-card.unlocked .relic-status { border-color:#ff6a00; color:#ff6a00; }
-.relic-card.next-unlock .relic-status { border-color:#ffaa00; color:#ffaa00; animation:pulse 1.8s infinite; }
+.st-l {
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text-muted); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-top: 4px;
+}
 
-@keyframes pulse { 0%,100% { opacity:0.75; } 50% { opacity:1; } }
+/* ===== PROGRESS ===== */
+.prog { margin-top: 28px; }
+.prog-top {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 11px; margin-bottom: 6px;
+}
+.prog-top .l { color: var(--amber); }
+.prog-top .r { color: var(--text-muted); }
+.prog-bar {
+  height: 6px; background: var(--bg3);
+  border: 1px solid var(--border2); position: relative; overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #cc3300, var(--accent), var(--gold));
+  width: 0; transition: width 2s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+.prog-fill::after {
+  content: ''; position: absolute; right: -2px; top: -2px; bottom: -2px;
+  width: 8px; background: var(--gold); filter: blur(4px); opacity: 0.8;
+}
+.prog-btm {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-muted); margin-top: 6px;
+}
+
+/* ===== MILESTONES ===== */
+.mss {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 3px; margin-top: 24px;
+}
+.ms {
+  background: var(--bg2); border: 1px solid var(--border);
+  padding: 10px 4px; text-align: center;
+  font-family: var(--mono); font-size: 8px;
+  color: var(--text-muted); transition: all 0.3s;
+}
+.ms.locked { opacity: 0.35; }
+.ms.next {
+  border-color: rgba(245,166,35,0.5);
+  background: rgba(245,166,35,0.05);
+  color: var(--amber);
+  animation: glow 3s ease-in-out infinite;
+}
+.ms.unlocked {
+  border-color: rgba(255,106,0,0.4);
+  background: rgba(255,106,0,0.04);
+  color: var(--accent);
+}
+@keyframes glow { 0%,100% { opacity:0.7; } 50% { opacity:1; } }
+.ms-p {
+  font-family: var(--display); font-size: 18px;
+  line-height: 1; display: block; color: var(--text-muted);
+}
+.ms.next .ms-p { color: var(--amber); }
+.ms.unlocked .ms-p { color: var(--accent); }
+.ms-r { display: block; margin-top: 2px; }
+.ms-g { display: block; margin-top: 1px; color: var(--text-muted); font-size: 7px; }
+
+/* ===== RELIC CARDS ===== */
+.relics {
+  display: grid; grid-template-columns: repeat(2,1fr);
+  gap: 1px; background: var(--border); margin-top: 28px;
+}
+.rc {
+  background: var(--bg); position: relative;
+  overflow: hidden; transition: background 0.3s;
+}
+.rc:hover { background: var(--bg2); }
+
+/* LOCKED STATE */
+.rc.locked { pointer-events: none; }
+.rc.locked .rc-img {
+  filter: brightness(0.12) grayscale(1) blur(1px);
+}
+.rc.locked .rc-info { opacity: 0.3; }
+.rc.locked::after {
+  content: '🔒'; position: absolute;
+  top: 90px; left: 50%; transform: translateX(-50%);
+  font-size: 28px; z-index: 5; opacity: 0.6;
+}
+
+/* NEXT STATE */
+.rc.next-unlock { }
+.rc.next-unlock .rc-info {
+  border-left: 2px solid var(--amber);
+}
+
+/* UNLOCKED STATE */
+.rc.unlocked .rc-info {
+  border-left: 2px solid var(--accent);
+}
+
+.rc-img {
+  width: 100%; height: 200px; object-fit: cover;
+  display: block; transition: all 0.4s;
+}
+.rc:hover:not(.locked) .rc-img {
+  filter: contrast(1.05) saturate(1.1);
+}
+
+.rc-info { padding: 14px 18px; }
+
+.rc-tier {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
+}
+.rc-tier.legendary { color: var(--legendary); }
+.rc-tier.rare { color: var(--rare); }
+.rc-tier.common { color: var(--common); }
+
+.rc-name {
+  font-family: var(--display); font-size: 22px;
+  color: var(--text); margin-top: 4px; letter-spacing: 0.02em;
+}
+
+.rc-gor {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-muted); margin-top: 5px; letter-spacing: 0.04em;
+}
+.rc-gor span { color: var(--amber); }
+
+.rc-badge {
+  display: inline-block; margin-top: 8px;
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 8px; border: 1px solid;
+}
+.rc-badge.locked { border-color: var(--border2); color: var(--text-muted); }
+.rc-badge.next { border-color: var(--amber); color: var(--amber); animation: glow 3s ease-in-out infinite; }
+.rc-badge.unlocked { border-color: var(--accent); color: var(--accent); }
+
+/* ===== FOOTER ===== */
+footer {
+  max-width: 860px; margin: 0 auto;
+  padding: 40px 32px; text-align: center;
+  border-top: 1px solid var(--border);
+}
+footer p {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-muted); letter-spacing: 0.08em; line-height: 2.2;
+}
+footer p span { color: var(--text-dim); }
+.ft-tag {
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text-muted); letter-spacing: 0.12em;
+  margin-top: 16px; display: block;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  nav { padding: 0 16px; height: 48px; }
+  .nav-links { gap: 10px; }
+  .nav-links a { font-size: 8px; }
+  header, main, footer { padding-left: 16px; padding-right: 16px; }
+  header { padding-top: 80px; }
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .relics { grid-template-columns: 1fr; }
+  .rc-img { height: 180px; }
+  .mss { grid-template-columns: repeat(5,1fr); }
+  .ms { padding: 8px 2px; font-size: 7px; }
+  .ms-p { font-size: 14px; }
+}
 </style>
 </head>
 <body>
 
-<nav id="nav">
-  <a href="/" class="nlogo">GORWELD</a>
-  <div style="display:flex; gap:24px;">
-    <a href="/" style="color:#888; font-size:10px;">ABOUT</a>
-    <a href="/#tokens" style="color:#888; font-size:10px;">TOKENS</a>
-    <a href="/relics/" style="color:#ff6a00; font-size:10px;">BURN RELICS</a>
-    <a href="/demo" style="color:#ff6a00;">▶ PLAY DEMO</a>
+<nav>
+  <a href="/" class="nav-brand"><span>GOR</span>WELD</a>
+  <div class="nav-links">
+    <a href="/">About</a>
+    <a href="/#tokens">Tokens</a>
+    <a href="/relics/" class="active">Burn Relics</a>
+    <a href="/#sovereign">Sovereign</a>
+    <a href="/burn-relics.html">Roller</a>
+    <a href="/demo" class="nav-cta">▶ PLAY DEMO</a>
   </div>
 </nav>
 
 <header>
-  <div class="hero-embers" id="heroEmbers"></div>
-  <h1>BURN <span>RELICS</span></h1>
-  <p style="font-family:'Rajdhani',sans-serif; font-size:17px; color:#ff6a00; letter-spacing:5px; margin:12px 0;">GENESIS COLLECTION — 10 UNIQUE 1/1</p>
+  <p class="h-tag">Dumpster Forge · <span>Gorbagana Chain</span></p>
+  <h1>BURN <span class="a">RELICS</span></h1>
+  <p class="h-sub">Genesis Collection — Sovereign Bond Unlock</p>
+  <p class="h-desc">
+    Ten unique NFTs forged from the ashes of the <strong>500B $GORWELDD burn</strong>.
+    Not for sale — earned by the community. Each Sovereign Bond milestone unlocks the next Relic, from Common to Legendary.
+  </p>
 </header>
 
-<main style="max-width:1180px; margin:0 auto; padding:0 24px 120px;">
-  <section>
-    <div style="color:#ff6a00; font-size:10px; letter-spacing:3px;">// SOVEREIGN BOND #9</div>
-    <div style="font-family:'Teko',sans-serif; font-size:56px; font-weight:700; margin:16px 0;">The Forge <span style="color:#ff6a00;">Heats Up</span></div>
-    
-    <p style="color:#aaa; max-width:720px;">
-      ~292,500 GOR bonded (7.9%)<br>
-      Next unlock at <strong style="color:#ff6a00">380,000 GOR</strong> → Relic #10 Common
+<main>
+
+  <!-- STATS -->
+  <div class="sec">
+    <div class="sec-tag">// Collection</div>
+    <div class="stats">
+      <div class="st"><div class="st-n">10</div><div class="st-l">Total Relics</div></div>
+      <div class="st"><div class="st-n">1/1</div><div class="st-l">Each Unique</div></div>
+      <div class="st"><div class="st-n">3.8M</div><div class="st-l">GOR Target</div></div>
+      <div class="st"><div class="st-n" id="statBonded">~300K</div><div class="st-l">GOR Bonded</div></div>
+    </div>
+  </div>
+
+  <!-- SOVEREIGN BOND -->
+  <div class="sec">
+    <div class="sec-tag">// Sovereign Bond Unlock</div>
+    <div class="sec-title">The Forge <em>Heats Up</em></div>
+    <p class="sec-desc">
+      As the Sovereign Bond pool grows toward <strong>3,800,000 GOR</strong>,
+      each 10% milestone unlocks the next Relic — starting from <strong>#10</strong> (Common)
+      climbing to <strong>#1</strong> (Legendary). The deeper the community bonds, the rarer the unlock.
     </p>
 
-    <div class="progress-bar"><div class="progress-fill"></div></div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px,1fr)); gap:12px; margin-top:30px;">
-      <div style="background:#0a0a0a; border:1px solid #ff6a00; padding:14px; text-align:center;">10%<br><strong>#10</strong><br>380K</div>
-      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">20%<br>#9<br>760K</div>
-      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">30%<br>#8<br>1.14M</div>
-      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">40%<br>#7<br>1.52M</div>
-      <div style="background:#0a0a0a; border:1px solid #333; padding:14px; text-align:center; opacity:0.6;">50%<br>#6<br>1.9M</div>
+    <div class="prog">
+      <div class="prog-top">
+        <span class="l" id="progCurrent">~300,000 GOR</span>
+        <span class="r">Target: 3,800,000 GOR</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-btm">
+        <span id="progPct">7.9% complete</span>
+        <span id="progNext">Next: 380,000 GOR → Relic #10</span>
+      </div>
     </div>
-  </section>
 
-  <section>
-    <div style="color:#ff6a00; font-size:10px; letter-spacing:3px; margin-bottom:20px;">// THE COLLECTION</div>
-    <div style="font-family:'Teko',sans-serif; font-size:52px; font-weight:700; margin-bottom:40px;">Burn Relics <span style="color:#ff6a00;">Genesis</span></div>
-    
-    <div class="relics-grid" id="relicsGrid"></div>
-  </section>
+    <div class="mss" id="milestones"></div>
+    <div class="mss" id="milestones2" style="margin-top:3px"></div>
+  </div>
+
+  <!-- RELICS -->
+  <div class="sec">
+    <div class="sec-tag">// All Relics</div>
+    <div class="sec-title">The <em>Collection</em></div>
+    <div class="relics" id="grid"></div>
+  </div>
+
 </main>
 
-<script>
-const IMG_BASE = "https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
-const CURRENT_GOR = 292500;   // ← Zmień na np. 390000 żeby odblokować #10
-const TARGET = 3800000;
+<footer>
+  <p>
+    Minted with Metaplex UMI SDK · <span>Gorbagana Chain</span><br>
+    Sovereign Bond #9 · <span>sovereign.wastemanagement.wtf</span><br>
+    Burn TX: <span>March 17, 2026</span> · 500,000,000,000 $GORWELDD destroyed
+  </p>
+  <span class="ft-tag">DUMPSTER FORGE // GORBAGANA CHAIN // 2025—2026</span>
+</footer>
 
-const relicsData = [
-  {id:10, name:"The Burn TX", tier:"Common"},
-  {id:9, name:"Scrapcoin Token", tier:"Common"},
-  {id:8, name:"Dumpster Lid", tier:"Common"},
-  {id:7, name:"Ash Coin", tier:"Common"},
-  {id:6, name:"Chain Link", tier:"Rare"},
-  {id:5, name:"Forge Flame", tier:"Rare"},
-  {id:4, name:"Scrap Fragment", tier:"Rare"},
-  {id:3, name:"GORIUS TRASHINUS", tier:"Legendary"},
-  {id:2, name:"GORWELD Mask", tier:"Legendary"},
-  {id:1, name:"The Forge Hammer", tier:"Legendary"}
+<script>
+// ==========================================
+// CONFIGURATION — UPDATE THIS VALUE
+// ==========================================
+const CURRENT_BOND = 300000;   // <-- zmien na aktualna wartosc GOR w puli
+const BOND_TARGET  = 3800000;
+// ==========================================
+
+const PCT = (CURRENT_BOND / BOND_TARGET) * 100;
+const IMG = "https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
+
+const RELICS = [
+  {id:1,  name:"The Forge Hammer", tier:"Legendary", pct:100},
+  {id:2,  name:"GORWELD Mask",     tier:"Legendary", pct:90},
+  {id:3,  name:"GORIUS TRASHINUS", tier:"Legendary", pct:80},
+  {id:4,  name:"Scrap Fragment",   tier:"Rare",      pct:70},
+  {id:5,  name:"Forge Flame",      tier:"Rare",      pct:60},
+  {id:6,  name:"Chain Link",       tier:"Rare",      pct:50},
+  {id:7,  name:"Ash Coin",         tier:"Common",    pct:40},
+  {id:8,  name:"Dumpster Lid",     tier:"Common",    pct:30},
+  {id:9,  name:"Scrapcoin Token",  tier:"Common",    pct:20},
+  {id:10, name:"The Burn TX",      tier:"Common",    pct:10},
 ];
 
-const grid = document.getElementById('relicsGrid');
-
-relicsData.forEach(r => {
-  const percent = Math.floor((CURRENT_GOR / TARGET) * 100);
-  const isUnlocked = (r.id === 10 && percent >= 10);   // tylko #10 może się odblokować na razie
-  const isNext = (r.id === 10 && percent < 10);
-
-  const card = document.createElement('div');
-  card.className = `relic-card ${isUnlocked ? 'unlocked' : isNext ? 'next-unlock' : 'locked'}`;
-
-  card.innerHTML = `
-    <img class="relic-img" src="${IMG_BASE}/${r.id}.png" alt="${r.name}" loading="lazy">
-    <div class="relic-info">
-      <div class="relic-tier ${r.tier.toLowerCase()}">${r.tier}</div>
-      <div class="relic-name">#${String(r.id).padStart(3,'0')} — ${r.name}</div>
-      <div class="relic-status">${isUnlocked ? 'UNLOCKED 🔥' : isNext ? 'NEXT UNLOCK' : 'LOCKED'}</div>
-    </div>
-  `;
-  grid.appendChild(card);
-});
-
-// Embers
-function createEmbers() {
-  const cont = document.createElement('div');
-  cont.className = 'hero-embers';
-  document.querySelector('header').appendChild(cont);
-  for(let i = 0; i < 40; i++) {
-    const e = document.createElement('div');
-    e.className = 'ember';
-    const s = Math.random() * 4 + 2;
-    e.style.width = e.style.height = s + 'px';
-    e.style.left = Math.random() * 100 + '%';
-    e.style.animationDuration = (Math.random() * 7 + 5) + 's';
-    e.style.animationDelay = '-' + (Math.random() * 10) + 's';
-    cont.appendChild(e);
-  }
+// Format numbers
+function fmtGor(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return n.toString();
 }
-createEmbers();
 
-// Nav effect
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('s', window.scrollY > 50);
+// Find next relic to unlock (lowest pct that is still > current PCT)
+const nextRelic = RELICS.slice().reverse().find(r => r.pct > PCT) || null;
+
+// Update progress bar
+document.getElementById('progFill').style.width = PCT + '%';
+document.getElementById('progCurrent').textContent = '~' + fmtGor(CURRENT_BOND) + ' GOR';
+document.getElementById('progPct').textContent = PCT.toFixed(1) + '% complete';
+document.getElementById('statBonded').textContent = '~' + fmtGor(CURRENT_BOND);
+
+if (nextRelic) {
+  const nextGor = (nextRelic.pct / 100) * BOND_TARGET;
+  document.getElementById('progNext').textContent = 'Next: ' + fmtGor(nextGor) + ' GOR → Relic #' + nextRelic.id;
+} else {
+  document.getElementById('progNext').textContent = 'ALL RELICS UNLOCKED';
+}
+
+// Animate progress
+setTimeout(() => {
+  document.getElementById('progFill').style.width = PCT + '%';
+}, 100);
+
+// Build milestones (row 1: 10%-50%, row 2: 60%-100%)
+const msData = [
+  {pct:10, id:10}, {pct:20, id:9}, {pct:30, id:8}, {pct:40, id:7}, {pct:50, id:6},
+  {pct:60, id:5}, {pct:70, id:4}, {pct:80, id:3}, {pct:90, id:2}, {pct:100, id:1},
+];
+
+function buildMilestones(data, containerId) {
+  const c = document.getElementById(containerId);
+  data.forEach(m => {
+    const unlocked = PCT >= m.pct;
+    const isNext = nextRelic && m.id === nextRelic.id;
+    let cls = 'ms';
+    if (unlocked) cls += ' unlocked';
+    else if (isNext) cls += ' next';
+    else cls += ' locked';
+
+    const gor = (m.pct / 100) * BOND_TARGET;
+    const d = document.createElement('div');
+    d.className = cls;
+    d.innerHTML = '<span class="ms-p">' + m.pct + '%</span>' +
+                  '<span class="ms-r">#' + m.id + (m.id === 1 ? ' ⚔' : '') + '</span>' +
+                  '<span class="ms-g">' + fmtGor(gor) + '</span>';
+    c.appendChild(d);
+  });
+}
+buildMilestones(msData.slice(0,5), 'milestones');
+buildMilestones(msData.slice(5), 'milestones2');
+
+// Build relic cards
+const grid = document.getElementById('grid');
+
+RELICS.forEach(r => {
+  const gorNeeded = (r.pct / 100) * BOND_TARGET;
+  const isUnlocked = PCT >= r.pct;
+  const isNext = nextRelic && r.id === nextRelic.id;
+
+  let cardCls = 'rc';
+  if (isUnlocked) cardCls += ' unlocked';
+  else if (isNext) cardCls += ' next-unlock';
+  else cardCls += ' locked';
+
+  const tierCls = r.tier === 'Legendary' ? 'legendary' : r.tier === 'Rare' ? 'rare' : 'common';
+
+  let badgeCls, badgeText;
+  if (isUnlocked) { badgeCls = 'unlocked'; badgeText = 'UNLOCKED'; }
+  else if (isNext) { badgeCls = 'next'; badgeText = 'NEXT UNLOCK'; }
+  else { badgeCls = 'locked'; badgeText = 'LOCKED'; }
+
+  const d = document.createElement('div');
+  d.className = cardCls;
+  d.innerHTML =
+    '<img class="rc-img" src="' + IMG + '/' + r.id + '.png" alt="Burn Relic #' + String(r.id).padStart(3,'0') + ' — ' + r.name + '" loading="lazy">' +
+    '<div class="rc-info">' +
+      '<div class="rc-tier ' + tierCls + '">' + r.tier + '</div>' +
+      '<div class="rc-name">#' + String(r.id).padStart(3,'0') + ' — ' + r.name + '</div>' +
+      '<div class="rc-gor">Unlocks at <span>' + r.pct + '%</span> — ' + fmtGor(gorNeeded) + ' GOR</div>' +
+      '<div class="rc-badge ' + badgeCls + '">' + badgeText + '</div>' +
+    '</div>';
+  grid.appendChild(d);
 });
 </script>
 </body>

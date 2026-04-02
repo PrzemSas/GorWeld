@@ -1,773 +1,113 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Burn Relics Genesis — Dumpster Forge</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Burn Relics — GORWELD | Dumpster Forge</title>
 <style>
-  :root {
-    --orange: #e85d00;
-    --amber: #f5a623;
-    --ember: #ff2200;
-    --ash: #1a1510;
-    --slag: #2a2018;
-    --rust: #3d2a10;
-    --steel: #8a7a6a;
-    --bone: #d4c9b0;
-    --smoke: #5a4f40;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background-color: var(--ash);
-    color: var(--bone);
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* Noise texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.6;
-  }
-
-  /* Scanlines */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-    pointer-events: none;
-    z-index: 998;
-  }
-
-  .forge-bg {
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(232,93,0,0.18) 0%, transparent 70%),
-      radial-gradient(ellipse 30% 20% at 50% 100%, rgba(255,60,0,0.25) 0%, transparent 50%),
-      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(20,14,8,0.9) 0%, transparent 100%);
-    pointer-events: none;
-  }
-
-  /* Header */
-  header {
-    position: relative;
-    text-align: center;
-    padding: 80px 20px 40px;
-    z-index: 10;
-  }
-
-  .site-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    color: var(--steel);
-    margin-bottom: 20px;
-    text-transform: uppercase;
-  }
-
-  .site-tag span { color: var(--orange); }
-
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(72px, 14vw, 140px);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
-    color: var(--bone);
-    position: relative;
-    display: inline-block;
-  }
-
-  h1 .fire-word {
-    display: block;
-    background: linear-gradient(180deg, #ffcc44 0%, #ff8800 40%, #cc3300 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: heat-pulse 3s ease-in-out infinite;
-  }
-
-  @keyframes heat-pulse {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.2); }
-  }
-
-  .subtitle {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
-    color: var(--steel);
-    letter-spacing: 0.2em;
-    margin-top: 16px;
-    text-transform: uppercase;
-  }
-
-  /* Divider */
-  .divider {
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--orange), var(--amber), var(--orange), transparent);
-    opacity: 0.4;
-    position: relative;
-  }
-
-  .divider::after {
-    content: '◆';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--orange);
-    font-size: 10px;
-    background: var(--ash);
-    padding: 0 8px;
-  }
-
-  /* Main content */
-  main {
-    position: relative;
-    z-index: 10;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 60px 24px 100px;
-  }
-
-  /* The burn block */
-  .burn-block {
-    background: var(--slag);
-    border: 1px solid rgba(232,93,0,0.25);
-    border-left: 3px solid var(--orange);
-    padding: 32px 36px;
-    margin-bottom: 48px;
-    position: relative;
-    animation: fade-up 0.8s ease both;
-  }
-
-  .burn-block::before {
-    content: '// ORIGIN';
-    position: absolute;
-    top: -10px;
-    left: 20px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--orange);
-    background: var(--slag);
-    padding: 0 8px;
-  }
-
-  .burn-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    line-height: 1;
-    background: linear-gradient(135deg, #ffcc44, #ff6600);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .burn-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    color: var(--steel);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .burn-block p {
-    font-size: 15px;
-    line-height: 1.8;
-    color: var(--bone);
-    opacity: 0.85;
-  }
-
-  .burn-block p strong {
-    color: var(--amber);
-    font-weight: 500;
-  }
-
-  /* Collection grid */
-  .section-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    color: var(--orange);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: fade-up 0.9s ease both;
-  }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(232,93,0,0.2);
-  }
-
-  .collection-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-bottom: 48px;
-    animation: fade-up 1s ease both;
-  }
-
-  .stat-box {
-    background: var(--slag);
-    border: 1px solid rgba(138,122,106,0.15);
-    padding: 24px 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-box::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--orange), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .stat-box:hover::after { opacity: 1; }
-
-  .stat-box .num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    line-height: 1;
-    color: var(--amber);
-    display: block;
-  }
-
-  .stat-box .lbl {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--steel);
-    text-transform: uppercase;
-    margin-top: 4px;
-    display: block;
-  }
-
-  /* Rarity breakdown */
-  .rarity-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 48px;
-    animation: fade-up 1.1s ease both;
-  }
-
-  .rarity-tag {
-    flex: 1;
-    padding: 12px 8px;
-    text-align: center;
-    border: 1px solid;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .rarity-tag.legendary { border-color: rgba(255,180,0,0.4); color: #ffb400; background: rgba(255,180,0,0.06); }
-  .rarity-tag.rare { border-color: rgba(100,160,255,0.4); color: #82aaff; background: rgba(100,160,255,0.06); }
-  .rarity-tag.common { border-color: rgba(138,122,106,0.3); color: var(--steel); background: rgba(138,122,106,0.06); }
-
-  .rarity-tag .rarity-num {
-    display: block;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  /* Unlock mechanic */
-  .unlock-section {
-    background: var(--slag);
-    border: 1px solid rgba(232,93,0,0.2);
-    padding: 36px;
-    margin-bottom: 48px;
-    position: relative;
-    animation: fade-up 1.2s ease both;
-  }
-
-  .unlock-section::before {
-    content: '// UNLOCK MECHANIC';
-    position: absolute;
-    top: -10px;
-    left: 20px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--orange);
-    background: var(--slag);
-    padding: 0 8px;
-  }
-
-  .unlock-section p {
-    font-size: 15px;
-    line-height: 1.9;
-    color: var(--bone);
-    opacity: 0.85;
-    margin-bottom: 28px;
-  }
-
-  .unlock-section p strong { color: var(--amber); font-weight: 500; }
-
-  /* Progress bar */
-  .progress-label-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-  }
-
-  .progress-label-row span {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    color: var(--steel);
-    text-transform: uppercase;
-  }
-
-  .progress-label-row .target {
-    color: var(--amber);
-    font-size: 13px;
-  }
-
-  .progress-track {
-    height: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(138,122,106,0.2);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #cc3300, #ff8800, #ffcc00);
-    width: 0;
-    animation: fill-bar 2s cubic-bezier(0.4,0,0.2,1) 0.5s forwards;
-    position: relative;
-  }
-
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: rgba(255,255,255,0.3);
-    filter: blur(4px);
-    animation: heat-pulse 1s ease-in-out infinite;
-  }
-
-  @keyframes fill-bar {
-    from { width: 0; }
-    to { width: 79%; }
-  }
-
-  .milestone-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 24px;
-    gap: 6px;
-  }
-
-  .milestone {
-    flex: 1;
-    text-align: center;
-    padding: 10px 4px;
-    border: 1px solid rgba(138,122,106,0.15);
-    background: rgba(255,255,255,0.02);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    color: var(--steel);
-    position: relative;
-    transition: border-color 0.3s;
-  }
-
-  .milestone.unlocked {
-    border-color: rgba(232,93,0,0.4);
-    background: rgba(232,93,0,0.06);
-    color: var(--amber);
-  }
-
-  .milestone.next {
-    border-color: rgba(245,166,35,0.5);
-    background: rgba(245,166,35,0.08);
-    color: var(--amber);
-    animation: heat-pulse 2s ease-in-out infinite;
-  }
-
-  .milestone .m-num {
-    display: block;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    line-height: 1;
-    margin-bottom: 2px;
-  }
-
-  .milestone.unlocked .m-num { color: var(--orange); }
-  .milestone.next .m-num { color: #ffcc44; }
-
-  /* Relic #10 highlight */
-  .relic10 {
-    border: 1px solid rgba(245,166,35,0.5);
-    background: linear-gradient(135deg, rgba(42,32,24,1) 0%, rgba(60,40,10,0.5) 100%);
-    padding: 36px;
-    margin-bottom: 48px;
-    position: relative;
-    animation: fade-up 1.3s ease both;
-    overflow: hidden;
-  }
-
-  .relic10::before {
-    content: '// RELIC #10 — THE LAST FORGE';
-    position: absolute;
-    top: -10px;
-    left: 20px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--amber);
-    background: var(--ash);
-    padding: 0 8px;
-  }
-
-  .relic10-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-    align-items: center;
-  }
-
-  .relic10-badge {
-    text-align: center;
-  }
-
-  .relic10-badge .icon {
-    font-size: 64px;
-    display: block;
-    margin-bottom: 8px;
-    animation: heat-pulse 2.5s ease-in-out infinite;
-  }
-
-  .relic10-badge .badge-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 80px;
-    line-height: 0.9;
-    background: linear-gradient(180deg, #ffdd44, #ff8800, #cc3300);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: block;
-  }
-
-  .relic10-badge .badge-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--steel);
-    text-transform: uppercase;
-  }
-
-  .relic10-details .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(138,122,106,0.12);
-  }
-
-  .relic10-details .detail-row:last-child { border-bottom: none; }
-
-  .detail-key {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--steel);
-    text-transform: uppercase;
-  }
-
-  .detail-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: var(--amber);
-    letter-spacing: 0.05em;
-  }
-
-  .detail-val.green { color: #7ecb52; }
-  .detail-val.red { color: #ff4422; }
-
-  /* Footer lore */
-  .lore-block {
-    border-top: 1px solid rgba(138,122,106,0.15);
-    padding-top: 40px;
-    text-align: center;
-    animation: fade-up 1.5s ease both;
-  }
-
-  .lore-block p {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    color: var(--smoke);
-    letter-spacing: 0.1em;
-    line-height: 2;
-    text-transform: uppercase;
-  }
-
-  .lore-block p span { color: var(--steel); }
-
-  .chain-tag {
-    display: inline-block;
-    margin-top: 20px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--orange);
-    border: 1px solid rgba(232,93,0,0.3);
-    padding: 6px 16px;
-    text-transform: uppercase;
-  }
-
-  /* Animations */
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Ember particles */
-  .embers {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 5;
-    overflow: hidden;
-  }
-
-  .ember-particle {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--amber);
-    animation: ember-rise linear infinite;
-    opacity: 0;
-  }
-
-  @keyframes ember-rise {
-    0% { transform: translateY(0) translateX(0); opacity: 0.8; }
-    50% { opacity: 0.4; }
-    100% { transform: translateY(-80vh) translateX(var(--drift)); opacity: 0; }
-  }
-
-  @media (max-width: 560px) {
-    .relic10-inner { grid-template-columns: 1fr; }
-    .collection-stats { grid-template-columns: 1fr 1fr 1fr; }
-    .milestone-row { flex-wrap: wrap; }
-    .milestone { min-width: 28%; }
-  }
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap');
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--border:#222;--text:#e0e0e0;--dim:#888;--muted:#555;--accent:#ff6a00;--accent2:#ff8800;--amber:#f5a623;--cyan:#00e5ff;--legendary:#ff6a00;--rare:#00e5ff;--common:#777}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;padding:0 24px;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nb{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:.1em}.nb span{color:var(--accent)}
+.nl{display:flex;gap:20px;align-items:center}.nl a{font-size:10px;color:var(--dim);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}.nl a:hover,.nl a.ac{color:var(--accent)}.nc{font-size:9px;color:var(--bg)!important;background:var(--accent);padding:5px 12px;font-weight:700}
+.bb{position:fixed;top:50px;left:0;right:0;z-index:190;background:rgba(10,10,10,0.9);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.1em}.bb .l{color:var(--muted)}.bb .l strong{color:var(--amber)}.bb .r{color:var(--muted)}.bb .r strong{color:var(--accent)}
+.bm{flex:1;margin:0 20px;height:4px;background:var(--bg3);border:1px solid var(--border);overflow:hidden}.bm .f{height:100%;background:linear-gradient(90deg,var(--accent),var(--amber));transition:width 1s}
+#bL{position:fixed;top:50px;left:0;right:0;z-index:191;background:var(--bg);padding:10px 24px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.15em}
+.hero{width:100%;height:100vh;position:relative;background:radial-gradient(ellipse at 50% 130%,#1a0800 0%,#080200 40%,#000 70%);user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab}.hero.dg{cursor:grabbing}
+.sl{position:absolute;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.08) 1px,rgba(0,0,0,.08) 3px)}
+.vg{position:absolute;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.7) 100%)}
+.fg{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:80%;height:200px;background:radial-gradient(ellipse at center,rgba(255,80,0,.15) 0%,transparent 70%);pointer-events:none;z-index:1;animation:fp 4s ease-in-out infinite}@keyframes fp{0%,100%{opacity:.5}50%{opacity:1}}
+.ht{position:absolute;top:80px;left:0;right:0;text-align:center;z-index:60}
+.htg{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:8px;color:var(--accent);text-transform:uppercase;animation:p 3s ease-in-out infinite}
+.htm{font-family:'Orbitron',sans-serif;font-size:clamp(24px,5vw,38px);font-weight:900;color:#fff;letter-spacing:4px;margin-top:4px;text-shadow:0 0 30px rgba(255,106,0,.5)}
+.hts{font-size:10px;color:var(--muted);letter-spacing:6px;margin-top:6px}@keyframes p{0%,100%{opacity:.4}50%{opacity:1}}
+.sc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);perspective:1400px;width:240px;height:320px;z-index:10}
+.cr{width:100%;height:100%;position:relative;transform-style:preserve-3d}
+.cd{position:absolute;width:200px;height:280px;left:50%;top:50%;margin-left:-100px;margin-top:-140px;transform-style:preserve-3d;cursor:pointer;transition:filter .4s}
+.cd:hover .ci{transform:scale(1.02)}.ci{width:100%;height:100%;border-radius:8px;overflow:hidden;position:relative;transition:transform .3s;background:linear-gradient(180deg,#0d0d0d,#151515,#0a0a0a)}
+.cd.lk .ci{filter:grayscale(.9) brightness(.25)}.cd.lk{cursor:not-allowed}.cd.lk::after{content:'🔒';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;z-index:10}
+.cd.nx .ci{filter:grayscale(.3) brightness(.6);animation:ng 3s ease-in-out infinite}@keyframes ng{0%,100%{box-shadow:0 0 15px rgba(245,166,35,.1)}50%{box-shadow:0 0 30px rgba(245,166,35,.3)}}
+.cd.nx::after{content:'NEXT';position:absolute;top:12px;right:12px;z-index:10;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--amber);background:rgba(0,0,0,.8);padding:3px 8px;border:1px solid var(--amber);animation:p 2s ease-in-out infinite}
+.sh{position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.03) 40%,rgba(255,255,255,.06) 50%,rgba(255,255,255,.03) 60%,transparent 80%);animation:sm 3s ease-in-out infinite}@keyframes sm{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.cd img{width:100%;height:195px;object-fit:cover;display:block}.cif{padding:8px 12px;position:relative;z-index:3}
+.ct{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+.cn{font-size:12px;color:#eee;font-weight:bold;margin-top:2px;font-family:'Orbitron',sans-serif}
+.cm{font-size:9px;color:#888;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb{font-size:7px;letter-spacing:2px;margin-top:4px;padding:2px 6px;display:inline-block;border:1px solid}
+.gl{position:absolute;bottom:0;left:15%;right:15%;height:1px}
+.tl .ci{border:1px solid rgba(255,106,0,.3);box-shadow:0 0 25px rgba(255,106,0,.2)}.tl .ct{color:var(--legendary)}.tl .gl{background:linear-gradient(90deg,transparent,var(--legendary),transparent)}
+.tr .ci{border:1px solid rgba(0,229,255,.3);box-shadow:0 0 25px rgba(0,229,255,.2)}.tr .ct{color:var(--rare)}.tr .gl{background:linear-gradient(90deg,transparent,var(--rare),transparent)}
+.tc .ci{border:1px solid rgba(119,119,119,.2);box-shadow:0 0 15px rgba(119,119,119,.1)}.tc .ct{color:var(--common)}.tc .gl{background:linear-gradient(90deg,transparent,var(--common),transparent)}
+.ctr{position:absolute;top:50%;right:20px;transform:translateY(-50%);font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:rgba(255,106,0,.06);z-index:2}
+.dt{position:absolute;bottom:35px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:60}
+.d{width:8px;height:8px;border-radius:4px;background:#222;transition:all .4s;cursor:pointer}.d.a{width:22px}.d.dl{opacity:.3}
+.hi{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:8px;color:#333;letter-spacing:3px;z-index:60}
+.at{position:absolute;bottom:10px;right:16px;font-size:9px;color:#444;z-index:60;cursor:pointer;font-family:'Orbitron',sans-serif}.at:hover{color:var(--accent)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(20px)}.ov.ac{display:flex;animation:fi .3s}@keyframes fi{from{opacity:0}to{opacity:1}}
+.de{width:min(380px,90vw);border-radius:12px;overflow:hidden;animation:di .4s cubic-bezier(.16,1,.3,1)}@keyframes di{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.de img{width:100%;height:min(380px,50vh);object-fit:cover;display:block}
+.db{padding:20px;background:linear-gradient(180deg,#111,#0a0a0a)}
+.dtr{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-weight:700}
+.dtt{font-family:'Orbitron',sans-serif;font-size:16px;color:#fff;font-weight:700;margin-top:8px;line-height:1.3}
+.dd{font-size:11px;color:#555;margin-top:14px;line-height:1.7;border-top:1px solid #1a1a1a;padding-top:14px}
+.du{margin-top:12px;padding:8px 12px;font-size:10px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);color:var(--amber);letter-spacing:.1em}
+.dc{margin-top:16px;padding:10px 0;text-align:center;font-size:10px;color:var(--accent);letter-spacing:3px;cursor:pointer;border:1px solid rgba(255,106,0,.25);font-family:'Orbitron',sans-serif}.dc:hover{background:rgba(255,106,0,.08)}
+.ms{background:var(--bg);padding:64px 24px;border-top:1px solid var(--border)}.mi{max-width:900px;margin:0 auto}
+.mt{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--accent);letter-spacing:.2em;margin-bottom:24px}
+.mh{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--text);margin-bottom:8px}.mh em{font-style:normal;color:var(--accent)}
+.md{font-size:13px;color:var(--dim);line-height:1.8;max-width:600px;margin-bottom:32px}.md strong{color:var(--amber)}
+.mg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.mb{background:var(--bg2);border:1px solid var(--border);padding:14px 6px;text-align:center;transition:all .3s}
+.mb.mlk{opacity:.35}.mb.mul{border-color:rgba(255,106,0,.4);background:rgba(255,106,0,.05)}.mb.mnx{border-color:var(--amber);background:rgba(245,166,35,.06);animation:p 2.5s ease-in-out infinite}
+.mp{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;display:block;color:var(--muted)}.mb.mul .mp{color:var(--accent)}.mb.mnx .mp{color:var(--amber)}
+.mr{display:block;font-size:9px;color:var(--muted);margin-top:3px}.mgo{display:block;font-size:8px;color:var(--muted);margin-top:2px}
+.em{position:absolute;border-radius:50%;bottom:-10px;animation:ef linear infinite}@keyframes ef{0%{transform:translateY(0) rotate(0) scale(1);opacity:0}5%{opacity:.8}50%{opacity:1;transform:translateY(-50vh) rotate(360deg) scale(.8)}90%{opacity:.3}100%{transform:translateY(-105vh) rotate(720deg) scale(.2);opacity:0}}
+footer{padding:40px 24px;text-align:center;border-top:1px solid var(--border)}footer p{font-size:10px;color:var(--muted);letter-spacing:.1em;line-height:2}
+@media(max-width:640px){.sc{width:180px;height:260px}.cd{width:160px;height:230px;margin-left:-80px;margin-top:-115px}.cd img{height:155px}.ctr{font-size:32px;right:10px}.nl{gap:10px}.nl a{font-size:8px}.bb{flex-wrap:wrap;gap:6px}.bm{width:100%;margin:6px 0 0}}
 </style>
 </head>
 <body>
-
-<div class="forge-bg"></div>
-
-<!-- Ember particles -->
-<div class="embers" id="embers"></div>
-
-<header>
-  <p class="site-tag">Dumpster Forge Industries · <span>Gorbagana Chain</span> · Est. 2025</p>
-  <h1>
-    Burn
-    <span class="fire-word">Relics</span>
-  </h1>
-  <p class="subtitle">Genesis Collection — 10 Unique Artifacts</p>
-</header>
-
-<div class="divider" style="margin-bottom: 60px;"></div>
-
-<main>
-
-  <!-- Origin Story -->
-  <div class="section-label">Origin</div>
-  <div class="burn-block">
-    <span class="burn-number">500B</span>
-    <span class="burn-label">$GORWELDD Permanently Destroyed</span>
-    <p>
-      On <strong>March 17, 2026</strong>, half of the entire $GORWELDD supply was sent to the void — burned, gone, irrecoverable.
-      From those ashes, the <strong>Burn Relics Genesis</strong> collection was forged.
-      Ten unique NFTs. Ten fragments of sacrifice. Each one minted on Gorbagana Chain, frozen forever in the blockchain's memory.
-      They exist because something was given up to create them.
-    </p>
-  </div>
-
-  <!-- Collection Stats -->
-  <div class="section-label">The Collection</div>
-  <div class="collection-stats">
-    <div class="stat-box">
-      <span class="num">10</span>
-      <span class="lbl">Total Relics</span>
-    </div>
-    <div class="stat-box">
-      <span class="num">1/1</span>
-      <span class="lbl">Each Unique</span>
-    </div>
-    <div class="stat-box">
-      <span class="num">🔒</span>
-      <span class="lbl">Frozen Forever</span>
-    </div>
-  </div>
-
-  <!-- Rarity -->
-  <div class="rarity-row">
-    <div class="rarity-tag legendary">
-      <span class="rarity-num">3</span>
-      Legendary
-    </div>
-    <div class="rarity-tag rare">
-      <span class="rarity-num">3</span>
-      Rare
-    </div>
-    <div class="rarity-tag common">
-      <span class="rarity-num">4</span>
-      Common
-    </div>
-  </div>
-
-  <!-- Unlock Mechanic -->
-  <div class="section-label">Unlock Mechanic</div>
-  <div class="unlock-section">
-    <p>
-      Relics are not for sale from the start. They are <strong>earned by the community</strong>.
-      Each Relic unlocks when the <strong>Sovereign Bond pool</strong> on Gort Knox hits a new 10% threshold.
-      As the bond grows, the forge heats up — and a new Relic is released into the wild.
-      <br><br>
-      The pool currently holds approximately <strong>~392 500k GOR</strong>.
-      Every GOR bonded brings the next unlock closer.
-    </p>
-
-    <div class="progress-label-row">
-      <span>Current bond pool</span>
-      <span class="target">Target: 760k GOR → Relic #9</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill"></div>
-    </div>
-
-    <div class="milestone-row">
-      <div class="milestone unlocked"><span class="m-num">10%</span>Relic 1</div>
-      <div class="milestone unlocked"><span class="m-num">20%</span>Relic 2</div>
-      <div class="milestone unlocked"><span class="m-num">30%</span>Relic 3</div>
-      <div class="milestone unlocked"><span class="m-num">40%</span>Relic 4</div>
-      <div class="milestone unlocked"><span class="m-num">50%</span>Relic 5</div>
-      <div class="milestone unlocked"><span class="m-num">60%</span>Relic 6</div>
-      <div class="milestone unlocked"><span class="m-num">70%</span>Relic 7</div>
-      <div class="milestone unlocked"><span class="m-num">80%</span>Relic 8</div>
-      <div class="milestone unlocked"><span class="m-num">90%</span>Relic 9</div>
-      <div class="milestone next"><span class="m-num">100%</span>Relic 10 ⚔</div>
-    </div>
-  </div>
-
-  <!-- Relic #10 -->
-  <div class="section-label">Relic #10</div>
-  <div class="relic10">
-    <div class="relic10-inner">
-      <div class="relic10-badge">
-        <span class="icon">⚔️</span>
-        <span class="badge-num">#10</span>
-        <span class="badge-label">The Final Relic</span>
-      </div>
-      <div class="relic10-details">
-        <div class="detail-row">
-          <span class="detail-key">Unlock at</span>
-          <span class="detail-val">760k GOR</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Price</span>
-          <span class="detail-val green">1 GOR</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Supply</span>
-          <span class="detail-val">1 of 1</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Rule</span>
-          <span class="detail-val red">First come</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-key">Platform</span>
-          <span class="detail-val">Gort Knox</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer lore -->
-  <div class="lore-block">
-    <p>
-      Minted with Metaplex UMI SDK · <span>Gorbagana Chain</span><br>
-      Collection: <span>476gqj9XBXjZGjQrft7etrTVJes2JbcZ9Fup535ezoEj</span><br>
-      Burn TX: <span>March 17, 2026</span>
-    </p>
-    <div class="chain-tag">⛓ Dumpster Forge Industries // 2025—2026</div>
-  </div>
-
-</main>
-
+<nav><a href="https://gorweld.com" class="nb"><span>GOR</span>WELD</a><div class="nl"><a href="https://gorweld.com">Home</a><a href="https://gorweld.com/#tokens">Tokens</a><a href="/relics/" class="ac">Relics</a><a href="https://gorweld.com/#game">Game</a><a href="https://gorweld.com/demo" class="nc">▶ DEMO</a></div></nav>
+<div id="bL">⏳ LOADING BOND DATA FROM GORBAGANA...</div>
+<div class="bb" id="bB" style="display:none"><div class="l">SOVEREIGN #9 · <strong id="bA">—</strong> GOR</div><div class="bm"><div class="f" id="bF" style="width:0"></div></div><div class="r"><strong id="bP">—</strong> of 3.8M · <strong id="bN">—</strong></div></div>
+<section class="hero" id="H">
+<div class="sl"></div><div class="vg"></div><div class="fg"></div><div id="EM"></div>
+<div class="ht"><div class="htg">◆ DUMPSTER FORGE ◆</div><div class="htm">BURN RELICS</div><div class="hts">SOVEREIGN BOND UNLOCK — GORBAGANA CHAIN</div></div>
+<div class="sc"><div class="cr" id="CR"></div></div>
+<div class="ctr" id="CTR">10</div>
+<div class="dt" id="DT"></div>
+<div class="hi">← → ARROWS · DRAG · SCROLL · CLICK UNLOCKED CARDS</div>
+<div class="at" id="AT" onclick="tA()">◉ AUTO</div>
+<div class="ov" id="OV" onclick="cD()"><div class="de" id="DE" onclick="event.stopPropagation()"></div></div>
+</section>
+<section class="ms"><div class="mi"><div class="mt">// SOVEREIGN BOND MILESTONES</div><div class="mh">The Forge <em>Heats Up</em></div><div class="md">Each 10% of <strong>3,800,000 GOR</strong> unlocks a Relic — #10 first, climbing to #1 last.</div><div class="mg" id="G1"></div><div class="mg" id="G2" style="margin-top:4px"></div></div></section>
+<footer><p>Metaplex UMI SDK · Gorbagana Chain<br>Sovereign Bond #9 · sovereign.wastemanagement.wtf</p><p style="margin-top:12px;color:#333">DUMPSTER FORGE // GORBAGANA CHAIN // 2025—2026</p></footer>
 <script>
-  // Generate ember particles
-  const container = document.getElementById('embers');
-  for (let i = 0; i < 18; i++) {
-    const e = document.createElement('div');
-    e.className = 'ember-particle';
-    const size = Math.random() * 3 + 1.5;
-    const left = Math.random() * 100;
-    const delay = Math.random() * 8;
-    const duration = Math.random() * 6 + 5;
-    const drift = (Math.random() - 0.5) * 80;
-    const colors = ['#ffcc44','#ff8800','#ff4400','#ffaa00'];
-    e.style.cssText = `
-      left: ${left}%;
-      bottom: ${Math.random() * 20}%;
-      width: ${size}px;
-      height: ${size}px;
-      --drift: ${drift}px;
-      animation-delay: ${delay}s;
-      animation-duration: ${duration}s;
-      background: ${colors[Math.floor(Math.random()*colors.length)]};
-    `;
-    container.appendChild(e);
-  }
+const T=3800000,RPC="https://rpc.gorbagana.wtf/",
+VAULT="",FALLBACK=400000,
+IM="https://ipfs.io/ipfs/bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty",
+N=[{id:10,n:"The Burn TX",t:"Common",e:"Stone",p:10,d:"The transaction. Carved in stone. 500B $GORWELDD burned March 17, 2026."},{id:9,n:"Scrapcoin Token",t:"Common",e:"Metal",p:20,d:"The physical form of $SCRAPCOIN. 4 million exist. Cracked metal, molten core."},{id:8,n:"Dumpster Lid",t:"Common",e:"Metal",p:30,d:"Every forge has a door. Rusted. Tagged. The Dumpster Forge started here."},{id:7,n:"Ash Coin",t:"Common",e:"Ash",p:40,d:"What remains after the burn. A coin blackened by fire."},{id:6,n:"Chain Link",t:"Rare",e:"Metal",p:50,d:"One link. The chain is Gorbagana. Every transaction — connected."},{id:5,n:"Forge Flame",t:"Rare",e:"Fire",p:60,d:"The exact flame. Frozen at the moment 500B tokens ceased to exist."},{id:4,n:"Scrap Fragment",t:"Rare",e:"Metal",p:70,d:"A jagged shard torn from the Dumpster Forge in the moment of the burn."},{id:3,n:"GORIUS TRASHINUS",t:"Legendary",e:"Shadow",p:80,d:"He watches. He judges. He protects. One eye green. One eye orange."},{id:2,n:"GORWELD Mask",t:"Legendary",e:"Fire",p:90,d:"The welding mask of GORWELD himself. The forge still glows through the cracked lens."},{id:1,n:"The Forge Hammer",t:"Legendary",e:"Fire",p:100,d:"The hammer that sealed the fate of 500B $GORWELDD. One strike. Irreversible."}],
+C=N.length,AG=360/C,RD=420;
+let ba=FALLBACK,bp=0,ro=0,au=true,dr=false,dx=0,ds=0,ve=0,tr=null;
+const cr=document.getElementById('CR'),dt=document.getElementById('DT'),ct=document.getElementById('CTR'),ov=document.getElementById('OV'),de=document.getElementById('DE'),he=document.getElementById('H');
+async function fB(){if(!VAULT){uU(FALLBACK);return}try{const r=await fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[VAULT]})});const d=await r.json();if(d.result?.value!==undefined)uU(d.result.value/1e9);else uU(FALLBACK)}catch(e){uU(FALLBACK)}}
+function uU(a){ba=a;bp=(a/T)*100;document.getElementById('bL').style.display='none';document.getElementById('bB').style.display='flex';document.getElementById('bA').textContent=a>=1e6?(a/1e6).toFixed(2)+'M':Math.round(a).toLocaleString();document.getElementById('bP').textContent=bp.toFixed(1)+'%';document.getElementById('bF').style.width=Math.min(bp,100)+'%';const nx=N.find(r=>r.p>bp);document.getElementById('bN').textContent=nx?'Next: #'+nx.id+' at '+nx.p+'%':'ALL UNLOCKED';bC();bM()}
+function bC(){cr.innerHTML='';dt.innerHTML='';const tc={Legendary:'#ff6a00',Rare:'#00e5ff',Common:'#888'};N.forEach((n,i)=>{const ul=bp>=n.p,nx=!ul&&N.find(r=>r.p>bp)?.id===n.id;const c=document.createElement('div');const tg=n.t==='Legendary'?'tl':n.t==='Rare'?'tr':'tc';c.className='cd '+tg+(ul?'':nx?' nx':' lk');c.style.transform=`rotateY(${i*AG}deg) translateZ(${RD}px)`;const sc=ul?'color:var(--accent);border-color:var(--accent)':nx?'color:var(--amber);border-color:var(--amber)':'color:var(--muted);border-color:var(--border)';c.innerHTML=`<div class="ci"><div class="sh"></div><img src="${IM}/${n.id}.png" alt="${n.n}" loading="lazy"><div class="cif"><div class="ct">${n.t}</div><div class="cn">#${String(n.id).padStart(3,'0')}</div><div class="cm">${n.n}</div><div class="cb" style="${sc}">${ul?'UNLOCKED':nx?'NEXT':'LOCKED'}</div></div><div class="gl"></div></div>`;if(ul)c.addEventListener('click',e=>{e.stopPropagation();oD(i)});cr.appendChild(c);const dd=document.createElement('div');dd.className='d'+(!ul&&!nx?' dl':'');dd.addEventListener('click',e=>{e.stopPropagation();au=false;uA();tr=-i*AG;ve=0});dt.appendChild(dd)})}
+function bM(){const g1=document.getElementById('G1'),g2=document.getElementById('G2');g1.innerHTML='';g2.innerHTML='';N.forEach((n,i)=>{const ul=bp>=n.p,nx=!ul&&N.find(r=>r.p>bp)?.id===n.id;const b=document.createElement('div');b.className='mb'+(ul?' mul':nx?' mnx':' mlk');const g=(n.p/100)*T,gs=g>=1e6?(g/1e6).toFixed(1)+'M':(g/1e3)+'K';b.innerHTML=`<span class="mp">${n.p}%</span><span class="mr">#${n.id}</span><span class="mgo">${gs}</span>`;(i<5?g1:g2).appendChild(b)})}
+function oD(i){const n=N[i];if(bp<n.p)return;const tc={Legendary:'#ff6a00',Rare:'#00e5ff',Common:'#888'},c=tc[n.t],g=(n.p/100)*T;de.style.border=`1px solid ${c}44`;de.style.boxShadow=`0 0 40px ${c}33`;de.innerHTML=`<img src="${IM}/${n.id}.png" alt="${n.n}"><div class="db"><div class="dtr" style="color:${c}">${n.t} · ${n.e}</div><div class="dtt" style="text-shadow:0 0 15px ${c}33">#${String(n.id).padStart(3,'0')} — ${n.n}</div><div class="dd">${n.d}</div><div class="du">🔓 UNLOCKED AT ${n.p}% — ${Math.round(g).toLocaleString()} GOR</div><div class="dc" onclick="cD()">✕ CLOSE</div></div>`;ov.classList.add('ac');au=false;uA()}
+function cD(){ov.classList.remove('ac')}function tA(){au=!au;tr=null;ve=0;uA()}function uA(){const e=document.getElementById('AT');e.textContent=au?'◉ AUTO':'○ MANUAL';e.style.color=au?'#ff6a00':'#444'}
+function gI(){return Math.round((((-ro%360)+360)%360)/AG)%C}
+function uD(){const i=gI(),tc={Legendary:'#ff6a00',Rare:'#00e5ff',Common:'#888'};Array.from(dt.children).forEach((d,j)=>{if(j===i){d.classList.add('a');d.style.background=tc[N[j].t];d.style.boxShadow=`0 0 8px ${tc[N[j].t]}`}else{d.classList.remove('a');d.style.background=d.classList.contains('dl')?'#111':'#222';d.style.boxShadow='none'}});ct.textContent=String(N[gI()].id).padStart(2,'0')}
+he.addEventListener('pointerdown',e=>{if(ov.classList.contains('ac'))return;dr=true;he.classList.add('dg');dx=e.clientX;ds=ro;au=false;tr=null;ve=0;uA()});
+document.addEventListener('pointermove',e=>{if(!dr)return;const x=e.clientX-dx;ro=ds+x*.4;ve=x*.1});
+document.addEventListener('pointerup',()=>{dr=false;he.classList.remove('dg')});
+document.addEventListener('keydown',e=>{if(ov.classList.contains('ac')){if(e.key==='Escape')cD();return}if(e.key==='ArrowRight'||e.key==='d'){au=false;uA();tr=(tr??ro)-AG;ve=0}if(e.key==='ArrowLeft'||e.key==='a'){au=false;uA();tr=(tr??ro)+AG;ve=0}if(e.key==='Enter'||e.key===' '){e.preventDefault();oD(gI())}if(e.key==='Escape')cD()});
+document.addEventListener('wheel',e=>{if(ov.classList.contains('ac'))return;if(e.target.closest('.ms')||e.target.closest('footer'))return;e.preventDefault();au=false;uA();ro-=e.deltaY*.15;ve=-e.deltaY*.05;tr=null},{passive:false});
+function anim(){if(au&&!ov.classList.contains('ac'))ro+=.12;else if(tr!==null){const d=tr-ro;if(Math.abs(d)<.3){ro=tr;tr=null}else ro+=d*.08}else if(!dr&&Math.abs(ve)>.01){ro+=ve;ve*=.95}cr.style.transform=`rotateY(${ro}deg)`;uD();requestAnimationFrame(anim)}
+const em=document.getElementById('EM');for(let i=0;i<30;i++){const e=document.createElement('div');e.className='em';const s=Math.random()*4+1,cs=['#ff6a00','#ff3300','#ffaa00','#ff8800'],c=cs[~~(Math.random()*cs.length)];Object.assign(e.style,{width:s+'px',height:s+'px',background:c,left:Math.random()*100+'%',animationDuration:(Math.random()*7+4)+'s',animationDelay:(Math.random()*7)+'s',boxShadow:`0 0 ${Math.random()*10+3}px ${c}`});em.appendChild(e)}
+anim();fB();setInterval(fB,5*60*1e3);
 </script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta property="og:title" content="GORWELD — Dumpster Forge">
 <meta property="og:description" content="Post-apocalyptic crypto ecosystem on Gorbagana Chain. Forged from the scraps of the old world.">
-<meta property="og:image" content="[gorweld.com](https://gorweld.com/preview.jpg)">
-<meta property="og:url" content="[gorweld.com](https://gorweld.com/)">
+<meta property="og:image" content="https://gorweld.com/preview.jpg">
+<meta property="og:url" content="https://gorweld.com/">
 <meta property="og:type" content="website">
 
 <meta charset="UTF-8">
@@ -164,7 +164,7 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
   <h1 class="hero-t">GORWELD<small>DUMPSTER FORGE </small></h1>
   <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged on Gorbagana Chain.</p>
   <div class="hero-stats"><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div></div>
-  <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a><a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn3">Sovereign #9</a></div>
+  <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a></div>
   <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#ff6a00" stroke-width="2" stroke-linecap="round"/></svg></a>
 </section>
 
@@ -244,12 +244,18 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 <section id="sovereign" class="sec-dark"><div class="si">
   <div class="stag">// SOVEREIGN PROTOCOL</div><div class="sdiv"></div>
   <h2 class="stitle">Sovereign <em>#9</em></h2>
-  <p class="sdesc">BYO token bonding pool. 20% of $GORWELDD supply committed. Organic growth, community-backed.</p>
-  <div class="sov"><div>
-    <div class="sov-g"><div class="sov-s"><div class="sl">COMMITTED</div><div class="sv">98B</div></div><div class="sov-s"><div class="sl">BOND TARGET</div><div class="sv">3.8M GOR</div></div><div class="sov-s"><div class="sl">DURATION</div><div class="sv">30 DAYS</div></div><div class="sov-s"><div class="sl">SWAP FEE</div><div class="sv">2.5%</div></div></div>
-    <div class="sov-bar"><div class="sov-track"><div class="sov-fill" style="width:6.1%"></div></div><div class="sov-lbl"><span>232,500 GOR • 5 depositors</span><span>6.1% bonded</span></div></div>
-    <div style="margin-top:6px;font-size:8px;color:#444">10% LP bonus for post-bond distribution</div>
-  </div><div style="text-align:center"><a href="https://sovereign.wastemanagement.wtf/sovereign/9" target="_blank" class="btn btn1" style="width:100%;justify-content:center">View Sovereign #9</a><div style="font-size:7px;color:#333;margin-top:8px;font-family:'Orbitron',sans-serif;letter-spacing:2px">LIVE ON SOVEREIGN PROTOCOL</div></div></div>
+  <div class="sov" style="grid-template-columns:1fr">
+    <div style="text-align:center;padding:28px 20px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:#ff3c00;letter-spacing:4px;margin-bottom:20px">🔥 BOND CLOSED — ASHES TO ASHES</div>
+      <p style="color:#555;font-size:12px;line-height:1.9;max-width:560px;margin:0 auto">Sovereign #9 has run its course. The bond didn't fill — and what doesn't forge, gets melted down. The remaining 100B $GORWELDD returns to the fire. Automatic burn. No scraps left behind.</p>
+      <p style="margin-top:20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff6a0055;font-style:italic">The forge demands sacrifice.</p>
+      <div style="margin-top:24px;display:inline-flex;gap:16px;align-items:center;padding:14px 28px;border:1px solid #ff3c0033;border-radius:8px;background:#ff3c0008">
+        <div><div style="font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif">BURNED</div><div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#ff3c00;margin-top:4px;text-shadow:0 0 12px #ff3c0044">100B</div></div>
+        <div style="width:1px;height:40px;background:#ff6a0022"></div>
+        <div style="text-align:left"><div style="font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif">$GORWELDD</div><div style="font-family:'Orbitron',sans-serif;font-size:9px;color:#333;margin-top:6px;letter-spacing:1px">RETURNED TO FIRE</div></div>
+      </div>
+    </div>
+  </div>
 </div></section>
 
 <section id="community" class="sec-dark"><div class="si">
@@ -276,7 +282,7 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 <script>
 var he=document.getElementById('heroEmbers');var colors=['#ff6a00','#ff3300','#ffaa00','#ff8800','#ff4400'];
 for(var i=0;i<30;i++){var e=document.createElement('div');e.className='ember';var s=Math.random()*4+1;var c=colors[Math.floor(Math.random()*colors.length)];e.style.width=s+'px';e.style.height=s+'px';e.style.background=c;e.style.left=Math.random()*100+'%';e.style.animationDuration=(Math.random()*7+4)+'s';e.style.animationDelay=(Math.random()*7)+'s';e.style.boxShadow='0 0 '+(Math.random()*10+3)+'px '+c;he.appendChild(e)}
-var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','SOVEREIGN <span class="c1">#9</span> LIVE','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
+var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','<span class="c1">100B BURNED</span> — SOVEREIGN #9 CLOSED','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
 var tt=document.getElementById('ticker');for(var r=0;r<2;r++){for(var j=0;j<tItems.length;j++){var d=document.createElement('div');d.className='ticker-i';d.innerHTML=tItems[j];tt.appendChild(d)}}
 var CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
 var GW=["https://ipfs.io/ipfs/"+CID,"https://gateway.pinata.cloud/ipfs/"+CID,"https://nftstorage.link/ipfs/"+CID,"https://cloudflare-ipfs.com/ipfs/"+CID];

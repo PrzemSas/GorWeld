@@ -15,7 +15,7 @@
 <meta name="twitter:site" content="@GorWeld">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:#000;font-family:'Share Tech Mono',monospace;color:#e0e0e0;overflow-x:hidden}::selection{background:#ff6a00;color:#000}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#ff6a0044;border-radius:3px}a{color:inherit;text-decoration:none}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:#08080a;font-family:'Share Tech Mono',monospace;color:#e0e0e0;overflow-x:hidden}::selection{background:#3eb7f4;color:#000}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#08080a}::-webkit-scrollbar-thumb{background:#3eb7f444;border-radius:3px}a{color:inherit;text-decoration:none}
 @keyframes emberFloat{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:0}5%{opacity:.8}50%{opacity:1;transform:translateY(-50vh) rotate(360deg) scale(.8)}90%{opacity:.3}100%{transform:translateY(-105vh) rotate(720deg) scale(.2);opacity:0}}
 @keyframes floorPulse{0%,100%{opacity:.4}50%{opacity:.9}}
 @keyframes titlePulse{0%,100%{opacity:.35}50%{opacity:1}}
@@ -23,65 +23,65 @@
 @keyframes scan{0%{top:-100%}100%{top:200%}}
 @keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes fireGlow{0%,100%{box-shadow:0 0 15px #ff6a0022}50%{box-shadow:0 0 30px #ff6a0033,0 0 60px #ff3c0011}}
+@keyframes fireGlow{0%,100%{box-shadow:0 0 15px #3eb7f422}50%{box-shadow:0 0 30px #3eb7f433,0 0 60px #0ea5f111}}
 @keyframes fireBreathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
 @keyframes sparkRise{0%{opacity:.7;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(0)}}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .vis{animation:slideUp .6s ease forwards}
 .scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.06) 1px,rgba(0,0,0,.06) 3px)}
 .scan-after{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
-.scan-after::after{content:'';position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,#ff6a0006,transparent);animation:scan 5s linear infinite}
+.scan-after::after{content:'';position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,#3eb7f406,transparent);animation:scan 5s linear infinite}
 nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;background:transparent}
-nav.s{background:#000000dd;backdrop-filter:blur(10px);border-bottom:1px solid #ff6a0011}
-.nlogo{font-family:'Teko',sans-serif;font-size:24px;font-weight:700;color:#ff6a00;letter-spacing:5px;text-shadow:0 0 12px #ff6a0044}
+nav.s{background:#08080add;backdrop-filter:blur(10px);border-bottom:1px solid #3eb7f411}
+.nlogo{font-family:'Teko',sans-serif;font-size:24px;font-weight:700;color:#3eb7f4;letter-spacing:5px;text-shadow:0 0 12px #3eb7f444}
 .nlinks{display:flex;gap:18px;align-items:center}
 .nlinks a{color:#444;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s}
-.nlinks a:hover{color:#ff6a00}
-.ncta{padding:6px 16px!important;border:1px solid #ff6a00!important;border-radius:3px;color:#ff6a00!important}
-.ncta:hover{background:#ff6a00!important;color:#000!important}
-.mmenu{display:none;cursor:pointer;font-size:20px;color:#ff6a00;background:none;border:none}
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:100px 24px 80px;overflow:hidden;background:radial-gradient(ellipse at 50% 130%,#1a0800 0%,#080200 40%,#000 70%)}
+.nlinks a:hover{color:#3eb7f4}
+.ncta{padding:6px 16px!important;border:1px solid #3eb7f4!important;border-radius:3px;color:#3eb7f4!important}
+.ncta:hover{background:#3eb7f4!important;color:#000!important}
+.mmenu{display:none;cursor:pointer;font-size:20px;color:#3eb7f4;background:none;border:none}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:100px 24px 80px;overflow:hidden;background:radial-gradient(ellipse at 50% 130%,#001018 0%,#000810 40%,#08080a 70%)}
 .hero-vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.65) 100%);pointer-events:none}
-.hero-floor{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:80%;height:200px;background:radial-gradient(ellipse at center,rgba(255,80,0,.12) 0%,transparent 70%);pointer-events:none;animation:floorPulse 4s ease-in-out infinite}
+.hero-floor{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:80%;height:200px;background:radial-gradient(ellipse at center,rgba(59,183,244,.12) 0%,transparent 70%);pointer-events:none;animation:floorPulse 4s ease-in-out infinite}
 .hero-embers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .ember{position:absolute;border-radius:50%;bottom:-10px;animation:emberFloat linear infinite}
 .hero-forge{position:relative;z-index:1;width:150px;height:150px;margin-bottom:14px;animation:float 4s ease-in-out infinite}
-.hero-badge{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:5px;color:#555;padding:5px 16px;border:1px solid #ff6a0015;border-radius:20px;background:#ff6a0006;margin-bottom:12px}
-.hero-t{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:clamp(36px,8vw,72px);font-weight:900;color:#fff;letter-spacing:8px;text-shadow:0 0 30px rgba(255,106,0,.5),0 0 60px rgba(255,106,0,.25),0 0 120px rgba(255,60,0,.1);animation:titleGlitch 6s infinite;line-height:1}
-.hero-t small{display:block;font-size:.28em;color:#ff6a00;letter-spacing:12px;margin-top:8px;text-shadow:none;font-weight:700;animation:titlePulse 3s ease-in-out infinite}
+.hero-badge{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:5px;color:#555;padding:5px 16px;border:1px solid #3eb7f415;border-radius:20px;background:#3eb7f406;margin-bottom:12px}
+.hero-t{position:relative;z-index:1;font-family:'Orbitron',sans-serif;font-size:clamp(36px,8vw,72px);font-weight:900;color:#fff;letter-spacing:8px;text-shadow:0 0 30px rgba(59,183,244,.5),0 0 60px rgba(59,183,244,.25),0 0 120px rgba(14,165,241,.1);animation:titleGlitch 6s infinite;line-height:1}
+.hero-t small{display:block;font-size:.28em;color:#3eb7f4;letter-spacing:12px;margin-top:8px;text-shadow:none;font-weight:700;animation:titlePulse 3s ease-in-out infinite}
 .hero-sub{position:relative;z-index:1;font-family:'Rajdhani',sans-serif;font-size:clamp(13px,2vw,17px);color:#555;margin-top:16px;letter-spacing:2px;max-width:500px;line-height:1.7}
-.hero-sub b{color:#ff6a00}
+.hero-sub b{color:#3eb7f4}
 .hero-stats{position:relative;z-index:1;display:flex;gap:28px;margin-top:28px;flex-wrap:wrap;justify-content:center}
-.hs{text-align:center}.hs .hv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#ff6a00;text-shadow:0 0 10px #ff6a0033}.hs .hl{font-size:7px;color:#444;letter-spacing:2px;margin-top:3px;font-family:'Orbitron',sans-serif}
+.hs{text-align:center}.hs .hv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#3eb7f4;text-shadow:0 0 10px #3eb7f433}.hs .hl{font-size:7px;color:#444;letter-spacing:2px;margin-top:3px;font-family:'Orbitron',sans-serif}
 .hero-btns{position:relative;z-index:1;display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center}
 .btn{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;border-radius:4px;transition:all .3s;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px}
-.btn1{background:linear-gradient(135deg,#ff3c00,#ff6a00);color:#000;box-shadow:0 0 20px #ff6a0033}
-.btn1:hover{box-shadow:0 0 30px #ff6a0055;transform:translateY(-2px)}
-.btn2{background:transparent;color:#ff6a00;border:1px solid #ff6a0044}
-.btn2:hover{background:#ff6a000a;border-color:#ff6a00}
+.btn1{background:linear-gradient(135deg,#0ea5f1,#3eb7f4);color:#000;box-shadow:0 0 20px #3eb7f433}
+.btn1:hover{box-shadow:0 0 30px #3eb7f455;transform:translateY(-2px)}
+.btn2{background:transparent;color:#3eb7f4;border:1px solid #3eb7f444}
+.btn2:hover{background:#3eb7f40a;border-color:#3eb7f4}
 .btn3{background:transparent;color:#00e5ff;border:1px solid #00e5ff33}
 .btn3:hover{background:#00e5ff08;border-color:#00e5ff}
 .scroll-h{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:1;animation:float 2s ease-in-out infinite;cursor:pointer}
 .scroll-h svg{width:24px;height:24px}
-.ticker{border-top:1px solid #ff6a000a;border-bottom:1px solid #ff6a000a;background:#ff6a0004;overflow:hidden}
+.ticker{border-top:1px solid #3eb7f40a;border-bottom:1px solid #3eb7f40a;background:#3eb7f404;overflow:hidden}
 .ticker-track{display:flex;animation:marquee 35s linear infinite;white-space:nowrap}
 .ticker-i{padding:10px 36px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#444;flex-shrink:0}
-.ticker-i .c1{color:#ff6a00}.ticker-i .c2{color:#00e5ff}.ticker-i .c3{color:#FFD700}
+.ticker-i .c1{color:#3eb7f4}.ticker-i .c2{color:#00e5ff}.ticker-i .c3{color:#FFD700}
 section{padding:80px 24px;position:relative}.si{max-width:1100px;margin:0 auto}
-.stag{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;color:#ff6a00;margin-bottom:10px}
+.stag{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;color:#3eb7f4;margin-bottom:10px}
 .stitle{font-family:'Teko',sans-serif;font-size:clamp(38px,7vw,64px);font-weight:700;color:#fff;line-height:.95;margin-bottom:12px}
-.stitle em{color:#ff6a00;font-style:normal}
+.stitle em{color:#3eb7f4;font-style:normal}
 .sdesc{color:#888;font-size:12px;line-height:1.7;max-width:520px;margin-bottom:36px}
-.sdiv{width:36px;height:2px;background:#ff6a00;margin-bottom:18px;box-shadow:0 0 8px #ff6a0044}
-.sec-dark{background:linear-gradient(180deg,#000,#050506,#000)}
+.sdiv{width:36px;height:2px;background:#3eb7f4;margin-bottom:18px;box-shadow:0 0 8px #3eb7f444}
+.sec-dark{background:linear-gradient(180deg,#08080a,#0d0d12,#08080a)}
 .about-g{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
-.forge-vis{border-radius:12px;border:1px solid #ff6a0012;background:#060606;padding:16px;text-align:center}
+.forge-vis{border-radius:12px;border:1px solid #3eb7f412;background:#060606;padding:16px;text-align:center}
 .forge-vis svg{width:100%;max-width:320px;margin:0 auto}
 .forge-lbl{font-family:'Orbitron',sans-serif;font-size:7px;color:#333;letter-spacing:3px;margin-top:10px}
 .feats{display:flex;flex-direction:column;gap:12px}
-.feat{padding:14px 16px;border-left:2px solid #ff6a0033;background:linear-gradient(90deg,#ff6a0004,transparent);transition:all .3s}
-.feat:hover{border-left-color:#ff6a00;background:linear-gradient(90deg,#ff6a000a,transparent);transform:translateX(4px)}
-.feat .ft{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#ff6a00;margin-bottom:4px;letter-spacing:1px}
+.feat{padding:14px 16px;border-left:2px solid #3eb7f433;background:linear-gradient(90deg,#3eb7f404,transparent);transition:all .3s}
+.feat:hover{border-left-color:#3eb7f4;background:linear-gradient(90deg,#3eb7f40a,transparent);transform:translateX(4px)}
+.feat .ft{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#3eb7f4;margin-bottom:4px;letter-spacing:1px}
 .feat .fd{font-size:10px;color:#888;line-height:1.6}
 .tok-g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .tok{border-radius:12px;padding:22px 18px;background:#060606;position:relative;overflow:hidden;transition:all .4s;border:1px solid #ffffff06}
@@ -95,52 +95,52 @@ section{padding:80px 24px;position:relative}.si{max-width:1100px;margin:0 auto}
 .tok-row .tv{font-family:'Orbitron',sans-serif;font-size:12px;color:#888;font-weight:600}
 .tok-tag{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:3px;font-size:7px;letter-spacing:1px;font-family:'Orbitron',sans-serif}
 .nft-showcase{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:28px}
-.nft-th{border-radius:8px;overflow:hidden;border:1px solid #ff6a0012;background:#060606;transition:all .4s;cursor:pointer}
-.nft-th:hover{border-color:#ff6a0044;transform:translateY(-4px);box-shadow:0 8px 24px #ff6a000e}
-.nft-th img{width:100%;aspect-ratio:1;object-fit:cover;background:linear-gradient(135deg,#1a0f08,#060606)}
-.nft-th-fb{width:100%;aspect-ratio:1;display:none;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#1a0f08,#060606);color:#ff6a0033}
-.nft-th-id{padding:6px 8px;font-family:'Orbitron',sans-serif;font-size:7px;color:#ff6a00;letter-spacing:1px}
-.game-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px;border:1px solid #ff6a0012;border-radius:14px;background:#060606}
-.game-vis{border-radius:10px;border:1px solid #ff6a0018;aspect-ratio:4/3;background:#0a0a0a;display:flex;align-items:center;justify-content:center}
+.nft-th{border-radius:8px;overflow:hidden;border:1px solid #3eb7f412;background:#060606;transition:all .4s;cursor:pointer}
+.nft-th:hover{border-color:#3eb7f444;transform:translateY(-4px);box-shadow:0 8px 24px #3eb7f40e}
+.nft-th img{width:100%;aspect-ratio:1;object-fit:cover;background:linear-gradient(135deg,#060e14,#060606)}
+.nft-th-fb{width:100%;aspect-ratio:1;display:none;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#060e14,#060606);color:#3eb7f433}
+.nft-th-id{padding:6px 8px;font-family:'Orbitron',sans-serif;font-size:7px;color:#3eb7f4;letter-spacing:1px}
+.game-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px;border:1px solid #3eb7f412;border-radius:14px;background:#060606}
+.game-vis{border-radius:10px;border:1px solid #3eb7f418;aspect-ratio:4/3;background:#0a0a0a;display:flex;align-items:center;justify-content:center}
 .game-vis-in{text-align:center;padding:20px}
 .gv-ic{font-size:52px;animation:fireBreathe 2s infinite}
-.gv-t{font-family:'Teko',sans-serif;font-size:22px;color:#ff6a00;letter-spacing:3px;margin-top:8px}
+.gv-t{font-family:'Teko',sans-serif;font-size:22px;color:#3eb7f4;letter-spacing:3px;margin-top:8px}
 .gv-s{font-size:8px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif;margin-top:3px}
 .gfeats{display:flex;flex-direction:column;gap:11px;margin-top:14px}
 .gf{display:flex;gap:10px;align-items:flex-start}
-.gf-ic{width:30px;height:30px;border-radius:6px;background:#ff6a0008;border:1px solid #ff6a0012;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.gf-t{font-family:'Orbitron',sans-serif;font-size:8px;color:#ff6a00;letter-spacing:1px;margin-bottom:2px}
+.gf-ic{width:30px;height:30px;border-radius:6px;background:#3eb7f408;border:1px solid #3eb7f412;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.gf-t{font-family:'Orbitron',sans-serif;font-size:8px;color:#3eb7f4;letter-spacing:1px;margin-bottom:2px}
 .gf-d{font-size:9px;color:#888;line-height:1.5}
-.sov{padding:24px;border:1px solid #ff6a0015;border-radius:14px;background:#060606;display:grid;grid-template-columns:5fr 2fr;gap:24px;align-items:center}
+.sov{padding:24px;border:1px solid #3eb7f415;border-radius:14px;background:#060606;display:grid;grid-template-columns:5fr 2fr;gap:24px;align-items:center}
 .sov-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .sov-s{padding:12px;border-radius:6px;background:#0a0a0a;border:1px solid #ffffff05}
 .sov-s .sl{font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif}
-.sov-s .sv{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#ff6a00;margin-top:4px}
+.sov-s .sv{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#3eb7f4;margin-top:4px}
 .sov-bar{margin-top:12px}
 .sov-track{height:8px;border-radius:4px;background:#111;overflow:hidden}
-.sov-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#ff3c00,#ff6a00,#FFD700);box-shadow:0 0 10px #ff6a0044}
+.sov-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#0284c7,#3eb7f4,#7dd3fc);box-shadow:0 0 10px #3eb7f444}
 .sov-lbl{display:flex;justify-content:space-between;margin-top:4px;font-size:7px;color:#444;font-family:'Orbitron',sans-serif}
 .soc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .soc{padding:20px;border-radius:10px;border:1px solid #ffffff08;background:#060606;text-align:center;transition:all .3s;display:block}
-.soc:hover{border-color:#ff6a0033;transform:translateY(-3px)}
+.soc:hover{border-color:#3eb7f433;transform:translateY(-3px)}
 .soc-ic{font-size:26px;margin-bottom:6px}
-.soc-h{font-family:'Orbitron',sans-serif;font-size:9px;color:#ff6a00;letter-spacing:1px}
+.soc-h{font-family:'Orbitron',sans-serif;font-size:9px;color:#3eb7f4;letter-spacing:1px}
 .soc-d{font-size:8px;color:#777;margin-top:3px}
-.discord-sec{padding:80px 24px;background:linear-gradient(180deg,#000,#0a0400,#000);text-align:center;position:relative;overflow:hidden}
-.discord-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,#ff6a0010 0%,transparent 70%);pointer-events:none}
+.discord-sec{padding:80px 24px;background:linear-gradient(180deg,#08080a,#000810,#08080a);text-align:center;position:relative;overflow:hidden}
+.discord-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,#3eb7f410 0%,transparent 70%);pointer-events:none}
 .discord-inner{max-width:600px;margin:0 auto;position:relative;z-index:1}
-.discord-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;background:linear-gradient(135deg,#ff3c00,#ff6a00);color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;border-radius:6px;transition:all .3s;border:none;cursor:pointer;box-shadow:0 0 30px #ff6a0033}
-.discord-btn:hover{transform:translateY(-3px);box-shadow:0 0 50px #ff6a0055}
+.discord-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;background:linear-gradient(135deg,#0ea5f1,#3eb7f4);color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;border-radius:6px;transition:all .3s;border:none;cursor:pointer;box-shadow:0 0 30px #3eb7f433}
+.discord-btn:hover{transform:translateY(-3px);box-shadow:0 0 50px #3eb7f455}
 .discord-sub{margin-top:16px;font-size:9px;color:#333;font-family:'Orbitron',sans-serif;letter-spacing:2px}
-.discord-float{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#ff3c00,#ff6a00);color:#000;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;border-radius:30px;box-shadow:0 4px 20px #ff6a0044;transition:all .3s;text-decoration:none}
-.discord-float:hover{transform:translateY(-2px);box-shadow:0 6px 28px #ff6a0066}
-footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;background:#000}
-.flogo{font-family:'Teko',sans-serif;font-size:24px;color:#ff6a00;letter-spacing:5px}
+.discord-float{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#0ea5f1,#3eb7f4);color:#000;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;border-radius:30px;box-shadow:0 4px 20px #3eb7f444;transition:all .3s;text-decoration:none}
+.discord-float:hover{transform:translateY(-2px);box-shadow:0 6px 28px #3eb7f466}
+footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;background:#08080a}
+.flogo{font-family:'Teko',sans-serif;font-size:24px;color:#3eb7f4;letter-spacing:5px}
 .flinks{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap}
 .flinks a{color:#444;font-size:8px;letter-spacing:1px;font-family:'Orbitron',sans-serif;transition:color .3s}
-.flinks a:hover{color:#ff6a00}
+.flinks a:hover{color:#3eb7f4}
 .fcopy{margin-top:14px;font-size:7px;color:#222;letter-spacing:3px;font-family:'Orbitron',sans-serif}
-@media(max-width:900px){.about-g,.game-card,.sov{grid-template-columns:1fr}.tok-g{grid-template-columns:1fr}.nft-showcase{grid-template-columns:repeat(2,1fr)}.soc-g{grid-template-columns:1fr}.sov-g{grid-template-columns:1fr 1fr}.nlinks{display:none}.nlinks.open{display:flex;flex-direction:column;position:absolute;top:50px;right:12px;background:#000000ee;border:1px solid #ff6a0018;border-radius:8px;padding:14px;backdrop-filter:blur(12px)}.mmenu{display:block}}
+@media(max-width:900px){.about-g,.game-card,.sov{grid-template-columns:1fr}.tok-g{grid-template-columns:1fr}.nft-showcase{grid-template-columns:repeat(2,1fr)}.soc-g{grid-template-columns:1fr}.sov-g{grid-template-columns:1fr 1fr}.nlinks{display:none}.nlinks.open{display:flex;flex-direction:column;position:absolute;top:50px;right:12px;background:#08080aee;border:1px solid #3eb7f418;border-radius:8px;padding:14px;backdrop-filter:blur(12px)}.mmenu{display:block}}
 @media(max-width:600px){.hero-btns{flex-direction:column;align-items:center}.btn{width:100%;max-width:260px;justify-content:center}.sov-g{grid-template-columns:1fr}}
 </style>
 </head>
@@ -152,20 +152,20 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 <section class="hero">
   <div class="hero-vig"></div><div class="hero-floor"></div><div class="hero-embers" id="heroEmbers"></div>
   <svg class="hero-forge" viewBox="0 0 200 200" fill="none">
-    <defs><linearGradient id="hfire" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#ff2d00"/><stop offset="50%" stop-color="#ff6a00"/><stop offset="100%" stop-color="#ffd700"/></linearGradient><filter id="hglow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-    <circle cx="100" cy="100" r="88" stroke="#ff6a00" stroke-width=".8" fill="none" opacity=".15"/>
-    <circle cx="100" cy="100" r="78" stroke="#ff6a00" stroke-width=".4" fill="none" opacity=".08" stroke-dasharray="4 8"/>
-    <path d="M60 110 L65 80 L135 80 L140 110 L150 128 L50 128 Z" fill="#111" stroke="#ff6a00" stroke-width="1" opacity=".8" filter="url(#hglow)"/>
-    <path d="M65 80 L135 80 L130 90 L70 90 Z" fill="#1a1a1a" stroke="#ff6a0044" stroke-width=".5"/>
-    <path d="M60 110 L38 106 L40 100 L60 102" fill="#111" stroke="#ff6a00" stroke-width=".8" opacity=".6"/>
-    <rect x="55" y="128" width="90" height="14" rx="3" fill="#0a0a0a" stroke="#ff6a0044" stroke-width=".5"/>
-    <rect x="70" y="142" width="60" height="18" rx="2" fill="#080808" stroke="#ff6a0033" stroke-width=".4"/>
+    <defs><linearGradient id="hfire" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#0284c7"/><stop offset="50%" stop-color="#3eb7f4"/><stop offset="100%" stop-color="#7dd3fc"/></linearGradient><filter id="hglow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <circle cx="100" cy="100" r="88" stroke="#3eb7f4" stroke-width=".8" fill="none" opacity=".15"/>
+    <circle cx="100" cy="100" r="78" stroke="#3eb7f4" stroke-width=".4" fill="none" opacity=".08" stroke-dasharray="4 8"/>
+    <path d="M60 110 L65 80 L135 80 L140 110 L150 128 L50 128 Z" fill="#111" stroke="#3eb7f4" stroke-width="1" opacity=".8" filter="url(#hglow)"/>
+    <path d="M65 80 L135 80 L130 90 L70 90 Z" fill="#1a1a1a" stroke="#3eb7f444" stroke-width=".5"/>
+    <path d="M60 110 L38 106 L40 100 L60 102" fill="#111" stroke="#3eb7f4" stroke-width=".8" opacity=".6"/>
+    <rect x="55" y="128" width="90" height="14" rx="3" fill="#0a0a0a" stroke="#3eb7f444" stroke-width=".5"/>
+    <rect x="70" y="142" width="60" height="18" rx="2" fill="#080808" stroke="#3eb7f433" stroke-width=".4"/>
     <path d="M90 78 Q95 48 100 58 Q105 48 110 78" fill="url(#hfire)" opacity=".7" style="animation:fireBreathe 1.5s infinite"/>
-    <path d="M94 78 Q98 56 100 62 Q102 56 106 78" fill="#ffd700" opacity=".35" style="animation:fireBreathe 1.2s infinite"/>
-    <circle cx="88" cy="52" r="1.5" fill="#ff6a00" opacity=".5" style="animation:sparkRise 1.8s infinite"/>
-    <circle cx="112" cy="46" r="1" fill="#ffd700" opacity=".4" style="animation:sparkRise 2.2s .3s infinite"/>
-    <circle cx="96" cy="40" r="1.2" fill="#ff3300" opacity=".4" style="animation:sparkRise 2s .6s infinite"/>
-    <text font-family="Orbitron,sans-serif" font-size="6" fill="#ff6a00" opacity=".2" letter-spacing="4"><textPath href="#tc" startOffset="8%">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN •</textPath></text>
+    <path d="M94 78 Q98 56 100 62 Q102 56 106 78" fill="#7dd3fc" opacity=".35" style="animation:fireBreathe 1.2s infinite"/>
+    <circle cx="88" cy="52" r="1.5" fill="#3eb7f4" opacity=".5" style="animation:sparkRise 1.8s infinite"/>
+    <circle cx="112" cy="46" r="1" fill="#7dd3fc" opacity=".4" style="animation:sparkRise 2.2s .3s infinite"/>
+    <circle cx="96" cy="40" r="1.2" fill="#0ea5f1" opacity=".4" style="animation:sparkRise 2s .6s infinite"/>
+    <text font-family="Orbitron,sans-serif" font-size="6" fill="#3eb7f4" opacity=".2" letter-spacing="4"><textPath href="#tc" startOffset="8%">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN •</textPath></text>
     <path id="tc" d="M100,8 a92,92 0 1,1 0,184 a92,92 0 1,1 0,-184" fill="none"/>
   </svg>
   <div class="hero-badge">GORBAGANA CHAIN // EST. 2025</div>
@@ -173,7 +173,7 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
   <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged on Gorbagana Chain.</p>
   <div class="hero-stats"><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div></div>
   <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a></div>
-  <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#ff6a00" stroke-width="2" stroke-linecap="round"/></svg></a>
+  <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#3eb7f4" stroke-width="2" stroke-linecap="round"/></svg></a>
 </section>
 
 <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
@@ -191,25 +191,25 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 </div>
 <div class="forge-vis">
   <svg viewBox="0 0 300 300" fill="none">
-    <defs><linearGradient id="af" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#ff2d00"/><stop offset="50%" stop-color="#ff6a00"/><stop offset="100%" stop-color="#ffd700"/></linearGradient><filter id="ag"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-    <rect x="125" y="10" width="50" height="72" rx="4" fill="#0d0d0d" stroke="#ff6a0033" stroke-width="1"/>
-    <rect x="120" y="6" width="60" height="10" rx="3" fill="#111" stroke="#ff6a0044" stroke-width=".8"/>
-    <rect x="50" y="82" width="200" height="130" rx="8" fill="#0d0d0d" stroke="#ff6a0033" stroke-width="1.2"/>
-    <circle cx="65" cy="96" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/><circle cx="235" cy="96" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/>
-    <circle cx="65" cy="200" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/><circle cx="235" cy="200" r="2.5" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".5"/>
-    <rect x="90" y="110" width="120" height="72" rx="5" fill="#050505" stroke="#ff6a0033" stroke-width=".8"/>
+    <defs><linearGradient id="af" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0%" stop-color="#0284c7"/><stop offset="50%" stop-color="#3eb7f4"/><stop offset="100%" stop-color="#7dd3fc"/></linearGradient><filter id="ag"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <rect x="125" y="10" width="50" height="72" rx="4" fill="#0d0d0d" stroke="#3eb7f433" stroke-width="1"/>
+    <rect x="120" y="6" width="60" height="10" rx="3" fill="#111" stroke="#3eb7f444" stroke-width=".8"/>
+    <rect x="50" y="82" width="200" height="130" rx="8" fill="#0d0d0d" stroke="#3eb7f433" stroke-width="1.2"/>
+    <circle cx="65" cy="96" r="2.5" fill="#0a0a0a" stroke="#3eb7f422" stroke-width=".5"/><circle cx="235" cy="96" r="2.5" fill="#0a0a0a" stroke="#3eb7f422" stroke-width=".5"/>
+    <circle cx="65" cy="200" r="2.5" fill="#0a0a0a" stroke="#3eb7f422" stroke-width=".5"/><circle cx="235" cy="200" r="2.5" fill="#0a0a0a" stroke="#3eb7f422" stroke-width=".5"/>
+    <rect x="90" y="110" width="120" height="72" rx="5" fill="#050505" stroke="#3eb7f433" stroke-width=".8"/>
     <path d="M120 178 Q130 145 150 158 Q160 135 170 148 Q180 135 180 178" fill="url(#af)" opacity=".6" filter="url(#ag)" style="animation:fireBreathe 1.5s infinite"/>
-    <path d="M130 178 Q140 155 150 162 Q155 148 165 158 Q170 148 170 178" fill="#ffd700" opacity=".25" style="animation:fireBreathe 1.2s infinite"/>
-    <rect x="70" y="124" width="12" height="36" rx="3" fill="#080808" stroke="#ff6a0033" stroke-width=".4"/>
-    <circle cx="76" cy="134" r="2.5" fill="#ff6a00" opacity=".4"/><circle cx="76" cy="142" r="2.5" fill="#ff3300" opacity=".25"/>
-    <rect x="218" y="124" width="14" height="20" rx="2" fill="#050505" stroke="#ff6a0033" stroke-width=".4"/>
-    <text x="225" y="137" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="5.5" fill="#ff6a00" opacity=".6">1538</text>
-    <text x="225" y="142" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="3.5" fill="#ff6a0044">°C</text>
-    <rect x="60" y="212" width="180" height="12" rx="3" fill="#0a0a0a" stroke="#ff6a0022" stroke-width=".6"/>
-    <rect x="70" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#ff6a0018" stroke-width=".4"/>
-    <rect x="202" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#ff6a0018" stroke-width=".4"/>
-    <line x1="40" y1="258" x2="260" y2="258" stroke="#ff6a0015" stroke-width=".8"/>
-    <text x="150" y="278" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="7" fill="#ff6a00" opacity=".25" letter-spacing="4">OPERATIONAL</text>
+    <path d="M130 178 Q140 155 150 162 Q155 148 165 158 Q170 148 170 178" fill="#7dd3fc" opacity=".25" style="animation:fireBreathe 1.2s infinite"/>
+    <rect x="70" y="124" width="12" height="36" rx="3" fill="#080808" stroke="#3eb7f433" stroke-width=".4"/>
+    <circle cx="76" cy="134" r="2.5" fill="#3eb7f4" opacity=".4"/><circle cx="76" cy="142" r="2.5" fill="#0ea5f1" opacity=".25"/>
+    <rect x="218" y="124" width="14" height="20" rx="2" fill="#050505" stroke="#3eb7f433" stroke-width=".4"/>
+    <text x="225" y="137" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="5.5" fill="#3eb7f4" opacity=".6">1538</text>
+    <text x="225" y="142" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="3.5" fill="#3eb7f444">°C</text>
+    <rect x="60" y="212" width="180" height="12" rx="3" fill="#0a0a0a" stroke="#3eb7f422" stroke-width=".6"/>
+    <rect x="70" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#3eb7f418" stroke-width=".4"/>
+    <rect x="202" y="224" width="28" height="34" rx="2" fill="#080808" stroke="#3eb7f418" stroke-width=".4"/>
+    <line x1="40" y1="258" x2="260" y2="258" stroke="#3eb7f415" stroke-width=".8"/>
+    <text x="150" y="278" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="7" fill="#3eb7f4" opacity=".25" letter-spacing="4">OPERATIONAL</text>
   </svg>
   <div class="forge-lbl">DUMPSTER FORGE SMELTER // STATUS: ONLINE</div>
 </div></div></div></section>
@@ -219,7 +219,7 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
   <h2 class="stitle">Three tokens. <em>One forge.</em></h2>
   <p class="sdesc">Each token has a role in the Dumpster Forge economy. Burned, scarce, welded to last.</p>
   <div class="tok-g">
-    <div class="tok" style="--tc:#ff6a00"><div class="tok-sym">$GORWELDD</div><div class="tok-name">PRIMARY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div><div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:#ff3c00">500,000,000,000</span></div></div><div class="tok-tag" style="background:#ff6a0012;color:#ff6a00">DEFLATIONARY 🔥</div></div>
+    <div class="tok" style="--tc:#3eb7f4"><div class="tok-sym">$GORWELDD</div><div class="tok-name">PRIMARY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div><div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:#0ea5f1">500,000,000,000</span></div></div><div class="tok-tag" style="background:#3eb7f412;color:#3eb7f4">DEFLATIONARY 🔥</div></div>
     <div class="tok" style="--tc:#00e5ff"><div class="tok-sym">$SCRAPCOIN</div><div class="tok-name">UTILITY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">TOTAL SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">WALLET CAP</span><span class="tv" style="color:#00e5ff">4,000,000</span></div></div><div class="tok-tag" style="background:#00e5ff12;color:#00e5ff">4M MAX / WALLET ⚡</div></div>
     <div class="tok" style="--tc:#FFD700"><div class="tok-sym" style="font-size:26px">$GORIUS</div><div class="tok-name">GORIUS TRASHINUS</div><div class="tok-data"><div class="tok-row"><span class="tl">CURRENT SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">TARGET</span><span class="tv" style="color:#FFD700">10,000,000</span></div></div><div class="tok-tag" style="background:#FFD70012;color:#FFD700">FUNDRAISING 🎯</div></div>
   </div>
@@ -254,12 +254,12 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
   <h2 class="stitle">Sovereign <em>#9</em></h2>
   <div class="sov" style="grid-template-columns:1fr">
     <div style="text-align:center;padding:28px 20px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:#ff3c00;letter-spacing:4px;margin-bottom:20px">🔥 BOND CLOSED — ASHES TO ASHES</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:#0ea5f1;letter-spacing:4px;margin-bottom:20px">🔥 BOND CLOSED — ASHES TO ASHES</div>
       <p style="color:#555;font-size:12px;line-height:1.9;max-width:560px;margin:0 auto">Sovereign #9 has run its course. The bond didn't fill — and what doesn't forge, gets melted down. The remaining 100B $GORWELDD returns to the fire. Automatic burn. No scraps left behind.</p>
-      <p style="margin-top:20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff6a0055;font-style:italic">The forge demands sacrifice.</p>
-      <div style="margin-top:24px;display:inline-flex;gap:16px;align-items:center;padding:14px 28px;border:1px solid #ff3c0033;border-radius:8px;background:#ff3c0008">
-        <div><div style="font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif">BURNED</div><div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#ff3c00;margin-top:4px;text-shadow:0 0 12px #ff3c0044">100B</div></div>
-        <div style="width:1px;height:40px;background:#ff6a0022"></div>
+      <p style="margin-top:20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#3eb7f455;font-style:italic">The forge demands sacrifice.</p>
+      <div style="margin-top:24px;display:inline-flex;gap:16px;align-items:center;padding:14px 28px;border:1px solid #0ea5f133;border-radius:8px;background:#0ea5f108">
+        <div><div style="font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif">BURNED</div><div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#0ea5f1;margin-top:4px;text-shadow:0 0 12px #0ea5f144">100B</div></div>
+        <div style="width:1px;height:40px;background:#3eb7f422"></div>
         <div style="text-align:left"><div style="font-size:7px;color:#444;letter-spacing:2px;font-family:'Orbitron',sans-serif">$GORWELDD</div><div style="font-family:'Orbitron',sans-serif;font-size:9px;color:#333;margin-top:6px;letter-spacing:1px">RETURNED TO FIRE</div></div>
       </div>
     </div>
@@ -307,7 +307,7 @@ footer{padding:28px 24px;border-top:1px solid #ff6a000a;text-align:center;backgr
 </footer>
 
 <script>
-var he=document.getElementById('heroEmbers');var colors=['#ff6a00','#ff3300','#ffaa00','#ff8800','#ff4400'];
+var he=document.getElementById('heroEmbers');var colors=['#3eb7f4','#0ea5f1','#6ccaf9','#29b4ee','#0b84c1'];
 for(var i=0;i<30;i++){var e=document.createElement('div');e.className='ember';var s=Math.random()*4+1;var c=colors[Math.floor(Math.random()*colors.length)];e.style.width=s+'px';e.style.height=s+'px';e.style.background=c;e.style.left=Math.random()*100+'%';e.style.animationDuration=(Math.random()*7+4)+'s';e.style.animationDelay=(Math.random()*7)+'s';e.style.boxShadow='0 0 '+(Math.random()*10+3)+'px '+c;he.appendChild(e)}
 var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','<span class="c1">100B BURNED</span> — SOVEREIGN #9 CLOSED','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
 var tt=document.getElementById('ticker');for(var r=0;r<2;r++){for(var j=0;j<tItems.length;j++){var d=document.createElement('div');d.className='ticker-i';d.innerHTML=tItems[j];tt.appendChild(d)}}

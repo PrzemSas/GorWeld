@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#08080a">
+<title>COOKIE HUNT — GORWELD</title>
+<meta name="description" content="Find cookies. Earn $GORWELDD. The welder's IRL cookie quest across the city.">
+<meta property="og:title" content="GORWELD COOKIE HUNT">
+<meta property="og:description" content="Find cookies in real cafes. Earn $GORWELDD. The welder's IRL quest.">
+<meta property="og:image" content="https://gorweld.com/preview.jpg">
+<meta property="og:url" content="https://gorweld.com/hunt/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@GorWeld">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2308080a' stroke='%233eb7f4' stroke-width='3'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='32' fill='%233eb7f4' text-anchor='middle' font-weight='700'%3EG%3C/text%3E%3C/svg%3E">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#08080a;font-family:'Share Tech Mono',monospace;color:#e0e0e0;min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+::selection{background:#3eb7f4;color:#000}
+a{color:#3eb7f4;text-decoration:none}
+
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 12px #3eb7f422}50%{box-shadow:0 0 28px #3eb7f455,0 0 60px #3eb7f422}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes scan{0%{top:-100%}100%{top:200%}}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.06) 1px,rgba(0,0,0,.06) 3px)}
+
+nav{position:sticky;top:0;z-index:100;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:#08080add;backdrop-filter:blur(10px);border-bottom:1px solid #3eb7f422}
+.nlogo{font-family:'Teko',sans-serif;font-size:22px;font-weight:700;color:#3eb7f4;letter-spacing:4px;text-shadow:0 0 10px #3eb7f444}
+.nlogo small{font-size:11px;color:#666;letter-spacing:2px;margin-left:8px}
+.nback{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#666;text-transform:uppercase}
+.nback:hover{color:#3eb7f4}
+
+.hero{padding:48px 20px 24px;text-align:center;background:radial-gradient(ellipse at 50% 0%,#001824 0%,#08080a 60%);border-bottom:1px solid #3eb7f411}
+.hero-badge{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px;color:#3eb7f4;padding:5px 14px;border:1px solid #3eb7f422;border-radius:20px;display:inline-block;background:#3eb7f406;margin-bottom:14px}
+.hero-t{font-family:'Orbitron',sans-serif;font-size:clamp(32px,9vw,52px);font-weight:900;color:#fff;letter-spacing:5px;line-height:1;text-shadow:0 0 20px rgba(59,183,244,.4)}
+.hero-t small{display:block;font-size:.3em;color:#3eb7f4;letter-spacing:8px;margin-top:8px;font-weight:700;animation:pulse 3s ease-in-out infinite}
+.hero-sub{font-family:'Rajdhani',sans-serif;font-size:14px;color:#888;margin-top:14px;letter-spacing:1px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6}
+.hero-sub b{color:#3eb7f4}
+
+main{max-width:540px;margin:0 auto;padding:24px 16px}
+
+.card{background:linear-gradient(180deg,#0a0a0e,#060608);border:1px solid #3eb7f422;border-radius:14px;padding:22px 18px;margin-bottom:16px;animation:slideUp .5s ease forwards}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card-num{font-family:'Orbitron',sans-serif;font-size:10px;color:#3eb7f4;background:#3eb7f411;border:1px solid #3eb7f433;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.card-t{font-family:'Orbitron',sans-serif;font-size:12px;color:#fff;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+.card-d{font-size:11px;color:#777;line-height:1.6;margin-bottom:14px}
+
+.input{width:100%;padding:12px 14px;background:#000;border:1px solid #3eb7f422;border-radius:6px;color:#e0e0e0;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+.input:focus{border-color:#3eb7f4;box-shadow:0 0 0 2px #3eb7f422}
+
+.btn{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 20px;border-radius:6px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px;justify-content:center;transition:all .25s;width:100%}
+.btn1{background:linear-gradient(135deg,#0ea5f1,#3eb7f4);color:#000;animation:glow 3s ease-in-out infinite}
+.btn1:hover{transform:translateY(-1px)}
+.btn1:disabled{opacity:.4;cursor:not-allowed;animation:none;transform:none}
+.btn2{background:transparent;color:#3eb7f4;border:1px solid #3eb7f444}
+.btn2:hover{background:#3eb7f40a;border-color:#3eb7f4}
+.btn3{background:transparent;color:#FFD700;border:1px solid #FFD70044}
+.btn3:hover{background:#FFD70008;border-color:#FFD700}
+
+.status{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:8px 12px;border-radius:4px;margin-top:10px;text-transform:uppercase}
+.status.ok{background:#00ff8810;color:#00ff88;border:1px solid #00ff8833}
+.status.err{background:#ff336610;color:#ff3366;border:1px solid #ff336633}
+.status.wait{background:#3eb7f410;color:#3eb7f4;border:1px solid #3eb7f433}
+
+.challenge{background:#FFD70008;border:1px dashed #FFD70044;border-radius:8px;padding:14px;text-align:center;margin-bottom:14px}
+.challenge-lbl{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:3px;color:#FFD70099;margin-bottom:6px}
+.challenge-w{font-family:'Teko',sans-serif;font-size:28px;font-weight:700;color:#FFD700;letter-spacing:4px;text-shadow:0 0 12px #FFD70044}
+
+.photo-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid #3eb7f422;background:#000;aspect-ratio:1;margin-bottom:10px;display:none}
+.photo-wrap.shown{display:block}
+.photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+
+input[type=file]{display:none}
+
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.meta-i{background:#000;border:1px solid #3eb7f411;border-radius:6px;padding:10px}
+.meta-l{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;color:#555;margin-bottom:4px}
+.meta-v{font-family:'Share Tech Mono',monospace;font-size:11px;color:#3eb7f4;word-break:break-all;line-height:1.3}
+
+.cache-card{position:relative;aspect-ratio:1;background:radial-gradient(circle at 30% 30%,#001824 0%,#08080a 70%);border:1px solid #3eb7f444;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.cc-canvas{width:100%;display:block}
+
+.log{margin-top:18px}
+.log-h{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:#666;margin-bottom:10px;text-transform:uppercase}
+.log-i{background:#060608;border:1px solid #3eb7f411;border-radius:6px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:10px}
+.log-i .li-n{color:#3eb7f4;font-family:'Orbitron',sans-serif;font-weight:700}
+.log-i .li-d{color:#666;font-family:'Share Tech Mono',monospace}
+.log-empty{color:#444;font-size:11px;text-align:center;padding:14px;font-style:italic}
+
+.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:380px){.share-grid{grid-template-columns:1fr}}
+
+footer{text-align:center;padding:24px 20px;color:#444;font-size:10px;letter-spacing:2px;font-family:'Orbitron',sans-serif;border-top:1px solid #3eb7f411;margin-top:30px}
+footer a{color:#666}
+footer a:hover{color:#3eb7f4}
+
+.hidden{display:none!important}
+.tip{font-size:10px;color:#555;margin-top:8px;line-height:1.5;font-style:italic}
+.tip b{color:#FFD70099;font-style:normal}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<nav>
+  <div class="nlogo">GORWELD <small>/ HUNT</small></div>
+  <a href="/" class="nback">← Back</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">FORGE × COOKIES × IRL</div>
+  <h1 class="hero-t">COOKIE HUNT<small>EARN $GORWELDD</small></h1>
+  <p class="hero-sub">Walk into any <b>bakery, cafe or patisserie</b>. Take a photo with the cookies in frame. Submit. Get <b>$GORWELDD</b> dropped to your wallet. The welder hunts cookies for the Cookies Chain.</p>
+</header>
+
+<main>
+
+  <!-- 1. WALLET -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">1</span><span class="card-t">Your Wallet</span></div>
+    <p class="card-d">Wallet address (Solana / Gorbagana). Reward will be dropped here after review.</p>
+    <input id="wallet" class="input" placeholder="paste wallet pubkey..." autocomplete="off" spellcheck="false">
+    <div class="tip"><b>Tip:</b> use your Phantom / Backpack address. Same for Solana and Gorbagana.</div>
+  </section>
+
+  <!-- 2. CHALLENGE -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">2</span><span class="card-t">Today's Challenge Word</span></div>
+    <div class="challenge">
+      <div class="challenge-lbl">WRITE THIS NEXT TO THE COOKIES</div>
+      <div class="challenge-w" id="challenge">—</div>
+    </div>
+    <p class="card-d">Write the word on a napkin / receipt / piece of paper and put it next to the cookies. Anti-bot protection.</p>
+  </section>
+
+  <!-- 3. PHOTO -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">3</span><span class="card-t">Photo of Cookies</span></div>
+    <p class="card-d">Shoot a live photo: cookies + challenge word in frame. From device camera only.</p>
+    <div class="photo-wrap" id="photoWrap"><img id="photoImg" alt="cache photo"></div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment">
+    <button class="btn btn2" onclick="document.getElementById('photoInput').click()">📷 Take Photo</button>
+    <div id="photoStatus"></div>
+  </section>
+
+  <!-- 4. GPS -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">4</span><span class="card-t">Location</span></div>
+    <p class="card-d">Tag the bakery on the map. Used to verify proof of visit.</p>
+    <button class="btn btn2" id="gpsBtn">📍 Capture Location</button>
+    <div id="gpsStatus"></div>
+    <div class="meta hidden" id="gpsMeta">
+      <div class="meta-i"><div class="meta-l">LAT</div><div class="meta-v" id="gpsLat">—</div></div>
+      <div class="meta-i"><div class="meta-l">LON</div><div class="meta-v" id="gpsLon">—</div></div>
+    </div>
+  </section>
+
+  <!-- 5. BAKERY NAME -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">5</span><span class="card-t">Bakery Name</span></div>
+    <p class="card-d">Name of the place. Helps verify and tag the cache on the map.</p>
+    <input id="bakery" class="input" placeholder="e.g. Cukiernia Pod Aniołem" autocomplete="off">
+  </section>
+
+  <!-- 6. GENERATE -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">6</span><span class="card-t">Generate Cache Card</span></div>
+    <p class="card-d">Creates a shareable PNG (1080×1080) with your cache details. Save it. Post it. DM @GorWeld for the GW drop.</p>
+    <button class="btn btn1" id="generateBtn" disabled>⚒ Forge Cache Card</button>
+    <div id="generateStatus"></div>
+
+    <div class="cache-card hidden" id="cardPreview">
+      <canvas class="cc-canvas" id="canvas" width="1080" height="1080"></canvas>
+    </div>
+
+    <div class="share-grid hidden" id="shareGrid">
+      <button class="btn btn3" id="downloadBtn">⬇ Download PNG</button>
+      <button class="btn btn3" id="tweetBtn">𝕏 Share on X</button>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="card log">
+    <div class="log-h">Your Cache Log</div>
+    <div id="logList"></div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">?</span><span class="card-t">How It Works</span></div>
+    <ol style="padding-left:18px;font-size:11px;line-height:1.8;color:#888">
+      <li>You walk into any bakery / cafe.</li>
+      <li>Write today's <b style="color:#FFD700">challenge word</b> next to the cookies on a napkin.</li>
+      <li>Snap a photo. Capture GPS. Name the place.</li>
+      <li>Forge a cache card. Share it on X with <b style="color:#3eb7f4">#CookieHunt #GorWeld</b>.</li>
+      <li>DM <a href="https://x.com/GorWeld" target="_blank">@GorWeld</a> with the card. We verify. <b style="color:#3eb7f4">100 GW drops to your wallet.</b></li>
+      <li>Repeat. Limit: <b>5 unique caches per day</b>. Demon NFT holders: 2× rewards.</li>
+    </ol>
+  </section>
+
+</main>
+
+<footer>
+  GORWELD™ DUMPSTER FORGE · COOKIE HUNT v0.1 · <a href="/">gorweld.com</a>
+</footer>
+
+<script>
+// === STATE ===
+const state = {
+  wallet: '',
+  photoDataUrl: null,
+  gps: null,
+  bakery: '',
+  challenge: ''
+};
+
+// === CHALLENGE WORD (rotuje co dzień) ===
+const CHALLENGE_WORDS = ['GORWELD','DUMPSTER','FORGE','COOKIES','SCRAP','EMBER','SOLDER','ANVIL','WELDER','SCAVENGER','TRINITY','GORBAGANA','COOKIESCHAIN','DEMON','RELIC'];
+function todayChallenge(){
+  const d=new Date();
+  const seed=d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate();
+  return CHALLENGE_WORDS[seed%CHALLENGE_WORDS.length];
+}
+state.challenge=todayChallenge();
+document.getElementById('challenge').textContent=state.challenge;
+
+// === WALLET (persist) ===
+const walletInput=document.getElementById('wallet');
+walletInput.value=localStorage.getItem('gw_wallet')||'';
+state.wallet=walletInput.value.trim();
+walletInput.addEventListener('input',()=>{
+  state.wallet=walletInput.value.trim();
+  localStorage.setItem('gw_wallet',state.wallet);
+  refreshGenerateBtn();
+});
+
+// === BAKERY ===
+const bakeryInput=document.getElementById('bakery');
+bakeryInput.addEventListener('input',()=>{
+  state.bakery=bakeryInput.value.trim();
+  refreshGenerateBtn();
+});
+
+// === PHOTO ===
+const photoInput=document.getElementById('photoInput');
+const photoWrap=document.getElementById('photoWrap');
+const photoImg=document.getElementById('photoImg');
+const photoStatus=document.getElementById('photoStatus');
+
+photoInput.addEventListener('change',async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  photoStatus.innerHTML='<div class="status wait">Processing photo...</div>';
+  try{
+    const compressed=await compressImage(file,1280,0.85);
+    state.photoDataUrl=compressed;
+    photoImg.src=compressed;
+    photoWrap.classList.add('shown');
+    photoStatus.innerHTML='<div class="status ok">✓ Photo captured</div>';
+    refreshGenerateBtn();
+  }catch(err){
+    photoStatus.innerHTML='<div class="status err">✗ '+err.message+'</div>';
+  }
+});
+
+async function compressImage(file,maxDim,quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let{width,height}=img;
+      if(width>maxDim||height>maxDim){
+        if(width>height){height*=maxDim/width;width=maxDim;}
+        else{width*=maxDim/height;height=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=width;canvas.height=height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,width,height);
+      resolve(canvas.toDataURL('image/jpeg',quality));
+    };
+    img.onerror=()=>reject(new Error('Image load failed'));
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+// === GPS ===
+const gpsBtn=document.getElementById('gpsBtn');
+const gpsStatus=document.getElementById('gpsStatus');
+const gpsMeta=document.getElementById('gpsMeta');
+
+gpsBtn.addEventListener('click',()=>{
+  if(!navigator.geolocation){
+    gpsStatus.innerHTML='<div class="status err">✗ Geolocation not supported</div>';return;
+  }
+  gpsStatus.innerHTML='<div class="status wait">Locating...</div>';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.gps={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:pos.coords.accuracy};
+    document.getElementById('gpsLat').textContent=state.gps.lat.toFixed(6);
+    document.getElementById('gpsLon').textContent=state.gps.lon.toFixed(6);
+    gpsMeta.classList.remove('hidden');
+    gpsStatus.innerHTML='<div class="status ok">✓ Location captured (±'+Math.round(state.gps.acc)+'m)</div>';
+    refreshGenerateBtn();
+  },err=>{
+    gpsStatus.innerHTML='<div class="status err">✗ '+err.message+'</div>';
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+});
+
+// === GENERATE BUTTON GATING ===
+const generateBtn=document.getElementById('generateBtn');
+function refreshGenerateBtn(){
+  generateBtn.disabled=!(state.wallet&&state.photoDataUrl&&state.gps&&state.bakery);
+}
+refreshGenerateBtn();
+
+// === CACHE CARD CANVAS ===
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const cardPreview=document.getElementById('cardPreview');
+const shareGrid=document.getElementById('shareGrid');
+const generateStatus=document.getElementById('generateStatus');
+
+generateBtn.addEventListener('click',async()=>{
+  generateStatus.innerHTML='<div class="status wait">Forging cache card...</div>';
+  await drawCacheCard();
+  cardPreview.classList.remove('hidden');
+  shareGrid.classList.remove('hidden');
+  generateStatus.innerHTML='<div class="status ok">✓ Cache card forged. Save & share it.</div>';
+  saveCacheToLog();
+});
+
+async function drawCacheCard(){
+  const W=1080,H=1080;
+  ctx.clearRect(0,0,W,H);
+
+  // tło
+  const bgGrad=ctx.createRadialGradient(W*0.3,H*0.2,50,W*0.5,H*0.5,W);
+  bgGrad.addColorStop(0,'#001824');
+  bgGrad.addColorStop(0.6,'#08080a');
+  bgGrad.addColorStop(1,'#000');
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // siatka
+  ctx.strokeStyle='rgba(62,183,244,0.05)';
+  ctx.lineWidth=1;
+  for(let i=0;i<W;i+=60){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();}
+  for(let i=0;i<H;i+=60){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
+
+  // foto w środku
+  const img=new Image();
+  await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=state.photoDataUrl;});
+  const photoSize=720,px=(W-photoSize)/2,py=180;
+  ctx.save();
+  roundRect(ctx,px,py,photoSize,photoSize,16);
+  ctx.clip();
+  const ar=img.width/img.height;
+  let dw=photoSize,dh=photoSize,dx=px,dy=py;
+  if(ar>1){dw=photoSize*ar;dx=px-(dw-photoSize)/2;}
+  else{dh=photoSize/ar;dy=py-(dh-photoSize)/2;}
+  ctx.drawImage(img,dx,dy,dw,dh);
+  ctx.restore();
+
+  // ramka fotki
+  ctx.strokeStyle='#3eb7f4';
+  ctx.lineWidth=3;
+  roundRect(ctx,px,py,photoSize,photoSize,16);
+  ctx.stroke();
+
+  // header
+  ctx.fillStyle='#3eb7f4';
+  ctx.font='900 32px Orbitron,Arial';
+  ctx.textAlign='left';
+  ctx.fillText('GORWELD',60,80);
+  ctx.fillStyle='#666';
+  ctx.font='700 14px Orbitron,Arial';
+  ctx.fillText('COOKIE HUNT // CACHE FORGED',60,108);
+
+  // reward badge prawy górny
+  ctx.fillStyle='#FFD700';
+  ctx.font='900 28px Orbitron,Arial';
+  ctx.textAlign='right';
+  ctx.fillText('+100 GW',W-60,80);
+  ctx.fillStyle='#888';
+  ctx.font='700 12px Orbitron,Arial';
+  ctx.fillText('REWARD PENDING',W-60,104);
+
+  // separator
+  ctx.strokeStyle='#3eb7f433';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(60,140);ctx.lineTo(W-60,140);ctx.stroke();
+
+  // dół: info
+  const bottomY=940;
+  ctx.fillStyle='#fff';
+  ctx.font='700 32px Teko,Arial';
+  ctx.textAlign='center';
+  ctx.fillText(state.bakery.toUpperCase(),W/2,bottomY);
+
+  ctx.fillStyle='#3eb7f4';
+  ctx.font='400 16px "Share Tech Mono",monospace';
+  const coords=state.gps.lat.toFixed(4)+'°N  '+state.gps.lon.toFixed(4)+'°E';
+  ctx.fillText(coords,W/2,bottomY+30);
+
+  ctx.fillStyle='#666';
+  ctx.font='700 11px Orbitron,Arial';
+  const shortW=state.wallet.slice(0,4)+'...'+state.wallet.slice(-4);
+  const dateStr=new Date().toISOString().slice(0,10);
+  ctx.fillText('WALLET '+shortW+'  ·  '+dateStr+'  ·  CHALLENGE '+state.challenge,W/2,bottomY+58);
+
+  // dolny pasek
+  ctx.fillStyle='#3eb7f4';
+  ctx.font='900 14px Orbitron,Arial';
+  ctx.fillText('GORWELD.COM/HUNT',W/2,H-30);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// === DOWNLOAD ===
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  const link=document.createElement('a');
+  link.download='gorweld-cookie-cache-'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+});
+
+// === TWEET ===
+document.getElementById('tweetBtn').addEventListener('click',()=>{
+  const text=`Cookie cache forged @ ${state.bakery} 🍪⚒️\n\nThe welder hunts cookies for @CookiesChain.\n\n#CookieHunt #GorWeld $GORWELDD`;
+  const url='https://twitter.com/intent/tweet?text='+encodeURIComponent(text);
+  window.open(url,'_blank');
+});
+
+// === LOG (localStorage) ===
+function saveCacheToLog(){
+  const log=JSON.parse(localStorage.getItem('gw_caches')||'[]');
+  log.unshift({
+    bakery:state.bakery,
+    lat:state.gps.lat,lon:state.gps.lon,
+    wallet:state.wallet,
+    challenge:state.challenge,
+    timestamp:Date.now()
+  });
+  localStorage.setItem('gw_caches',JSON.stringify(log.slice(0,50)));
+  renderLog();
+}
+function renderLog(){
+  const log=JSON.parse(localStorage.getItem('gw_caches')||'[]');
+  const list=document.getElementById('logList');
+  if(log.length===0){list.innerHTML='<div class="log-empty">No caches yet. Go find some cookies.</div>';return;}
+  list.innerHTML=log.map((c,i)=>{
+    const d=new Date(c.timestamp);
+    return `<div class="log-i"><span class="li-n">#${String(log.length-i).padStart(3,'0')} · ${c.bakery}</span><span class="li-d">${d.toLocaleDateString()}</span></div>`;
+  }).join('');
+}
+renderLog();
+</script>
+</body>
+</html>

@@ -128,29 +128,19 @@ footer a:hover{color:#3eb7f4}
     <div class="tip"><b>Tip:</b> use your Phantom / Backpack address — it works on both Gorbagana and CookiesChain (Solana-fork chains, same keypair format).</div>
   </section>
 
-  <!-- 2. CHALLENGE -->
+  <!-- 2. PHOTO -->
   <section class="card">
-    <div class="card-h"><span class="card-num">2</span><span class="card-t">Today's Challenge Word</span></div>
-    <div class="challenge">
-      <div class="challenge-lbl">WRITE THIS NEXT TO THE COOKIES</div>
-      <div class="challenge-w" id="challenge">—</div>
-    </div>
-    <p class="card-d">Write the word on a napkin / receipt / piece of paper and put it next to the cookies. Anti-bot protection.</p>
-  </section>
-
-  <!-- 3. PHOTO -->
-  <section class="card">
-    <div class="card-h"><span class="card-num">3</span><span class="card-t">Photo of Cookies</span></div>
-    <p class="card-d">Shoot a live photo: cookies + challenge word in frame. From device camera only.</p>
+    <div class="card-h"><span class="card-num">2</span><span class="card-t">Photo of Cookies</span></div>
+    <p class="card-d">Shoot a live photo of the cookies / pastries. From device camera only.</p>
     <div class="photo-wrap" id="photoWrap"><img id="photoImg" alt="cache photo"></div>
     <input type="file" id="photoInput" accept="image/*" capture="environment">
     <button class="btn btn2" onclick="document.getElementById('photoInput').click()">📷 Take Photo</button>
     <div id="photoStatus"></div>
   </section>
 
-  <!-- 4. GPS -->
+  <!-- 3. GPS -->
   <section class="card">
-    <div class="card-h"><span class="card-num">4</span><span class="card-t">Location</span></div>
+    <div class="card-h"><span class="card-num">3</span><span class="card-t">Location</span></div>
     <p class="card-d">Tag the bakery on the map. Used to verify proof of visit.</p>
     <button class="btn btn2" id="gpsBtn">📍 Capture Location</button>
     <div id="gpsStatus"></div>
@@ -160,11 +150,18 @@ footer a:hover{color:#3eb7f4}
     </div>
   </section>
 
-  <!-- 5. BAKERY NAME -->
+  <!-- 4. BAKERY NAME -->
   <section class="card">
-    <div class="card-h"><span class="card-num">5</span><span class="card-t">Bakery Name</span></div>
+    <div class="card-h"><span class="card-num">4</span><span class="card-t">Bakery Name</span></div>
     <p class="card-d">Name of the place. Helps verify and tag the cache on the map.</p>
     <input id="bakery" class="input" placeholder="e.g. Cukiernia Pod Aniołem" autocomplete="off">
+  </section>
+
+  <!-- 5. NOTE (optional) -->
+  <section class="card">
+    <div class="card-h"><span class="card-num">5</span><span class="card-t">Note <span style="color:#555;font-size:9px;letter-spacing:2px">· OPTIONAL</span></span></div>
+    <p class="card-d">What did you find? Type of pastry, comment, vibe — anything.</p>
+    <input id="note" class="input" placeholder="e.g. szarlotka, makowiec, kawa po turecku..." autocomplete="off" maxlength="80">
   </section>
 
   <!-- 6. GENERATE -->
@@ -216,6 +213,7 @@ const state = {
   photoDataUrl: null,
   gps: null,
   bakery: '',
+  note: '',
   challenge: ''
 };
 
@@ -227,7 +225,6 @@ function todayChallenge(){
   return CHALLENGE_WORDS[seed%CHALLENGE_WORDS.length];
 }
 state.challenge=todayChallenge();
-document.getElementById('challenge').textContent=state.challenge;
 
 // === WALLET (persist) ===
 const walletInput=document.getElementById('wallet');
@@ -244,6 +241,12 @@ const bakeryInput=document.getElementById('bakery');
 bakeryInput.addEventListener('input',()=>{
   state.bakery=bakeryInput.value.trim();
   refreshGenerateBtn();
+});
+
+// === NOTE ===
+const noteInput=document.getElementById('note');
+noteInput.addEventListener('input',()=>{
+  state.note=noteInput.value.trim();
 });
 
 // === PHOTO ===
@@ -327,6 +330,8 @@ const generateStatus=document.getElementById('generateStatus');
 generateBtn.addEventListener('click',async()=>{
   generateStatus.innerHTML='<div class="status wait">Forging cache card...</div>';
   await drawCacheCard();
+  // schowaj surowy preview foto — wystarczy finalna karta
+  photoWrap.classList.remove('shown');
   cardPreview.classList.remove('hidden');
   shareGrid.classList.remove('hidden');
   generateStatus.innerHTML='<div class="status ok">✓ Cache card forged. Save & share it.</div>';
@@ -406,11 +411,17 @@ async function drawCacheCard(){
   const coords=state.gps.lat.toFixed(4)+'°N  '+state.gps.lon.toFixed(4)+'°E';
   ctx.fillText(coords,W/2,bottomY+30);
 
+  if(state.note){
+    ctx.fillStyle='#FFD700';
+    ctx.font='italic 400 14px "Share Tech Mono",monospace';
+    ctx.fillText('"'+state.note+'"',W/2,bottomY+54);
+  }
+
   ctx.fillStyle='#666';
   ctx.font='700 11px Orbitron,Arial';
   const shortW=state.wallet.slice(0,4)+'...'+state.wallet.slice(-4);
   const dateStr=new Date().toISOString().slice(0,10);
-  ctx.fillText('WALLET '+shortW+'  ·  '+dateStr+'  ·  CHALLENGE '+state.challenge,W/2,bottomY+58);
+  ctx.fillText('WALLET '+shortW+'  ·  '+dateStr+'  ·  TAG '+state.challenge,W/2,bottomY+78);
 
   // dolny pasek
   ctx.fillStyle='#3eb7f4';
@@ -448,6 +459,7 @@ function saveCacheToLog(){
   const log=JSON.parse(localStorage.getItem('gw_caches')||'[]');
   log.unshift({
     bakery:state.bakery,
+    note:state.note,
     lat:state.gps.lat,lon:state.gps.lon,
     wallet:state.wallet,
     challenge:state.challenge,

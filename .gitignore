@@ -1,0 +1,12 @@
+# Prywatny kontekst Claude — NIGDY do publicznego repo
+CLAUDE_CONTEXT*.md
+CLAUDE_CONTEXT.md
+
+# Systemowe / edytor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Lokalne notatki
+*.local.md

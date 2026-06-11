@@ -1175,9 +1175,16 @@ function cutMove(e){
 }
 function depositKerf(x,y,ns,k){
   const sx=x+(ns.x-x)*0.55, sy=y+(ns.y-y)*0.55;
-  pctx.save(); pctx.globalCompositeOperation="destination-out"; pctx.beginPath(); pctx.arc(sx,sy,k,0,7); pctx.fill(); pctx.restore();
-  sctx.save(); sctx.globalCompositeOperation="lighter"; sctx.fillStyle="rgba(255,110,30,.16)";
-  sctx.beginPath(); sctx.arc(sx,sy,k*1.7,0,7); sctx.fill(); sctx.restore();
+  // 1) wypal materiał z płyty — realna szczelina na wylot (odsłania tło)
+  pctx.save(); pctx.globalCompositeOperation="destination-out"; pctx.beginPath(); pctx.arc(sx,sy,k*1.05,0,7); pctx.fill(); pctx.restore();
+  // 2) TRWAŁY rzaz na warstwie seam: ciemny rdzeń + świeże krawędzie cięcia + delikatny nalot cieplny (HAZ)
+  sctx.save();
+  sctx.fillStyle="rgba(7,9,11,.88)"; sctx.beginPath(); sctx.arc(sx,sy,k,0,7); sctx.fill();            // ciemna szczelina (zostaje po paleniu)
+  sctx.lineWidth=1.6; sctx.strokeStyle="rgba(150,168,185,.22)";                                        // metaliczna krawędź rzazu
+  sctx.beginPath(); sctx.arc(sx,sy,k*1.18,0,7); sctx.stroke();
+  sctx.globalCompositeOperation="lighter"; sctx.strokeStyle=(proc==="PLASMA"?"rgba(150,110,255,.08)":"rgba(255,140,40,.08)");
+  sctx.beginPath(); sctx.arc(sx,sy,k*1.55,0,7); sctx.stroke();                                         // opalenie wokół rzazu
+  sctx.restore();
   baked.push({x:sx,y:sy,r:k,off:ns.d});
 }
 function cutCoverage(){ if(!seamPts.length||!baked.length) return 0; const k=kerfPx(); let c=0;

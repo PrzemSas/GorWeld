@@ -143,11 +143,13 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
 @media(max-width:900px){.about-g,.game-card,.sov{grid-template-columns:1fr}.tok-g{grid-template-columns:1fr}.nft-showcase{grid-template-columns:repeat(2,1fr)}.soc-g{grid-template-columns:1fr}.sov-g{grid-template-columns:1fr 1fr}.nlinks{display:none}.nlinks.open{display:flex;flex-direction:column;position:absolute;top:50px;right:12px;background:#08080aee;border:1px solid #3eb7f418;border-radius:8px;padding:14px;backdrop-filter:blur(12px)}.mmenu{display:block}}
 @media(max-width:600px){.hero-btns{flex-direction:column;align-items:center}.btn{width:100%;max-width:260px;justify-content:center}.sov-g{grid-template-columns:1fr}}
 </style>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 </head>
 <body>
 <div class="scanlines"></div>
 <div class="scan-after"></div>
-<nav id="nav"><a href="#" class="nlogo">GORWELD</a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><a href="#about">About</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="#sovereign">Sovereign</a><a href="#community">Community</a><a href="/demo" class="ncta">▶ Play Demo</a></div></nav>
+<nav id="nav"><a href="#" class="nlogo" style="display:flex;align-items:center;gap:8px"><img src="/favicon.png" alt="GORWELD" style="height:36px;width:36px;border-radius:50%;display:block"></a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><a href="#about">About</a><a href="#chains">Chains</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="#sovereign">Sovereign</a><a href="#community">Community</a><a href="/demo" class="ncta">▶ Play Demo</a></div></nav>
 
 <section class="hero">
   <div class="hero-vig"></div><div class="hero-floor"></div><div class="hero-embers" id="heroEmbers"></div>
@@ -168,7 +170,8 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
     <text font-family="Orbitron,sans-serif" font-size="6" fill="#3eb7f4" opacity=".2" letter-spacing="4"><textPath href="#tc" startOffset="8%">DUMPSTER FORGE INDUSTRIES • GORBAGANA CHAIN •</textPath></text>
     <path id="tc" d="M100,8 a92,92 0 1,1 0,184 a92,92 0 1,1 0,-184" fill="none"/>
   </svg>
-  <div class="hero-badge">GORBAGANA CHAIN // EST. 2025</div>
+  <img src="/banner.jpg" alt="GORWELD welder between Gorbagana and Cookie Chain" style="position:relative;z-index:1;width:min(920px,94vw);border-radius:10px;margin:8px 0 16px;border:1px solid #3eb7f433;box-shadow:0 0 45px rgba(59,183,244,.2)">
+  <div class="hero-badge">GORBAGANA + COOKIE CHAIN // EST. 2025</div>
   <h1 class="hero-t">GORWELD<small>DUMPSTER FORGE </small></h1>
   <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged on Gorbagana Chain.</p>
   <div class="hero-stats"><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div></div>
@@ -214,12 +217,48 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
   <div class="forge-lbl">DUMPSTER FORGE SMELTER // STATUS: ONLINE</div>
 </div></div></div></section>
 
+<section id="chains"><div class="si">
+  <div class="stag">// BUILT ON TWO CHAINS</div><div class="sdiv"></div>
+  <h2 class="stitle">Two fires. <em>One welder.</em></h2>
+  <p class="sdesc">GorWeld backs both chains — bow to neither. The same Trinity (<b>$GORWELDD · $SCRAPCOIN · $GORIUS</b>) lives on both. Each chain plays its role in the forge.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px">
+    <div style="border:1px solid #6ee7a733;border-radius:10px;padding:24px;background:linear-gradient(180deg,rgba(110,231,167,.06),transparent)">
+      <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;color:#6ee7a7;letter-spacing:2px">⛓ GORBAGANA</div>
+      <div style="font-size:9px;color:#4ade80;letter-spacing:3px;margin-top:5px;font-family:'Orbitron',sans-serif">ORIGIN · NFT · BURN</div>
+      <ul style="list-style:none;margin:16px 0 0;padding:0;font-size:12px;color:#999;line-height:2.2">
+        <li>🔥 Burn Relics Genesis — 10 NFT (Metaplex)</li>
+        <li>💀 500B + 100B $GORWELDD burned</li>
+        <li>🏭 Dumpster Forge — where it began</li>
+        <li>🪙 Trinity tokens live on-chain</li>
+      </ul>
+      <div style="display:flex;gap:6px;margin-top:20px">
+        <a href="https://explorer.gorbagana.wtf" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;padding:9px 4px;border:1px solid #6ee7a744;color:#6ee7a7;border-radius:3px;font-family:'Orbitron',sans-serif;letter-spacing:1px">EXPLORER ↗</a>
+        <a href="https://gorweld.fun" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;padding:9px 4px;border:1px solid #6ee7a744;color:#6ee7a7;border-radius:3px;font-family:'Orbitron',sans-serif;letter-spacing:1px">HUB ↗</a>
+      </div>
+    </div>
+    <div style="border:1px solid #00e5ff33;border-radius:10px;padding:24px;background:linear-gradient(180deg,rgba(0,229,255,.06),transparent)">
+      <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;color:#00e5ff;letter-spacing:2px">🍪 COOKIE CHAIN <span style="font-size:9px;opacity:.7">(SVM)</span></div>
+      <div style="font-size:9px;color:#22d3ee;letter-spacing:3px;margin-top:5px;font-family:'Orbitron',sans-serif">LIQUIDITY · DEFI · TRADING</div>
+      <ul style="list-style:none;margin:16px 0 0;padding:0;font-size:12px;color:#999;line-height:2.2">
+        <li>💰 CookieSwap DEX — swap & LP</li>
+        <li>💧 Live $GORWELDD / wCOOK pools</li>
+        <li>🌉 1:1 sCOOK ↔ Solana bridge</li>
+        <li>🪙 Trinity tokens live on-chain</li>
+      </ul>
+      <div style="display:flex;gap:6px;margin-top:20px">
+        <a href="https://cookiescan.io" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;padding:9px 4px;border:1px solid #00e5ff44;color:#00e5ff;border-radius:3px;font-family:'Orbitron',sans-serif;letter-spacing:1px">EXPLORER ↗</a>
+        <a href="https://cookieswap.fun" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;padding:9px 4px;border:1px solid #00e5ff44;color:#00e5ff;border-radius:3px;font-family:'Orbitron',sans-serif;letter-spacing:1px">DEX ↗</a>
+      </div>
+    </div>
+  </div>
+</div></section>
+
 <section id="tokens" class="sec-dark"><div class="si">
   <div class="stag">// ECOSYSTEM TOKENS</div><div class="sdiv"></div>
   <h2 class="stitle">Three tokens. <em>One forge.</em></h2>
   <p class="sdesc">Each token has a role in the Dumpster Forge economy. Burned, scarce, welded to last.</p>
   <div class="tok-g">
-    <div class="tok" style="--tc:#3eb7f4"><div class="tok-sym">$GORWELDD</div><div class="tok-name">PRIMARY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div><div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:#0ea5f1">500,000,000,000</span></div></div><div class="tok-tag" style="background:#3eb7f412;color:#3eb7f4">DEFLATIONARY 🔥</div></div>
+    <div class="tok" style="--tc:#3eb7f4"><div class="tok-sym">$GORWELDD</div><div class="tok-name">PRIMARY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">SUPPLY</span><span class="tv">490,000,000,000</span></div><div class="tok-row"><span class="tl">BURNED</span><span class="tv" style="color:#0ea5f1">500,000,000,000</span></div><div class="tok-row"><span class="tl">CHAINS</span><span class="tv" style="font-size:9px">⛓ Gorbagana · 🍪 Cookie (SVM)</span></div></div><div class="tok-tag" style="background:#3eb7f412;color:#3eb7f4">DEFLATIONARY 🔥 · DUAL-CHAIN</div><div style="display:flex;gap:6px;margin-top:10px"><a href="https://explorer.gorbagana.wtf/address/GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;letter-spacing:1px;padding:6px 4px;border:1px solid #3eb7f433;color:#3eb7f4;border-radius:3px;font-family:'Orbitron',sans-serif">⛓ GORBAGANA ↗</a><a href="https://cookiescan.io/address/GCQ4NYEd2P8vRFDn9wadeE1KAPfckWpzJUUyzTqyimG7" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:8px;letter-spacing:1px;padding:6px 4px;border:1px solid #00e5ff33;color:#00e5ff;border-radius:3px;font-family:'Orbitron',sans-serif">🍪 COOKIE ↗</a></div></div>
     <div class="tok" style="--tc:#00e5ff"><div class="tok-sym">$SCRAPCOIN</div><div class="tok-name">UTILITY TOKEN</div><div class="tok-data"><div class="tok-row"><span class="tl">TOTAL SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">WALLET CAP</span><span class="tv" style="color:#00e5ff">4,000,000</span></div></div><div class="tok-tag" style="background:#00e5ff12;color:#00e5ff">4M MAX / WALLET ⚡</div></div>
     <div class="tok" style="--tc:#FFD700"><div class="tok-sym" style="font-size:26px">$GORIUS</div><div class="tok-name">GORIUS TRASHINUS</div><div class="tok-data"><div class="tok-row"><span class="tl">CURRENT SUPPLY</span><span class="tv">1,000,000,000</span></div><div class="tok-row"><span class="tl">TARGET</span><span class="tv" style="color:#FFD700">10,000,000</span></div></div><div class="tok-tag" style="background:#FFD70012;color:#FFD700">FUNDRAISING 🎯</div></div>
   </div>
@@ -276,8 +315,9 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
     <a href="https://gorweld.fun" target="_blank" class="soc"><div class="soc-ic">⚡</div><div class="soc-h">GORWELD.FUN</div><div class="soc-d">Gorbagana ecosystem hub</div></a>
   </div>
   <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-    <a href="https://trashscan.io" target="_blank" class="soc"><div class="soc-ic">🔍</div><div class="soc-h">TRASHSCAN.IO</div><div class="soc-d">Block explorer</div></a>
-    <a href="https://trashbin.fun" target="_blank" class="soc"><div class="soc-ic">💰</div><div class="soc-h">TRASHBIN.FUN</div><div class="soc-d">Swap & DeFi</div></a>
+    <a href="https://explorer.gorbagana.wtf" target="_blank" rel="noopener" class="soc"><div class="soc-ic">⛓</div><div class="soc-h">GORBAGANA.WTF</div><div class="soc-d">Gorbagana explorer</div></a>
+    <a href="https://cookiescan.io" target="_blank" rel="noopener" class="soc"><div class="soc-ic">🍪</div><div class="soc-h">COOKIESCAN.IO</div><div class="soc-d">Cookie Chain explorer</div></a>
+    <a href="https://cookieswap.fun" target="_blank" rel="noopener" class="soc"><div class="soc-ic">💰</div><div class="soc-h">COOKIESWAP.FUN</div><div class="soc-d">Cookie Chain DEX · swap</div></a>
   </div>
 </div></section>
 
@@ -312,7 +352,7 @@ for(var i=0;i<30;i++){var e=document.createElement('div');e.className='ember';va
 var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','<span class="c1">100B BURNED</span> — SOVEREIGN #9 CLOSED','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
 var tt=document.getElementById('ticker');for(var r=0;r<2;r++){for(var j=0;j<tItems.length;j++){var d=document.createElement('div');d.className='ticker-i';d.innerHTML=tItems[j];tt.appendChild(d)}}
 var CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
-var GW=["https://ipfs.io/ipfs/"+CID,"https://gateway.pinata.cloud/ipfs/"+CID,"https://nftstorage.link/ipfs/"+CID,"https://cloudflare-ipfs.com/ipfs/"+CID];
+var GW=["https://gateway.pinata.cloud/ipfs/"+CID,"https://dweb.link/ipfs/"+CID,"https://ipfs.io/ipfs/"+CID];
 var ns=document.getElementById('nftShowcase');
 for(var i=1;i<=10;i++){var c=document.createElement('div');c.className='nft-th';c.setAttribute('data-i',i);c.onclick=function(){location.href='/relics#relic-'+this.getAttribute('data-i')};
 var img=document.createElement('img');img.loading='lazy';img.alt='Burn Relic #'+String(i).padStart(3,'0');img.setAttribute('data-gw','0');img.setAttribute('data-n',i);img.src=GW[0]+'/'+i+'.png';

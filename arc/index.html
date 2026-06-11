@@ -112,6 +112,8 @@
       <button class="proc on" data-proc="MMA">MMA 111</button>
       <button class="proc" data-proc="MIG">MIG/MAG 135</button>
       <button class="proc" data-proc="TIG">TIG 141</button>
+      <button class="proc" data-proc="CUT">🔥 TLEN 81</button>
+      <button class="proc" data-proc="PLASMA">⚡ PLAZMA</button>
     </div>
     <div class="group"><span class="lbl" data-i18n="joint">Złącze</span>
       <button class="joint on" data-joint="butt" data-i18n="jt_butt">Doczołowe V</button>
@@ -267,7 +269,10 @@ const I18N={
   pass_root:"przetop", pass_fill:"wypełnienie", pass_cap:"lico",
   t_passdone:"✅ WARSTWA %1 → teraz: %2", t_passlast:"⚡ OSTATNIA WARSTWA — lico",
   def_crater:"Krater / niewypełniony koniec ściegu", def_rootlack:"Słaby przetop w grani (warstwa przetopowa %1%)",
-  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", btn_methods:"📖 METODY", methods_title:"Metody — opis fachu", btn_close:"ZAMKNIJ", tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
+  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", btn_methods:"📖 METODY", methods_title:"Metody — opis fachu", btn_close:"ZAMKNIJ",
+  t_cut_steelonly:"🔥 Palnik tlenowy tnie TYLKO stal — nie nierdzewkę ani alu", t_cut_preheat:"🔥 Podgrzewaj przy starcie — trzymaj wolno aż przebije", t_cut_pierced:"✅ Przebite! Prowadź rzaz po linii", cut_word:"cięcie",
+  cd_incomplete:"Niedocięcie — rzaz nie przeszedł na wylot (%1%)", cd_wide:"Szeroki rzaz / nadtopienie krawędzi (za wolno)", cd_dross:"Żużel i grat na dole (za szybko)", cd_dev:"Odchył od linii — krzywy rzaz", cd_clean:"Czysty rzaz — gładkie, prostopadłe krawędzie",
+  tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
   tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym większa nagroda $GORWELDD (gwiazdki = mnożnik).",
   tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — napis <b style='color:#5fe08a'>DOBRE TEMPO</b> = pełny przetop. Za szybko = zimny zakład, za wolno = przepalenie.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
@@ -298,7 +303,10 @@ const I18N={
   pass_root:"root", pass_fill:"fill", pass_cap:"cap",
   t_passdone:"✅ LAYER %1 → now: %2", t_passlast:"⚡ LAST LAYER — cap",
   def_crater:"Crater / unfilled bead end", def_rootlack:"Poor root penetration (root pass %1%)",
-  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", btn_methods:"📖 METHODS", methods_title:"Methods — the trade", btn_close:"CLOSE", tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
+  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", btn_methods:"📖 METHODS", methods_title:"Methods — the trade", btn_close:"CLOSE",
+  t_cut_steelonly:"🔥 Oxy torch cuts STEEL only — not stainless or aluminium", t_cut_preheat:"🔥 Preheat at the start — hold slow until it pierces", t_cut_pierced:"✅ Pierced! Run the cut along the line", cut_word:"cut",
+  cd_incomplete:"Incomplete cut — didn't sever through (%1%)", cd_wide:"Wide kerf / edge melt (too slow)", cd_dross:"Dross on the underside (too fast)", cd_dev:"Off the cut line — crooked kerf", cd_clean:"Clean cut — smooth, square edges",
+  tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
   tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. The harder it is, the bigger the $GORWELDD reward (stars = multiplier).",
   tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — <b style='color:#5fe08a'>GOOD SPEED</b> = full penetration. Too fast = cold lap, too slow = burn-through.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
@@ -329,7 +337,10 @@ const I18N={
   pass_root:"корень", pass_fill:"заполнение", pass_cap:"облицовка",
   t_passdone:"✅ СЛОЙ %1 → теперь: %2", t_passlast:"⚡ ПОСЛЕДНИЙ СЛОЙ — облицовка",
   def_crater:"Кратер / незаваренный конец шва", def_rootlack:"Слабый провар корня (корневой слой %1%)",
-  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", btn_methods:"📖 МЕТОДЫ", methods_title:"Методы — ремесло", btn_close:"ЗАКРЫТЬ", tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
+  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", btn_methods:"📖 МЕТОДЫ", methods_title:"Методы — ремесло", btn_close:"ЗАКРЫТЬ",
+  t_cut_steelonly:"🔥 Кислородный резак режет ТОЛЬКО сталь — не нержавейку и не алюминий", t_cut_preheat:"🔥 Прогрев у старта — держи медленно до прожига", t_cut_pierced:"✅ Прожиг! Веди рез по линии", cut_word:"рез",
+  cd_incomplete:"Недорез — не прошло насквозь (%1%)", cd_wide:"Широкий рез / оплавление кромки (медленно)", cd_dross:"Грат снизу (слишком быстро)", cd_dev:"Уход от линии — кривой рез", cd_clean:"Чистый рез — гладкие, прямые кромки",
+  tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
   tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше награда $GORWELDD (звёзды = множитель).",
   tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — <b style='color:#5fe08a'>ХОРОШИЙ ТЕМП</b> = полный провар. Быстро = непровар, медленно = прожог.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
@@ -348,6 +359,8 @@ const PROCESS = {
   MMA:{ name:{pl:"MMA 111 — elektroda otulona",en:"MMA 111 — stick electrode",ru:"MMA 111 — штучный электрод"}, arc:"#dfeeff", vMul:1.00, sparks:1.4, fume:1.0, slag:1, rippleK:1.0, ripDark:0.34, crown:0.85, buzz:90, hiss:1700, crackInt:60, crackDepth:0.22 },
   MIG:{ name:{pl:"MIG/MAG 135 — drut",en:"MIG/MAG 135 — wire",ru:"MIG/MAG 135 — проволока"}, arc:"#cfe6ff", vMul:1.40, sparks:0.7, fume:0.7, slag:0, rippleK:0.55,ripDark:0.20, crown:0.7, buzz:125,hiss:2300, crackInt:85, crackDepth:0.10 },
   TIG:{ name:{pl:"TIG 141 — elektroda wolframowa",en:"TIG 141 — tungsten",ru:"TIG 141 — вольфрам"}, arc:"#b7ffff", vMul:0.70, sparks:0.0, fume:0.15,slag:0, rippleK:1.8, ripDark:0.42, crown:1.2, buzz:240,hiss:3300, crackInt:150,crackDepth:0.04 },
+  CUT:{ name:{pl:"CIĘCIE 81 — tlen + acetylen",en:"OXY-FUEL 81 — cutting",ru:"РЕЗКА 81 — кислород+ацетилен"}, arc:"#ffb066", vMul:0.85, sparks:2.0, fume:1.3, slag:0, rippleK:1.0, ripDark:0.30, crown:0.7, buzz:70, hiss:1400, crackInt:40, crackDepth:0.15 },
+  PLASMA:{ name:{pl:"PLAZMA — cięcie plazmowe",en:"PLASMA — cutting",ru:"ПЛАЗМА — резка"}, arc:"#cda8ff", vMul:1.50, sparks:1.4, fume:0.5, slag:0, rippleK:1.0, ripDark:0.30, crown:0.7, buzz:300, hiss:3600, crackInt:120, crackDepth:0.05 },
 };
 const POSITIONS = {
   PA:{lbl:"PA",name:{pl:"PA — podolna (flat)",en:"PA — flat",ru:"PA — нижнее"},ang:0,g:0.025,stars:1,joints:["butt","fillet"]},
@@ -376,7 +389,7 @@ const MATERIAL={
 };
 const BASE_REWARD=50; // $GORWELDD for a perfect A on the easiest coupon
 function difficulty(){
-  const mb={MIG:1.0,MMA:1.6,TIG:2.2}[proc];
+  const mb={MIG:1.0,MMA:1.6,TIG:2.2,CUT:1.1,PLASMA:1.3}[proc];
   const pm=[0,1.0,1.25,1.6,2.1,2.8][POSITIONS[posKey].stars]||1;
   const jm=joint==="pipe"?1.3:joint==="fillet"?0.9:1.0;
   const mf=MATERIAL[bead][proc]||1;
@@ -423,7 +436,7 @@ const PASS_W={root:0.72, fill:0.92, cap:1.00};   // bead width multiplier per la
 function passPlan(){ if(thick<=3) return ["cap"]; if(thick<=5) return ["root","cap"]; return ["root","fill","cap"]; }
 
 // ── Economy (DEMO: GW wallet in localStorage; COOK→GW buy-in + cashout wired later) ──
-const CONSUMABLE={MMA:2, MIG:2, TIG:3};            // electrode / wire — cheap, burned every job (the sink)
+const CONSUMABLE={MMA:2, MIG:2, TIG:3, CUT:3, PLASMA:4};            // electrode / wire — cheap, burned every job (the sink)
 const MAT_BASE={steel:6, ss:14, alu:26};           // plate price — alu = the expensive stake you can ruin
 let gw=120, pool=200, burned=0, jobCost=0, jobPaid=false, jobSettled=false;
 try{ const a=localStorage.getItem("gorweld_gw"); if(a!=null) gw=+a; const b=localStorage.getItem("gorweld_pool"); if(b!=null) pool=+b; }catch(e){}
@@ -437,7 +450,7 @@ function updateWallet(){ const el=document.getElementById("wal"); if(el) el.inne
 function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; }
 
 // ── Geometry ──────────────────────────────────────────────────────
-function buildWorkpiece(){
+function buildWorkpiece(){ if(isCut()){ buildCutPiece(); return; }
   const P=POSITIONS[posKey]; recalc(); seamPts=[];
   const cx=W/2,cy=H*0.66;
   if(P.pipe){
@@ -546,7 +559,7 @@ function moltenColor(age){ const c=BEADS[bead];
 
 // ── Pointer / laying ──────────────────────────────────────────────
 function pos(e){ const t=e.touches?e.touches[0]:e; return {x:t.clientX,y:t.clientY}; }
-function start(e){ if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+function start(e){ if(isCut())return cutStart(e); if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
   if(!jobPaid){ const price=jobPrice();                                  // buy consumable + plate on first strike
     if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
@@ -554,7 +567,7 @@ function start(e){ if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y
     showToast(fmt("t_bought",[price]),"#ffae3c"); }
   welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
   lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud(); e.preventDefault(); }
-function move(e){
+function move(e){ if(isCut())return cutMove(e);
   if(!welding)return; const p=pos(e),now=performance.now(); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   recEv('move',p.x,p.y,now);
   if(last){
@@ -583,7 +596,7 @@ function move(e){
   }
   last=p; lastT=now; e.preventDefault();
 }
-function end(){ if(welding&&last) recEv('up',last.x,last.y,performance.now()); welding=false; last=null; speedFb=""; arcOff();
+function end(){ if(isCut())return cutEnd(); if(welding&&last) recEv('up',last.x,last.y,performance.now()); welding=false; last=null; speedFb=""; arcOff();
   if(baked.length>=10 && coverageNow()>=0.9){               // full layer covered
     if(passIndex < passPlanArr.length-1) bankPass();        // more layers to go → freeze this one, weld the next
     else inspect();                                         // last layer done → grade the whole joint
@@ -1073,6 +1086,128 @@ function fillMethods(){
       +'<div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9aa6ae">'+g.b[lang]+'</div></div>'); });
 }
 document.getElementById("methods").onclick=()=>{ fillMethods(); openModal("methodsModal"); };
+
+// ════════ TRYB CIĘCIA — oxy-fuel (TLEN) + PLAZMA ════════
+let cutHeat=0, pierced=false, cutDevSum=0, cutDevN=0;
+function isCut(){ return proc==="CUT"||proc==="PLASMA"; }
+function kerfPx(){ return proc==="PLASMA" ? 3.2 : 5 + thick*0.45; }
+function cutLineY(){ return H*0.62; }
+function buildCutPiece(){
+  recalc(); seamPts=[]; baked=[]; cutHeat=0; pierced=false; cutDevSum=0; cutDevN=0;
+  const y=cutLineY(), x0=W*0.18, x1=W*0.82;
+  for(let i=0;i<=150;i++) seamPts.push({x:x0+(x1-x0)*i/150, y});
+  drawCutPlate();
+}
+function drawCutPlate(){
+  pctx.clearRect(0,0,W,H);
+  const y=cutLineY(), x0=W*0.18-40, x1=W*0.82+40, ph=82;
+  const bg=pctx.createRadialGradient(W/2,H*0.4,60,W/2,H/2,Math.max(W,H)*0.8);
+  bg.addColorStop(0,"rgba(20,24,28,.30)"); bg.addColorStop(1,"rgba(8,10,12,.72)"); pctx.fillStyle=bg; pctx.fillRect(0,0,W,H);
+  const tint = bead==="alu"?["#9aa0a6","#6e747a","#54595e"] : bead==="ss"?["#aeb6bd","#7c848b","#5a6066"] : ["#7a828a","#565d64","#3c4147"];
+  const g=pctx.createLinearGradient(0,y-ph,0,y+ph);
+  g.addColorStop(0,tint[0]); g.addColorStop(0.5,tint[1]); g.addColorStop(1,tint[2]);
+  pctx.save(); pctx.shadowColor="rgba(0,0,0,.5)"; pctx.shadowBlur=18; pctx.shadowOffsetY=6;
+  pctx.fillStyle=g; pctx.fillRect(x0,y-ph,x1-x0,ph*2); pctx.restore();
+  pctx.strokeStyle="rgba(255,255,255,.12)"; pctx.lineWidth=1; pctx.strokeRect(x0,y-ph,x1-x0,ph*2);
+  pctx.save(); pctx.setLineDash([10,7]); pctx.strokeStyle="rgba(255,174,60,.65)"; pctx.lineWidth=2;
+  pctx.beginPath(); pctx.moveTo(seamPts[0].x,y); pctx.lineTo(seamPts[seamPts.length-1].x,y); pctx.stroke(); pctx.restore();
+  pctx.fillStyle="#ff5a1e"; pctx.beginPath(); pctx.arc(seamPts[0].x,y,5,0,7); pctx.fill();
+  pctx.fillStyle="rgba(255,255,255,.85)"; pctx.font="700 9px 'Segoe UI'"; pctx.textAlign="center"; pctx.fillText("START",seamPts[0].x,y-12);
+}
+function cutStart(e){
+  if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; }
+  if(proc==="CUT" && bead!=="steel"){ showToast(t("t_cut_steelonly"),"#ff5a4a"); e.preventDefault(); return; }
+  if(!jobPaid){ const price=jobPrice();
+    if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
+    gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
+    showToast(fmt("t_bought",[price]),"#ffae3c"); }
+  welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx;
+  cutHeat=0; pierced=(proc==="PLASMA");
+  if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); arcIntensity(0.3);
+  showToast(proc==="PLASMA"?t("t_cut_pierced"):t("t_cut_preheat"), proc==="PLASMA"?"#1fd6e3":"#ffae3c");
+  e.preventDefault();
+}
+function cutMove(e){
+  if(!welding)return; const p=pos(e),now=performance.now(); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  recEv('move',p.x,p.y,now);
+  if(last){
+    const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy),dt=Math.max(8,now-lastT);
+    const inst=dist/(dt/1000),prev=vEMA; vEMA=vEMA*0.7+inst*0.3; vVarSum+=Math.abs(vEMA-prev);
+    if(dist){ ux=ddx/dist; uy=ddy/dist; }
+    const k=kerfPx();
+    if(!pierced){
+      const ns0=nearestSeam(p.x,p.y);
+      if(ns0.d<k*3 && dist<6){ cutHeat+=dt/1000/0.9; arcIntensity(0.3+Math.min(0.5,cutHeat*0.4));
+        molten.push({x:p.x,y:p.y,r:idealHalf*0.9,t:now}); }
+      if(cutHeat>=1){ pierced=true; showToast(t("t_cut_pierced"),"#1fd6e3"); }
+    } else {
+      const step=Math.max(2,k*0.7),n=Math.max(1,Math.floor(dist/step));
+      for(let i=1;i<=n;i++){ const x=last.x+ddx*(i/n),y=last.y+ddy*(i/n);
+        if(!onPlate(x,y)) continue; const ns=nearestSeam(x,y);
+        depositKerf(x,y,ns,k); molten.push({x,y,r:k,t:now}); cutDevSum+=ns.d; cutDevN++; }
+      arcIntensity(Math.min(1,dist/14));
+    }
+    speedSum+=vEMA; speedN++; speedFb=feedback();
+  }
+  last=p; lastT=now; e.preventDefault();
+}
+function depositKerf(x,y,ns,k){
+  const sx=x+(ns.x-x)*0.55, sy=y+(ns.y-y)*0.55;
+  pctx.save(); pctx.globalCompositeOperation="destination-out"; pctx.beginPath(); pctx.arc(sx,sy,k,0,7); pctx.fill(); pctx.restore();
+  sctx.save(); sctx.globalCompositeOperation="lighter"; sctx.fillStyle="rgba(255,110,30,.16)";
+  sctx.beginPath(); sctx.arc(sx,sy,k*1.7,0,7); sctx.fill(); sctx.restore();
+  baked.push({x:sx,y:sy,r:k,off:ns.d});
+}
+function cutCoverage(){ if(!seamPts.length||!baked.length) return 0; const k=kerfPx(); let c=0;
+  for(const pt of seamPts){ let d=1e18; for(const b of baked){ const dd=(b.x-pt.x)**2+(b.y-pt.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)<k*1.8) c++; }
+  return c/seamPts.length; }
+function cutEnd(){
+  if(welding&&last) recEv('up',last.x,last.y,performance.now());
+  welding=false; last=null; speedFb=""; arcOff();
+  if(baked.length>=10 && cutCoverage()>=0.8) cutInspect();
+}
+function cutInspect(){
+  if(baked.length<10){ showToast(t("t_layfirst"),"#ff9a3c"); return; }
+  const coverage=cutCoverage(), k=kerfPx();
+  const avgDev=cutDevN?cutDevSum/cutDevN:0;
+  const straight=Math.max(0,Math.min(1,1-avgDev/(k*2.2)));
+  const tol=MATERIAL[bead].tol, avgV=speedN?speedSum/speedN:targetPx;
+  const spdAcc=Math.max(0,1-Math.abs(avgV-targetPx)/(targetPx*tol));
+  const fast=avgV>targetPx*(1+0.45*tol), slow=avgV<targetPx*(1-0.45*tol);
+  let score=Math.max(0,Math.min(100,Math.round(coverage*55 + spdAcc*25 + straight*20)));
+  const D=[];
+  if(coverage<0.9) D.push({s:coverage<0.7?"major":"minor",t:fmt("cd_incomplete",[Math.round((1-coverage)*100)])});
+  if(slow) D.push({s:"minor",t:t("cd_wide")});
+  if(fast) D.push({s:(coverage<0.8?"major":"minor"),t:t("cd_dross")});
+  if(straight<0.6) D.push({s:straight<0.4?"major":"minor",t:t("cd_dev")});
+  if(D.length===0) D.push({s:"ok",t:t("cd_clean")});
+  const major=D.some(d=>d.s==="major");
+  let iso,isoCol; if(major||score<50){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
+  const letter=score>=90?"A":score>=78?"B":score>=62?"C":score>=45?"D":"F";
+  const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
+  const diff=(proc==="PLASMA"?1.3:1.1)*(bead==="alu"?1.6:bead==="ss"?1.3:1.0)*(1+thick*0.05);
+  const mat=matCost(), mult=payMult(score); let payout=Math.round(mat*mult),jackpot=0;
+  if(!jobSettled){ if(score>=90 && diff>=1.6 && pool>0) jackpot=Math.round(pool*0.4);
+    const won=payout+jackpot; gw+=won; pool-=won; jobSettled=true; saveWallet(); updateWallet(); }
+  const net=payout+jackpot-jobCost;
+  lastReport={score,letter,iso,proc,posKey,thick,coverage,spdAcc,evenness:straight,avgV,diff,cost:jobCost,payout:payout+jackpot,jackpot,net,balance:gw,material:MATERIAL[bead].name[lang]};
+  document.getElementById("rLetter").textContent=letter; document.getElementById("rLetter").style.color=col;
+  const isoEl=document.getElementById("rIso"); isoEl.textContent="ISO 9013 · "+iso; isoEl.style.background=isoCol+"22"; isoEl.style.color=isoCol;
+  document.getElementById("rPct").textContent=score+"% · "+(proc==="PLASMA"?"PLAZMA":"TLEN")+" · "+t("cut_word")+" · "+thick+"mm";
+  document.getElementById("rCov").textContent=Math.round(coverage*100)+"%";
+  document.getElementById("rSpd").textContent=Math.round(spdAcc*100)+"% ("+(avgV/PX_PER_MM).toFixed(1)+"/"+(targetPx/PX_PER_MM).toFixed(1)+" mm/s)";
+  document.getElementById("rEven").textContent=Math.round(straight*100)+"%";
+  const rb=document.getElementById("rReward"), tier=valueTier(diff);
+  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  else rb.innerHTML=t("rew_zero")+ecoTail;
+  const ul=document.getElementById("rDefects"); ul.innerHTML="";
+  for(const d of D){ const li=document.createElement("li");
+    li.innerHTML='<span class="sev '+d.s+'">'+(d.s==="ok"?t("sev_ok"):d.s==="major"?t("sev_major"):t("sev_minor"))+'</span><span>'+d.t+'</span>'; ul.appendChild(li); }
+  const mid=seamPts[Math.floor(seamPts.length/2)]; drawZoom(mid.x,mid.y, D.find(d=>d.s!=="ok"));
+  openModal("repModal");
+}
 document.getElementById("pricing").onclick=()=>{ document.getElementById("priceFrame").src="cennik.html?l="+lang+"&t="+Date.now(); openModal("priceModal"); };
 document.getElementById("priceClose").onclick=()=>closeModal("priceModal");
 (()=>{ const v=document.getElementById("pagebg"); if(!v)return; v.muted=true; const p=v.play&&v.play(); if(p&&p.catch)p.catch(()=>{}); document.addEventListener("click",()=>v.play&&v.play(),{once:true}); })();

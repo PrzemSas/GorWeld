@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GORWELD® Arc Welder — Cennik</title>
+<style>
+  :root{ --cyan:#3cb9ff; --amber:#ff9a3c; --gold:#ffd23f; --steel:#1a1d21; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; font-family:'Segoe UI',system-ui,sans-serif; background:#05070a; color:#e8edf1; overflow-x:hidden; }
+  /* tło: wideo z Groka, przyciemnione + rozmyte, baked text staje się teksturą */
+  #bg{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(.62) blur(1.5px) saturate(1.15); z-index:0; }
+  #scrim{ position:fixed; inset:0; background:radial-gradient(130% 100% at 50% 35%, transparent, #04060acc 95%); z-index:1; }
+  .wrap{ position:relative; z-index:2; min-height:100%; display:flex; flex-direction:column; align-items:center; padding:34px 16px 56px; }
+
+  .lang{ position:fixed; top:14px; right:16px; z-index:5; display:flex; gap:6px; }
+  .lang button{ background:#11161bcc; color:#9aa6ad; border:1px solid #2a343c; border-radius:8px; padding:5px 10px; font-weight:800; font-size:12px; cursor:pointer; letter-spacing:.5px; }
+  .lang button.on{ color:#04060a; background:var(--cyan); border-color:var(--cyan); }
+
+  .panel{ width:min(680px,96vw); background:linear-gradient(160deg,#15191ee8,#0c0f13f2); border:1px solid #ffae3c33;
+    border-radius:14px; box-shadow:0 0 0 1px #00000080, 0 30px 80px #000a, inset 0 1px 0 #ffffff10; padding:26px 26px 30px; backdrop-filter:blur(2px); }
+
+  .head{ text-align:center; border-bottom:1px solid #ffae3c33; padding-bottom:16px; margin-bottom:18px; }
+  .brand{ font-size:12px; letter-spacing:4px; color:var(--cyan); font-weight:800; }
+  .title{ font-size:clamp(22px,5vw,32px); font-weight:900; color:var(--gold); letter-spacing:1px; margin:6px 0 4px;
+    text-shadow:0 0 18px #ff9a3c55; }
+  .tag{ font-size:13px; color:#aeb6bb; font-style:italic; }
+
+  .sec{ margin:18px 0; }
+  .sec h2{ font-size:13px; letter-spacing:2px; color:var(--amber); text-transform:uppercase; margin-bottom:10px;
+    display:flex; align-items:center; gap:8px; }
+  .sec h2::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg,#ff9a3c44,transparent); }
+
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  td,th{ padding:7px 8px; text-align:left; border-bottom:1px solid #ffffff0d; }
+  th{ color:#8b969d; font-weight:700; font-size:12px; }
+  td.r,th.r{ text-align:right; font-variant-numeric:tabular-nums; font-weight:800; }
+  .grade{ font-weight:900; }
+  .A{ color:#5fe08a; } .B{ color:#cdd6db; } .C{ color:#ffb86b; } .D{ color:#ff5a4a; }
+  .tier{ font-size:11px; font-weight:800; letter-spacing:.5px; }
+  .t-com{ color:#9aa6ad; } .t-rar{ color:#3cb9ff; } .t-epi{ color:#c07bff; } .t-leg{ color:#ff8a3c; }
+
+  .jack{ margin:16px 0; padding:12px 14px; border-radius:10px; text-align:center; font-weight:800; font-size:14px;
+    background:linear-gradient(90deg,#2a200f,#103033); border:1px solid #ffae3c55; color:var(--gold); }
+
+  .foot{ text-align:center; margin-top:20px; font-size:11px; color:#6c757c; letter-spacing:.5px; }
+  .net{ font-weight:900; }
+</style>
+</head>
+<body>
+  <video id="bg" autoplay muted loop playsinline preload="auto" src="forge-board.mp4"></video>
+  <div id="scrim"></div>
+
+  <div class="lang">
+    <button data-l="pl" class="on">PL</button>
+    <button data-l="en">EN</button>
+    <button data-l="ru">RU</button>
+  </div>
+
+  <div class="wrap">
+    <div class="panel">
+      <div class="head">
+        <div class="brand">GORWELD® ARC WELDER</div>
+        <div class="title" data-t="title">CENNIK</div>
+        <div class="tag" data-t="tag">„Spawasz — zarabiasz"</div>
+      </div>
+
+      <!-- WEJŚCIE -->
+      <div class="sec">
+        <h2 data-t="s_entry">WEJŚCIE — co płacisz</h2>
+        <table>
+          <tr><th data-t="h_cons">Elektroda / drut (spalany)</th><th class="r">GW</th></tr>
+          <tr><td>MIG / MAG 135</td><td class="r">2</td></tr>
+          <tr><td>MMA 111</td><td class="r">2</td></tr>
+          <tr><td>TIG 141</td><td class="r">3</td></tr>
+        </table>
+        <table style="margin-top:12px">
+          <tr><th data-t="h_plate">Płyta 5 mm (materiał)</th><th class="r">GW</th></tr>
+          <tr><td data-t="m_steel">Stal</td><td class="r">7</td></tr>
+          <tr><td data-t="m_ss">Nierdzewka</td><td class="r">15</td></tr>
+          <tr><td data-t="m_alu">Aluminium</td><td class="r">29</td></tr>
+        </table>
+      </div>
+
+      <!-- NAGRODA -->
+      <div class="sec">
+        <h2 data-t="s_reward">NAGRODA — cena płyty × mnożnik</h2>
+        <table>
+          <tr><th data-t="h_grade">Ocena</th><th data-t="h_mult">Mnożnik</th><th data-t="h_means" class="r">Co oznacza</th></tr>
+          <tr><td class="grade A">A · ≥90%</td><td>1,38 – 2,10×</td><td class="r" data-t="g_a">pełny zysk</td></tr>
+          <tr><td class="grade B">B · 78–89%</td><td>1,0×</td><td class="r" data-t="g_b">zwrot materiału, −elektroda</td></tr>
+          <tr><td class="grade C">C · 62–77%</td><td>0,5×</td><td class="r" data-t="g_c">pół płyty</td></tr>
+          <tr><td class="grade D">D / odrzut</td><td>0×</td><td class="r" data-t="g_d">tracisz płytę</td></tr>
+        </table>
+      </div>
+
+      <div class="jack" data-t="jackpot">💥 JACKPOT — spoina LEGENDARNA + ocena A = 50% puli</div>
+
+      <!-- PRZYKŁADY -->
+      <div class="sec">
+        <h2 data-t="s_examples">PRZYKŁADY (5 mm, ocena A)</h2>
+        <table>
+          <tr><td>MIG · Stal · PA</td><td class="net A r">+1</td><td class="tier t-com" data-t="tier_com">POSPOLITA</td></tr>
+          <tr><td>MMA · Stal · PF</td><td class="net A r">+4</td><td class="tier t-rar" data-t="tier_rar">RZADKA</td></tr>
+          <tr><td>TIG · Alu · 6G</td><td class="net A r">+29</td><td class="tier t-leg" data-t="tier_leg">LEGENDARNA</td></tr>
+          <tr><td>TIG · Alu · 6G 💥</td><td class="net A r">+129</td><td class="tier t-leg" data-t="tier_leg2">LEGENDARNA</td></tr>
+          <tr><td>TIG · Alu · 6G ✕</td><td class="net D r">−32</td><td class="tier t-leg" data-t="tier_rej">odrzut</td></tr>
+        </table>
+      </div>
+
+      <div class="foot" data-t="foot">Start: 120 GW · pula 200 GW · DEMO (localStorage) · faza on-chain: GW na Cookie</div>
+    </div>
+  </div>
+
+<script>
+// wymuś odtwarzanie tła (autoplay policy / iframe)
+(function(){ const v=document.getElementById('bg'); if(!v) return;
+  v.muted=true; const go=()=>{ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); };
+  go(); v.addEventListener('canplay',go,{once:true}); document.addEventListener('click',go,{once:true}); })();
+
+const I18N={
+ pl:{ title:"CENNIK", tag:"„Spawasz — zarabiasz\"",
+   s_entry:"WEJŚCIE — co płacisz", h_cons:"Elektroda / drut (spalany)", h_plate:"Płyta 5 mm (materiał)",
+   m_steel:"Stal", m_ss:"Nierdzewka", m_alu:"Aluminium",
+   s_reward:"NAGRODA — cena płyty × mnożnik", h_grade:"Ocena", h_mult:"Mnożnik", h_means:"Co oznacza",
+   g_a:"pełny zysk", g_b:"zwrot materiału, −elektroda", g_c:"pół płyty", g_d:"tracisz płytę",
+   jackpot:"💥 JACKPOT — spoina LEGENDARNA + ocena A = 50% puli",
+   s_examples:"PRZYKŁADY (5 mm, ocena A)",
+   tier_com:"POSPOLITA", tier_rar:"RZADKA", tier_leg:"LEGENDARNA", tier_leg2:"LEGENDARNA", tier_rej:"odrzut",
+   foot:"Start: 120 GW · pula 200 GW · DEMO (localStorage) · faza on-chain: GW na Cookie" },
+ en:{ title:"PRICE LIST", tag:"\"Weld — Earn\"",
+   s_entry:"ENTRY — what you pay", h_cons:"Electrode / wire (burned)", h_plate:"Plate 5 mm (material)",
+   m_steel:"Steel", m_ss:"Stainless", m_alu:"Aluminium",
+   s_reward:"REWARD — plate price × multiplier", h_grade:"Grade", h_mult:"Multiplier", h_means:"Meaning",
+   g_a:"full profit", g_b:"material back, −electrode", g_c:"half plate", g_d:"lose the plate",
+   jackpot:"💥 JACKPOT — LEGENDARY weld + grade A = 50% of the pool",
+   s_examples:"EXAMPLES (5 mm, grade A)",
+   tier_com:"COMMON", tier_rar:"RARE", tier_leg:"LEGENDARY", tier_leg2:"LEGENDARY", tier_rej:"reject",
+   foot:"Start: 120 GW · pool 200 GW · DEMO (localStorage) · on-chain phase: GW on Cookie" },
+ ru:{ title:"ЦЕНЫ", tag:"«Варишь — зарабатываешь»",
+   s_entry:"ВХОД — что платишь", h_cons:"Электрод / проволока (расход)", h_plate:"Плита 5 мм (материал)",
+   m_steel:"Сталь", m_ss:"Нержавейка", m_alu:"Алюминий",
+   s_reward:"НАГРАДА — цена плиты × множитель", h_grade:"Оценка", h_mult:"Множитель", h_means:"Что значит",
+   g_a:"полная прибыль", g_b:"возврат материала, −электрод", g_c:"пол-плиты", g_d:"теряешь плиту",
+   jackpot:"💥 ДЖЕКПОТ — ЛЕГЕНДАРНЫЙ шов + оценка A = 50% пула",
+   s_examples:"ПРИМЕРЫ (5 мм, оценка A)",
+   tier_com:"ОБЫЧНАЯ", tier_rar:"РЕДКАЯ", tier_leg:"ЛЕГЕНДАРНАЯ", tier_leg2:"ЛЕГЕНДАРНАЯ", tier_rej:"брак",
+   foot:"Старт: 120 GW · пул 200 GW · ДЕМО (localStorage) · он-чейн фаза: GW на Cookie" }
+};
+function setLang(l){
+  document.documentElement.lang=l;
+  const d=I18N[l];
+  document.querySelectorAll('[data-t]').forEach(el=>{ const k=el.getAttribute('data-t'); if(d[k]!=null) el.textContent=d[k]; });
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on', b.dataset.l===l));
+  try{ localStorage.setItem('gorweld_lang',l); }catch(e){}
+}
+document.querySelectorAll('.lang button').forEach(b=> b.onclick=()=>setLang(b.dataset.l));
+setLang((()=>{ try{return localStorage.getItem('gorweld_lang')||'pl';}catch(e){return 'pl';} })());
+</script>
+</body>
+</html>

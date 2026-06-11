@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GORWELD® ARC WELDER — MIG · TIG · MMA Simulator</title>
+<style>
+  :root { --cyan:#1fd6e3; --amber:#ffae3c; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#07090b; font-family:"Segoe UI",system-ui,sans-serif; touch-action:none; color:#cfd8de; }
+  #pagebg { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.62) contrast(1.1) saturate(1.15); pointer-events:none; }
+  #stage { position:fixed; inset:0; display:block; cursor:crosshair; z-index:1; }
+
+  .panel { position:fixed; z-index:6; background:rgba(13,17,21,.82); border:1px solid #232b31; border-radius:12px; backdrop-filter:blur(8px); }
+  .top { top:12px; left:12px; right:12px; display:flex; gap:13px; align-items:center; padding:9px 13px; flex-wrap:wrap; }
+  .brand { font-weight:800; letter-spacing:2px; color:#e9eef2; text-shadow:0 0 12px rgba(31,214,227,.5); font-size:15px; white-space:nowrap; }
+  .brand b { color:var(--cyan); }
+  .group { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .lbl { font-size:10px; letter-spacing:1.5px; color:#5d6973; text-transform:uppercase; margin-right:2px; }
+
+  button { cursor:pointer; border:1px solid #2b333a; background:#161c21; color:#b9c4cb; padding:7px 11px; border-radius:8px; font-size:12px; font-weight:600; letter-spacing:.3px; transition:.12s; }
+  button:hover { border-color:var(--cyan); color:#fff; }
+  button.on { border-color:var(--cyan); color:#fff; background:#10303380; box-shadow:0 0 10px rgba(31,214,227,.25); }
+  button:active { transform:translateY(1px); }
+  button:disabled { opacity:.35; cursor:not-allowed; }
+  .pos,.thk,.lng { padding:6px 9px; font-size:11px; }
+  .proc.on { border-color:var(--amber); box-shadow:0 0 10px rgba(255,174,60,.3); background:#2a200f80; }
+
+  .bottom { top:50%; right:12px; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; align-items:stretch; padding:10px; max-height:94vh; overflow-y:auto; width:max-content; }
+  .bottom .group { justify-content:center; }
+  .bottom > button { width:100%; }
+
+  .info { position:fixed; left:12px; bottom:124px; z-index:6; font-size:12px; line-height:1.55; color:#8b97a0; max-width:300px; pointer-events:none; text-shadow:0 0 6px #000; }
+  .info .pname { color:var(--cyan); font-weight:700; font-size:13px; }
+  .info .proc { color:var(--amber); font-weight:700; }
+  .info .stars { color:#ffb43c; letter-spacing:2px; }
+  .info .v { color:#e9eef2; font-weight:700; }
+  .grav { position:fixed; left:50%; transform:translateX(-50%); bottom:12px; z-index:6; font-size:11px; color:#5d6973; text-align:center; pointer-events:none; text-shadow:0 0 6px #000; }
+  .grav .arrow { font-size:22px; color:#ff7b3a; display:block; }
+  .toolhud { position:fixed; left:12px; bottom:62px; z-index:6; font-size:12px; color:#9aa6ad; pointer-events:none; text-shadow:0 0 6px #000; max-width:320px; }
+  .toolhud b { color:var(--amber); }
+  .rankbar { position:fixed; left:12px; bottom:14px; z-index:6; text-align:left; font-size:11px; color:#7d8990; pointer-events:none; text-shadow:0 0 6px #000; }
+  .rankbar b { color:var(--cyan); font-size:13px; }
+
+  #toast { position:fixed; left:50%; top:84px; transform:translateX(-50%); z-index:8; font-weight:800; letter-spacing:3px; font-size:14px; opacity:0; transition:opacity .15s; pointer-events:none; text-shadow:0 0 8px #000; }
+
+  .modal { position:fixed; inset:0; z-index:9; display:none; align-items:center; justify-content:center; background:rgba(4,6,8,.72); backdrop-filter:blur(3px); padding:16px; }
+  .card { background:#0e1418; border:1px solid #2b333a; border-radius:16px; padding:24px 28px; box-shadow:0 0 40px rgba(0,0,0,.6); max-height:92vh; overflow:auto; }
+  .card h2 { font-size:15px; letter-spacing:2px; color:#e9eef2; margin-bottom:14px; text-transform:uppercase; }
+  .letter { font-size:66px; font-weight:900; line-height:1; }
+  .pct { font-size:13px; color:#8b97a0; margin:4px 0 14px; }
+  .row { display:flex; justify-content:space-between; gap:18px; font-size:13px; color:#9aa6ad; padding:5px 0; border-top:1px solid #1b2228; }
+  .row b { color:#e9eef2; }
+  .iso { display:inline-block; padding:3px 10px; border-radius:6px; font-weight:800; letter-spacing:1px; font-size:13px; margin-bottom:12px; }
+  .defects { list-style:none; font-size:12.5px; margin:6px 0 4px; }
+  .defects li { padding:5px 0; border-top:1px solid #161c20; display:flex; gap:8px; align-items:baseline; }
+  .sev { font-size:10px; font-weight:800; padding:1px 6px; border-radius:4px; letter-spacing:.5px; }
+  .sev.ok{background:#13351f;color:#5fe08a} .sev.minor{background:#3a3112;color:#ffd23f} .sev.major{background:#3a1512;color:#ff6a5a}
+  #zoom { display:block; border-radius:10px; border:1px solid #232b31; margin:10px auto 4px; }
+  .card .act { display:flex; gap:8px; margin-top:16px; }
+  .card .act button { flex:1; padding:11px; }
+
+  .cgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:9px; width:min(620px,86vw); }
+  .coupon { text-align:left; border:1px solid #242c32; border-radius:11px; padding:10px 11px; background:#11171b; cursor:pointer; transition:.12s; position:relative; }
+  .coupon:hover { border-color:var(--cyan); }
+  .coupon.done { border-color:#2f5e3c; background:#0f1a13; }
+  .coupon.locked { opacity:.4; cursor:not-allowed; }
+  .coupon .ttl { font-weight:700; color:#e9eef2; font-size:12.5px; margin-bottom:3px; }
+  .coupon .meta { font-size:11px; color:#7d8990; }
+  .coupon .badge { position:absolute; top:8px; right:9px; font-size:13px; }
+  .xpwrap { width:min(620px,86vw); margin:0 0 14px; }
+  .xpbar { height:8px; background:#1a2127; border-radius:5px; overflow:hidden; margin-top:6px; }
+  .xpbar > div { height:100%; background:linear-gradient(90deg,#1fd6e3,#5fe08a); }
+
+  #flash { position:fixed; inset:0; background:#cfeaff; opacity:0; pointer-events:none; z-index:4; mix-blend-mode:screen; }
+  #stage { transition:filter .12s, transform .12s; }
+  #eyeburn { position:fixed; inset:0; z-index:5; pointer-events:none; opacity:0; transition:opacity .2s; mix-blend-mode:screen;
+    background:radial-gradient(circle at 50% 45%, rgba(225,242,255,.55), rgba(180,210,255,.16) 42%, transparent 72%); }
+  .reward { margin:12px 0 4px; padding:11px 14px; border-radius:10px; background:linear-gradient(90deg,#2a200f,#103033); border:1px solid #ffae3c55; font-weight:800; font-size:16px; color:#ffd23f; text-align:center; }
+  .reward small { display:block; font-weight:600; font-size:11px; color:#9aa6ad; letter-spacing:.4px; margin-top:3px; }
+
+  /* live groove-coverage bar */
+  .covbar { position:fixed; top:58px; left:50%; transform:translateX(-50%); z-index:6; width:min(360px,76vw); height:23px; background:rgba(13,17,21,.85); border:1px solid #232b31; border-radius:12px; overflow:hidden; opacity:0; transition:opacity .25s; pointer-events:none; }
+  .covbar.show { opacity:1; }
+  .covfill { position:absolute; inset:0; width:0%; background:linear-gradient(90deg,#1fd6e3,#5fe08a); transition:width .14s linear, background .25s; }
+  .covmark { position:absolute; top:0; bottom:0; left:90%; width:2px; background:#ffae3c; box-shadow:0 0 7px #ffae3c; }
+  .covtxt { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; letter-spacing:.4px; color:#eaf2f5; text-shadow:0 1px 3px #000; white-space:nowrap; overflow:hidden; }
+
+  /* tutorial */
+  .tutsteps { display:flex; flex-direction:column; gap:9px; font-size:12.7px; line-height:1.5; color:#9aa6ad; width:min(380px,84vw); }
+  .tutsteps > div { padding:9px 12px; background:#11171b; border:1px solid #1d242a; border-radius:9px; }
+  .tutsteps b { color:#e9eef2; }
+
+  /* GW wallet chip */
+  .wal { font-size:12px; font-weight:700; color:#ffd23f; letter-spacing:.3px; padding:5px 10px; background:#1a140880; border:1px solid #ffae3c44; border-radius:8px; white-space:nowrap; }
+  .wal b { color:#fff; }
+</style>
+</head>
+<body>
+  <video id="pagebg" autoplay muted loop playsinline preload="auto" src="page-bg.mp4"></video>
+  <canvas id="stage"></canvas>
+  <div id="flash"></div>
+  <div id="eyeburn"></div>
+  <div id="toast"></div>
+
+  <div class="panel top">
+    <div class="brand">⚡ <b>GORWELD</b>®</div>
+    <div class="wal" id="wal">💰 120 GW</div>
+    <div class="group"><span class="lbl" data-i18n="method">Metoda</span>
+      <button class="proc on" data-proc="MMA">MMA 111</button>
+      <button class="proc" data-proc="MIG">MIG/MAG 135</button>
+      <button class="proc" data-proc="TIG">TIG 141</button>
+    </div>
+    <div class="group"><span class="lbl" data-i18n="joint">Złącze</span>
+      <button class="joint on" data-joint="butt" data-i18n="jt_butt">Doczołowe V</button>
+      <button class="joint" data-joint="fillet" data-i18n="jt_fillet">Pachwinowe T</button>
+      <button class="joint" data-joint="pipe" data-i18n="jt_pipe">Rura</button>
+    </div>
+    <div class="group" id="posWrap"><span class="lbl" data-i18n="position">Pozycja</span></div>
+    <div class="group"><span class="lbl">🌐</span>
+      <button class="lng on" data-lng="pl">PL</button>
+      <button class="lng" data-lng="en">EN</button>
+      <button class="lng" data-lng="ru">RU</button>
+    </div>
+  </div>
+
+  <div class="rankbar" id="rankbar"></div>
+  <div class="info" id="info"></div>
+  <div class="grav"><span class="arrow" id="gArrow">↓</span><span data-i18n="grav">grawitacja<br>jeziorka</span></div>
+  <div class="toolhud" id="toolhud"></div>
+  <div class="covbar" id="covbar"><div class="covfill" id="covfill"></div><div class="covmark"></div><span class="covtxt" id="covtxt"></span></div>
+
+  <div class="panel bottom">
+    <div class="group"><span class="lbl" data-i18n="thickness">Grubość</span>
+      <button class="thk" data-t="2">2</button>
+      <button class="thk" data-t="3">3</button>
+      <button class="thk on" data-t="5">5</button>
+      <button class="thk" data-t="8">8</button>
+      <button class="thk" data-t="12">12</button>
+    </div>
+    <div class="group"><span class="lbl" data-i18n="material">Materiał</span>
+      <button class="bead on" data-bead="steel" data-i18n="mat_steel">Stal</button>
+      <button class="bead" data-bead="ss" data-i18n="mat_ss">Nierdz.</button>
+      <button class="bead" data-bead="alu" data-i18n="mat_alu">Alu</button>
+    </div>
+    <button id="helmet" class="on" data-i18n="btn_helmet">🥽 HEŁM</button>
+    <button id="snd">🔊 ŁUK</button>
+    <button id="inspect" data-i18n="btn_inspect">🔎 INSPEKCJA</button>
+    <button id="career" data-i18n="btn_career">🎓 KARIERA</button>
+    <button id="help" data-i18n="btn_help">❔ JAK GRAĆ</button>
+    <button id="pricing" data-i18n="btn_pricing">💲 CENNIK</button>
+    <button id="clear" data-i18n="btn_clear">✕ ZETRZYJ</button>
+  </div>
+
+  <!-- INSPECTION REPORT -->
+  <div id="repModal" class="modal"><div class="card" style="width:min(460px,90vw)">
+    <h2 data-i18n="rep_title">Inspekcja wizualna VT</h2>
+    <div style="display:flex; gap:18px; align-items:center">
+      <div class="letter" id="rLetter">A</div>
+      <div>
+        <div class="iso" id="rIso">ISO 5817 · poziom B</div>
+        <div class="pct" id="rPct" style="margin:0"></div>
+      </div>
+    </div>
+    <div class="reward" id="rReward"></div>
+    <canvas id="zoom" width="380" height="120"></canvas>
+    <ul class="defects" id="rDefects"></ul>
+    <div class="row"><span data-i18n="row_cov">Pokrycie grani</span><b id="rCov">—</b></div>
+    <div class="row"><span data-i18n="row_spd">Trzymanie tempa</span><b id="rSpd">—</b></div>
+    <div class="row"><span data-i18n="row_even">Równość lica</span><b id="rEven">—</b></div>
+    <div class="act">
+      <button id="rCard" data-i18n="btn_cardx">📤 KARTA NA X</button>
+      <button id="rClose" class="on" data-i18n="btn_weldon">SPAWAJ DALEJ</button>
+    </div>
+  </div></div>
+
+  <!-- CAREER -->
+  <div id="carModal" class="modal"><div class="card">
+    <h2 data-i18n="car_title">Kariera spawacza · WPQR</h2>
+    <div class="xpwrap" id="xpwrap"></div>
+    <div class="cgrid" id="cgrid"></div>
+    <div class="act"><button id="carReset" data-i18n="car_reset">RESET POSTĘPU</button><button id="carClose" class="on" data-i18n="car_close">ZAMKNIJ</button></div>
+  </div></div>
+
+  <!-- SHARE CARD -->
+  <div id="cardModal" class="modal"><div class="card" style="text-align:center">
+    <h2 data-i18n="card_title">Karta wyniku</h2>
+    <canvas id="shareCanvas" width="600" height="338" style="width:min(560px,86vw); border-radius:12px; border:1px solid #232b31"></canvas>
+    <div class="act">
+      <button id="cardDl" class="on" data-i18n="card_dl">💾 POBIERZ PNG</button>
+      <button id="cardTxt" data-i18n="card_copy">📋 KOPIUJ TEKST</button>
+      <button id="cardClose" data-i18n="card_close">ZAMKNIJ</button>
+    </div>
+  </div></div>
+
+  <!-- TUTORIAL -->
+  <div id="tutModal" class="modal"><div class="card" style="width:min(440px,92vw)">
+    <h2 data-i18n="tut_title">Jak spawać — 30 sekund</h2>
+    <div class="tutsteps" id="tutSteps"></div>
+    <div class="act"><button id="tutSkip" data-i18n="tut_skip">POMIŃ</button><button id="tutStart" class="on" data-i18n="tut_start">DO ROBOTY ⚡</button></div>
+  </div></div>
+
+  <!-- CENNIK -->
+  <div id="priceModal" class="modal" style="padding:0;"><div class="card" style="width:100vw; height:100vh; max-height:100vh; padding:0; margin:0; border:0; border-radius:0; overflow:hidden; position:relative; background:#05070a;">
+    <button id="priceClose" title="ESC" style="position:absolute; top:10px; left:12px; z-index:3; background:#11161bcc; color:#e9eef2; border:1px solid #2b333a; border-radius:8px; padding:6px 11px; font-weight:800; cursor:pointer;">✕</button>
+    <iframe id="priceFrame" title="Cennik" allow="autoplay; fullscreen" style="width:100%; height:100%; border:0; display:block; background:#05070a;"></iframe>
+  </div></div>
+
+<script src="sim.js"></script>
+<script>
+"use strict";
+const stage=document.getElementById("stage"), ctx=stage.getContext("2d");
+const flashEl=document.getElementById("flash"), toast=document.getElementById("toast");
+const plate=document.createElement("canvas"), pctx=plate.getContext("2d");
+const seam =document.createElement("canvas"), sctx=seam.getContext("2d");
+const weldbg=document.createElement("canvas"), wbctx=weldbg.getContext("2d"); // banked lower passes (root/fill) sit under the live bead
+let W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+const PX_PER_MM=16;
+
+// ── Seeded PRNG (faza on-chain, krok 1) ───────────────────────────
+// Strumień losowości WPŁYWAJĄCEJ NA OCENĘ. Tylko to, co serwer odtwarza
+// w replay, idzie przez srng() — NIE iskry/dym/dźwięk (czysta grafika).
+// Reszta zostaje na Math.random, żeby strumień seeda się nie rozjechał.
+function mulberry32(seed){ let a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0;
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+let roundSeed=(Math.random()*4294967296)>>>0, srng=mulberry32(roundSeed);
+// Nowa runda: ustaw nasiono (na razie lokalne; docelowo seed z serwera) i wyzeruj strumień.
+function reseedRound(seed){ roundSeed=(seed!=null?seed:(Math.random()*4294967296))>>>0; srng=mulberry32(roundSeed); }
+
+// ── Rejestrator rundy (krok 2): surowe inputy do serwerowego replay + parity ──
+// To DOKŁADNIE artefakt, który klient wyśle na serwer: nasiono + parametry + ścieżka kursora.
+let rec=null;
+function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,events:[]}; }
+function recEv(type,x,y,now){ if(rec) rec.events.push({type,t:Math.round(now),x:Math.round(x*100)/100,y:Math.round(y*100)/100}); }
+
+// ── i18n (PL / EN / RU) ───────────────────────────────────────────
+let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
+const I18N={
+ pl:{ method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał",
+  jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
+  btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
+  grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
+  tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — spoiwo dabami, prowadź wolno",
+  fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
+  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY",
+  t_couponOk:"✅ COUPON ZALICZONY +%1 XP", t_couponFail:"COUPON NIEZALICZONY — wymóg %1%", t_copied:"TEKST SKOPIOWANY", t_clipFail:"BRAK DOSTĘPU DO SCHOWKA", t_couponSel:"COUPON: %1",
+  rep_title:"Inspekcja wizualna VT", row_cov:"Pokrycie grani", row_spd:"Trzymanie tempa", row_sag:"Zwisy / przelewy", row_even:"Równość lica",
+  btn_cardx:"📤 KARTA NA X", btn_weldon:"SPAWAJ DALEJ",
+  iso_reject:"ODRZUCONA", iso_B:"poziom B (rygor.)", iso_C:"poziom C", iso_D:"poziom D",
+  sev_ok:"OK", sev_major:"WADA", sev_minor:"DROBNA",
+  def_pen:"Brak przetopu / przyklejenie grani (%1% niewypełnione)", def_narrow:"Wąskie lico — niedolew (za szybkie tempo)", def_wide:"Nadmierny nadlew lica (za wolno)",
+  def_undercut:"Podtopienie / zwis poza granią (%1%)", def_porosity:"Porowatość — %1 pęcherzy (niestabilny łuk)", def_spatter:"Odpryski — %1 (czyszczenie po spawaniu)", def_uneven:"Nierówna szerokość lica", def_clean:"Brak wad — spoina zgodna z wymaganiami",
+  rew_none:"⚠ 0 $GORWELDD — łaga niewyspawana lub odrzucona", rew_none_sub:"dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
+  zoom_zoom:"powiększenie ×", car_title:"Kariera spawacza · WPQR", car_req:"wymóg", car_reset:"RESET POSTĘPU", car_close:"ZAMKNIJ", car_max:"MAX",
+  card_title:"Karta wyniku", card_dl:"💾 POBIERZ PNG", card_copy:"📋 KOPIUJ TEKST", card_close:"ZAMKNIJ", tagline:"SPAWASZ — ZARABIASZ",
+  cov_lbl:"Pokrycie", cov_layer:"Warstwa", cov_inspect:"⚡ auto-inspekcja", cov_done:"✅ PEŁNA ŁAGA — puść",
+  pass_root:"przetop", pass_fill:"wypełnienie", pass_cap:"lico",
+  t_passdone:"✅ WARSTWA %1 → teraz: %2", t_passlast:"⚡ OSTATNIA WARSTWA — lico",
+  def_crater:"Krater / niewypełniony koniec ściegu", def_rootlack:"Słaby przetop w grani (warstwa przetopowa %1%)",
+  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
+  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym większa nagroda $GORWELDD (gwiazdki = mnożnik).",
+  tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — napis <b style='color:#5fe08a'>DOBRE TEMPO</b> = pełny przetop. Za szybko = zimny zakład, za wolno = przepalenie.",
+  tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
+  tut4:"<b>4. Zarabiaj.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → 🏆 $GORWELDD. Pochwal się kartą na X.",
+  t_nofunds:"💸 BRAK GW — tańsza płyta albo dokup za COOK", t_bought:"−%1 GW · materiał kupiony",
+  eco_buy:"kupisz", eco_a:"za A netto", eco_cost:"koszt", eco_net:"netto", eco_bal:"saldo", eco_jack:"JACKPOT", rew_zero:"💀 SPALONA PŁYTA — materiał stracony",
+  tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
+  rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
+  cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nSpawasz — zarabiasz. GORWELD® Arc Welder\n#welding #spawanie #GorWeld $GORWELDD" },
+ en:{ method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material",
+  jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
+  btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
+  grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
+  tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — dab the filler, move slowly",
+  fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
+  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE",
+  t_couponOk:"✅ COUPON PASSED +%1 XP", t_couponFail:"COUPON FAILED — need %1%", t_copied:"TEXT COPIED", t_clipFail:"CLIPBOARD BLOCKED", t_couponSel:"COUPON: %1",
+  rep_title:"Visual inspection (VT)", row_cov:"Groove coverage", row_spd:"Travel speed", row_sag:"Undercut / sag", row_even:"Bead evenness",
+  btn_cardx:"📤 X CARD", btn_weldon:"KEEP WELDING",
+  iso_reject:"REJECTED", iso_B:"level B (strict)", iso_C:"level C", iso_D:"level D",
+  sev_ok:"OK", sev_major:"DEFECT", sev_minor:"MINOR",
+  def_pen:"Lack of penetration / cold lap (%1% unfilled)", def_narrow:"Narrow bead — underfill (too fast)", def_wide:"Excess reinforcement (too slow)",
+  def_undercut:"Undercut / sag outside groove (%1%)", def_porosity:"Porosity — %1 pores (unstable arc)", def_spatter:"Spatter — %1 (post-weld cleanup)", def_uneven:"Uneven bead width", def_clean:"No defects — weld meets requirements",
+  rew_none:"⚠ 0 $GORWELDD — pass unfinished or rejected", rew_none_sub:"finish the whole pass (coverage ≥80%), min grade D",
+  zoom_zoom:"zoom ×", car_title:"Welder career · WPQR", car_req:"req", car_reset:"RESET PROGRESS", car_close:"CLOSE", car_max:"MAX",
+  card_title:"Score card", card_dl:"💾 SAVE PNG", card_copy:"📋 COPY TEXT", card_close:"CLOSE", tagline:"WELD — EARN",
+  cov_lbl:"Coverage", cov_layer:"Layer", cov_inspect:"⚡ auto-inspect", cov_done:"✅ FULL BEAD — release",
+  pass_root:"root", pass_fill:"fill", pass_cap:"cap",
+  t_passdone:"✅ LAYER %1 → now: %2", t_passlast:"⚡ LAST LAYER — cap",
+  def_crater:"Crater / unfilled bead end", def_rootlack:"Poor root penetration (root pass %1%)",
+  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
+  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. The harder it is, the bigger the $GORWELDD reward (stars = multiplier).",
+  tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — <b style='color:#5fe08a'>GOOD SPEED</b> = full penetration. Too fast = cold lap, too slow = burn-through.",
+  tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
+  tut4:"<b>4. Earn.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → 🏆 $GORWELDD. Brag with a card on X.",
+  t_nofunds:"💸 NOT ENOUGH GW — cheaper plate or top up with COOK", t_bought:"−%1 GW · plate bought",
+  eco_buy:"buy-in", eco_a:"A net", eco_cost:"cost", eco_net:"net", eco_bal:"balance", eco_jack:"JACKPOT", rew_zero:"💀 PLATE BURNED — material lost",
+  tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
+  rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
+  cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nWeld — earn. GORWELD® Arc Welder\n#welding #GorWeld $GORWELDD" },
+ ru:{ method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал",
+  jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
+  btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
+  grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
+  tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
+  fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
+  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ",
+  t_couponOk:"✅ КУПОН СДАН +%1 XP", t_couponFail:"КУПОН НЕ СДАН — нужно %1%", t_copied:"ТЕКСТ СКОПИРОВАН", t_clipFail:"БУФЕР НЕДОСТУПЕН", t_couponSel:"КУПОН: %1",
+  rep_title:"Визуальный контроль (VT)", row_cov:"Заполнение шва", row_spd:"Темп", row_sag:"Подрезы / натёки", row_even:"Равномерность",
+  btn_cardx:"📤 КАРТА В X", btn_weldon:"СВАРИВАЙ ДАЛЬШЕ",
+  iso_reject:"БРАК", iso_B:"уровень B (строгий)", iso_C:"уровень C", iso_D:"уровень D",
+  sev_ok:"OK", sev_major:"ДЕФЕКТ", sev_minor:"МЕЛКИЙ",
+  def_pen:"Непровар / несплавление (%1% не заполнено)", def_narrow:"Узкий валик — недолив (быстро)", def_wide:"Чрезмерное усиление (медленно)",
+  def_undercut:"Подрез / натёк вне шва (%1%)", def_porosity:"Поры — %1 (нестабильная дуга)", def_spatter:"Брызги — %1 (зачистка)", def_uneven:"Неравномерная ширина", def_clean:"Без дефектов — шов годен",
+  rew_none:"⚠ 0 $GORWELDD — шов не закончен или брак", rew_none_sub:"завершите весь шов (≥80%), мин. оценка D",
+  zoom_zoom:"увелич. ×", car_title:"Карьера сварщика · WPQR", car_req:"треб.", car_reset:"СБРОС ПРОГРЕССА", car_close:"ЗАКРЫТЬ", car_max:"МАКС",
+  card_title:"Карта результата", card_dl:"💾 СКАЧАТЬ PNG", card_copy:"📋 КОПИР. ТЕКСТ", card_close:"ЗАКРЫТЬ", tagline:"ВАРИШЬ — ЗАРАБАТЫВАЕШЬ",
+  cov_lbl:"Заполнение", cov_layer:"Слой", cov_inspect:"⚡ авто-контроль", cov_done:"✅ ШОВ ЦЕЛИКОМ — отпусти",
+  pass_root:"корень", pass_fill:"заполнение", pass_cap:"облицовка",
+  t_passdone:"✅ СЛОЙ %1 → теперь: %2", t_passlast:"⚡ ПОСЛЕДНИЙ СЛОЙ — облицовка",
+  def_crater:"Кратер / незаваренный конец шва", def_rootlack:"Слабый провар корня (корневой слой %1%)",
+  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
+  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше награда $GORWELDD (звёзды = множитель).",
+  tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — <b style='color:#5fe08a'>ХОРОШИЙ ТЕМП</b> = полный провар. Быстро = непровар, медленно = прожог.",
+  tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
+  tut4:"<b>4. Зарабатывай.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → 🏆 $GORWELDD. Похвались картой в X.",
+  t_nofunds:"💸 НЕ ХВАТАЕТ GW — дешевле плита или докупи за COOK", t_bought:"−%1 GW · плита куплена",
+  eco_buy:"вход", eco_a:"A нетто", eco_cost:"цена", eco_net:"нетто", eco_bal:"баланс", eco_jack:"ДЖЕКПОТ", rew_zero:"💀 ПЛИТА СОЖЖЕНА — материал потерян",
+  tier_common:"ОБЫЧНАЯ", tier_rare:"РЕДКАЯ", tier_epic:"ЭПИЧЕСКАЯ", tier_legendary:"ЛЕГЕНДАРНАЯ",
+  rank_helper:"Помощник", rank_tacker:"Прихватчик", rank_welder:"Сварщик", rank_cert:"Сертиф. сварщик", rank_coded:"Аттест. сварщик", rank_master:"Мастер сварки",
+  cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nВаришь — зарабатываешь. GORWELD® Arc Welder\n#welding #GorWeld $GORWELDD" },
+};
+function t(k,a){ const v=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]!=null?I18N.pl[k]:k); return a!=null?String(v).replace("%1",a):v; }
+function fmt(k,arr){ let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]||k); arr.forEach((v,i)=>s=String(s).replace("%"+(i+1),v)); return s; }
+
+// ── Processes ─────────────────────────────────────────────────────
+const PROCESS = {
+  MMA:{ name:{pl:"MMA 111 — elektroda otulona",en:"MMA 111 — stick electrode",ru:"MMA 111 — штучный электрод"}, arc:"#dfeeff", vMul:1.00, sparks:1.4, fume:1.0, slag:1, rippleK:1.0, ripDark:0.34, crown:0.85, buzz:90, hiss:1700, crackInt:60, crackDepth:0.22 },
+  MIG:{ name:{pl:"MIG/MAG 135 — drut",en:"MIG/MAG 135 — wire",ru:"MIG/MAG 135 — проволока"}, arc:"#cfe6ff", vMul:1.40, sparks:0.7, fume:0.7, slag:0, rippleK:0.55,ripDark:0.20, crown:0.7, buzz:125,hiss:2300, crackInt:85, crackDepth:0.10 },
+  TIG:{ name:{pl:"TIG 141 — elektroda wolframowa",en:"TIG 141 — tungsten",ru:"TIG 141 — вольфрам"}, arc:"#b7ffff", vMul:0.70, sparks:0.0, fume:0.15,slag:0, rippleK:1.8, ripDark:0.42, crown:1.2, buzz:240,hiss:3300, crackInt:150,crackDepth:0.04 },
+};
+const POSITIONS = {
+  PA:{lbl:"PA",name:{pl:"PA — podolna (flat)",en:"PA — flat",ru:"PA — нижнее"},ang:0,g:0.025,stars:1,joints:["butt","fillet"]},
+  PB:{lbl:"PB",name:{pl:"PB — naboczna (fillet)",en:"PB — horizontal fillet",ru:"PB — гориз. угловое"},ang:0,g:0.060,stars:2,joints:["fillet"]},
+  PC:{lbl:"PC",name:{pl:"PC — naścienna (horizontal)",en:"PC — horizontal",ru:"PC — горизонтальное"},ang:0,g:0.150,stars:3,joints:["butt","fillet"]},
+  PD:{lbl:"PD",name:{pl:"PD — okapowa (overhead fillet)",en:"PD — overhead fillet",ru:"PD — потолочное угловое"},ang:0,g:0.150,stars:4,joints:["fillet"],flip:true},
+  PE:{lbl:"PE",name:{pl:"PE — pułapowa (overhead)",en:"PE — overhead",ru:"PE — потолочное"},ang:0,g:0.190,stars:5,joints:["butt"],flip:true},
+  PF:{lbl:"PF↑",name:{pl:"PF — pionowa z dołu (up)",en:"PF — vertical up",ru:"PF — вертикаль снизу вверх"},ang:90,g:0.110,stars:4,joints:["butt","fillet"]},
+  PG:{lbl:"PG↓",name:{pl:"PG — pionowa z góry (down)",en:"PG — vertical down",ru:"PG — вертикаль сверху вниз"},ang:90,g:0.110,stars:3,joints:["butt","fillet"]},
+  P1G:{lbl:"PA·1G",name:{pl:"Rura 1G — obracana",en:"Pipe 1G — rolled",ru:"Труба 1G — поворотное"},ang:0,g:0.030,stars:1,joints:["pipe"],pipe:"flat"},
+  P2G:{lbl:"PC·2G",name:{pl:"Rura 2G — oś pionowa",en:"Pipe 2G — vertical axis",ru:"Труба 2G — верт. ось"},ang:0,g:0.150,stars:3,joints:["pipe"],pipe:"wall"},
+  P5G:{lbl:"PH·5G",name:{pl:"Rura 5G — oś pozioma",en:"Pipe 5G — horizontal axis",ru:"Труба 5G — гор. ось"},ang:0,g:0.130,stars:4,joints:["pipe"],pipe:"axis"},
+  HL045:{lbl:"H-L045",name:{pl:"Rura 6G — oś 45° (king)",en:"Pipe 6G — 45° (king)",ru:"Труба 6G — 45° (король)"},ang:0,g:0.150,stars:5,joints:["pipe"],pipe:"axis",tilt:45},
+};
+const SPEED={2:5.0,3:4.3,5:3.2,8:2.3,12:1.6};
+const BEADS={
+  steel:{hot:"#fff6d8",solid:"#7e8990",high:"#cdd6db",dark:"#2c3136"},
+  ss:{hot:"#fffaf0",solid:"#aeb6bb",high:"#e6ecef",dark:"#3a4146"},
+  alu:{hot:"#f3fbff",solid:"#b9c2c8",high:"#eef4f7",dark:"#4a525a"},
+};
+// material difficulty per process (MIG welds everything; alu w/ stick = nightmare) + grading tolerance (lower = harder)
+const MATERIAL={
+  steel:{name:{pl:"Stal",en:"Steel",ru:"Сталь"},          MIG:1.0, MMA:1.0, TIG:1.0, tol:1.00},
+  ss:   {name:{pl:"Nierdzewka",en:"Stainless",ru:"Нержавейка"}, MIG:1.2, MMA:1.6, TIG:1.5, tol:0.82},
+  alu:  {name:{pl:"Aluminium",en:"Aluminium",ru:"Алюминий"},    MIG:1.4, MMA:2.4, TIG:1.9, tol:0.70},
+};
+const BASE_REWARD=50; // $GORWELDD for a perfect A on the easiest coupon
+function difficulty(){
+  const mb={MIG:1.0,MMA:1.6,TIG:2.2}[proc];
+  const pm=[0,1.0,1.25,1.6,2.1,2.8][POSITIONS[posKey].stars]||1;
+  const jm=joint==="pipe"?1.3:joint==="fillet"?0.9:1.0;
+  const mf=MATERIAL[bead][proc]||1;
+  const pn=passPlan().length, pf=1+0.18*(pn-1);   // multipass coupons are worth more
+  return mb*pm*jm*mf*pf;
+}
+function gradeQ(s){ return s>=90?1.0:s>=78?0.7:s>=62?0.45:s>=45?0.2:0; }
+function rewardFor(score,coverage){ if(coverage<0.8) return 0; return Math.round(BASE_REWARD*difficulty()*gradeQ(score)); }
+// rarity tier — harder coupon = rarer = pays more
+function valueTier(d){
+  if(d>=7)   return {name:t("tier_legendary"), col:"#ff8a3c"};
+  if(d>=4)   return {name:t("tier_epic"),      col:"#c07bff"};
+  if(d>=2)   return {name:t("tier_rare"),      col:"#3cb9ff"};
+  return            {name:t("tier_common"),    col:"#9aa6ad"};
+}
+const COUPONS=[
+  {id:"c1", proc:"MMA",joint:"butt",  pos:"PA",  t:5, req:62, xp:100, name:{pl:"Podstawa MMA",en:"MMA basics",ru:"Основы MMA"}},
+  {id:"c2", proc:"MMA",joint:"fillet",pos:"PB",  t:5, req:62, xp:120, name:{pl:"Pachwina naboczna",en:"Horizontal fillet",ru:"Гор. угловое"}},
+  {id:"c3", proc:"MMA",joint:"butt",  pos:"PC",  t:8, req:62, xp:150, name:{pl:"Naścienna 8mm",en:"Horizontal 8mm",ru:"Горизонт. 8мм"}},
+  {id:"c4", proc:"MMA",joint:"butt",  pos:"PF",  t:8, req:78, xp:190, name:{pl:"Pionowa z dołu",en:"Vertical up",ru:"Вертикаль снизу"}},
+  {id:"c5", proc:"MIG",joint:"butt",  pos:"PA",  t:3, req:62, xp:120, name:{pl:"MIG cienka blacha",en:"MIG thin sheet",ru:"MIG тонкий лист"}},
+  {id:"c6", proc:"MIG",joint:"fillet",pos:"PB",  t:5, req:62, xp:140, name:{pl:"MIG pachwina",en:"MIG fillet",ru:"MIG угловое"}},
+  {id:"c7", proc:"MIG",joint:"butt",  pos:"PF",  t:8, req:78, xp:210, name:{pl:"MIG pionowa",en:"MIG vertical",ru:"MIG вертикаль"}},
+  {id:"c8", proc:"MIG",joint:"butt",  pos:"PE",  t:5, req:78, xp:240, name:{pl:"MIG pułapowa",en:"MIG overhead",ru:"MIG потолок"}},
+  {id:"c9", proc:"TIG",joint:"butt",  pos:"PA",  t:2, req:78, xp:170, name:{pl:"TIG cienka 2mm",en:"TIG thin 2mm",ru:"TIG тонкий 2мм"}},
+  {id:"c10",proc:"TIG",joint:"butt",  pos:"PC",  t:3, req:78, xp:250, name:{pl:"TIG naścienna",en:"TIG horizontal",ru:"TIG горизонт."}},
+  {id:"c11",proc:"TIG",joint:"butt",  pos:"PF",  t:5, req:90, xp:320, name:{pl:"TIG pionowa pro",en:"TIG vertical pro",ru:"TIG вертикаль про"}},
+  {id:"c12",proc:"TIG",joint:"pipe",  pos:"HL045",t:5,req:90, xp:520, name:{pl:"6G — KING coupon",en:"6G — KING coupon",ru:"6G — КОРОЛЬ"}},
+];
+const RANKS=[[0,"rank_helper"],[120,"rank_tacker"],[350,"rank_welder"],[800,"rank_cert"],[1600,"rank_coded"],[3200,"rank_master"]];
+
+// progress
+let progress={done:{},xp:0};
+try{ const s=localStorage.getItem("gorweld_welder"); if(s) progress=JSON.parse(s); }catch(e){}
+function saveProgress(){ try{ localStorage.setItem("gorweld_welder",JSON.stringify(progress)); }catch(e){} }
+function rankFor(xp){ let r=RANKS[0]; for(const x of RANKS) if(xp>=x[0]) r=x; return r; }
+
+let proc="MMA",joint="butt",posKey="PA",bead="steel",thick=5,helmetOn=true,activeCoupon=null;
+let seamPts=[],grooveHalf=8,bevelW=14,idealHalf=11,targetPx=50;
+let lastReport=null;
+// ── Multipass (root → fill → cap) — thick plate needs several layers ──
+let passPlanArr=["cap"], passIndex=0, passMul=1, passLog=[], covSmoothed=0, lastCovUpd=0;
+const PASS_W={root:0.72, fill:0.92, cap:1.00};   // bead width multiplier per layer type (cap = the visible face = baseline)
+function passPlan(){ if(thick<=3) return ["cap"]; if(thick<=5) return ["root","cap"]; return ["root","fill","cap"]; }
+
+// ── Economy (DEMO: GW wallet in localStorage; COOK→GW buy-in + cashout wired later) ──
+const CONSUMABLE={MMA:2, MIG:2, TIG:3};            // electrode / wire — cheap, burned every job (the sink)
+const MAT_BASE={steel:6, ss:14, alu:26};           // plate price — alu = the expensive stake you can ruin
+let gw=120, pool=200, burned=0, jobCost=0, jobPaid=false, jobSettled=false;
+try{ const a=localStorage.getItem("gorweld_gw"); if(a!=null) gw=+a; const b=localStorage.getItem("gorweld_pool"); if(b!=null) pool=+b; }catch(e){}
+function saveWallet(){ try{ localStorage.setItem("gorweld_gw",gw); localStorage.setItem("gorweld_pool",pool); }catch(e){} }
+function matCost(){ return Math.round(MAT_BASE[bead]*(0.6+thick/10)); }                 // thicker plate = pricier
+function jobPrice(){ return CONSUMABLE[proc]+matCost(); }
+function payMult(score){ const st=POSITIONS[posKey].stars;                              // A scales with position; sub-A loses material
+  if(score>=90) return 1.2+0.18*st; if(score>=78) return 1.0; if(score>=62) return 0.5; return 0; }
+function updateWallet(){ const el=document.getElementById("wal"); if(el) el.innerHTML='💰 <b>'+gw+'</b> GW · 🏦 '+Math.max(0,Math.round(pool)); }
+
+function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; }
+
+// ── Geometry ──────────────────────────────────────────────────────
+function buildWorkpiece(){
+  const P=POSITIONS[posKey]; recalc(); seamPts=[];
+  const cx=W/2,cy=H*0.66;
+  if(P.pipe){
+    const r=Math.min(W,H)*0.30, tilt=(P.tilt||0)*Math.PI/180;
+    const yS=P.pipe==="flat"?0.40:P.pipe==="wall"?1.0:0.6;
+    for(let a=0;a<=Math.PI*2+0.001;a+=Math.PI/110){ let x=Math.cos(a)*r,y=Math.sin(a)*r*yS;
+      seamPts.push({x:cx+x*Math.cos(tilt)-y*Math.sin(tilt),y:cy+x*Math.sin(tilt)+y*Math.cos(tilt)}); }
+  } else {
+    const len=Math.min(W,H)*0.62,ang=P.ang*Math.PI/180,dx=Math.cos(ang),dy=Math.sin(ang);
+    for(let t=-1;t<=1.0001;t+=2/150) seamPts.push({x:cx+dx*len/2*t,y:cy+dy*len/2*t});
+  }
+  drawPlate();
+}
+function pathStroke(c,pts,width,color,cap="round"){
+  c.lineWidth=width; c.strokeStyle=color; c.lineCap=cap; c.lineJoin="round";
+  c.beginPath(); c.moveTo(pts[0].x,pts[0].y); for(let i=1;i<pts.length;i++) c.lineTo(pts[i].x,pts[i].y); c.stroke();
+}
+function drawPlate(){
+  const P=POSITIONS[posKey]; recalc();
+  pctx.clearRect(0,0,W,H);                                   // przezroczyste — odsłania wideo tła strony
+  const g=pctx.createRadialGradient(W/2,H*(P.flip?0.72:0.36),60,W/2,H/2,Math.max(W,H)*0.8);
+  g.addColorStop(0,"rgba(20,24,28,.32)"); g.addColorStop(1,"rgba(8,10,12,.74)"); pctx.fillStyle=g; pctx.fillRect(0,0,W,H);
+  if(seamPts.length<2) return;
+  const fullW=grooveHalf*2+bevelW*2+150,bevelEdge=(grooveHalf+bevelW)*2,root=grooveHalf*2;
+  pctx.save(); pctx.shadowColor="rgba(0,0,0,.5)"; pctx.shadowBlur=18; pctx.shadowOffsetY=6;
+  pathStroke(pctx,seamPts,fullW,"#4a525a","butt"); pctx.restore();
+  pathStroke(pctx,seamPts,fullW,"rgba(120,134,144,.16)","butt");
+  pathStroke(pctx,seamPts,bevelEdge,"#6b7780");
+  pathStroke(pctx,seamPts,bevelEdge-3,"#7d8990");
+  pathStroke(pctx,seamPts,root+4,"#9aa6ad");
+  pathStroke(pctx,seamPts,root,"#16191c");
+  pathStroke(pctx,seamPts,root-3,"#0e1113");
+}
+
+// ── State ─────────────────────────────────────────────────────────
+let molten=[],sparks=[],smoke=[],baked=[],welding=false,last=null,lastT=0,lastSpawn=0;
+let vEMA=0,distAcc=0,speedSum=0,speedN=0,vVarSum=0,spatterCount=0,speedFb="";
+// tool / consumable mechanics
+let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
+let electrodeLeft=1, replacing=false;
+const ELEC_MAX=118, ELEC_STUB=0.16;
+// arc-eye: looking at the arc with no helmet fries your eyes after ~2s
+let eyeBurn=0, lastFrameT=0, eyeWarned=false;
+
+function gVec(){ return POSITIONS[posKey].g; }
+function nearestSeam(x,y){ let d=1e18,px=x,py=y; for(const p of seamPts){ const dd=(p.x-x)**2+(p.y-y)**2; if(dd<d){d=dd;px=p.x;py=p.y;} } return {d:Math.sqrt(d),x:px,y:py}; }
+function plateHalf(){ return grooveHalf+bevelW+75; }                 // half width of the coupon plate
+function onPlate(x,y){ return nearestSeam(x,y).d <= plateHalf(); }
+function coverageNow(){ if(!seamPts.length||!baked.length) return 0; let c=0;
+  for(const pt of seamPts){ let d=1e18; for(const b of baked){ const dd=(b.x-pt.x)**2+(b.y-pt.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)<grooveHalf*1.6) c++; }
+  return c/seamPts.length; }
+
+function depositBead(x,y,w){
+  const c=BEADS[bead]; const ns=nearestSeam(x,y);
+  if(ns.d<grooveHalf+bevelW){ x+=(ns.x-x)*0.4; y+=(ns.y-y)*0.4; }
+  const jit = proc==="MMA" ? (srng()*0.18-0.09)*w : 0;              // stick wanders a touch — SEEDOWANE (wpływa na baked→ocenę)
+  x+=jit; const ww = w*(1 + (proc==="MMA"?(Math.random()*0.12-0.06):0));
+  // fusion toe — seats the bead into the plate (slight shadow ring)
+  sctx.save(); sctx.shadowColor="rgba(0,0,0,.45)"; sctx.shadowBlur=Math.max(2,ww*0.4);
+  // convex bead body, light from upper-left → crown sheen, dark toes
+  let g=sctx.createRadialGradient(x-ww*0.34,y-ww*0.42,ww*0.08, x,y,ww);
+  g.addColorStop(0,c.high); g.addColorStop(0.42,c.solid); g.addColorStop(0.86,c.dark); g.addColorStop(1,c.dark);
+  sctx.fillStyle=g; sctx.beginPath(); sctx.arc(x,y,ww,0,7); sctx.fill(); sctx.restore();
+  // specular crown highlight (elongated along travel)
+  sctx.save(); sctx.globalAlpha=Math.min(0.55,PROCESS[proc].crown*0.42); sctx.fillStyle=c.high;
+  sctx.beginPath(); sctx.ellipse(x-ww*0.22,y-ww*0.28, ww*0.34, ww*0.16, Math.atan2(uy,ux), 0,7); sctx.fill(); sctx.restore();
+  if(PROCESS[proc].slag){ sctx.globalAlpha=0.1; sctx.fillStyle="#16110d";
+    for(let i=0;i<2;i++) sctx.fillRect(x-ww*0.4+Math.random()*ww*0.8,y-ww*0.4+Math.random()*ww*0.8,1.6,1.6); sctx.globalAlpha=1; }
+  baked.push({x,y,r:w,off:ns.d}); return {x,y};
+}
+// one "dime" — crescent scale bowed toward travel: dark trailing edge + bright leading ridge
+function drawRipple(x,y,w,dx,dy){
+  const c=BEADS[bead],P=PROCESS[proc],px=-dy,py=dx;
+  const irr = proc==="MMA" ? (Math.random()*0.25+0.85) : 1;
+  const bow = w*(proc==="TIG"?0.95:proc==="MIG"?0.45:0.62)*irr;
+  sctx.lineCap="round"; sctx.lineJoin="round";
+  // trailing shadow (the gap between scales)
+  sctx.strokeStyle=c.dark; sctx.globalAlpha=P.ripDark; sctx.lineWidth=Math.max(1.2,w*0.26);
+  sctx.beginPath(); sctx.moveTo(x-px*w*0.94,y-py*w*0.94);
+  sctx.quadraticCurveTo(x+dx*bow,y+dy*bow,x+px*w*0.94,y+py*w*0.94); sctx.stroke();
+  // bright leading ridge of the scale (shifted a hair toward travel → 3-D step)
+  const lx=x+dx*w*0.2, ly=y+dy*w*0.2;
+  sctx.strokeStyle=c.high; sctx.globalAlpha=Math.min(0.75,P.crown*0.52); sctx.lineWidth=Math.max(1,w*0.13);
+  sctx.beginPath(); sctx.moveTo(lx-px*w*0.78,ly-py*w*0.78);
+  sctx.quadraticCurveTo(lx+dx*bow,ly+dy*bow,lx+px*w*0.78,ly+py*w*0.78); sctx.stroke();
+  sctx.globalAlpha=1;
+}
+function beadWidth(){
+  const sr=vEMA/targetPx;
+  if(sr<0.7) return Math.min(idealHalf*1.9,idealHalf*Math.pow(0.7/Math.max(sr,0.08),0.55));
+  if(sr>1.3) return Math.max(idealHalf*0.42,idealHalf*Math.pow(1.3/sr,0.7));
+  return idealHalf;
+}
+let fbGood=false;
+function feedback(){ const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
+  if(sr>1.45) return t("fb_fast");
+  if(sr<0.62) return t("fb_slow");
+  return t("fb_good"); }
+function spawnSparks(x,y,n){ n=Math.round(n*PROCESS[proc].sparks); if(n<=0)return; const gy=gVec()*6;
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2,sp=1.5+Math.random()*6; spatterCount++;
+    sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.5+gy,life:1,decay:0.012+Math.random()*0.03,r:0.6+Math.random()*1.6}); } }
+function spawnSmoke(x,y){ const f=PROCESS[proc].fume; if(Math.random()>f*0.6)return;
+  smoke.push({x:x+(Math.random()*10-5),y,vx:(Math.random()*0.6-0.3),vy:-(0.4+Math.random()*0.7),r:6+Math.random()*8,life:1,decay:0.006+Math.random()*0.01}); }
+function moltenColor(age){ const c=BEADS[bead];
+  if(age<60)return c.hot; if(age<160)return"#ffe14d"; if(age<340)return"#ff8a14"; if(age<640)return"#e8400a"; return"#a02408"; }
+
+// ── Pointer / laying ──────────────────────────────────────────────
+function pos(e){ const t=e.touches?e.touches[0]:e; return {x:t.clientX,y:t.clientY}; }
+function start(e){ if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
+  if(!jobPaid){ const price=jobPrice();                                  // buy consumable + plate on first strike
+    if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
+    gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
+    showToast(fmt("t_bought",[price]),"#ffae3c"); }
+  welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
+  lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud(); e.preventDefault(); }
+function move(e){
+  if(!welding)return; const p=pos(e),now=performance.now(); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  recEv('move',p.x,p.y,now);
+  if(last){
+    const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy),dt=Math.max(8,now-lastT);
+    const inst=dist/(dt/1000),prev=vEMA; vEMA=vEMA*0.7+inst*0.3; vVarSum+=Math.abs(vEMA-prev);
+    const w=beadWidth(); if(dist){ ux=ddx/dist; uy=ddy/dist; }
+    if(proc==="TIG"){
+      // torch leads (one hand), filler added in dabs (other hand) — bead builds dab by dab
+      if(now-lastDab>150 && onPlate(p.x,p.y)){ const dw=Math.max(idealHalf, w*0.95); const pl=depositBead(p.x,p.y,dw);
+        molten.push({x:pl.x,y:pl.y,r:dw,t:now}); drawRipple(pl.x,pl.y,dw,ux,uy); lastDab=now; dipT=now; }
+    } else {
+      const step=Math.max(2,w*0.35),n=Math.max(1,Math.floor(dist/step));
+      for(let i=1;i<=n;i++){
+        const x=last.x+ddx*(i/n),y=last.y+ddy*(i/n);
+        if(!onPlate(x,y)) continue;                                 // arc only fuses on the plate
+        if(proc==="MMA"){ if(replacing) break;
+          electrodeLeft-=step/650;                                  // stick burns down as you weld
+          if(electrodeLeft<=ELEC_STUB){ replacing=true; arcIntensity(0.02); showToast(t("t_replace"),"#ff9a3c"); break; } }
+        const pl=depositBead(x,y,w);
+        molten.push({x:pl.x,y:pl.y,r:w,t:now}); distAcc+=step;
+        const rip=w*(1.5+vEMA*0.012)/PROCESS[proc].rippleK; if(distAcc>=rip){ drawRipple(pl.x,pl.y,w,ux,uy); distAcc=0; } }
+    }
+    speedSum+=vEMA; speedN++; speedFb=feedback();
+    if(!(proc==="MMA"&&replacing)) arcIntensity(Math.min(1,dist/14));
+    updateToolHud();
+  }
+  last=p; lastT=now; e.preventDefault();
+}
+function end(){ if(welding&&last) recEv('up',last.x,last.y,performance.now()); welding=false; last=null; speedFb=""; arcOff();
+  if(baked.length>=10 && coverageNow()>=0.9){               // full layer covered
+    if(passIndex < passPlanArr.length-1) bankPass();        // more layers to go → freeze this one, weld the next
+    else inspect();                                         // last layer done → grade the whole joint
+  } }
+stage.addEventListener("mousedown",start); addEventListener("mousemove",move); addEventListener("mouseup",end);
+stage.addEventListener("touchstart",start,{passive:false}); stage.addEventListener("touchmove",move,{passive:false}); addEventListener("touchend",end);
+addEventListener("mousemove",e=>{ cursor.x=e.clientX; cursor.y=e.clientY; cursor.seen=true; });
+
+// ── Tool / consumable rendering ───────────────────────────────────
+function drawTool(now){
+  const p = (welding&&last) ? last : (cursor.seen?cursor:null); if(!p) return;
+  const bx=-ux*0.5, by=-1.0, bm=Math.hypot(bx,by), ex=bx/bm, ey=by/bm; // up-and-behind unit vector
+  ctx.save(); ctx.lineCap="round"; ctx.lineJoin="round";
+  if(proc==="MMA") drawElectrode(p.x,p.y,ex,ey);
+  else if(proc==="MIG") drawMig(p.x,p.y,ex,ey);
+  else drawTig(p.x,p.y,ex,ey,now);
+  ctx.restore();
+}
+function drawElectrode(x,y,ex,ey){
+  const len=ELEC_MAX*Math.max(electrodeLeft,0.05), hx=x+ex*len, hy=y+ey*len, ang=Math.atan2(ey,ex);
+  ctx.strokeStyle="#8a8f93"; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(x+ex*14,y+ey*14); ctx.lineTo(hx,hy); ctx.stroke(); // flux-coated rod
+  if(welding&&!replacing){ ctx.strokeStyle="#ffb347"; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+ex*14,y+ey*14); ctx.stroke();
+    ctx.fillStyle="rgba(255,150,40,.5)"; ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.fill(); }
+  ctx.save(); ctx.translate(hx,hy); ctx.rotate(ang);
+  ctx.fillStyle="#15181b"; ctx.fillRect(-2,-4,14,8);
+  ctx.fillStyle=replacing?"#7a2018":"#c23b2a"; ctx.fillRect(8,-10,34,20);  // holder body
+  ctx.fillStyle="#0c0e10"; ctx.fillRect(40,-4,30,8);                       // cable stub
+  ctx.restore();
+}
+function drawMig(x,y,ex,ey){
+  const nx=x+ex*26, ny=y+ey*26, ang=Math.atan2(ey,ex);
+  ctx.strokeStyle="#d8d2c0"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny); ctx.stroke(); // auto-fed wire
+  ctx.save(); ctx.translate(nx,ny); ctx.rotate(ang);
+  ctx.fillStyle="#3a4045"; ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(8,-11); ctx.lineTo(8,11); ctx.lineTo(0,7); ctx.closePath(); ctx.fill(); // nozzle
+  ctx.fillStyle="#23282c"; ctx.fillRect(8,-12,46,24);   // gun body
+  ctx.fillStyle="#c23b2a"; ctx.fillRect(20,-12,7,24);   // trigger accent
+  ctx.fillStyle="#0c0e10"; ctx.fillRect(54,-5,26,10);   // cable
+  ctx.restore();
+}
+function drawTig(x,y,ex,ey,now){
+  const cx2=x+ex*22, cy2=y+ey*22, ang=Math.atan2(ey,ex);
+  ctx.strokeStyle="#cfd6da"; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx2,cy2); ctx.stroke(); // tungsten
+  ctx.save(); ctx.translate(cx2,cy2); ctx.rotate(ang);
+  ctx.fillStyle="#b8722f"; ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(10,-12); ctx.lineTo(10,12); ctx.lineTo(0,8); ctx.closePath(); ctx.fill(); // ceramic cup
+  ctx.fillStyle="#2a2f33"; ctx.fillRect(10,-9,40,18);   // torch body
+  ctx.fillStyle="#0c0e10"; ctx.fillRect(50,-4,26,8);
+  ctx.restore();
+  // filler rod from the other hand, dips into the puddle on each dab
+  const dip=Math.max(0,1-(now-dipT)/170);
+  const fdx=(ex>=0?-1:1)*0.7, fdy=-0.7, fm=Math.hypot(fdx,fdy), gx=fdx/fm, gy=fdy/fm;
+  const gap=(1-dip)*16+4, ftx=x+gx*gap, fty=y+gy*gap;
+  ctx.strokeStyle="#9aa6ad"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ftx,fty); ctx.lineTo(ftx+gx*72,fty+gy*72); ctx.stroke();
+  if(dip>0.5&&welding){ ctx.fillStyle="rgba(255,180,60,.6)"; ctx.beginPath(); ctx.arc(ftx,fty,3,0,7); ctx.fill(); }
+}
+function updateToolHud(){
+  const el=document.getElementById("toolhud"); if(!el)return;
+  if(proc==="MMA"){ const pc=Math.max(0,Math.round((electrodeLeft-ELEC_STUB)/(1-ELEC_STUB)*100)), bars=Math.max(0,Math.round(electrodeLeft*8));
+    el.innerHTML=t("tool_elec")+'<b>'+(replacing?t("tool_used"):pc+'%')+'</b> '+'▮'.repeat(bars)+'▯'.repeat(8-bars); }
+  else if(proc==="MIG"){ el.innerHTML=t("tool_mig"); }
+  else { el.innerHTML=t("tool_tig"); }
+}
+// the molten pool — where the arc liquefies and fuses the base metal
+function drawPuddle(now){
+  if(!(welding&&last)) return;
+  if(proc==="MMA"&&replacing) return;          // arc broken while changing electrode
+  const x=last.x, y=last.y, r=idealHalf, ang=Math.atan2(uy,ux), tx=-ux, ty=-uy;
+  ctx.save(); ctx.globalCompositeOperation="lighter";
+  // HAZ — heated base metal halo spreading from the arc
+  const haz=r*(2.9+0.35*Math.sin(now/110));
+  const hg=ctx.createRadialGradient(x,y,r*0.4,x,y,haz);
+  hg.addColorStop(0,"rgba(255,150,40,0.30)"); hg.addColorStop(0.5,"rgba(200,70,10,0.15)"); hg.addColorStop(1,"rgba(120,20,0,0)");
+  ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(x,y,haz,0,7); ctx.fill();
+  // molten pool — teardrop trailing behind travel, surface wobbling
+  ctx.save(); ctx.translate(x+tx*r*0.45, y+ty*r*0.45); ctx.rotate(ang);
+  const wob=1+0.09*Math.sin(now/70);
+  const pg=ctx.createRadialGradient(r*0.35,0,r*0.08, 0,0,r*1.55);
+  pg.addColorStop(0,"#fffdf2"); pg.addColorStop(0.32,"#ffe487"); pg.addColorStop(0.66,"#ff8a14"); pg.addColorStop(1,"rgba(220,60,0,0.18)");
+  ctx.fillStyle=pg; ctx.beginPath(); ctx.ellipse(0,0, r*1.55*wob, r*1.02, 0, 0, 7); ctx.fill();
+  // keyhole — bright penetration at the leading edge (arc digging in)
+  ctx.fillStyle="rgba(255,255,250,0.92)"; ctx.beginPath(); ctx.ellipse(r*0.72,0, r*0.4, r*0.3, 0,0,7); ctx.fill();
+  ctx.restore();
+  // surface shimmer — light dancing on the liquid
+  for(let i=0;i<3;i++){ const a=now/100+i*2.1, sx=x+Math.cos(a)*r*0.45, sy=y+Math.sin(a*1.3)*r*0.32;
+    ctx.fillStyle="rgba(255,255,238,"+(0.28+0.22*Math.sin(now/55+i))+")"; ctx.beginPath(); ctx.arc(sx,sy,1.7,0,7); ctx.fill(); }
+  ctx.restore();
+}
+function applyEyeBurn(now,eff){
+  const eb=document.getElementById("eyeburn");
+  if(eff<=0){ if(stage.style.filter){ stage.style.filter=""; stage.style.transform=""; } eb.style.opacity=0; eyeWarned=false; return; }
+  // double vision — overlay a wobbling, shifted copy of the frame on itself
+  ctx.save(); ctx.globalAlpha=Math.min(0.5,eff*0.45); ctx.globalCompositeOperation="lighter";
+  ctx.drawImage(stage, eff*9*Math.sin(now/140), eff*6*Math.cos(now/110), W, H); ctx.restore();
+  // blur + over-exposure + hue swim + sway
+  stage.style.filter=`blur(${eff*5}px) brightness(${1+eff*0.7}) contrast(${1+eff*0.4}) saturate(${1+eff*0.6}) hue-rotate(${Math.sin(now/200)*eff*35}deg)`;
+  stage.style.transform=`translate(${Math.sin(now/120)*eff*5}px,${Math.cos(now/95)*eff*4}px) scale(${1+eff*0.015})`;
+  eb.style.opacity=Math.min(0.45, 0.12+eff*0.2+Math.sin(now/90)*0.05);
+  if(!eyeWarned){ eyeWarned=true; showToast(t("t_eye"),"#ffd23f"); }
+}
+
+// ── Live groove-coverage bar (drives the "weld the WHOLE bead" loop) ─
+function updateCovBar(now){
+  const bar=document.getElementById("covbar"); if(!bar) return;
+  if(baked.length<2 && passIndex===0){ bar.classList.remove("show"); return; }
+  bar.classList.add("show");
+  if(now-lastCovUpd>120){ covSmoothed=coverageNow(); lastCovUpd=now; }
+  const pct=Math.min(100,Math.round(covSmoothed*100)), ready=covSmoothed>=0.9;
+  const fill=document.getElementById("covfill");
+  fill.style.width=pct+"%";
+  fill.style.background=ready?"linear-gradient(90deg,#ffae3c,#ffd23f)":"linear-gradient(90deg,#1fd6e3,#5fe08a)";
+  const plan=passPlanArr, layer=plan.length>1?(" · "+t("cov_layer")+" "+(passIndex+1)+"/"+plan.length+" "+t("pass_"+plan[passIndex])):"";
+  const tail=ready?t("cov_done"):(t("cov_inspect")+" 90%");
+  document.getElementById("covtxt").textContent=t("cov_lbl")+" "+pct+"%"+layer+" · "+tail;
+}
+// ── Render ────────────────────────────────────────────────────────
+function frame(now){
+  const dtf=lastFrameT?Math.min(0.05,(now-lastFrameT)/1000):0; lastFrameT=now;
+  if(welding&&!helmetOn) eyeBurn+=dtf; else eyeBurn=Math.max(0,eyeBurn-dtf*0.6); // eyes recover when you stop / put helmet on
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(plate,0,0,W,H);
+  ctx.drawImage(weldbg,0,0,W,H);   // banked lower passes
+  ctx.drawImage(seam,0,0,W,H);     // live pass on top
+  updateCovBar(now);
+  const grav=gVec(),P=PROCESS[proc];
+
+  // smoke (below glow, above plate)
+  ctx.save();
+  const sk=[];
+  for(const s of smoke){ s.x+=s.vx; s.y+=s.vy; s.vx*=0.99; s.r+=0.4; s.life-=s.decay; if(s.life<=0)continue;
+    ctx.globalAlpha=s.life*0.14; ctx.fillStyle="#9aa6ad";
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7); ctx.fill(); sk.push(s); }
+  smoke=sk; ctx.restore();
+
+  // cooling trail behind the arc — base metal glowing down white→orange→red→gone
+  ctx.save(); ctx.globalCompositeOperation="lighter"; const keep=[];
+  for(const m of molten){ const age=now-m.t; if(age>900)continue; m.y+=grav*0.6;
+    const col=moltenColor(age),glow=1-age/900;
+    const gr=ctx.createRadialGradient(m.x,m.y,0,m.x,m.y,m.r*(1.3+glow*0.7));
+    gr.addColorStop(0,col); gr.addColorStop(0.45,col); gr.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.globalAlpha=0.45+glow*0.5; ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(m.x,m.y,m.r*(1.3+glow*0.7),0,7); ctx.fill(); keep.push(m); }
+  molten=keep; ctx.restore();
+
+  // live molten weld pool fusing into the base metal
+  drawPuddle(now);
+
+  // arc + spatter + smoke source
+  if(welding&&last){
+    if(now-lastSpawn>16){ spawnSparks(last.x,last.y,3+(thick>>1)); spawnSmoke(last.x,last.y); lastSpawn=now; }
+    ctx.save(); ctx.globalCompositeOperation="lighter";
+    const flick=0.6+Math.random()*0.4,ar=idealHalf*(2.4+Math.random()*0.9);
+    const ag=ctx.createRadialGradient(last.x,last.y,0,last.x,last.y,ar);
+    ag.addColorStop(0,P.arc); ag.addColorStop(0.3,"rgba(120,200,255,"+flick*0.45+")"); ag.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.globalAlpha=flick; ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(last.x,last.y,ar,0,7); ctx.fill(); ctx.restore();
+  }
+
+  // sparks
+  ctx.save(); ctx.globalCompositeOperation="lighter"; const live=[];
+  for(const s of sparks){ s.vy+=0.14; s.vx*=0.99; s.x+=s.vx; s.y+=s.vy; s.life-=s.decay; if(s.life<=0)continue;
+    ctx.globalAlpha=s.life; ctx.fillStyle=s.life>0.5?"#fff4cf":(s.life>0.25?"#ffb43c":"#ff5a1e");
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r*(0.5+s.life),0,7); ctx.fill();
+    ctx.globalAlpha=s.life*0.4; ctx.fillRect(s.x-s.vx,s.y-s.vy,1,1); live.push(s); }
+  sparks=live; ctx.restore();
+
+  // tool in hand (electrode / gun / torch + filler)
+  drawTool(now);
+
+  applyEyeBurn(now, Math.max(0, Math.min(1.3, (eyeBurn-2)/3)));  // <2s = nothing, then it gets ugly
+
+  // HELMET — auto-darkening filter
+  if(helmetOn){
+    ctx.save();
+    if(welding&&last){
+      const gd=ctx.createRadialGradient(last.x,last.y,idealHalf*1.6,last.x,last.y,Math.max(W,H)*0.55);
+      gd.addColorStop(0,"rgba(2,9,7,0)"); gd.addColorStop(0.45,"rgba(2,9,7,0.82)"); gd.addColorStop(1,"rgba(0,3,2,0.97)");
+      ctx.fillStyle=gd; ctx.fillRect(0,0,W,H);
+      ctx.globalCompositeOperation="overlay"; ctx.fillStyle="rgba(20,70,40,0.18)"; ctx.fillRect(0,0,W,H); // ADF green tint
+    } else {
+      ctx.fillStyle="rgba(5,12,9,0.34)"; ctx.fillRect(0,0,W,H);
+    }
+    ctx.restore();
+    if(welding&&last && speedFb){ ctx.save(); ctx.font="700 12px 'Segoe UI'"; ctx.textAlign="center";
+      ctx.fillStyle=fbGood?"#5fe08a":"#ff9a3c"; ctx.shadowColor="rgba(0,0,0,.85)"; ctx.shadowBlur=4;
+      ctx.fillText(speedFb,last.x,last.y-idealHalf-14); ctx.restore(); }
+  } else if(welding&&last&&speedFb){ ctx.save(); ctx.font="700 12px 'Segoe UI'"; ctx.textAlign="center";
+      ctx.fillStyle=fbGood?"#5fe08a":"#ff9a3c"; ctx.shadowColor="rgba(0,0,0,.85)"; ctx.shadowBlur=4;
+      ctx.fillText(speedFb,last.x,last.y-idealHalf-14); ctx.restore(); }
+
+  requestAnimationFrame(frame);
+}
+
+// ── Inspection (ISO 5817) ─────────────────────────────────────────
+// quality metrics of the CURRENT layer only (combined across layers in inspect)
+function passMetrics(){
+  const K=seamPts.length; let covered=0; const gaps=[];
+  for(let i=0;i<K;i++){ const p=seamPts[i]; let d=1e18; for(const b of baked){ const dd=(b.x-p.x)**2+(b.y-p.y)**2; if(dd<d)d=dd; }
+    if(Math.sqrt(d)<grooveHalf*1.6) covered++; else gaps.push(p); }
+  const coverage=K?covered/K:0;
+  let out=0,narrow=0,wide=0,rs=[];
+  for(const b of baked){ if(b.off>grooveHalf+bevelW*0.7) out++; if(b.r<grooveHalf*0.9) narrow++; if(b.r>idealHalf*1.65) wide++; rs.push(b.r); }
+  const overflow=baked.length?out/baked.length:0;
+  const mean=rs.reduce((a,v)=>a+v,0)/(rs.length||1);
+  const evenness=rs.length?Math.max(0,1-(Math.sqrt(rs.reduce((a,v)=>a+(v-mean)**2,0)/rs.length)/mean)*1.4):0;
+  const tol=MATERIAL[bead].tol;
+  const avgV=speedN?speedSum/speedN:targetPx, spdAcc=Math.max(0,1-Math.abs(avgV-targetPx)/(targetPx*tol));
+  const instab=speedN?vVarSum/speedN:0; const porosity=Math.max(0,Math.round((instab/8 + (proc==="MIG"&&spdAcc<0.4?2:0))/tol));
+  const spatter=Math.round(spatterCount*PROCESS[proc].sparks/40);
+  // crater — the two ends of the seam left unfilled (no bead within reach of an endpoint)
+  let endGap=0; for(const e of [seamPts[0],seamPts[K-1]]){ let d=1e18; for(const b of baked){ const dd=(b.x-e.x)**2+(b.y-e.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)>grooveHalf*1.7) endGap++; }
+  return {coverage,overflow,evenness,spdAcc,porosity,spatter,narrow,wide,out,gaps,avgV,endGap};
+}
+// freeze the finished layer underneath and arm the next one
+function bankPass(){
+  recEv('bank',0,0,performance.now());
+  passLog.push(passMetrics());
+  wbctx.drawImage(seam,0,0,W,H); sctx.clearRect(0,0,W,H);
+  baked=[]; molten=[]; speedSum=0; speedN=0; vVarSum=0; spatterCount=0; distAcc=0;
+  passIndex++; passMul=PASS_W[passPlanArr[passIndex]]||1; recalc();
+  const nextType=t("pass_"+passPlanArr[passIndex]), isLast=passIndex===passPlanArr.length-1;
+  showToast(isLast? t("t_passlast") : fmt("t_passdone",[passIndex,nextType]), "#5fe08a");
+  flashEl.style.opacity="0.32"; setTimeout(()=>flashEl.style.opacity="0",90);
+  updateToolHud(); updateInfo();
+}
+function inspect(){
+  if(baked.length<10){ showToast(t("t_layfirst"),"#ff9a3c"); return; }
+  const K=seamPts.length;
+  const cur=passMetrics(), all=passLog.concat([cur]), n=all.length, avg=k=>all.reduce((a,m)=>a+m[k],0)/n;
+  const coverage=avg("coverage"), spdAcc=avg("spdAcc"), evenness=avg("evenness");
+  const overflow=Math.max.apply(null,all.map(m=>m.overflow));
+  const porosity=all.reduce((a,m)=>a+m.porosity,0), spatter=all.reduce((a,m)=>a+m.spatter,0);
+  const narrow=cur.narrow, wide=cur.wide, gaps=cur.gaps, out=cur.out, avgV=cur.avgV;
+  const endGap=Math.max.apply(null,all.map(m=>m.endGap));
+  const rootCov=(passPlanArr[0]==="root"&&passLog.length)?passLog[0].coverage:1;
+
+  // grade = weighted weld-quality (positives sum to 100) minus defect penalties
+  let score = coverage*50          // przetop / wypełnienie grani (najważniejsze)
+            + spdAcc*20            // tempo = wkład ciepła
+            + evenness*15          // równość lica
+            + (1-overflow)*15      // brak podtopień / zwisów
+            - porosity*5           // pęcherze
+            - (proc==="TIG"?spatter*3:spatter*0.5); // TIG ma być czysty
+  score=Math.max(0,Math.min(100,Math.round(score)));
+
+  // PARITY (krok 2): odtwórz tę samą rundę headless i porównaj z wynikiem live.
+  if(rec){ rec.liveScore=score; window.__round=rec;
+    if(window.ArcSim){ try{ const sr=window.ArcSim.simulate(rec);
+      console.log('%c[PARITY]','color:#3cb9ff;font-weight:700','live',score,'· sim',sr.score,'· Δ',score-sr.score, sr);
+    }catch(err){ console.warn('[PARITY] sim error',err); } } }
+
+  const D=[];
+  if(coverage<0.85) D.push({s:coverage<0.6?"major":"minor",t:fmt("def_pen",[Math.round((1-coverage)*100)])});
+  if(narrow/baked.length>0.25) D.push({s:"minor",t:t("def_narrow")});
+  if(wide/baked.length>0.2) D.push({s:"minor",t:t("def_wide")});
+  if(overflow>0.12) D.push({s:overflow>0.3?"major":"minor",t:fmt("def_undercut",[Math.round(overflow*100)])});
+  if(porosity>0) D.push({s:porosity>3?"major":"minor",t:fmt("def_porosity",[porosity])});
+  if(spatter>4&&proc!=="TIG") D.push({s:"minor",t:fmt("def_spatter",[spatter])});
+  if(evenness<0.6) D.push({s:"minor",t:t("def_uneven")});
+  if(endGap>0) D.push({s:endGap>1?"major":"minor",t:t("def_crater")});                                   // unfilled stop/start
+  if(passPlanArr[0]==="root"&&rootCov<0.8) D.push({s:"major",t:fmt("def_rootlack",[Math.round(rootCov*100)])}); // weak root layer
+  if(D.length===0) D.push({s:"ok",t:t("def_clean")});
+
+  const major=D.some(d=>d.s==="major");
+  let iso,isoCol; if(major||score<50){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
+  const letter=score>=90?"A":score>=78?"B":score>=62?"C":score>=45?"D":"F";
+  const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
+
+  const diff=difficulty(), mat=matCost(), mult=payMult(score);
+  let payout=Math.round(mat*mult), jackpot=0;
+  if(!jobSettled){                                                       // settle the job once
+    if(score>=90 && diff>=7 && pool>0) jackpot=Math.round(pool*0.5);     // LEGENDARNA A cracks the shop pool
+    const won=payout+jackpot; gw+=won; pool-=won; jobSettled=true; saveWallet(); updateWallet();
+  }
+  const net=payout+jackpot-jobCost;
+  lastReport={score,letter,iso,proc,posKey,thick,coverage,spdAcc,evenness,avgV,diff,cost:jobCost,payout:payout+jackpot,jackpot,net,balance:gw,material:MATERIAL[bead].name[lang]};
+
+  document.getElementById("rLetter").textContent=letter; document.getElementById("rLetter").style.color=col;
+  const isoEl=document.getElementById("rIso"); isoEl.textContent="ISO 5817 · "+iso; isoEl.style.background=isoCol+"22"; isoEl.style.color=isoCol;
+  document.getElementById("rPct").textContent=score+"% · "+proc+" · "+POSITIONS[posKey].lbl+" · "+thick+"mm";
+  document.getElementById("rCov").textContent=Math.round(coverage*100)+"%";
+  document.getElementById("rSpd").textContent=Math.round(spdAcc*100)+"% ("+(avgV/PX_PER_MM).toFixed(1)+"/"+(targetPx/PX_PER_MM).toFixed(1)+" mm/s)";
+  document.getElementById("rEven").textContent=Math.round(evenness*100)+"%";
+  const rb=document.getElementById("rReward"), tier=valueTier(diff);
+  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  else rb.innerHTML=t("rew_zero")+ecoTail;
+  const ul=document.getElementById("rDefects"); ul.innerHTML="";
+  for(const d of D){ const li=document.createElement("li");
+    li.innerHTML='<span class="sev '+d.s+'">'+(d.s==="ok"?t("sev_ok"):d.s==="major"?t("sev_major"):t("sev_minor"))+'</span><span>'+d.t+'</span>'; ul.appendChild(li); }
+
+  // annotated zoom on worst region
+  const worst = gaps.length?gaps[Math.floor(gaps.length/2)] : (out?baked.find(b=>b.off>grooveHalf+bevelW*0.7):seamPts[Math.floor(K/2)]);
+  drawZoom(worst.x,worst.y, D.find(d=>d.s!=="ok"));
+  openModal("repModal");
+  maybeCompleteCoupon(score);
+}
+function drawZoom(cx,cy,worst){
+  const zc=document.getElementById("zoom"),z=zc.getContext("2d"),zw=zc.width,zh=zc.height,sc=2.4;
+  z.fillStyle="#0a0d0f"; z.fillRect(0,0,zw,zh);
+  z.save(); z.translate(zw/2,zh/2); z.scale(sc,sc); z.translate(-cx,-cy);
+  z.drawImage(plate,0,0,W,H); z.drawImage(weldbg,0,0,W,H); z.drawImage(seam,0,0,W,H); z.restore();
+  if(worst){ z.strokeStyle="#ff5a4a"; z.lineWidth=2; z.beginPath(); z.arc(zw/2,zh/2,16,0,7); z.stroke();
+    z.fillStyle="#ff5a4a"; z.font="700 11px 'Segoe UI'"; z.fillText("◄ "+worst.t.split(" ").slice(0,2).join(" "), zw/2+20, zh/2+4); }
+  z.strokeStyle="#232b31"; z.strokeRect(0,0,zw,zh);
+  z.fillStyle="#5d6973"; z.font="10px 'Segoe UI'"; z.fillText(t("zoom_zoom")+sc, 8, zh-8);
+}
+
+// ── Career ────────────────────────────────────────────────────────
+function maybeCompleteCoupon(score){
+  if(!activeCoupon) return; const c=COUPONS.find(x=>x.id===activeCoupon); if(!c) return;
+  if(score>=c.req && (!progress.done[c.id] || progress.done[c.id]<score)){
+    const fresh=!progress.done[c.id]; progress.done[c.id]=score; if(fresh) progress.xp+=c.xp; saveProgress(); updateRank();
+    setTimeout(()=>showToast(fmt("t_couponOk",[fresh?c.xp:0]),"#5fe08a"),300);
+  } else if(score<c.req){ setTimeout(()=>showToast(fmt("t_couponFail",[c.req]),"#ff9a3c"),300); }
+}
+function openCareer(){
+  const grid=document.getElementById("cgrid"); grid.innerHTML="";
+  COUPONS.forEach((c,i)=>{
+    const done=progress.done[c.id], unlocked=i===0||progress.done[COUPONS[i-1].id]>=COUPONS[i-1].req;
+    const el=document.createElement("div"); el.className="coupon"+(done?" done":"")+(unlocked?"":" locked");
+    el.innerHTML='<div class="ttl">'+c.name[lang]+'</div><div class="meta">'+c.proc+' · '+POSITIONS[c.pos].lbl+' · '+c.t+'mm · '+t("car_req")+' '+c.req+'%</div>'+
+      '<div class="badge">'+(done?'⭐'+done+'%':(unlocked?'':'🔒'))+'</div>';
+    if(unlocked) el.onclick=()=>{ loadCoupon(c); closeModal("carModal"); showToast(fmt("t_couponSel",[c.name[lang]]),"#1fd6e3"); };
+    grid.appendChild(el);
+  });
+  const r=rankFor(progress.xp), next=RANKS.find(x=>x[0]>progress.xp);
+  const prog=next?(progress.xp-r[0])/(next[0]-r[0]):1;
+  document.getElementById("xpwrap").innerHTML='<b style="color:#e9eef2">'+t(r[1])+'</b> · '+progress.xp+' XP'+(next?' → '+t(next[1])+' ('+next[0]+')':' · '+t("car_max"))+'<div class="xpbar"><div style="width:'+Math.round(prog*100)+'%"></div></div>';
+  openModal("carModal");
+}
+function loadCoupon(c){
+  activeCoupon=c.id; proc=c.proc; joint=c.joint; posKey=c.pos; thick=c.t;
+  document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
+  document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
+  document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
+  refreshPositions();
+}
+function updateRank(){ const r=rankFor(progress.xp); document.getElementById("rankbar").innerHTML='<b>'+t(r[1])+'</b><br>'+progress.xp+' XP'; }
+function applyI18N(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
+  document.getElementById("snd").textContent = soundOn? t("btn_arc") : t("btn_mute");
+  updateInfo(); updateToolHud(); updateRank(); fillTut(); updateWallet();
+}
+
+// ── Share card ────────────────────────────────────────────────────
+function buildCard(){
+  if(!lastReport){ showToast("NAJPIERW INSPEKCJA","#ff9a3c"); return; }
+  const r=lastReport,cv=document.getElementById("shareCanvas"),x=cv.getContext("2d"),Wc=cv.width,Hc=cv.height;
+  const g=x.createLinearGradient(0,0,Wc,Hc); g.addColorStop(0,"#0c1418"); g.addColorStop(1,"#10222a");
+  x.fillStyle=g; x.fillRect(0,0,Wc,Hc);
+  x.strokeStyle="#1fd6e3"; x.lineWidth=3; x.strokeRect(8,8,Wc-16,Hc-16);
+  x.fillStyle="#1fd6e3"; x.font="800 26px 'Segoe UI'"; x.fillText("GORWELD® ARC", 30, 52);
+  x.fillStyle="#5d6973"; x.font="600 13px 'Segoe UI'"; x.fillText("welding simulator · "+new Date().toISOString().slice(0,10), 30, 74);
+  const col=r.score>=78?"#5fe08a":r.score>=62?"#ffd23f":"#ff9a3c";
+  x.fillStyle=col; x.font="900 130px 'Segoe UI'"; x.textAlign="right"; x.fillText(r.letter, Wc-40, 200);
+  x.font="800 30px 'Segoe UI'"; x.fillText(r.score+"%", Wc-40, 240);
+  x.textAlign="left"; x.fillStyle="#e9eef2"; x.font="800 30px 'Segoe UI'";
+  x.fillText(r.proc+" · "+POSITIONS[r.posKey].lbl, 30, 150);
+  x.fillStyle="#9aa6ad"; x.font="600 17px 'Segoe UI'";
+  x.fillText(r.material+" · "+r.thick+"mm · ISO 5817: "+r.iso, 30, 180);
+  x.fillStyle=(r.net>=0)?"#5fe08a":"#ff5a4a"; x.font="800 27px 'Segoe UI'"; x.fillText("🏆 "+((r.net>=0)?"+":"")+(r.net||0)+" GW"+(r.jackpot?"  💥 JACKPOT":""), 30, 222);
+  { const t=valueTier(r.diff||1); x.fillStyle=t.col; x.font="800 15px 'Segoe UI'"; x.fillText("spoina "+t.name+" ×"+(r.diff||1).toFixed(1), 30, 246); }
+  x.fillStyle="#7d8990"; x.font="600 14px 'Segoe UI'";
+  x.fillText("pokrycie "+Math.round(r.coverage*100)+"%  ·  tempo "+Math.round(r.spdAcc*100)+"%  ·  równość "+Math.round(r.evenness*100)+"%  ·  wartość ×"+(r.diff||1).toFixed(1), 30, 270);
+  x.fillStyle="#ffae3c"; x.font="800 16px 'Segoe UI'"; x.fillText(t("tagline"), 30, 300);
+  x.fillStyle="#5d6973"; x.font="600 14px 'Segoe UI'"; x.fillText(t(rankFor(progress.xp)[1])+" · "+progress.xp+" XP", 30, 320);
+  openModal("cardModal");
+}
+function cardText(){ const r=lastReport;
+  return fmt("cardtext",[ r.proc+" · "+r.material+" · "+POSITIONS[r.posKey].lbl+" ("+r.thick+"mm)", r.letter+" ("+r.score+"%)", r.iso, (r.payout||0) ]); }
+
+// ── Audio ─────────────────────────────────────────────────────────
+let actx,master,noiseSrc,buzzOsc,bpFilter,crackleTimer,soundOn=true;
+function initAudio(){ if(actx)return;
+  actx=new (AudioContext||webkitAudioContext)(); master=actx.createGain(); master.gain.value=0; master.connect(actx.destination);
+  const buf=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  noiseSrc=actx.createBufferSource(); noiseSrc.buffer=buf; noiseSrc.loop=true;
+  bpFilter=actx.createBiquadFilter(); bpFilter.type="bandpass"; bpFilter.Q.value=0.7; noiseSrc.connect(bpFilter); bpFilter.connect(master);
+  buzzOsc=actx.createOscillator(); buzzOsc.type="sawtooth"; const bg=actx.createGain(); bg.gain.value=0.18;
+  const lp=actx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=600; buzzOsc.connect(lp); lp.connect(bg); bg.connect(master);
+  noiseSrc.start(); buzzOsc.start();
+}
+function arcOn(){ if(!soundOn)return; initAudio(); if(actx.state==="suspended")actx.resume();
+  const P=PROCESS[proc]; bpFilter.frequency.value=P.hiss; buzzOsc.frequency.value=P.buzz;
+  master.gain.cancelScheduledValues(actx.currentTime); master.gain.setTargetAtTime(0.22,actx.currentTime,0.02);
+  clearInterval(crackleTimer); crackleTimer=setInterval(()=>{ if(!master)return;
+    master.gain.setTargetAtTime(0.11+Math.random()*P.crackDepth,actx.currentTime,0.01);
+    buzzOsc.frequency.setTargetAtTime(P.buzz*(0.85+Math.random()*0.3),actx.currentTime,0.02); },P.crackInt);
+}
+function arcIntensity(v){ if(master&&soundOn) master.gain.setTargetAtTime(0.12+v*0.18,actx.currentTime,0.03); }
+function arcOff(){ clearInterval(crackleTimer); if(master) master.gain.setTargetAtTime(0,actx.currentTime,0.05); }
+
+// ── UI ────────────────────────────────────────────────────────────
+function refreshPositions(){
+  const wrap=document.getElementById("posWrap"); wrap.querySelectorAll(".pos").forEach(b=>b.remove());
+  const keys=Object.keys(POSITIONS).filter(k=>POSITIONS[k].joints.includes(joint));
+  if(!keys.includes(posKey)) posKey=keys[0];
+  for(const k of keys){ const b=document.createElement("button"); b.className="pos"+(k===posKey?" on":""); b.textContent=POSITIONS[k].lbl; b.dataset.pos=k;
+    b.onclick=()=>{ posKey=k; activeCoupon=null; wrap.querySelectorAll(".pos").forEach(x=>x.classList.remove("on")); b.classList.add("on"); selectPos(); };
+    wrap.appendChild(b); }
+  selectPos();
+}
+function updateInfo(){
+  const P=POSITIONS[posKey]; recalc(); const d=difficulty(), tr=valueTier(d), plan=passPlan();
+  const passInfo = plan.length>1 ? `<br>${t("cov_layer")}: <b style="color:#ffae3c">${plan.map(p=>t("pass_"+p)).join(" → ")}</b>` : "";
+  const cost=jobPrice(), aNet=Math.round(matCost()*(1.2+0.18*P.stars))-cost;
+  document.getElementById("info").innerHTML=
+    `<span class="proc">${PROCESS[proc].name[lang]}</span><br><span class="pname">${P.name[lang]}</span><br>`+
+    `<span class="stars">${"★".repeat(P.stars)}${"☆".repeat(5-P.stars)}</span> &nbsp; ${t("vset")} <span class="v">${(targetPx/PX_PER_MM).toFixed(1)} mm/s</span> · ${thick}mm<br>`+
+    `${MATERIAL[bead].name[lang]} · <b style="color:${tr.col}">${tr.name}</b> ×${d.toFixed(1)}<br>`+
+    `${t("eco_buy")} <b style="color:#ff9a3c">${cost} GW</b> · ${t("eco_a")} <b style="color:#5fe08a">${aNet>=0?'+':''}${aNet} GW</b>`+passInfo;
+}
+function selectPos(){
+  const P=POSITIONS[posKey]; recalc();
+  updateInfo();
+  document.getElementById("gArrow").textContent=P.flip?"↓↓":"↓";
+  clearWeld(); buildWorkpiece();
+}
+function clearWeld(){ reseedRound(); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; electrodeLeft=1; replacing=false; lastDab=0;
+  passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc(); updateToolHud(); }
+
+let openM=null;
+function openModal(id){ closeModal(openM); document.getElementById(id).style.display="flex"; openM=id; }
+function closeModal(id){ if(id) document.getElementById(id).style.display="none"; if(openM===id) openM=null; }
+function modalOpen(){ return !!openM; }
+
+document.querySelectorAll(".proc").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".proc").forEach(x=>x.classList.remove("on")); b.classList.add("on"); proc=b.dataset.proc; activeCoupon=null; selectPos(); });
+document.querySelectorAll(".joint").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".joint").forEach(x=>x.classList.remove("on")); b.classList.add("on"); joint=b.dataset.joint; activeCoupon=null; refreshPositions(); });
+document.querySelectorAll(".thk").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".thk").forEach(x=>x.classList.remove("on")); b.classList.add("on"); thick=+b.dataset.t; activeCoupon=null; selectPos(); });
+document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; drawPlate(); updateInfo(); });
+document.querySelectorAll(".lng").forEach(b=>{ b.classList.toggle("on", b.dataset.lng===lang);
+  b.onclick=()=>{ document.querySelectorAll(".lng").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+    lang=b.dataset.lng; try{localStorage.setItem("gorweld_lang",lang);}catch(e){} applyI18N(); }; });
+document.getElementById("helmet").onclick=e=>{ helmetOn=!helmetOn; e.target.classList.toggle("on",helmetOn); };
+document.getElementById("snd").onclick=e=>{ soundOn=!soundOn; e.target.textContent=soundOn?t("btn_arc"):t("btn_mute"); if(!soundOn)arcOff(); };
+document.getElementById("inspect").onclick=inspect;
+document.getElementById("career").onclick=openCareer;
+document.getElementById("clear").onclick=()=>{ clearWeld(); flashEl.style.opacity="0.5"; setTimeout(()=>flashEl.style.opacity="0",80); };
+document.getElementById("rClose").onclick=()=>closeModal("repModal");
+document.getElementById("rCard").onclick=()=>{ closeModal("repModal"); buildCard(); };
+document.getElementById("carClose").onclick=()=>closeModal("carModal");
+document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); gw=120; pool=200; burned=0; saveWallet(); updateWallet(); updateInfo(); updateRank(); openCareer(); };
+document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
+document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
+document.getElementById("cardTxt").onclick=()=>{ navigator.clipboard?.writeText(cardText()).then(()=>showToast(t("t_copied"),"#5fe08a"),()=>showToast(t("t_clipFail"),"#ff9a3c")); };
+function showToast(t,c){ toast.textContent=t; toast.style.color=c||"#fff"; toast.style.opacity="1"; setTimeout(()=>toast.style.opacity="0",1200); }
+
+// ── Tutorial ──────────────────────────────────────────────────────
+function fillTut(){ const el=document.getElementById("tutSteps"); if(!el) return; el.innerHTML="";
+  for(const k of ["tut1","tut2","tut3","tut4"]){ const d=document.createElement("div"); d.innerHTML=t(k); el.appendChild(d); } }
+function openTut(){ fillTut(); openModal("tutModal"); }
+function dismissTut(){ try{ localStorage.setItem("gorweld_tut","1"); }catch(e){} closeModal("tutModal"); }
+document.getElementById("help").onclick=openTut;
+document.getElementById("pricing").onclick=()=>{ document.getElementById("priceFrame").src="cennik.html?l="+lang+"&t="+Date.now(); openModal("priceModal"); };
+document.getElementById("priceClose").onclick=()=>closeModal("priceModal");
+(()=>{ const v=document.getElementById("pagebg"); if(!v)return; v.muted=true; const p=v.play&&v.play(); if(p&&p.catch)p.catch(()=>{}); document.addEventListener("click",()=>v.play&&v.play(),{once:true}); })();
+document.getElementById("tutStart").onclick=dismissTut;
+document.getElementById("tutSkip").onclick=dismissTut;
+
+// ── Boot ──────────────────────────────────────────────────────────
+function resize(){ W=innerWidth; H=innerHeight; DPR=Math.min(devicePixelRatio||1,2);
+  for(const c of [stage,plate,seam,weldbg]){ c.width=W*DPR; c.height=H*DPR; }
+  for(const c of [ctx,pctx,sctx,wbctx]) c.setTransform(DPR,0,0,DPR,0,0);
+  stage.style.width=W+"px"; stage.style.height=H+"px"; buildWorkpiece(); }
+addEventListener("resize",resize);
+resize(); refreshPositions(); updateRank(); applyI18N(); updateWallet(); requestAnimationFrame(frame);
+try{ if(!localStorage.getItem("gorweld_tut")) setTimeout(openTut,450); }catch(e){}   // first-visit tutorial
+</script>
+</body>
+</html>

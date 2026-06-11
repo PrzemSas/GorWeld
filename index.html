@@ -149,7 +149,7 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
 <body>
 <div class="scanlines"></div>
 <div class="scan-after"></div>
-<nav id="nav"><a href="#" class="nlogo" style="display:flex;align-items:center;gap:8px"><img src="/favicon.png" alt="GORWELD" style="height:36px;width:36px;border-radius:50%;display:block"></a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><a href="#about">About</a><a href="#chains">Chains</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="#sovereign">Sovereign</a><a href="#community">Community</a><a href="/demo" class="ncta">▶ Play Demo</a></div></nav>
+<nav id="nav"><a href="#" class="nlogo" style="display:flex;align-items:center;gap:8px"><img src="/favicon.png" alt="GORWELD" style="height:36px;width:36px;border-radius:50%;display:block"></a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><a href="#about">About</a><a href="#chains">Chains</a><a href="#arc">Arc Welder</a><a href="#tokens">Tokens</a><a href="/relics">Burn Relics</a><a href="#game">Game</a><a href="#sovereign">Sovereign</a><a href="#community">Community</a><a href="/demo" class="ncta">▶ Play Demo</a></div></nav>
 
 <section class="hero">
   <div class="hero-vig"></div><div class="hero-floor"></div><div class="hero-embers" id="heroEmbers"></div>
@@ -175,7 +175,7 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
   <h1 class="hero-t">GORWELD<small>DUMPSTER FORGE </small></h1>
   <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged across Gorbagana & Cookie Chain.</p>
   <div class="hero-stats"><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">TOKENS</div></div></div>
-  <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a></div>
+  <div class="hero-btns"><a href="/demo" class="btn btn1">⛏ Play Scrap Scavenger</a><a href="/arc" class="btn btn3">🔧 Arc Welder</a><a href="/relics" class="btn btn2">🔥 Burn Relics NFT</a></div>
   <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#3eb7f4" stroke-width="2" stroke-linecap="round"/></svg></a>
 </section>
 
@@ -288,6 +288,21 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
   </div>
 </div></section>
 
+<section id="arc"><div class="si">
+  <div class="stag">// ARC WELDER</div><div class="sdiv"></div>
+  <h2 class="stitle">Weld for a <em>living</em></h2>
+  <p class="sdesc">Browser welding simulator — MIG, TIG, MMA. Real positions (ISO 6947), real inspection standards (ISO 5817). Lay your beads, climb the board. Top welders of the week earn <b>$GORWELDD</b>.</p>
+  <div class="game-card">
+    <div class="game-vis"><div class="game-vis-in"><div class="gv-ic">🔧</div><div class="gv-t">ARC WELDER</div><div class="gv-s">PLAYABLE IN BROWSER</div><a href="/arc" class="btn btn1" style="margin-top:14px;display:inline-flex">▶ PLAY NOW</a></div></div>
+    <div><div class="gfeats">
+      <div class="gf"><div class="gf-ic">🔥</div><div><div class="gf-t">MIG · TIG · MMA</div><div class="gf-d">Three real welding methods. Control arc, travel speed and angle to lay a clean bead.</div></div></div>
+      <div class="gf"><div class="gf-ic">📐</div><div><div class="gf-t">REAL POSITIONS</div><div class="gf-d">PA–PF per ISO 6947. Flat, vertical, overhead — difficulty scales with method, material and joint.</div></div></div>
+      <div class="gf"><div class="gf-ic">🔍</div><div><div class="gf-t">INSPECTION</div><div class="gf-d">Beads graded against ISO 5817 quality levels. Porosity, undercut, penetration.</div></div></div>
+      <div class="gf"><div class="gf-ic">💰</div><div><div class="gf-t">EARN $GORWELDD</div><div class="gf-d">Free to play. Post your best run — top welders of the week get paid in $GORWELDD.</div></div></div>
+    </div><div style="margin-top:14px;font-size:8px;color:#333;font-family:'Orbitron',sans-serif;letter-spacing:1px"><a href="/arc/cennik.html" style="color:#3eb7f4">PRICING / CENNIK ↗</a></div></div>
+  </div>
+</div></section>
+
 <section id="sovereign" class="sec-dark"><div class="si">
   <div class="stag">// SOVEREIGN PROTOCOL</div><div class="sdiv"></div>
   <h2 class="stitle">Sovereign <em>#9</em></h2>
@@ -349,7 +364,7 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
 <script>
 var he=document.getElementById('heroEmbers');var colors=['#3eb7f4','#0ea5f1','#6ccaf9','#29b4ee','#0b84c1'];
 for(var i=0;i<30;i++){var e=document.createElement('div');e.className='ember';var s=Math.random()*4+1;var c=colors[Math.floor(Math.random()*colors.length)];e.style.width=s+'px';e.style.height=s+'px';e.style.background=c;e.style.left=Math.random()*100+'%';e.style.animationDuration=(Math.random()*7+4)+'s';e.style.animationDelay=(Math.random()*7)+'s';e.style.boxShadow='0 0 '+(Math.random()*10+3)+'px '+c;he.appendChild(e)}
-var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','<span class="c1">100B BURNED</span> — SOVEREIGN #9 CLOSED','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c3">WORKSHOP TOOLS</span> COMING','<span class="c1">$GORIUS</span> TRASHINUS'];
+var tItems=['<span class="c1">$GORWELDD</span> 490B SUPPLY','<span class="c1">500B BURNED</span> 🔥','<span class="c3">BURN RELICS</span> GENESIS NFT','<span class="c1">100B BURNED</span> — SOVEREIGN #9 CLOSED','<span class="c2">$SCRAPCOIN</span> 1B • 4M/WALLET','SCRAP SCAVENGER <span class="c1">DEMO</span>','<span class="c1">ARC WELDER</span> PLAY NOW','<span class="c1">$GORIUS</span> TRASHINUS'];
 var tt=document.getElementById('ticker');for(var r=0;r<2;r++){for(var j=0;j<tItems.length;j++){var d=document.createElement('div');d.className='ticker-i';d.innerHTML=tItems[j];tt.appendChild(d)}}
 var CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty";
 var GW=["https://gateway.pinata.cloud/ipfs/"+CID,"https://dweb.link/ipfs/"+CID,"https://ipfs.io/ipfs/"+CID];

@@ -150,6 +150,7 @@
     <button id="inspect" data-i18n="btn_inspect">🔎 INSPEKCJA</button>
     <button id="career" data-i18n="btn_career">🎓 KARIERA</button>
     <button id="help" data-i18n="btn_help">❔ JAK GRAĆ</button>
+    <button id="methods" data-i18n="btn_methods">📖 METODY</button>
     <button id="pricing" data-i18n="btn_pricing">💲 CENNIK</button>
     <button id="clear" data-i18n="btn_clear">✕ ZETRZYJ</button>
   </div>
@@ -208,6 +209,13 @@
     <iframe id="priceFrame" title="Cennik" allow="autoplay; fullscreen" style="width:100%; height:100%; border:0; display:block; background:#05070a;"></iframe>
   </div></div>
 
+  <!-- METODY / GLOSSARY -->
+  <div id="methodsModal" class="modal"><div class="card" style="width:min(580px,94vw);max-height:88vh;overflow:auto;text-align:left">
+    <h2 data-i18n="methods_title">Metody — opis fachu</h2>
+    <div id="methodsBody"></div>
+    <div class="act"><button class="on" onclick="closeModal('methodsModal')" data-i18n="btn_close">ZAMKNIJ</button></div>
+  </div></div>
+
 <script src="sim.js"></script>
 <script>
 "use strict";
@@ -259,7 +267,7 @@ const I18N={
   pass_root:"przetop", pass_fill:"wypełnienie", pass_cap:"lico",
   t_passdone:"✅ WARSTWA %1 → teraz: %2", t_passlast:"⚡ OSTATNIA WARSTWA — lico",
   def_crater:"Krater / niewypełniony koniec ściegu", def_rootlack:"Słaby przetop w grani (warstwa przetopowa %1%)",
-  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
+  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", btn_methods:"📖 METODY", methods_title:"Metody — opis fachu", btn_close:"ZAMKNIJ", tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
   tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym większa nagroda $GORWELDD (gwiazdki = mnożnik).",
   tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — napis <b style='color:#5fe08a'>DOBRE TEMPO</b> = pełny przetop. Za szybko = zimny zakład, za wolno = przepalenie.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
@@ -290,7 +298,7 @@ const I18N={
   pass_root:"root", pass_fill:"fill", pass_cap:"cap",
   t_passdone:"✅ LAYER %1 → now: %2", t_passlast:"⚡ LAST LAYER — cap",
   def_crater:"Crater / unfilled bead end", def_rootlack:"Poor root penetration (root pass %1%)",
-  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
+  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", btn_methods:"📖 METHODS", methods_title:"Methods — the trade", btn_close:"CLOSE", tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
   tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. The harder it is, the bigger the $GORWELDD reward (stars = multiplier).",
   tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — <b style='color:#5fe08a'>GOOD SPEED</b> = full penetration. Too fast = cold lap, too slow = burn-through.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
@@ -321,7 +329,7 @@ const I18N={
   pass_root:"корень", pass_fill:"заполнение", pass_cap:"облицовка",
   t_passdone:"✅ СЛОЙ %1 → теперь: %2", t_passlast:"⚡ ПОСЛЕДНИЙ СЛОЙ — облицовка",
   def_crater:"Кратер / незаваренный конец шва", def_rootlack:"Слабый провар корня (корневой слой %1%)",
-  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
+  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", btn_methods:"📖 МЕТОДЫ", methods_title:"Методы — ремесло", btn_close:"ЗАКРЫТЬ", tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
   tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше награда $GORWELDD (звёзды = множитель).",
   tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — <b style='color:#5fe08a'>ХОРОШИЙ ТЕМП</b> = полный провар. Быстро = непровар, медленно = прожог.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
@@ -1027,6 +1035,44 @@ function fillTut(){ const el=document.getElementById("tutSteps"); if(!el) return
 function openTut(){ fillTut(); openModal("tutModal"); }
 function dismissTut(){ try{ localStorage.setItem("gorweld_tut","1"); }catch(e){} closeModal("tutModal"); }
 document.getElementById("help").onclick=openTut;
+
+// ── Glossary: wszystkie metody fachu (spawanie + cięcie) ──
+const GLOSSARY=[
+ {ic:"🔥",code:"MMA · 111 · SMAW",cut:0,
+  t:{pl:"MMA — elektroda otulona",en:"MMA — stick electrode",ru:"MMA — штучный электрод"},
+  b:{pl:`Łuk jarzy się między <b>topliwą elektrodą otuloną</b> a materiałem. Topiąca się otulina tworzy gaz osłonowy i żużel chroniący jeziorko. Uniwersalna i tania — działa <b>w terenie i wietrze</b>, bez butli gazowej; wymaga odbijania żużla. Stal, stopy, żeliwo, naprawy. <i>Sterujesz: długość łuku, kąt, prąd, tempo.</i>`,
+     en:`Arc burns between a <b>consumable covered electrode</b> and the work. The melting coating makes both shielding gas and slag that protect the pool. Cheap and universal — works <b>outdoors and in wind</b>, no gas bottle; needs slag chipping. Steel, alloys, cast iron, repairs. <i>You control: arc length, angle, current, pace.</i>`,
+     ru:`Дуга горит между <b>плавящимся покрытым электродом</b> и металлом. Плавясь, обмазка даёт защитный газ и шлак. Дёшево и универсально — работает <b>на улице и ветру</b>, без баллона; нужно сбивать шлак. Сталь, сплавы, чугун, ремонт. <i>Управляешь: длина дуги, угол, ток, темп.</i>`}},
+ {ic:"🔫",code:"MIG/MAG · 131/135 · GMAW",cut:0,
+  t:{pl:"MIG/MAG — drut w osłonie gazu",en:"MIG/MAG — wire in gas",ru:"MIG/MAG — проволока в газе"},
+  b:{pl:`<b>Drut elektrodowy</b> podawany w sposób ciągły, łuk w osłonie gazu. <b>MIG (131)</b> = gaz obojętny (Ar/He) → aluminium i metale nieżelazne; <b>MAG (135)</b> = gaz aktywny (CO₂, Ar+CO₂) → stal. Szybkie, wydajne, łatwe — cienkie i średnie blachy, produkcja, konstrukcje. <i>Sterujesz: prędkość drutu, napięcie, tempo, kąt.</i>`,
+     en:`<b>Continuously fed wire</b>, arc shielded by gas. <b>MIG (131)</b> = inert gas (Ar/He) → aluminium and non-ferrous; <b>MAG (135)</b> = active gas (CO₂, Ar+CO₂) → steel. Fast, productive, easy — thin to medium plate, production, structures. <i>You control: wire speed, voltage, pace, angle.</i>`,
+     ru:`<b>Непрерывная подача проволоки</b>, дуга в защите газа. <b>MIG (131)</b> = инертный газ (Ar/He) → алюминий и цветные; <b>MAG (135)</b> = активный газ (CO₂, Ar+CO₂) → сталь. Быстро, производительно, просто — тонкий и средний металл, производство. <i>Управляешь: скорость проволоки, напряжение, темп, угол.</i>`}},
+ {ic:"👐",code:"TIG · 141 · GTAW/WIG",cut:0,
+  t:{pl:"TIG — elektroda wolframowa",en:"TIG — tungsten electrode",ru:"TIG — вольфрамовый электрод"},
+  b:{pl:`Łuk między <b>nietopliwą elektrodą wolframową</b> a materiałem, osłona gazu obojętnego (Ar); spoiwo dokładasz <b>drugą ręką</b>. Najwyższa jakość i precyzja: nierdzewka, aluminium, cienkie ścianki, <b>przetopy graniowe</b>, rury 6G. Wolne, obie ręce, często pedał prądu. <i>Sterujesz: prąd, dystans elektrody, dozowanie spoiwa, tempo.</i>`,
+     en:`Arc between a <b>non-consumable tungsten electrode</b> and the work, inert gas (Ar); filler added <b>by the other hand</b>. Top quality and precision: stainless, aluminium, thin walls, <b>root passes</b>, 6G pipe. Slow, two hands, often a current pedal. <i>You control: current, electrode distance, filler dabs, pace.</i>`,
+     ru:`Дуга между <b>неплавящимся вольфрамовым электродом</b> и металлом, инертный газ (Ar); присадку подаёшь <b>второй рукой</b>. Высшее качество и точность: нержавейка, алюминий, тонкие стенки, <b>корневые проходы</b>, труба 6G. Медленно, две руки, часто педаль тока. <i>Управляешь: ток, дистанция электрода, присадка, темп.</i>`}},
+ {ic:"🔥",code:"CIĘCIE · tlenowo-acetylenowe",cut:1,
+  t:{pl:"Przepalanie palnikiem (tlen + acetylen)",en:"Oxy-fuel cutting (oxygen + acetylene)",ru:"Кислородная резка (кислород + ацетилен)"},
+  b:{pl:`<b>Cięcie termiczne</b> w dwóch etapach: (1) płomień <b>tlen + acetylen</b> (~3160 °C) podgrzewa stal do temperatury zapłonu ~900 °C; (2) strumień <b>czystego tlenu</b> utlenia żelazo → ciekły żużel wydmuchiwany z rzazu. <b>Tylko stal niskowęglowa i niskostopowa</b> — nie tnie nierdzewki ani aluminium (ich tlenki topią się wyżej niż metal). Grube blachy, złom, demontaż.`,
+     en:`<b>Thermal cutting</b> in two stages: (1) an <b>oxygen + acetylene</b> flame (~3160 °C) preheats steel to its ignition point ~900 °C; (2) a <b>pure oxygen</b> jet oxidises the iron → molten slag blown out of the kerf. <b>Low-carbon / low-alloy steel only</b> — won't cut stainless or aluminium (their oxides melt higher than the metal). Thick plate, scrap, demolition.`,
+     ru:`<b>Термическая резка</b> в два этапа: (1) пламя <b>кислород + ацетилен</b> (~3160 °C) греет сталь до температуры воспламенения ~900 °C; (2) струя <b>чистого кислорода</b> окисляет железо → жидкий шлак выдувается из реза. <b>Только низкоуглеродистая/низколегированная сталь</b> — не режет нержавейку и алюминий (их оксиды плавятся выше металла). Толстый лист, лом, демонтаж.`}},
+ {ic:"⚡",code:"CIĘCIE · plazmowe",cut:1,
+  t:{pl:"Przepalanie plazmą",en:"Plasma cutting",ru:"Плазменная резка"},
+  b:{pl:`<b>Łuk plazmowy</b>: gaz (sprężone powietrze, azot, Ar) przepychany przez zwężoną dyszę i jonizowany łukiem tworzy strumień plazmy <b>~20 000–30 000 °C</b>, który topi metal, a gaz wydmuchuje stop z rzazu. <b>Tnie każdy metal przewodzący</b> — stal, nierdzewkę, aluminium, miedź. Czysty, szybki, wąski rzaz; cienkie i średnie. Potrzeba prądu i sprężonego gazu. <i>Sterujesz: prąd, dysza, prędkość, odległość.</i>`,
+     en:`<b>Plasma arc</b>: gas (compressed air, nitrogen, Ar) forced through a constricted nozzle and ionised by the arc forms a plasma jet <b>~20,000–30,000 °C</b> that melts the metal while the gas blows it out of the kerf. <b>Cuts any conductive metal</b> — steel, stainless, aluminium, copper. Clean, fast, narrow kerf; thin to medium. Needs power and compressed gas. <i>You control: current, nozzle, speed, standoff.</i>`,
+     ru:`<b>Плазменная дуга</b>: газ (сжатый воздух, азот, Ar) продавливается через суженное сопло и ионизируется дугой, образуя струю плазмы <b>~20 000–30 000 °C</b>, которая плавит металл, а газ выдувает его из реза. <b>Режет любой проводящий металл</b> — сталь, нержавейку, алюминий, медь. Чисто, быстро, узкий рез; тонкий и средний. Нужны ток и сжатый газ. <i>Управляешь: ток, сопло, скорость, зазор.</i>`}}
+];
+function fillMethods(){
+  const el=document.getElementById("methodsBody"); if(!el)return; el.innerHTML="";
+  GLOSSARY.forEach(g=>{ const bd=g.cut?"#ff8a3c":"#1fd6e3";
+    el.insertAdjacentHTML("beforeend",
+      '<div style="border:1px solid #232a31;border-left:3px solid '+bd+';border-radius:8px;padding:12px 14px;margin:10px 0;background:#0c1116">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:18px">'+g.ic+'</span><b style="color:#e9eef2;font-size:14px">'+g.t[lang]+'</b><span style="margin-left:auto;font-size:9px;letter-spacing:1px;color:'+bd+';font-weight:700">'+g.code+'</span></div>'
+      +'<div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9aa6ae">'+g.b[lang]+'</div></div>'); });
+}
+document.getElementById("methods").onclick=()=>{ fillMethods(); openModal("methodsModal"); };
 document.getElementById("pricing").onclick=()=>{ document.getElementById("priceFrame").src="cennik.html?l="+lang+"&t="+Date.now(); openModal("priceModal"); };
 document.getElementById("priceClose").onclick=()=>closeModal("priceModal");
 (()=>{ const v=document.getElementById("pagebg"); if(!v)return; v.muted=true; const p=v.play&&v.play(); if(p&&p.catch)p.catch(()=>{}); document.addEventListener("click",()=>v.play&&v.play(),{once:true}); })();

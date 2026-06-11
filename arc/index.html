@@ -113,7 +113,7 @@
       <button class="proc" data-proc="MIG">MIG/MAG 135</button>
       <button class="proc" data-proc="TIG">TIG 141</button>
       <button class="proc" data-proc="CUT">🔥 TLEN 81</button>
-      <button class="proc" data-proc="PLASMA">⚡ PLAZMA</button>
+      <button class="proc" data-proc="PLASMA">⚡ PLAZMA 83</button>
     </div>
     <div class="group"><span class="lbl" data-i18n="joint">Złącze</span>
       <button class="joint on" data-joint="butt" data-i18n="jt_butt">Doczołowe V</button>
@@ -360,7 +360,7 @@ const PROCESS = {
   MIG:{ name:{pl:"MIG/MAG 135 — drut",en:"MIG/MAG 135 — wire",ru:"MIG/MAG 135 — проволока"}, arc:"#cfe6ff", vMul:1.40, sparks:0.7, fume:0.7, slag:0, rippleK:0.55,ripDark:0.20, crown:0.7, buzz:125,hiss:2300, crackInt:85, crackDepth:0.10 },
   TIG:{ name:{pl:"TIG 141 — elektroda wolframowa",en:"TIG 141 — tungsten",ru:"TIG 141 — вольфрам"}, arc:"#b7ffff", vMul:0.70, sparks:0.0, fume:0.15,slag:0, rippleK:1.8, ripDark:0.42, crown:1.2, buzz:240,hiss:3300, crackInt:150,crackDepth:0.04 },
   CUT:{ name:{pl:"CIĘCIE 81 — tlen + acetylen",en:"OXY-FUEL 81 — cutting",ru:"РЕЗКА 81 — кислород+ацетилен"}, arc:"#ffb066", vMul:0.85, sparks:2.0, fume:1.3, slag:0, rippleK:1.0, ripDark:0.30, crown:0.7, buzz:70, hiss:1400, crackInt:40, crackDepth:0.15 },
-  PLASMA:{ name:{pl:"PLAZMA — cięcie plazmowe",en:"PLASMA — cutting",ru:"ПЛАЗМА — резка"}, arc:"#cda8ff", vMul:1.50, sparks:1.4, fume:0.5, slag:0, rippleK:1.0, ripDark:0.30, crown:0.7, buzz:300, hiss:3600, crackInt:120, crackDepth:0.05 },
+  PLASMA:{ name:{pl:"PLAZMA 83 — cięcie plazmowe",en:"PLASMA 83 — plasma cutting",ru:"ПЛАЗМА 83 — плазменная резка"}, arc:"#cda8ff", vMul:1.50, sparks:1.4, fume:0.5, slag:0, rippleK:1.0, ripDark:0.30, crown:0.7, buzz:300, hiss:3600, crackInt:120, crackDepth:0.05 },
 };
 const POSITIONS = {
   PA:{lbl:"PA",name:{pl:"PA — podolna (flat)",en:"PA — flat",ru:"PA — нижнее"},ang:0,g:0.025,stars:1,joints:["butt","fillet"]},
@@ -469,6 +469,7 @@ function pathStroke(c,pts,width,color,cap="round"){
   c.beginPath(); c.moveTo(pts[0].x,pts[0].y); for(let i=1;i<pts.length;i++) c.lineTo(pts[i].x,pts[i].y); c.stroke();
 }
 function drawPlate(){
+  if(isCut()){ drawCutPlate(); return; }
   const P=POSITIONS[posKey]; recalc();
   pctx.clearRect(0,0,W,H);                                   // przezroczyste — odsłania wideo tła strony
   const g=pctx.createRadialGradient(W/2,H*(P.flip?0.72:0.36),60,W/2,H/2,Math.max(W,H)*0.8);
@@ -612,7 +613,26 @@ function drawTool(now){
   ctx.save(); ctx.lineCap="round"; ctx.lineJoin="round";
   if(proc==="MMA") drawElectrode(p.x,p.y,ex,ey);
   else if(proc==="MIG") drawMig(p.x,p.y,ex,ey);
+  else if(isCut()) drawCutTorch(p.x,p.y,ex,ey);
   else drawTig(p.x,p.y,ex,ey,now);
+  ctx.restore();
+}
+function drawCutTorch(x,y,ex,ey){
+  const ang=Math.atan2(ey,ex), plasma=(proc==="PLASMA");
+  const hx=x+ex*20, hy=y+ey*20;
+  ctx.strokeStyle="#cfd6da"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(hx,hy); ctx.stroke();
+  ctx.save(); ctx.translate(hx,hy); ctx.rotate(ang);
+  if(plasma){
+    ctx.fillStyle="#3a4045"; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(9,-10); ctx.lineTo(9,10); ctx.lineTo(0,6); ctx.closePath(); ctx.fill(); // nozzle
+    ctx.fillStyle="#23282c"; ctx.fillRect(9,-11,46,22);                 // torch body
+    ctx.fillStyle="#a06bff"; ctx.fillRect(20,-11,6,22);                 // violet accent
+    ctx.fillStyle="#0c0e10"; ctx.fillRect(55,-5,26,10);                 // lead
+  } else {
+    ctx.fillStyle="#b08a3a"; ctx.fillRect(-2,-7,12,14);                 // brass cutting tip
+    ctx.fillStyle="#2a2f33"; ctx.fillRect(10,-9,42,18);                 // head + handle
+    ctx.fillStyle="#c23b2a"; ctx.fillRect(18,-17,11,9);                 // cutting-oxygen lever
+    ctx.fillStyle="#0c0e10"; ctx.fillRect(52,-6,28,12);                 // twin hoses
+  }
   ctx.restore();
 }
 function drawElectrode(x,y,ex,ey){
@@ -1066,12 +1086,12 @@ const GLOSSARY=[
   b:{pl:`Łuk między <b>nietopliwą elektrodą wolframową</b> a materiałem, osłona gazu obojętnego (Ar); spoiwo dokładasz <b>drugą ręką</b>. Najwyższa jakość i precyzja: nierdzewka, aluminium, cienkie ścianki, <b>przetopy graniowe</b>, rury 6G. Wolne, obie ręce, często pedał prądu. <i>Sterujesz: prąd, dystans elektrody, dozowanie spoiwa, tempo.</i>`,
      en:`Arc between a <b>non-consumable tungsten electrode</b> and the work, inert gas (Ar); filler added <b>by the other hand</b>. Top quality and precision: stainless, aluminium, thin walls, <b>root passes</b>, 6G pipe. Slow, two hands, often a current pedal. <i>You control: current, electrode distance, filler dabs, pace.</i>`,
      ru:`Дуга между <b>неплавящимся вольфрамовым электродом</b> и металлом, инертный газ (Ar); присадку подаёшь <b>второй рукой</b>. Высшее качество и точность: нержавейка, алюминий, тонкие стенки, <b>корневые проходы</b>, труба 6G. Медленно, две руки, часто педаль тока. <i>Управляешь: ток, дистанция электрода, присадка, темп.</i>`}},
- {ic:"🔥",code:"CIĘCIE · tlenowo-acetylenowe",cut:1,
+ {ic:"🔥",code:"CIĘCIE · 81 · oxy-fuel",cut:1,
   t:{pl:"Przepalanie palnikiem (tlen + acetylen)",en:"Oxy-fuel cutting (oxygen + acetylene)",ru:"Кислородная резка (кислород + ацетилен)"},
   b:{pl:`<b>Cięcie termiczne</b> w dwóch etapach: (1) płomień <b>tlen + acetylen</b> (~3160 °C) podgrzewa stal do temperatury zapłonu ~900 °C; (2) strumień <b>czystego tlenu</b> utlenia żelazo → ciekły żużel wydmuchiwany z rzazu. <b>Tylko stal niskowęglowa i niskostopowa</b> — nie tnie nierdzewki ani aluminium (ich tlenki topią się wyżej niż metal). Grube blachy, złom, demontaż.`,
      en:`<b>Thermal cutting</b> in two stages: (1) an <b>oxygen + acetylene</b> flame (~3160 °C) preheats steel to its ignition point ~900 °C; (2) a <b>pure oxygen</b> jet oxidises the iron → molten slag blown out of the kerf. <b>Low-carbon / low-alloy steel only</b> — won't cut stainless or aluminium (their oxides melt higher than the metal). Thick plate, scrap, demolition.`,
      ru:`<b>Термическая резка</b> в два этапа: (1) пламя <b>кислород + ацетилен</b> (~3160 °C) греет сталь до температуры воспламенения ~900 °C; (2) струя <b>чистого кислорода</b> окисляет железо → жидкий шлак выдувается из реза. <b>Только низкоуглеродистая/низколегированная сталь</b> — не режет нержавейку и алюминий (их оксиды плавятся выше металла). Толстый лист, лом, демонтаж.`}},
- {ic:"⚡",code:"CIĘCIE · plazmowe",cut:1,
+ {ic:"⚡",code:"CIĘCIE · 83 · plasma",cut:1,
   t:{pl:"Przepalanie plazmą",en:"Plasma cutting",ru:"Плазменная резка"},
   b:{pl:`<b>Łuk plazmowy</b>: gaz (sprężone powietrze, azot, Ar) przepychany przez zwężoną dyszę i jonizowany łukiem tworzy strumień plazmy <b>~20 000–30 000 °C</b>, który topi metal, a gaz wydmuchuje stop z rzazu. <b>Tnie każdy metal przewodzący</b> — stal, nierdzewkę, aluminium, miedź. Czysty, szybki, wąski rzaz; cienkie i średnie. Potrzeba prądu i sprężonego gazu. <i>Sterujesz: prąd, dysza, prędkość, odległość.</i>`,
      en:`<b>Plasma arc</b>: gas (compressed air, nitrogen, Ar) forced through a constricted nozzle and ionised by the arc forms a plasma jet <b>~20,000–30,000 °C</b> that melts the metal while the gas blows it out of the kerf. <b>Cuts any conductive metal</b> — steel, stainless, aluminium, copper. Clean, fast, narrow kerf; thin to medium. Needs power and compressed gas. <i>You control: current, nozzle, speed, standoff.</i>`,
@@ -1094,13 +1114,14 @@ function kerfPx(){ return proc==="PLASMA" ? 3.2 : 5 + thick*0.45; }
 function cutLineY(){ return H*0.62; }
 function buildCutPiece(){
   recalc(); seamPts=[]; baked=[]; cutHeat=0; pierced=false; cutDevSum=0; cutDevN=0;
-  const y=cutLineY(), x0=W*0.18, x1=W*0.82;
+  const y=cutLineY(), half=Math.min(W,H)*0.25, cx=W/2, x0=cx-half, x1=cx+half;
   for(let i=0;i<=150;i++) seamPts.push({x:x0+(x1-x0)*i/150, y});
   drawCutPlate();
 }
 function drawCutPlate(){
+  if(!seamPts.length) return;
   pctx.clearRect(0,0,W,H);
-  const y=cutLineY(), x0=W*0.18-40, x1=W*0.82+40, ph=82;
+  const y=cutLineY(), x0=seamPts[0].x-20, x1=seamPts[seamPts.length-1].x+20, ph=78;
   const bg=pctx.createRadialGradient(W/2,H*0.4,60,W/2,H/2,Math.max(W,H)*0.8);
   bg.addColorStop(0,"rgba(20,24,28,.30)"); bg.addColorStop(1,"rgba(8,10,12,.72)"); pctx.fillStyle=bg; pctx.fillRect(0,0,W,H);
   const tint = bead==="alu"?["#9aa0a6","#6e747a","#54595e"] : bead==="ss"?["#aeb6bd","#7c848b","#5a6066"] : ["#7a828a","#565d64","#3c4147"];

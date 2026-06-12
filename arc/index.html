@@ -94,6 +94,20 @@
   /* GW wallet chip */
   .wal { font-size:12px; font-weight:700; color:#ffd23f; letter-spacing:.3px; padding:5px 10px; background:#1a140880; border:1px solid #ffae3c44; border-radius:8px; white-space:nowrap; }
   .wal b { color:#fff; }
+  /* ── MOBILE: panel sterowania z prawego pionowego słupka → niski pasek na dole; reszta ekranu wolna na blachę ── */
+  @media (max-width:680px){
+    .top{ gap:5px; padding:6px 8px; }
+    .lbl{ display:none; }
+    .wal{ font-size:11px; padding:4px 8px; }
+    .proc,.joint,.bead,.thk,.lng,.pos{ padding:5px 7px; font-size:10px; }
+    .bottom{ top:auto; bottom:6px; left:6px; right:6px; transform:none;
+      flex-direction:row; flex-wrap:wrap; justify-content:center; align-items:center;
+      gap:5px; padding:6px; width:auto; max-height:24vh; overflow-y:auto; }
+    .bottom .group{ flex-direction:row; gap:5px; }
+    .bottom button{ padding:7px 9px; font-size:10px; }
+    .info,.grav,.rankbar{ display:none; }
+    .toolhud{ left:8px; right:8px; bottom:auto; top:88px; font-size:10px; max-width:none; }
+  }
 </style>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">

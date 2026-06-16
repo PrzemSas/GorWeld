@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GORWELD — podgląd Heat Input</title>
+<style>
+  :root { --cyan:#1fd6e3; --amber:#ffae3c; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#07090b; font-family:"Segoe UI",system-ui,sans-serif; color:#cfd8de; padding:24px; }
+  h1 { font-size:18px; color:#e9eef2; margin-bottom:8px; letter-spacing:1px; }
+  p { color:#7d8990; font-size:13px; margin-bottom:28px; max-width:720px; line-height:1.5; }
+  .section { margin-bottom:40px; }
+  .section h2 { font-size:12px; letter-spacing:2px; color:var(--cyan); text-transform:uppercase; margin-bottom:12px; }
+  .demo-wrap { position:relative; background:linear-gradient(180deg,#0a1014 0%,#07090b 60%,#0d1216 100%); border:1px solid #232b31; border-radius:16px; min-height:320px; overflow:hidden; }
+  .demo-wrap::before { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 70%, rgba(31,214,227,.06), transparent 60%); pointer-events:none; }
+
+  /* ── kopia stylów z gry ── */
+  .info { position:absolute; left:12px; bottom:124px; z-index:6; font-size:12px; line-height:1.55; color:#8b97a0; max-width:300px; text-shadow:0 0 6px #000; }
+  .info .pname { color:var(--cyan); font-weight:700; font-size:13px; }
+  .info .proc { color:var(--amber); font-weight:700; }
+  .info .stars { color:#ffb43c; letter-spacing:2px; }
+  .info .v { color:#e9eef2; font-weight:700; }
+
+  .modal-demo { display:flex; justify-content:center; padding:24px; background:rgba(4,6,8,.72); }
+  .card { background:#0e1418; border:1px solid #2b333a; border-radius:16px; padding:24px 28px; box-shadow:0 0 40px rgba(0,0,0,.6); width:min(460px,90vw); }
+  .card h2 { font-size:15px; letter-spacing:2px; color:#e9eef2; margin-bottom:14px; text-transform:uppercase; }
+  .letter { font-size:66px; font-weight:900; line-height:1; color:#5fe08a; }
+  .pct { font-size:13px; color:#8b97a0; margin:4px 0 14px; }
+  .iso { display:inline-block; padding:3px 10px; border-radius:6px; font-weight:800; letter-spacing:1px; font-size:13px; margin-bottom:12px; background:#5fe08a22; color:#5fe08a; }
+  .reward { margin:12px 0 4px; padding:11px 14px; border-radius:10px; background:linear-gradient(90deg,#2a200f,#103033); border:1px solid #ffae3c55; font-weight:800; font-size:16px; color:#ffd23f; text-align:center; }
+  .reward small { display:block; font-weight:600; font-size:11px; color:#9aa6ad; letter-spacing:.4px; margin-top:3px; }
+  .zoom-placeholder { display:block; border-radius:10px; border:1px solid #232b31; margin:10px auto 4px; width:380px; height:120px; background:#0a0d0f; position:relative; }
+  .zoom-placeholder::after { content:"powiększenie spoiny"; position:absolute; bottom:8px; left:8px; font-size:10px; color:#5d6973; }
+  .row { display:flex; justify-content:space-between; gap:18px; font-size:13px; color:#9aa6ad; padding:5px 0; border-top:1px solid #1b2228; }
+  .row b { color:#e9eef2; }
+  .row b.hi-ok { color:#5fe08a; }
+  .row b.hi-warn { color:#ff9a3c; }
+  .defects { list-style:none; font-size:12.5px; margin:6px 0 4px; }
+  .defects li { padding:5px 0; border-top:1px solid #161c20; display:flex; gap:8px; }
+  .sev { font-size:10px; font-weight:800; padding:1px 6px; border-radius:4px; }
+  .sev.ok { background:#13351f; color:#5fe08a; }
+  .act { display:flex; gap:8px; margin-top:16px; }
+  .act button { flex:1; padding:11px; cursor:pointer; border:1px solid #2b333a; background:#161c21; color:#b9c4cb; border-radius:8px; font-size:12px; font-weight:600; }
+  .act button.on { border-color:var(--cyan); color:#fff; background:#10303380; }
+
+  .arrow-hint { position:absolute; left:280px; bottom:148px; font-size:11px; color:var(--cyan); border:1px dashed var(--cyan); padding:4px 8px; border-radius:6px; background:rgba(16,48,51,.5); }
+  .arrow-hint::before { content:"← NOWA LINIA"; display:block; font-weight:700; letter-spacing:1px; font-size:9px; margin-bottom:2px; }
+</style>
+</head>
+<body>
+  <h1>GORWELD® Arc Welder — podgląd Heat Input</h1>
+  <p>Statyczny mockup tego, co widzisz w grze po dodaniu kalkulatora HI. Otwórz ten plik w przeglądarce obok <code>index.html</code>.</p>
+
+  <div class="section">
+    <h2>1 · Panel info (lewy dolny róg podczas gry)</h2>
+    <div class="demo-wrap" style="min-height:260px;">
+      <div class="info">
+        <span class="proc">MMA 111 — elektroda otulona</span><br>
+        <span class="pname">PA — podolna (flat)</span><br>
+        <span class="stars">★☆☆☆☆</span> &nbsp; v zadane: <span class="v">2.3 mm/s</span> · 8mm<br>
+        Stal · <b style="color:#3cb9ff">RZADKA</b> ×2.6<br>
+        kupisz <b style="color:#ff9a3c">15 GW</b> · za A netto <b style="color:#5fe08a">+8 GW</b><br>
+        Warstwa: <b style="color:#ffae3c">przetop → wypełnienie → lico</b><br>
+        HI zadane: <span class="v">1.085 kJ/mm</span> · 130 A · 24 V · 2.3 mm/s
+      </div>
+      <div class="arrow-hint">wkład ciepła + parametry łuku</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 · Raport inspekcji (po wyspawaniu)</h2>
+    <div class="modal-demo">
+      <div class="card">
+        <h2>Inspekcja wizualna VT</h2>
+        <div style="display:flex; gap:18px; align-items:center">
+          <div class="letter">A</div>
+          <div>
+            <div class="iso">ISO 5817 · poziom B (rygor.)</div>
+            <div class="pct">91% · MMA · PA · 8mm</div>
+          </div>
+        </div>
+        <div class="reward">🏆 +12 GW<small><b style="color:#3cb9ff">RZADKA</b> ×2.6 · koszt 15 → netto <b style="color:#5fe08a">-3 GW</b> · saldo 117</small></div>
+        <div class="zoom-placeholder"></div>
+        <ul class="defects">
+          <li><span class="sev ok">OK</span><span>Brak wad — spoina zgodna z wymaganiami</span></li>
+        </ul>
+        <div class="row"><span>Pokrycie grani</span><b>94%</b></div>
+        <div class="row"><span>Trzymanie tempa</span><b>88% (2.1/2.3 mm/s)</b></div>
+        <div class="row"><span>Wkład ciepła (HI)</span><b><span class="hi-ok">1.12</span> / 1.085 kJ/mm</b></div>
+        <div class="row"><span>Równość lica</span><b>86%</b></div>
+        <div class="act">
+          <button>📤 KARTA NA X</button>
+          <button class="on">SPAWAJ DALEJ</button>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:12px; font-size:12px;">HI faktyczne (zielone) vs zadane (szare). Pomarańczowe gdy odchyłka &gt;25%.</p>
+  </div>
+
+  <div class="section">
+    <h2>3 · Przykład złego tempa (HI za wysoki)</h2>
+    <div class="modal-demo">
+      <div class="card">
+        <h2>Inspekcja wizualna VT</h2>
+        <div style="display:flex; gap:18px; align-items:center">
+          <div class="letter" style="color:#ffd23f">C</div>
+          <div>
+            <div class="iso" style="background:#ffd23f22;color:#ffd23f">ISO 5817 · poziom C</div>
+            <div class="pct">68% · MMA · PA · 8mm</div>
+          </div>
+        </div>
+        <div class="row"><span>Wkład ciepła (HI)</span><b><span class="hi-warn">1.48</span> / 1.085 kJ/mm</b></div>
+        <div class="row"><span>Trzymanie tempa</span><b>42% (1.4/2.3 mm/s)</b></div>
+      </div>
+    </div>
+    <p style="margin-top:12px; font-size:12px;">Za wolno → wyższy HI → pomarańczowy alert w raporcie.</p>
+  </div>
+</body>
+</html>

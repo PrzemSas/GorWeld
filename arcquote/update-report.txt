@@ -1,0 +1,7 @@
+GORWELD — aktualizacja cen 2026-06-30 15:19
+
+✓ drut_G3Si1_kg: 8.6 → 8.6 zł/jedn. = (0%)
+✓ elektroda_E6013_kg: 15.25 → 15.25 zł/jedn. = (0%)
+✓ drut_308_kg: 30.44 → 30.44 zł/jedn. = (0%)
+✓ tarcza_listkowa: 5.73 → 5.73 zł/jedn. = (0%)
+✓ tarcza_ciecia: 2.99 → 2.96 zł/jedn. ▼ (1%)

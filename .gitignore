@@ -10,3 +10,33 @@ Thumbs.db
 
 # Lokalne notatki
 *.local.md
+
+# airdrop snapshots (local)
+airdrop-data/
+
+# retro-drop: snapshot + lista alokacji — adresy i salda 55 holderów.
+# Decyzja: listy NIE publikujemy (każdy przelicza swój przydział sam z RPC).
+# Repo jest PUBLICZNE i serwuje gorweld.com wprost ze swojej zawartości,
+# więc commit = plik do pobrania pod publicznym URL-em. Trzymamy poza wersjonowaniem.
+retro-data/
+
+# Wewnętrzny spis całości: adresy portfeli usera, pełny adres holdera w sporze,
+# kulisy decyzji. Do publikacji są WYŁĄCZNIE airdrop/RETRO-DROP*.md.
+AIRDROP-2CHAINS.md
+
+# Wewnętrzna notatka robocza (wskazuje na pliki spoza repo).
+WORK-STATUS.txt
+
+# Skrypty snapshotu/wypłaty zawierają adresy portfeli usera (główny + dev) ORAZ
+# pełny adres holdera w sporze — a tekst dropu celowo go nie nazywa. Publikacja
+# wymagałaby najpierw redakcji tych stałych. Do czasu decyzji: poza wersjonowaniem,
+# żeby `git add -A` nie wciągnął ich przypadkiem do publicznego repo.
+scripts/
+
+# Moduł podpinania portfela z porzuconego wariantu z claimem. Tekst dropu mówi
+# wprost, że NIKT nie poprosi o podłączenie portfela — publikacja tego kodu pod
+# tą samą domeną byłaby gotowym materiałem dla phishingu.
+airdrop/wallet-connect.js
+airdrop/config.js
+airdrop/snippet-*.html
+airdrop/README.md

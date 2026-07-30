@@ -20,6 +20,9 @@ airdrop-data/
 # więc commit = plik do pobrania pod publicznym URL-em. Trzymamy poza wersjonowaniem.
 retro-data/
 
+# DFD 2nd collection NFT reward: allocations + sent log (same reason as retro-data)
+dfd2nd-data/
+
 # Wewnętrzny spis całości: adresy portfeli usera, pełny adres holdera w sporze,
 # kulisy decyzji. Do publikacji są WYŁĄCZNIE airdrop/RETRO-DROP*.md.
 AIRDROP-2CHAINS.md

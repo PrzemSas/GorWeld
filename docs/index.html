@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GorWeld Docs — $GorWeld · WelderGor</title>
+<meta name="description" content="Official GorWeld ($GorWeld) docs. Solana welder memecoin. Contract address, forge rules, lock, links.">
+<meta property="og:title" content="GorWeld Docs — $GorWeld">
+<meta property="og:description" content="Steel > spam. Official CA, rules, lock. Dumpster Forge.">
+<meta property="og:url" content="https://gorweld.com/docs/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@GorWeld">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#08080a;color:#e0e0e0;font-family:'Share Tech Mono',monospace;line-height:1.55;min-height:100vh}
+a{color:#3eb7f4;text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+.brand{font-family:'Teko',sans-serif;font-size:42px;letter-spacing:6px;color:#3eb7f4;text-shadow:0 0 18px #3eb7f455}
+.sub{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#666;margin-top:4px}
+.tag{margin:18px 0 28px;color:#aaa;font-size:14px;border-left:2px solid #3eb7f4;padding-left:12px}
+h2{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#3eb7f4;margin:32px 0 12px;border-bottom:1px solid #1a2a33;padding-bottom:8px}
+p,li{font-size:14px;color:#ccc;margin-bottom:8px}
+ul{padding-left:18px;margin-bottom:8px}
+.card{background:#0c1014;border:1px solid #1a2a33;border-radius:6px;padding:16px 18px;margin:12px 0}
+.card.hl{border-color:#3eb7f466;box-shadow:0 0 24px #3eb7f415}
+.label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#666;margin-bottom:6px}
+.ca{font-size:13px;word-break:break-all;color:#fff;user-select:all;line-height:1.6}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{display:inline-block;padding:8px 14px;border:1px solid #3eb7f4;border-radius:3px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#3eb7f4}
+.btn:hover{background:#3eb7f4;color:#000;text-decoration:none}
+.btn.ghost{border-color:#333;color:#888}
+.btn.ghost:hover{border-color:#3eb7f4;color:#3eb7f4;background:transparent}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+td{padding:8px 6px;border-bottom:1px solid #151a20;vertical-align:top}
+td:first-child{color:#666;width:38%}
+.foot{margin-top:48px;padding-top:16px;border-top:1px solid #1a2a33;font-size:11px;color:#555}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;font-size:11px}
+.nav a{color:#555;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.nav a:hover{color:#3eb7f4}
+.copyok{font-size:11px;color:#3eb7f4;opacity:0;transition:opacity .2s;margin-left:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a href="https://gorweld.com/">← gorweld.com</a>
+    <a href="https://x.com/GorWeld">@GorWeld</a>
+  </div>
+
+  <div class="brand">GORWELD</div>
+  <div class="sub">Docs · WelderGor · $GorWeld · Dumpster Forge</div>
+  <p class="tag">Everything is computer / until you strike an arc.<br>Steel &gt; spam. Proof &gt; promises.</p>
+
+  <h2>1 · Contract (the only mint)</h2>
+  <div class="card hl">
+    <div class="label">Solana mint / CA — copy this only</div>
+    <div class="ca" id="ca">A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr</div>
+    <div class="btnrow">
+      <a class="btn" href="#" onclick="navigator.clipboard.writeText(document.getElementById('ca').textContent);document.getElementById('ok').style.opacity=1;return false">Copy CA</a>
+      <span class="copyok" id="ok">copied</span>
+      <a class="btn ghost" href="https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr" target="_blank" rel="noopener">Solscan</a>
+      <a class="btn ghost" href="https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr" target="_blank" rel="noopener">Pump.fun</a>
+      <a class="btn ghost" href="https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe" target="_blank" rel="noopener">DexScreener</a>
+    </div>
+  </div>
+  <p>Name: <strong>WelderGor</strong> · Ticker: <strong>$GorWeld</strong> · Decimals: 6 · Supply: ~1B · Mint/freeze: renounced</p>
+  <p style="color:#888;font-size:12px">Any other “GorWeld” mint is fake. Do not use random CA from DMs.</p>
+
+  <h2>2 · What it is</h2>
+  <p>Solana <strong>welder memecoin</strong>. After-shift culture. Scrap, steel, real work energy — not spam farm circus.</p>
+  <p>This is a memecoin / culture token. No guaranteed utility, listings, or price.</p>
+
+  <h2>3 · Forge rules</h2>
+  <ul>
+    <li><strong>Hold</strong> = stay in the forge</li>
+    <li><strong>Sold the airdrop bag</strong> (even 1 token) = out of free drops forever</li>
+    <li><strong>Free waves: CLOSED</strong> — no free farm unless a new official campaign is announced</li>
+    <li>Loyalty for pure holders was run; past rewards ≠ future promises</li>
+  </ul>
+
+  <h2>4 · On-chain lock</h2>
+  <div class="card">
+    <table>
+      <tr><td>Amount</td><td>50,000,000 $GorWeld</td></tr>
+      <tr><td>Via</td><td>Streamflow (time-based)</td></tr>
+      <tr><td>Unlock</td><td>~2027-01-29</td></tr>
+      <tr><td>Tx</td><td><a href="https://solscan.io/tx/5DvcDwnkfLKCax7bUr9nd4jYNxRCx1DkhBA6RcEjHBCNgHDemtgMxvzxGQ362ME3FxjyVzdNDJDfEXJ19fKcSVwA" target="_blank" rel="noopener">Solscan</a></td></tr>
+      <tr><td>Contract</td><td><a href="https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t" target="_blank" rel="noopener">Streamflow app</a></td></tr>
+    </table>
+  </div>
+  <p style="color:#888;font-size:12px">Lock is transparency, not a price floor. Verify on-chain yourself.</p>
+
+  <h2>5 · Links</h2>
+  <div class="card">
+    <table>
+      <tr><td>Website</td><td><a href="https://gorweld.com/">gorweld.com</a></td></tr>
+      <tr><td>Docs</td><td><a href="https://gorweld.com/docs/">gorweld.com/docs</a></td></tr>
+      <tr><td>ARC</td><td><a href="https://gorweld.com/arc/">gorweld.com/arc</a></td></tr>
+      <tr><td>X official</td><td><a href="https://x.com/GorWeld">@GorWeld</a></td></tr>
+      <tr><td>X dev</td><td><a href="https://x.com/PrzemSas">@PrzemSas</a></td></tr>
+      <tr><td>DexScreener</td><td><a href="https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe">pair chart</a></td></tr>
+    </table>
+  </div>
+
+  <h2>6 · Tagline</h2>
+  <p><em>Everything is computer</em> = internet / AI / Matrix / meme screen culture.<br>
+  <em>Until you strike an arc</em> = real welding arc — metal, hands, after shift.<br>
+  Brand: we stand with steel and proof, not spam prompts.</p>
+
+  <h2>7 · Safety</h2>
+  <ul>
+    <li>Only the CA above is official</li>
+    <li>No seed phrases. No “support” DMs</li>
+    <li>No random claim sites (free waves closed)</li>
+    <li>Memecoins can go to zero</li>
+  </ul>
+
+  <div class="foot">
+    Official docs · 2026-07-30 · Dumpster Forge<br>
+    On-chain data always wins over this text.<br>
+    Not financial advice.
+  </div>
+</div>
+</body>
+</html>

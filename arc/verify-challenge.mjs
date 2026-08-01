@@ -64,6 +64,10 @@ function verify(path) {
 
   if (problems.length) return { path, ok: false, problems };
 
+  // runda nagrana starszym silnikiem liczyła się wg innych reguł — oznacz to
+  if (proof.engine && proof.engine !== ArcSim.VERSION)
+    problems.push(`silnik gracza ${proof.engine} ≠ weryfikatora ${ArcSim.VERSION}`);
+
   const sim = ArcSim.simulate(r);
   const bot = botSignals(r.events);
   const passed = sim.score >= CFG.minScore;

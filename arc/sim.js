@@ -192,7 +192,9 @@
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2) };
   }
 
-  const API = { simulate, mulberry32, VERSION: "0.1.0" };
+  // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
+  // Rundy nagrane silnikiem 0.x liczą się inaczej i NIE są porównywalne z wynikami z challenge'u.
+  const API = { simulate, mulberry32, VERSION: "1.1.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

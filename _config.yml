@@ -1,0 +1,22 @@
+# Konfiguracja GitHub Pages dla gorweld.com
+#
+# `exclude` = pliki, które zostają w repo, ale NIE trafiają na serwer.
+# Uwaga: ustawienie tej listy nadpisuje domyślną listę Jekylla, więc jej
+# standardowe pozycje trzeba tu powtórzyć — inaczej zaczęłyby się publikować.
+
+exclude:
+  # weryfikator zgłoszeń ARC CHALLENGE — narzędzie operatorskie, nie część strony.
+  # Ma w środku progi wykrywania botów; publikowanie ich to instrukcja obejścia.
+  - arc/verify-challenge.mjs
+
+  # domyślne wykluczenia Jekylla (odtworzone, bo `exclude` je nadpisuje)
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/

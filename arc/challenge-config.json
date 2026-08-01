@@ -1,0 +1,13 @@
+{
+  "id": "ARC-A-2026-08",
+  "seed": 2832420865,
+  "W": 1280,
+  "H": 720,
+  "proc": "TIG",
+  "joint": "pipe",
+  "pos": "HL045",
+  "thick": 5,
+  "bead": "steel",
+  "minScore": 90,
+  "note": "Kupon c12 '6G — KING'. Sufit punktowy 100, wiec prog 90 nie ociera sie o limit silnika. seed dziesietnie = 0xA8CD6F01. Seed PODMIEN i opublikuj dopiero w chwili startu challenge'u — musi zgadzac sie z tym, czego pilnuje verify-challenge.mjs."
+}

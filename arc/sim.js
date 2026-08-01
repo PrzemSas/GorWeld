@@ -8,8 +8,13 @@
  *
  * UWAGA: matematyka jest 1:1 z `index.html` (depositBead / move / passMetrics / inspect).
  * Po potwierdzeniu parity scali się to w jedno źródło (index.html zacznie WOŁAĆ sim.js).
- * Jedyna metryka jeszcze NIE bit-exact: `spatter` (w grze nalicza pętla klatek ~16ms;
- * tu aproksymujemy 1 zdarzenie ruchu ≈ 1 klatka). Reszta odtwarza się dokładnie.
+ *
+ * Spatter jest teraz bit-exact: gra też nalicza go w `move()` po czasie łuku (spawnSparks
+ * odpowiada wyłącznie za grafikę), a do wyniku idzie TEMPO odprysków (na sekundę) z sufitem
+ * kary SPATTER_PEN_CAP — dawna suma bez limitu dawała grubemu MMA twarde F niezależnie od jakości.
+ *
+ * Wszystkie metryki liczą się po CZASIE i po DRODZE, nie po liczbie zdarzeń `move`,
+ * więc wynik nie zależy od częstotliwości myszy/ekranu gracza.
  */
 (function (root) {
   "use strict";
@@ -41,6 +46,9 @@
   const PASS_W = { root:0.72, fill:0.92, cap:1.00 };
   const BASE_REWARD = 50;
   const ELEC_STUB = 0.16;
+  const V_TAU = 0.045;            // stała czasowa wygładzania prędkości [s]
+  const V_TICK = 0.016;           // referencyjny takt [s] — skala `instab`
+  const SPATTER_PEN_CAP = 15;     // sufit kary za odpryski
 
   function simulate(round) {
     const { seed, W, H, proc, joint, pos: posKey, thick, bead, events } = round;
@@ -80,6 +88,7 @@
 
     // ── stan rundy (jak globalne w grze) ──
     let baked = [], speedSum = 0, speedN = 0, vVarSum = 0, spatterCount = 0, distAcc = 0;
+    let vSumT = 0, vTimeS = 0, depCarry = 0, passWeldMs = 0;
     let electrodeLeft = 1, replacing = false, vEMA = targetPx;
     let last = null, lastT = 0, lastDab = 0, ux = 1, uy = 0;
     const passLog = [];
@@ -104,14 +113,17 @@
       const mean = rs.reduce((a, v) => a + v, 0) / (rs.length || 1);
       const evenness = rs.length ? Math.max(0, 1 - (Math.sqrt(rs.reduce((a, v) => a + (v - mean) ** 2, 0) / rs.length) / mean) * 1.4) : 0;
       const tol = MATERIAL[bead].tol;
-      const avgV = speedN ? speedSum / speedN : targetPx, spdAcc = Math.max(0, 1 - Math.abs(avgV - targetPx) / (targetPx * tol));
-      const instab = speedN ? vVarSum / speedN : 0; const porosity = Math.max(0, Math.round((instab / 8 + (proc === "MIG" && spdAcc < 0.4 ? 2 : 0)) / tol));
-      const spatter = Math.round(spatterCount * PROCESS[proc].sparks / 40);
+      const avgV = vTimeS ? vSumT / vTimeS : targetPx, spdAcc = Math.max(0, 1 - Math.abs(avgV - targetPx) / (targetPx * tol));
+      const ticks = Math.max(1, vTimeS / V_TICK);
+      const instab = vTimeS ? vVarSum / ticks : 0; const porosity = Math.max(0, Math.round((instab / 8 + (proc === "MIG" && spdAcc < 0.4 ? 2 : 0)) / tol));
+      const weldSec = Math.max(0.5, passWeldMs / 1000);
+      const spatter = Math.round((spatterCount / weldSec) * PROCESS[proc].sparks / 40);
       let endGap = 0; for (const e of [seamPts[0], seamPts[K - 1]]) { let d = 1e18; for (const b of baked) { const dd = (b.x - e.x) ** 2 + (b.y - e.y) ** 2; if (dd < d) d = dd; } if (Math.sqrt(d) > grooveHalf * 1.7) endGap++; }
       return { coverage, overflow, evenness, spdAcc, porosity, spatter, narrow, wide, out, gaps, avgV, endGap };
     }
     function bankReset() { passLog.push(passMetrics());
       baked = []; speedSum = 0; speedN = 0; vVarSum = 0; spatterCount = 0; distAcc = 0;
+      vSumT = 0; vTimeS = 0; passWeldMs = 0; depCarry = 0;
       passIndex++; passMul = PASS_W[passPlanArr[passIndex]] || 1; recalc(); }
 
     // ── replay zdarzeń ──
@@ -122,22 +134,25 @@
       if (ev.type === "bank") { bankReset(); continue; }
       if (ev.type !== "move" || !last) continue;
       const p = { x: ev.x, y: ev.y }, now = ev.t;
-      const ddx = p.x - last.x, ddy = p.y - last.y, dist = Math.hypot(ddx, ddy), dt = Math.max(8, now - lastT);
-      const inst = dist / (dt / 1000), prev = vEMA; vEMA = vEMA * 0.7 + inst * 0.3; vVarSum += Math.abs(vEMA - prev);
+      const ddx = p.x - last.x, ddy = p.y - last.y, dist = Math.hypot(ddx, ddy);
+      const dtS = Math.min(0.25, Math.max(0.001, (now - lastT) / 1000));
+      const inst = dist / dtS, prev = vEMA, aEMA = 1 - Math.exp(-dtS / V_TAU);
+      vEMA = vEMA + (inst - vEMA) * aEMA; vVarSum += Math.abs(vEMA - prev);
       const w = beadWidth(); if (dist) { ux = ddx / dist; uy = ddy / dist; }
       if (proc === "TIG") {
         if (now - lastDab > 150 && onPlate(p.x, p.y)) { const dw = Math.max(idealHalf, w * 0.95); depositBead(p.x, p.y, dw); lastDab = now; }
       } else {
-        const step = Math.max(2, w * 0.35), n = Math.max(1, Math.floor(dist / step));
+        const step = Math.max(2, w * 0.35); depCarry += dist;
+        const n = Math.floor(depCarry / step); if (n > 0) depCarry -= n * step;
         for (let i = 1; i <= n; i++) { const x = last.x + ddx * (i / n), y = last.y + ddy * (i / n);
           if (!onPlate(x, y)) continue;
           if (proc === "MMA") { if (replacing) break; electrodeLeft -= step / 650;
             if (electrodeLeft <= ELEC_STUB) { replacing = true; break; } }
           depositBead(x, y, w); distAcc += step; }
       }
+      spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
+      vSumT += vEMA * dtS; vTimeS += dtS;
       speedSum += vEMA; speedN++;
-      // spatter: gra nalicza w pętli klatek co ~16ms; tu po czasie (dt/16) → niezależne od Hz urządzenia
-      spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * ((now - lastT) / 16);
       last = p; lastT = now;
     }
 
@@ -146,12 +161,13 @@
     const cur = passMetrics(), all = passLog.concat([cur]), n = all.length, avg = k => all.reduce((a, m) => a + m[k], 0) / n;
     const coverage = avg("coverage"), spdAcc = avg("spdAcc"), evenness = avg("evenness");
     const overflow = Math.max.apply(null, all.map(m => m.overflow));
-    const porosity = all.reduce((a, m) => a + m.porosity, 0), spatter = all.reduce((a, m) => a + m.spatter, 0);
+    const porosity = all.reduce((a, m) => a + m.porosity, 0);
+    const spatter = Math.round(avg("spatter"));   // tempo — uśredniamy po passach, nie sumujemy
     const endGap = Math.max.apply(null, all.map(m => m.endGap));
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
-              - porosity * 5 - (proc === "TIG" ? spatter * 3 : spatter * 0.5);
+              - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5);
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze

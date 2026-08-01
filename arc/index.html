@@ -23,6 +23,14 @@
   #grain { position:fixed; inset:0; z-index:3; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
   #stage { position:fixed; inset:0; display:block; cursor:none; z-index:1; transition:filter .12s, transform .12s; }
+  /* stanowisko jest poziome (stałe 1280×720) — na telefonie w pionie zostaje wąski pasek */
+  #rotateHint{ display:none; position:fixed; inset:0; z-index:60; align-items:center; justify-content:center;
+    background:#070a0cf2; text-align:center; padding:24px; }
+  body.needs-rotate #rotateHint{ display:flex; }
+  #rotateHint .rh-ico{ font-size:52px; display:block; margin-bottom:14px; animation:rhTwist 1.9s ease-in-out infinite; }
+  @keyframes rhTwist{ 0%,100%{transform:rotate(0)} 50%{transform:rotate(-90deg)} }
+  #rotateHint b{ display:block; font-size:19px; letter-spacing:.06em; color:#ffae3c; margin-bottom:8px; }
+  #rotateHint span{ color:#9aa6ad; font-size:13px; line-height:1.5; max-width:280px; display:inline-block; }
 
   .panel { position:fixed; z-index:6; background:var(--panel); border:1px solid var(--line); border-radius:14px;
     backdrop-filter:blur(14px) saturate(1.2); box-shadow:0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04); }
@@ -224,6 +232,7 @@
   <div id="vignette"></div>
   <div id="grain"></div>
   <canvas id="stage"></canvas>
+  <div id="rotateHint"><div><span class="rh-ico">📱</span><b data-i18n="rot_t">OBRÓĆ TELEFON</b><span data-i18n="rot_s"></span></div></div>
   <div id="flash"></div>
   <div id="eyeburn"></div>
   <div id="toast"></div>
@@ -329,6 +338,7 @@
     <div class="act">
       <button id="cardDl" class="on" data-i18n="card_dl">💾 POBIERZ PNG</button>
       <button id="cardTxt" data-i18n="card_copy">📋 KOPIUJ TEKST</button>
+      <button id="cardProof" style="display:none">🔒 KOPIUJ PROOF</button>
       <button id="cardClose" data-i18n="card_close">ZAMKNIJ</button>
     </div>
   </div></div>
@@ -364,6 +374,20 @@ const weldbg=document.createElement("canvas"), wbctx=weldbg.getContext("2d"); //
 let W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
 const PX_PER_MM=16;
 
+// ── Stałe pole gry ────────────────────────────────────────────────
+// Geometria NIGDY nie może zależeć od rozmiaru okna: szew ma długość min(W,H)*0.62,
+// więc małe okno = krótszy szew = darmowe pokrycie. Do tego workCY() na wąskim
+// ekranie przesuwał szew z 0.66H na 0.50H, czego sim.js nie odtwarza.
+// Pole jest stałe 1280×720, a do viewportu skalujemy je TYLKO w CSS (letterbox).
+const PLAY_W=1280, PLAY_H=720;
+
+// ── Tryb challenge ────────────────────────────────────────────────
+// /arc/?challenge=1 — wszystkim pinujemy ten sam seed i tę samą konfigurację,
+// żeby wyniki dało się w ogóle porównywać, a rundę zweryfikować przez sim.js.
+const CHALLENGE={ id:"ARC-A-2026-08", seed:0xA8CD6F01>>>0, W:PLAY_W, H:PLAY_H,
+  proc:"TIG", joint:"pipe", pos:"HL045", thick:5, bead:"steel", minScore:90 };
+function isChallenge(){ try{ return new URLSearchParams(location.search).has("challenge"); }catch(e){ return false; } }
+
 // ── Seeded PRNG (faza on-chain, krok 1) ───────────────────────────
 // Strumień losowości WPŁYWAJĄCEJ NA OCENĘ. Tylko to, co serwer odtwarza
 // w replay, idzie przez srng() — NIE iskry/dym/dźwięk (czysta grafika).
@@ -389,7 +413,7 @@ const I18N={
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
   tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — spoiwo dabami, prowadź wolno",
   fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
-  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY",
+  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
   t_couponOk:"✅ COUPON ZALICZONY +%1 XP", t_couponFail:"COUPON NIEZALICZONY — wymóg %1%", t_copied:"TEKST SKOPIOWANY", t_clipFail:"BRAK DOSTĘPU DO SCHOWKA", t_couponSel:"COUPON: %1",
   rep_title:"Inspekcja wizualna VT", row_cov:"Pokrycie grani", row_spd:"Trzymanie tempa", row_hi:"Wkład ciepła (HI)", row_even:"Równość lica",
   hi_set:"HI zadane:", hi_actual:"HI faktyczne:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -424,7 +448,7 @@ const I18N={
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
   tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — dab the filler, move slowly",
   fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
-  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE",
+  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
   t_couponOk:"✅ COUPON PASSED +%1 XP", t_couponFail:"COUPON FAILED — need %1%", t_copied:"TEXT COPIED", t_clipFail:"CLIPBOARD BLOCKED", t_couponSel:"COUPON: %1",
   rep_title:"Visual inspection (VT)", row_cov:"Groove coverage", row_spd:"Travel speed", row_hi:"Heat input (HI)", row_even:"Bead evenness",
   hi_set:"Set HI:", hi_actual:"Actual HI:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -459,7 +483,7 @@ const I18N={
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
   tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
   fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
-  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ",
+  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
   t_couponOk:"✅ КУПОН СДАН +%1 XP", t_couponFail:"КУПОН НЕ СДАН — нужно %1%", t_copied:"ТЕКСТ СКОПИРОВАН", t_clipFail:"БУФЕР НЕДОСТУПЕН", t_couponSel:"КУПОН: %1",
   rep_title:"Визуальный контроль (VT)", row_cov:"Заполнение шва", row_spd:"Темп", row_hi:"Тепловложение (HI)", row_even:"Равномерность",
   hi_set:"Задан. HI:", hi_actual:"Факт. HI:", hi_params:"%1 A · %2 V · %3 мм/с",
@@ -674,6 +698,15 @@ function drawPlate(){
 // ── State ─────────────────────────────────────────────────────────
 let molten=[],sparks=[],smoke=[],baked=[],ambients=[],confetti=[],welding=false,last=null,lastT=0,lastSpawn=0;
 let vEMA=0,distAcc=0,speedSum=0,speedN=0,vVarSum=0,spatterCount=0,speedFb="";
+// ── ocena niezależna od Hz myszy/ekranu ──────────────────────────
+// Metryki liczą się po CZASIE i po DRODZE, nie po liczbie zdarzeń pointermove.
+// Bez tego ten sam ruch dawał 44 pkt przy 250 Hz i 92 pkt przy 10 Hz.
+let vSumT=0, vTimeS=0;          // prędkość ważona czasem (zamiast średniej po zdarzeniach)
+let depCarry=0;                 // reszta drogi — koraliki kładzione co `step` px PRZEBYTEJ drogi
+let passWeldMs=0;               // czas palenia łuku w tym passie (do spatteru per sekunda)
+const V_TAU=0.045;              // stała czasowa wygładzania prędkości [s] — 1:1 z dawnym 0.3/klatkę @60Hz
+const V_TICK=0.016;             // referencyjny takt [s] — trzyma skalę `instab` jak dawniej
+const SPATTER_PEN_CAP=15;       // sufit kary za odpryski (dawniej bez limitu → grube MMA zawsze F)
 // tool / consumable mechanics
 let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
 let electrodeLeft=1, replacing=false;
@@ -737,7 +770,7 @@ function feedback(){ const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
   if(sr<0.62) return t("fb_slow");
   return t("fb_good"); }
 function spawnSparks(x,y,n){ n=Math.round(n*PROCESS[proc].sparks); if(n<=0)return; const gy=gVec()*6;
-  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2,sp=1.5+Math.random()*6; spatterCount++;
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2,sp=1.5+Math.random()*6;   // tylko grafika — licznik do oceny jest w move()
     sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.5+gy,life:1,decay:0.012+Math.random()*0.03,r:0.6+Math.random()*1.6}); } }
 function spawnSmoke(x,y){ const f=PROCESS[proc].fume; if(Math.random()>f*0.6)return;
   smoke.push({x:x+(Math.random()*10-5),y,vx:(Math.random()*0.6-0.3),vy:-(0.4+Math.random()*0.7),r:6+Math.random()*8,life:1,decay:0.006+Math.random()*0.01}); }
@@ -745,7 +778,10 @@ function moltenColor(age){ const c=BEADS[bead];
   if(age<60)return c.hot; if(age<160)return"#ffe14d"; if(age<340)return"#ff8a14"; if(age<640)return"#e8400a"; return"#a02408"; }
 
 // ── Pointer / laying ──────────────────────────────────────────────
-function pos(e){ const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return {x:t.clientX,y:t.clientY}; }
+// piksele CSS → logiczne pole 1280×720 (stage jest wyskalowany letterboxem)
+function pos(e){ const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;
+  const r=stage.getBoundingClientRect();
+  return { x:(t.clientX-r.left)*(W/Math.max(1,r.width)), y:(t.clientY-r.top)*(H/Math.max(1,r.height)) }; }
 function uiHit(e){ return !!(e.target&&e.target.closest&&e.target.closest(".panel,.modal,.covbar,.toolhud,.mob-hud,button")); }
 function unlockAudio(){ try{ if(actx&&actx.state==="suspended") actx.resume(); }catch(e){} const v=document.getElementById("pagebg"); if(v&&v.paused) v.play&&v.play().catch(()=>{}); }
 function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
@@ -757,23 +793,30 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
     if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
     showToast(fmt("t_bought",[price]),"#ffae3c"); }
-  welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
+  welding=true; last=p; const t0=Math.round(performance.now()); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
   lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud();
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault(); }
 function move(e){ if(isCut())return cutMove(e);
-  if(!welding)return; const p=pos(e),now=performance.now(); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  // czas zaokrąglony do ms — DOKŁADNIE ten, który trafia do nagrania rundy,
+  // żeby wynik na ekranie był bit-w-bit tym, co policzy weryfikator z sim.js
+  if(!welding)return; const p=pos(e),now=Math.round(performance.now()); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   recEv('move',p.x,p.y,now);
   if(last){
-    const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy),dt=Math.max(8,now-lastT);
-    const inst=dist/(dt/1000),prev=vEMA; vEMA=vEMA*0.7+inst*0.3; vVarSum+=Math.abs(vEMA-prev);
+    const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy);
+    const dtS=Math.min(0.25,Math.max(0.001,(now-lastT)/1000));      // sekundy — bez dawnej podłogi 8 ms
+    const inst=dist/dtS,prev=vEMA,aEMA=1-Math.exp(-dtS/V_TAU);      // wygładzanie po czasie, nie po zdarzeniu
+    vEMA=vEMA+(inst-vEMA)*aEMA; vVarSum+=Math.abs(vEMA-prev);
     const w=beadWidth(); if(dist){ ux=ddx/dist; uy=ddy/dist; }
     if(proc==="TIG"){
       // torch leads (one hand), filler added in dabs (other hand) — bead builds dab by dab
       if(now-lastDab>150 && onPlate(p.x,p.y)){ const dw=Math.max(idealHalf, w*0.95); const pl=depositBead(p.x,p.y,dw);
         molten.push({x:pl.x,y:pl.y,r:dw,t:now}); drawRipple(pl.x,pl.y,dw,ux,uy); lastDab=now; dipT=now; }
     } else {
-      const step=Math.max(2,w*0.35),n=Math.max(1,Math.floor(dist/step));
+      // koraliki co `step` px PRZEBYTEJ drogi — przy 250 Hz dawniej szło `step` na każde 0,2 px ruchu,
+      // przez co elektroda wypalała się ~3× za szybko i w spoinie robiły się dziury
+      const step=Math.max(2,w*0.35); depCarry+=dist;
+      const n=Math.floor(depCarry/step); if(n>0) depCarry-=n*step;
       for(let i=1;i<=n;i++){
         const x=last.x+ddx*(i/n),y=last.y+ddy*(i/n);
         if(!onPlate(x,y)) continue;                                 // arc only fuses on the plate
@@ -784,6 +827,9 @@ function move(e){ if(isCut())return cutMove(e);
         molten.push({x:pl.x,y:pl.y,r:w,t:now}); distAcc+=step;
         const rip=w*(1.5+vEMA*0.012)/PROCESS[proc].rippleK; if(distAcc>=rip){ drawRipple(pl.x,pl.y,w,ux,uy); distAcc=0; } }
     }
+    // odpryski do OCENY liczone po czasie łuku (1:1 z sim.js) — spawnSparks robi już tylko grafikę
+    spatterCount+=Math.round((3+(thick>>1))*PROCESS[proc].sparks)*(dtS*1000/16); passWeldMs+=dtS*1000;
+    vSumT+=vEMA*dtS; vTimeS+=dtS;
     speedSum+=vEMA; speedN++; speedFb=feedback();
     if(!(proc==="MMA"&&replacing)) arcIntensity(Math.min(1,dist/14));
     updateToolHud();
@@ -799,7 +845,9 @@ function end(e){ if(e&&uiHit(e)) return;
   } }
 stage.addEventListener("pointerdown",start); stage.addEventListener("pointermove",move);
 addEventListener("pointerup",end); addEventListener("pointercancel",end);
-addEventListener("mousemove",e=>{ if(!isMob()){ cursor.x=e.clientX; cursor.y=e.clientY; cursor.seen=true; } });
+// krzyżyk MUSI iść przez pos() — pole gry jest wyskalowanym letterboxem,
+// więc surowe clientX/clientY to już nie są współrzędne logiczne (stąd przesunięty kursor)
+addEventListener("mousemove",e=>{ if(!isMob()){ const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true; } });
 
 // ── Tool / consumable rendering ───────────────────────────────────
 function drawTool(now){
@@ -1124,9 +1172,11 @@ function passMetrics(){
   const mean=rs.reduce((a,v)=>a+v,0)/(rs.length||1);
   const evenness=rs.length?Math.max(0,1-(Math.sqrt(rs.reduce((a,v)=>a+(v-mean)**2,0)/rs.length)/mean)*1.4):0;
   const tol=MATERIAL[bead].tol;
-  const avgV=speedN?speedSum/speedN:targetPx, spdAcc=Math.max(0,1-Math.abs(avgV-targetPx)/(targetPx*tol));
-  const instab=speedN?vVarSum/speedN:0; const porosity=Math.max(0,Math.round((instab/8 + (proc==="MIG"&&spdAcc<0.4?2:0))/tol));
-  const spatter=Math.round(spatterCount*PROCESS[proc].sparks/40);
+  const avgV=vTimeS?vSumT/vTimeS:targetPx, spdAcc=Math.max(0,1-Math.abs(avgV-targetPx)/(targetPx*tol));
+  const ticks=Math.max(1,vTimeS/V_TICK);                                     // „na takt 16 ms", nie „na zdarzenie”
+  const instab=vTimeS?vVarSum/ticks:0; const porosity=Math.max(0,Math.round((instab/8 + (proc==="MIG"&&spdAcc<0.4?2:0))/tol));
+  const weldSec=Math.max(0.5,passWeldMs/1000);
+  const spatter=Math.round((spatterCount/weldSec)*PROCESS[proc].sparks/40);  // odpryski NA SEKUNDĘ, nie suma
   // crater — the two ends of the seam left unfilled (no bead within reach of an endpoint)
   let endGap=0; for(const e of [seamPts[0],seamPts[K-1]]){ let d=1e18; for(const b of baked){ const dd=(b.x-e.x)**2+(b.y-e.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)>grooveHalf*1.7) endGap++; }
   return {coverage,overflow,evenness,spdAcc,porosity,spatter,narrow,wide,out,gaps,avgV,endGap};
@@ -1137,6 +1187,7 @@ function bankPass(){
   passLog.push(passMetrics());
   wbctx.drawImage(seam,0,0,W,H); sctx.clearRect(0,0,W,H);
   baked=[]; molten=[]; speedSum=0; speedN=0; vVarSum=0; spatterCount=0; distAcc=0;
+  vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0;
   passIndex++; passMul=PASS_W[passPlanArr[passIndex]]||1; recalc();
   const nextType=t("pass_"+passPlanArr[passIndex]), isLast=passIndex===passPlanArr.length-1;
   showToast(isLast? t("t_passlast") : fmt("t_passdone",[passIndex,nextType]), "#5fe08a");
@@ -1149,7 +1200,7 @@ function inspect(){
   const cur=passMetrics(), all=passLog.concat([cur]), n=all.length, avg=k=>all.reduce((a,m)=>a+m[k],0)/n;
   const coverage=avg("coverage"), spdAcc=avg("spdAcc"), evenness=avg("evenness");
   const overflow=Math.max.apply(null,all.map(m=>m.overflow));
-  const porosity=all.reduce((a,m)=>a+m.porosity,0), spatter=all.reduce((a,m)=>a+m.spatter,0);
+  const porosity=all.reduce((a,m)=>a+m.porosity,0), spatter=Math.round(avg("spatter")); // tempo → średnia po passach
   const narrow=cur.narrow, wide=cur.wide, gaps=cur.gaps, out=cur.out, avgV=cur.avgV;
   const endGap=Math.max.apply(null,all.map(m=>m.endGap));
   const rootCov=(passPlanArr[0]==="root"&&passLog.length)?passLog[0].coverage:1;
@@ -1160,7 +1211,7 @@ function inspect(){
             + evenness*15          // równość lica
             + (1-overflow)*15      // brak podtopień / zwisów
             - porosity*5           // pęcherze
-            - (proc==="TIG"?spatter*3:spatter*0.5); // TIG ma być czysty
+            - Math.min(SPATTER_PEN_CAP, proc==="TIG"?spatter*3:spatter*0.5); // TIG ma być czysty; kara ograniczona
   score=Math.max(0,Math.min(100,Math.round(score)));
 
   // PARITY (krok 2): odtwórz tę samą rundę headless i porównaj z wynikiem live.
@@ -1363,7 +1414,64 @@ function selectPos(){
   document.getElementById("gArrow").textContent=P.flip?"↓↓":"↓";
   clearWeld(); buildWorkpiece();
 }
-function clearWeld(){ reseedRound(); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; electrodeLeft=1; replacing=false; lastDab=0;
+// ── Tryb challenge: pin, blokada ustawień, dowód rundy ────────────
+// Oficjalny seed i konfigurację czytamy z challenge-config.json (publikowany w chwili STARTU),
+// z fallbackiem na stałe w tym pliku — dzięki temu seed można ogłosić bez ruszania gry.
+async function loadChallengeConfig(){
+  if(!isChallenge()) return;
+  try{
+    const r=await fetch(new URL("challenge-config.json",location.href),{cache:"no-store"});
+    if(!r.ok) return;
+    const c=await r.json();
+    for(const k of ["id","seed","W","H","proc","joint","pos","thick","bead","minScore"])
+      if(c[k]!==undefined && c[k]!==null) CHALLENGE[k]=c[k];
+    CHALLENGE.seed=CHALLENGE.seed>>>0;
+  }catch(e){ /* offline → zostają stałe z pliku */ }
+  applyChallengePin();
+}
+function applyChallengePin(){
+  if(!isChallenge()) return;
+  proc=CHALLENGE.proc; joint=CHALLENGE.joint; posKey=CHALLENGE.pos; thick=CHALLENGE.thick; bead=CHALLENGE.bead;
+  activeCoupon=null;
+  // odzwierciedl pin w UI i zablokuj wszystko, co zmienia geometrię/trudność
+  document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
+  document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
+  document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
+  document.querySelectorAll(".bead").forEach(b=>b.classList.toggle("on",b.dataset.bead===bead));
+  refreshPositions();
+  document.querySelectorAll(".proc,.joint,.thk,.bead,.pos").forEach(b=>{
+    b.disabled=true; b.style.opacity=.55; b.style.cursor="not-allowed"; b.title="Zablokowane w trybie challenge"; });
+  const car=document.getElementById("career"); if(car){ car.disabled=true; car.style.opacity=.55; }
+  const pf=document.getElementById("cardProof"); if(pf) pf.style.display="";
+  document.title="ARC CHALLENGE "+CHALLENGE.id+" — "+CHALLENGE.proc+" "+CHALLENGE.pos;
+  clearWeld();
+}
+// czy nagrana runda faktycznie jest z oficjalnego kuponu (to samo sprawdza weryfikator)
+function roundMatchesChallenge(r){
+  if(!r) return false;
+  return (r.seed>>>0)===(CHALLENGE.seed>>>0) && r.W===CHALLENGE.W && r.H===CHALLENGE.H &&
+         r.proc===CHALLENGE.proc && r.joint===CHALLENGE.joint && r.pos===CHALLENGE.pos &&
+         r.thick===CHALLENGE.thick && r.bead===CHALLENGE.bead;
+}
+function buildProof(){
+  if(!rec||!lastReport) return null;
+  return { v:1, challenge:CHALLENGE.id, engine:(window.ArcSim&&window.ArcSim.VERSION)||"?",
+           pinOk:roundMatchesChallenge(rec), claimedScore:lastReport.score, claimedLetter:lastReport.letter,
+           ts:new Date().toISOString(), round:rec };
+}
+function copyProof(){
+  const p=buildProof();
+  if(!p){ showToast("Najpierw dokończ spoinę i kliknij INSPEKCJA","#ff9a3c"); return; }
+  const txt=JSON.stringify(p);
+  const done=()=>showToast("Proof skopiowany — wklej go w zgłoszeniu","#5fe08a");
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(done,()=>fallback());
+  else fallback();
+  function fallback(){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ showToast("Nie udało się skopiować","#ff5a4a"); }
+    ta.remove(); }
+}
+
+function clearWeld(){ reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0;
   passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc(); updateToolHud(); }
 
 let openM=null;
@@ -1390,6 +1498,7 @@ document.getElementById("carClose").onclick=()=>closeModal("carModal");
 document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); gw=120; pool=200; burned=0; saveWallet(); updateWallet(); updateInfo(); updateRank(); openCareer(); };
 document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
 document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
+document.getElementById("cardProof").onclick=copyProof;
 document.getElementById("cardTxt").onclick=()=>{ navigator.clipboard?.writeText(cardText()).then(()=>showToast(t("t_copied"),"#5fe08a"),()=>showToast(t("t_clipFail"),"#ff9a3c")); };
 let toastTmr=0;
 function showToast(msg,c){ toast.textContent=msg; toast.style.color=c||"#fff"; toast.classList.add("show");
@@ -1406,7 +1515,9 @@ document.getElementById("help").onclick=openTut;
 const setupSlots={top:[],bottom:[]};
 function toggleSetup(open){ document.body.classList.toggle("setup-open", open===undefined?!document.body.classList.contains("setup-open"):!!open); }
 function syncMobileLayout(){
-  const mob=matchMedia("(max-width:680px)").matches;
+  // Pole gry jest teraz stałym poziomym prostokątem, więc telefonem jest też
+  // NISKI viewport (komórka w poziomie) — inaczej panele desktopowe zasłaniałyby stanowisko.
+  const mob=matchMedia("(max-width:680px),(max-height:520px)").matches;
   document.body.classList.toggle("is-mobile",mob);
   const sheet=document.getElementById("setupSheet"), top=document.querySelector(".top"), bottom=document.querySelector(".bottom");
   if(mob){
@@ -1627,12 +1738,21 @@ document.getElementById("tutSkip").onclick=dismissTut;
 // ── Boot ──────────────────────────────────────────────────────────
 function hideSplash(){ const s=document.getElementById("splash"); if(!s||s.classList.contains("hide")) return;
   s.classList.add("hide"); setTimeout(()=>s.remove(),550); }
-function resize(){ syncMobileLayout(); W=innerWidth; H=innerHeight; DPR=Math.min(devicePixelRatio||1,2);
+function resize(){ syncMobileLayout(); W=PLAY_W; H=PLAY_H; DPR=Math.min(devicePixelRatio||1,2);
   for(const c of [stage,plate,seam,weldbg]){ c.width=W*DPR; c.height=H*DPR; }
   for(const c of [ctx,pctx,sctx,wbctx]) c.setTransform(DPR,0,0,DPR,0,0);
-  stage.style.width=W+"px"; stage.style.height=H+"px"; buildWorkpiece(); updateMobHud(); }
+  // letterbox: pole zostaje 1280×720, do okna dopasowujemy je wyłącznie skalą CSS
+  const s=Math.min(innerWidth/W, innerHeight/H);
+  const dw=Math.max(1,Math.round(W*s)), dh=Math.max(1,Math.round(H*s));
+  stage.style.inset="auto";
+  stage.style.left=Math.round((innerWidth-dw)/2)+"px"; stage.style.top=Math.round((innerHeight-dh)/2)+"px";
+  stage.style.width=dw+"px"; stage.style.height=dh+"px";
+  // wąski ekran w pionie → pole zeszłoby do paska; poproś o obrót zamiast dawać grać po znaczku
+  document.body.classList.toggle("needs-rotate", innerWidth<=680 && innerHeight>innerWidth);
+  buildWorkpiece(); updateMobHud(); }
 addEventListener("resize",resize);
 resize(); refreshPositions(); updateRank(); applyI18N(); updateWallet(); requestAnimationFrame(frame);
+applyChallengePin(); loadChallengeConfig();   // pin od razu ze stałych, potem doprecyzuj z challenge-config.json
 const _bgV=document.getElementById("pagebg"); if(_bgV){ _bgV.addEventListener("canplay",hideSplash,{once:true}); }
 setTimeout(hideSplash,900);
 try{ if(!localStorage.getItem("gorweld_tut")) setTimeout(openTut,1100); }catch(e){}

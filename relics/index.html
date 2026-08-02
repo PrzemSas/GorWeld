@@ -10,7 +10,7 @@
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@GorWeld">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap');
-:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--border:#222;--text:#e0e0e0;--dim:#888;--muted:#555;--accent:#ff6a00;--accent2:#ff8800;--amber:#f5a623;--cyan:#00e5ff;--legendary:#ff6a00;--rare:#00e5ff;--common:#777}
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--border:#333333;--text:#e8e8e8;--dim:#adadad;--muted:#909090;--accent:#ff6a00;--accent2:#ff8800;--amber:#f5a623;--cyan:#00e5ff;--legendary:#ff6a00;--rare:#00e5ff;--common:#a5a5a5}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
 nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;padding:0 24px;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
@@ -35,8 +35,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;padding:0 24px;d
 .sh{position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.03) 40%,rgba(255,255,255,.06) 50%,rgba(255,255,255,.03) 60%,transparent 80%);animation:sm 3s ease-in-out infinite}@keyframes sm{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .cd img{width:100%;height:195px;object-fit:cover;display:block}.cif{padding:8px 12px;position:relative;z-index:3}
 .ct{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
-.cn{font-size:12px;color:#eee;font-weight:bold;margin-top:2px;font-family:'Orbitron',sans-serif}
-.cm{font-size:9px;color:#888;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cn{font-size:12px;color:#f0f0f0;font-weight:bold;margin-top:2px;font-family:'Orbitron',sans-serif}
+.cm{font-size:9px;color:#adadad;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cb{font-size:7px;letter-spacing:2px;margin-top:4px;padding:2px 6px;display:inline-block;border:1px solid}
 .gl{position:absolute;bottom:0;left:15%;right:15%;height:1px}
 .tl .ci{border:1px solid rgba(255,106,0,.3);box-shadow:0 0 25px rgba(255,106,0,.2)}.tl .ct{color:var(--legendary)}.tl .gl{background:linear-gradient(90deg,transparent,var(--legendary),transparent)}
@@ -46,15 +46,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;padding:0 24px;d
 .dt{position:absolute;bottom:35px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:60}
 .d{width:8px;height:8px;border-radius:4px;background:#222;transition:all .4s;cursor:pointer}.d.a{width:22px}
 .d.dl{opacity:.3}
-.hi{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:8px;color:#333;letter-spacing:3px;z-index:60}
-.at{position:absolute;bottom:10px;right:16px;font-size:9px;color:#444;z-index:60;cursor:pointer;font-family:'Orbitron',sans-serif}.at:hover{color:var(--accent)}
+.hi{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:8px;color:#7f7f7f;letter-spacing:3px;z-index:60}
+.at{position:absolute;bottom:10px;right:16px;font-size:9px;color:#878787;z-index:60;cursor:pointer;font-family:'Orbitron',sans-serif}.at:hover{color:var(--accent)}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(20px)}.ov.ac{display:flex;animation:fi .3s}@keyframes fi{from{opacity:0}to{opacity:1}}
 .de{width:min(380px,90vw);border-radius:12px;overflow:hidden;animation:di .4s cubic-bezier(.16,1,.3,1)}@keyframes di{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .de img{width:100%;height:min(380px,50vh);object-fit:cover;display:block}
 .db{padding:20px;background:linear-gradient(180deg,#111,#0a0a0a)}
 .dtr{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-weight:700}
 .dtt{font-family:'Orbitron',sans-serif;font-size:16px;color:#fff;font-weight:700;margin-top:8px;line-height:1.3}
-.dd{font-size:11px;color:#555;margin-top:14px;line-height:1.7;border-top:1px solid #1a1a1a;padding-top:14px}
+.dd{font-size:11px;color:#909090;margin-top:14px;line-height:1.7;border-top:1px solid #1a1a1a;padding-top:14px}
 .du{margin-top:12px;padding:8px 12px;font-size:10px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);color:var(--amber);letter-spacing:.1em}
 .dc{margin-top:16px;padding:10px 0;text-align:center;font-size:10px;color:var(--accent);letter-spacing:3px;cursor:pointer;border:1px solid rgba(255,106,0,.25);font-family:'Orbitron',sans-serif}.dc:hover{background:rgba(255,106,0,.08)}
 .ms{background:var(--bg);padding:64px 24px;border-top:1px solid var(--border)}.mi{max-width:900px;margin:0 auto}
@@ -87,7 +87,7 @@ footer{padding:40px 24px;text-align:center;border-top:1px solid var(--border)}fo
 <div class="ov" id="OV" onclick="cD()"><div class="de" id="DE" onclick="event.stopPropagation()"></div></div>
 </section>
 <section class="ms"><div class="mi"><div class="mt">// SOVEREIGN BOND MILESTONES</div><div class="mh">Bond <em>Closed</em></div><div class="md">Sovereign #9 has run its course. The bond didn't fill — and what doesn't forge, gets melted down. The remaining <strong>100B $GORWELDD</strong> returns to the fire. Automatic burn. No scraps left behind.</div><div class="mg" id="G1"></div><div class="mg" id="G2" style="margin-top:4px"></div></div></section>
-<footer><p>Metaplex UMI SDK · Gorbagana Chain<br>Sovereign Bond #9 · CLOSED</p><p style="margin-top:12px;color:#333">DUMPSTER FORGE // GORBAGANA CHAIN // 2025—2026</p></footer>
+<footer><p>Metaplex UMI SDK · Gorbagana Chain<br>Sovereign Bond #9 · CLOSED</p><p style="margin-top:12px;color:#7f7f7f">DUMPSTER FORGE // GORBAGANA CHAIN // 2025—2026</p></footer>
 <script>
 const T=3800000,
 CID="bafybeihp5hb3ivofdphggpcfrghvkeq2c227gjtbgmddabwxsbfs6sg2ty",

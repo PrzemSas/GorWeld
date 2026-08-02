@@ -52,6 +52,10 @@ nav.s{background:#0a0a0ddd;backdrop-filter:blur(10px);border-bottom:1px solid #3
 .hero-t small{display:block;font-size:.28em;color:#3eb7f4;letter-spacing:12px;margin-top:8px;text-shadow:none;font-weight:700;animation:titlePulse 3s ease-in-out infinite}
 .hero-sub{position:relative;z-index:1;font-family:'Rajdhani',sans-serif;font-size:clamp(13px,2vw,17px);color:#909090;margin-top:16px;letter-spacing:2px;max-width:500px;line-height:1.7}
 .hero-sub b{color:#3eb7f4}
+/* Baner niesie już napis GORWELD / DUMPSTER FORGE, więc h1 chowamy wizualnie —
+   ale zostaje w DOM-ie, bo strona musi mieć nagłówek dla SEO i czytników ekranu. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.hero-t.sr-only{animation:none}  /* niewidoczny nagłówek nie musi mrugać glitchem */
 .hero-stats{position:relative;z-index:1;display:flex;gap:28px;margin-top:28px;flex-wrap:wrap;justify-content:center}
 .hs{text-align:center}.hs .hv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#3eb7f4;text-shadow:0 0 10px #3eb7f433}.hs .hl{font-size:7px;color:#878787;letter-spacing:2px;margin-top:3px;font-family:'Orbitron',sans-serif}
 .hero-btns{position:relative;z-index:1;display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center}
@@ -194,10 +198,10 @@ footer{padding:28px 24px;border-top:1px solid #3eb7f40a;text-align:center;backgr
     <text font-family="Orbitron,sans-serif" font-size="6" fill="#3eb7f4" opacity=".2" letter-spacing="4"><textPath href="#tc" startOffset="8%">DUMPSTER FORGE INDUSTRIES • GORBAGANA + COOKIE CHAIN •</textPath></text>
     <path id="tc" d="M100,8 a92,92 0 1,1 0,184 a92,92 0 1,1 0,-184" fill="none"/>
   </svg>
-  <img src="/banner.jpg" alt="GORWELD welder between Gorbagana and Cookie Chain" style="position:relative;z-index:1;width:min(920px,94vw);border-radius:10px;margin:8px 0 16px;border:1px solid #3eb7f433;box-shadow:0 0 45px rgba(59,183,244,.2)">
+  <img src="/banner.jpg" width="1760" height="576" alt="GORWELD — Dumpster Forge. Welding the future from the scraps of the old world. A welder in a black hood and glowing helmet stands in a burning night scrapyard; behind him a second figure in a red hoodie and gas mask cuts steel, throwing sparks." style="position:relative;z-index:1;width:min(920px,94vw);height:auto;border-radius:10px;margin:8px 0 16px;border:1px solid #3eb7f433;box-shadow:0 0 45px rgba(59,183,244,.2)">
   <div class="hero-badge">SOLANA + GORBAGANA + COOKIE CHAIN // EST. 2025</div>
-  <h1 class="hero-t">GORWELD<small>DUMPSTER FORGE </small></h1>
-  <p class="hero-sub">Welding the future from the <b>scraps of the old world</b>. A post-apocalyptic crypto ecosystem forged across Gorbagana & Cookie Chain — with <b>$GorWeld</b>, the welder memecoin, live on <b>Solana</b>.</p>
+  <h1 class="hero-t sr-only">GORWELD — DUMPSTER FORGE</h1>
+  <p class="hero-sub">A post-apocalyptic crypto ecosystem forged across <b>Gorbagana</b> &amp; <b>Cookie Chain</b> — with <b>$GorWeld</b>, the welder memecoin, live on <b>Solana</b>.</p>
   <div class="hero-stats"><div class="hs"><div class="hv">1B</div><div class="hl">$GORWELD · SOLANA</div></div><div class="hs"><div class="hv">490B</div><div class="hl">$GORWELDD</div></div><div class="hs"><div class="hv">1B</div><div class="hl">$SCRAPCOIN</div></div><div class="hs"><div class="hv">10</div><div class="hl">BURN RELICS</div></div><div class="hs"><div class="hv">3</div><div class="hl">CHAINS</div></div></div>
   <div class="hero-btns"><a href="#gorweld" class="btn btn1">⚡ $GorWeld on Solana</a><a href="https://x.com/Przemsas" class="btn btn2" rel="noopener">👨‍🏭 Follow @Przemsas</a><a href="/demo" class="btn btn2">⛏ Scrap Scavenger</a><a href="/arc" class="btn btn3">🔧 Arc Welder</a><a href="/arcquote" class="btn btn3">🧮 ArcQuote</a><a href="/relics" class="btn btn2">🔥 Burn Relics</a></div>
   <a href="#about" class="scroll-h"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v14M6 14l6 6 6-6" stroke="#3eb7f4" stroke-width="2" stroke-linecap="round"/></svg></a>

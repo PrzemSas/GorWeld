@@ -155,7 +155,34 @@ your_GORWELD     = your_GORWELD_raw / 1_000_000</pre>
   </div>
   <div class="warn">Only the mints above are official. Any other “GorWeld” contract is fake — never take a CA from a DM.</div>
 
-  <h2>7 · What this is not</h2>
+  <h2>7 · What moved after the drop</h2>
+  <p>The 23 July payout was not the last thing that happened. Everything below is on-chain and can be checked against the developer wallet <code>8SyjnLDPw7szTtmrVVp2PL3LnNfr4HVmgLCnijLBWwZ4</code>. It is listed here so that nobody has to guess what a transfer out of that wallet means.</p>
+
+  <div class="card">
+    <div class="label">Movements since the payout — all verifiable on Solscan</div>
+    <div class="tw"><table>
+      <tr><th>Date</th><th>What</th><th class="n">GORWELD</th></tr>
+      <tr><td>28 Jul 2026</td><td>Top-up of <strong>+10%</strong> on top of every allocation, 136 wallets, rule <code>floor(alloc × 11 / 10)</code></td><td class="n">—</td></tr>
+      <tr><td>1 Aug 2026</td><td>Airdrop wallet <code>3DFD4QLV…</code> funded, then fully paid out by 3 Aug — its balance is now <strong>zero</strong></td><td class="n">5 000 000</td></tr>
+      <tr><td>2 Aug 2026</td><td>Airdrop wallet <code>3SvPpjoK…</code> funded, distribution pending</td><td class="n">100 000</td></tr>
+      <tr><td>3 Aug 2026</td><td>Correction: <code>FzwK4rTp…</code> was skipped by mistake in the 28 July top-up and was paid in full</td><td class="n">243 862,890224</td></tr>
+      <tr><td>3 Aug 2026</td><td>🔥 <strong>Burn</strong> — tokens destroyed, total supply now below 1B</td><td class="n">15 000 000</td></tr>
+      <tr><td>4 Aug 2026</td><td>Airdrop wallet <code>7gRHtNfk…</code> funded, distribution pending</td><td class="n">2 500 000</td></tr>
+    </table></div>
+    <p style="margin-bottom:0">After all of the above the developer wallet holds <strong>150 854,65687 GORWELD — 0,015% of supply</strong>. The ten largest holders together hold about 11,1%. Nothing here is locked behind a claim page; the same rule as in section 5 applies to every one of these distributions.</p>
+  </div>
+
+  <div class="card hl">
+    <div class="label">Burn — 3 August 2026</div>
+    <div class="ca">15 000 000 GORWELD</div>
+    <p>Executed as a <code>burnTokens</code> instruction, not a transfer to a dead address. The tokens no longer exist and the mint authority was revoked long before, so they cannot be recreated. Total supply is now <strong>984 984 326,044934</strong>.</p>
+    <div class="btnrow">
+      <a class="btn ghost" href="https://solscan.io/tx/2mQf29WZFTjoKwfLR8rLMbd42Rio1cm887fFhAzQbRGhAhy6hPfW2hHr8bsZCbHqigeZzNEpkjxuZ4qQFy83z8Rq" target="_blank" rel="noopener">Burn transaction ↗</a>
+      <a class="btn ghost" href="https://solscan.io/account/8SyjnLDPw7szTtmrVVp2PL3LnNfr4HVmgLCnijLBWwZ4" target="_blank" rel="noopener">Dev wallet ↗</a>
+    </div>
+  </div>
+
+  <h2>8 · What this is not</h2>
   <p>This is not a promise about price, listings, or what GorWeld will be worth. It is a distribution of a fixed share of supply to addresses that already held the earlier token, executed on a rule anyone can recompute.</p>
   <p>The remainder of the reward pool stays allocated to a later phase, funded by creator fees from trading — so that distribution continues to come from activity rather than from a one-off giveaway.</p>
 

@@ -155,7 +155,34 @@ twoje_GORWELD     = twoje_GORWELD_raw / 1_000_000</pre>
   </div>
   <div class="warn">Tylko powyższe minty są oficjalne. Każdy inny kontrakt „GorWeld" jest fałszywy — nigdy nie bierz CA z prywatnej wiadomości.</div>
 
-  <h2>7 · Czym to nie jest</h2>
+  <h2>7 · Co się działo po dropie</h2>
+  <p>Wypłata z 23 lipca nie była ostatnią rzeczą, jaka się wydarzyła. Wszystko poniżej jest on-chain i da się sprawdzić na portfelu deweloperskim <code>8SyjnLDPw7szTtmrVVp2PL3LnNfr4HVmgLCnijLBWwZ4</code>. Spisujemy to tutaj, żeby nikt nie musiał zgadywać, co oznacza przelew wychodzący z tego portfela.</p>
+
+  <div class="card">
+    <div class="label">Ruchy po wypłacie — wszystkie do sprawdzenia na Solscanie</div>
+    <div class="tw"><table>
+      <tr><th>Data</th><th>Co</th><th class="n">GORWELD</th></tr>
+      <tr><td>28.07.2026</td><td>Dosypka <strong>+10%</strong> do każdej alokacji, 136 portfeli, reguła <code>floor(alloc × 11 / 10)</code></td><td class="n">—</td></tr>
+      <tr><td>01.08.2026</td><td>Portfel airdropowy <code>3DFD4QLV…</code> zasilony, do 3 sierpnia rozdysponowany w całości — saldo <strong>zero</strong></td><td class="n">5 000 000</td></tr>
+      <tr><td>02.08.2026</td><td>Portfel airdropowy <code>3SvPpjoK…</code> zasilony, dystrybucja przed nami</td><td class="n">100 000</td></tr>
+      <tr><td>03.08.2026</td><td>Korekta: <code>FzwK4rTp…</code> został przy dosypce z 28 lipca pominięty przez pomyłkę i dostał całość</td><td class="n">243 862,890224</td></tr>
+      <tr><td>03.08.2026</td><td>🔥 <strong>Spalenie</strong> — tokeny zniszczone, podaż całkowita spadła poniżej 1 mld</td><td class="n">15 000 000</td></tr>
+      <tr><td>04.08.2026</td><td>Portfel airdropowy <code>7gRHtNfk…</code> zasilony, dystrybucja przed nami</td><td class="n">2 500 000</td></tr>
+    </table></div>
+    <p style="margin-bottom:0">Po tym wszystkim portfel deweloperski trzyma <strong>150 854,65687 GORWELD — 0,015% podaży</strong>. Dziesięciu największych holderów ma łącznie około 11,1%. Nic z powyższego nie wymaga żadnej strony do odbioru; do każdej z tych dystrybucji stosuje się ta sama zasada co w sekcji 5.</p>
+  </div>
+
+  <div class="card hl">
+    <div class="label">Spalenie — 3 sierpnia 2026</div>
+    <div class="ca">15 000 000 GORWELD</div>
+    <p>Wykonane instrukcją <code>burnTokens</code>, a nie przelewem na martwy adres. Tych tokenów już nie ma, a mint authority została odebrana dużo wcześniej, więc nie da się ich odtworzyć. Podaż całkowita wynosi teraz <strong>984 984 326,044934</strong>.</p>
+    <div class="btnrow">
+      <a class="btn ghost" href="https://solscan.io/tx/2mQf29WZFTjoKwfLR8rLMbd42Rio1cm887fFhAzQbRGhAhy6hPfW2hHr8bsZCbHqigeZzNEpkjxuZ4qQFy83z8Rq" target="_blank" rel="noopener">Transakcja spalenia ↗</a>
+      <a class="btn ghost" href="https://solscan.io/account/8SyjnLDPw7szTtmrVVp2PL3LnNfr4HVmgLCnijLBWwZ4" target="_blank" rel="noopener">Portfel dev ↗</a>
+    </div>
+  </div>
+
+  <h2>8 · Czym to nie jest</h2>
   <p>To nie jest obietnica dotycząca ceny, listingów ani tego, ile GorWeld będzie wart. To rozdysponowanie ustalonego procentu podaży na adresy, które już wcześniej trzymały poprzedni token, wykonane według reguły, którą każdy może sobie przeliczyć.</p>
   <p>Reszta puli nagród zostaje na późniejszą fazę, finansowaną z creator fee z handlu — tak, żeby dystrybucja brała się z aktywności, a nie z jednorazowej rozdawki.</p>
 

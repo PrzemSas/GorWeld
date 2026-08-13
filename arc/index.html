@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#050709">
 <title>GORWELD® ARC WELDER — MIG · TIG · MMA Simulator</title>
-<meta name="description" content="Free browser welding simulator — MIG, TIG, MMA. Real ISO 6947 positions, ISO 5817 inspection. Lay clean beads, climb the board, earn $GORWELDD.">
+<meta name="description" content="Free browser welding simulator — MIG, TIG, MMA. Real ISO 6947 positions, ISO 5817 inspection. No wallet required.">
 <link rel="canonical" href="https://gorweld.com/arc/">
-<meta property="og:title" content="GORWELD® ARC WELDER — MIG · TIG · MMA Simulator"><meta property="og:description" content="Free browser welding simulator — MIG, TIG, MMA. Real ISO 6947 positions, ISO 5817 inspection. Lay clean beads, climb the board, earn $GORWELDD."><meta property="og:image" content="https://gorweld.com/banner.jpg"><meta property="og:url" content="https://gorweld.com/arc/"><meta property="og:type" content="website">
+<meta property="og:title" content="GORWELD® ARC WELDER — MIG · TIG · MMA Simulator"><meta property="og:description" content="Free browser welding simulator — MIG, TIG, MMA. Real ISO 6947 positions, ISO 5817 inspection. No wallet required."><meta property="og:image" content="https://gorweld.com/banner.jpg"><meta property="og:url" content="https://gorweld.com/arc/"><meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@GorWeld">
 <style>
   :root { --cyan:#1fd6e3; --amber:#ffae3c; --panel:rgba(10,14,18,.78); --line:rgba(42,52,60,.9); }
@@ -422,9 +422,9 @@ const I18N={
   sev_ok:"OK", sev_major:"WADA", sev_minor:"DROBNA",
   def_pen:"Brak przetopu / przyklejenie grani (%1% niewypełnione)", def_narrow:"Wąskie lico — niedolew (za szybkie tempo)", def_wide:"Nadmierny nadlew lica (za wolno)",
   def_undercut:"Podtopienie / zwis poza granią (%1%)", def_porosity:"Porowatość — %1 pęcherzy (niestabilny łuk)", def_spatter:"Odpryski — %1 (czyszczenie po spawaniu)", def_uneven:"Nierówna szerokość lica", def_clean:"Brak wad — spoina zgodna z wymaganiami",
-  rew_none:"⚠ 0 $GORWELDD — łaga niewyspawana lub odrzucona", rew_none_sub:"dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
+  rew_none:"⚠ 0 GW (demo) — łaga niewyspawana lub odrzucona", rew_none_sub:"dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
   zoom_zoom:"powiększenie ×", car_title:"Kariera spawacza · WPQR", car_req:"wymóg", car_reset:"RESET POSTĘPU", car_close:"ZAMKNIJ", car_max:"MAX",
-  card_title:"Karta wyniku", card_dl:"💾 POBIERZ PNG", card_copy:"📋 KOPIUJ TEKST", card_close:"ZAMKNIJ", tagline:"SPAWASZ — ZARABIASZ",
+  card_title:"Karta wyniku", card_dl:"💾 POBIERZ PNG", card_copy:"📋 KOPIUJ TEKST", card_close:"ZAMKNIJ", tagline:"SPAWASZ — UCZYSZ SIĘ · GW = demo",
   cov_lbl:"Pokrycie", cov_layer:"Warstwa", cov_inspect:"⚡ auto-inspekcja", cov_done:"✅ PEŁNA ŁAGA — puść",
   pass_root:"przetop", pass_fill:"wypełnienie", pass_cap:"lico",
   t_passdone:"✅ WARSTWA %1 → teraz: %2", t_passlast:"⚡ OSTATNIA WARSTWA — lico",
@@ -433,15 +433,15 @@ const I18N={
   t_cut_steelonly:"🔥 Palnik tlenowy tnie TYLKO stal — nie nierdzewkę ani alu", t_cut_preheat:"🔥 Podgrzewaj przy starcie — trzymaj wolno aż przebije", t_cut_pierced:"✅ Przebite! Prowadź rzaz po linii", cut_word:"cięcie",
   cd_incomplete:"Niedocięcie — rzaz nie przeszedł na wylot (%1%)", cd_wide:"Szeroki rzaz / nadtopienie krawędzi (za wolno)", cd_dross:"Żużel i grat na dole (za szybko)", cd_dev:"Odchył od linii — krzywy rzaz", cd_clean:"Czysty rzaz — gładkie, prostopadłe krawędzie",
   tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
-  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym większa nagroda $GORWELDD (gwiazdki = mnożnik).",
+  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym więcej punktów GW w demo (gwiazdki = mnożnik). To nie są prawdziwe tokeny.",
   tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — napis <b style='color:#5fe08a'>DOBRE TEMPO</b> = pełny przetop. Za szybko = zimny zakład, za wolno = przepalenie.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
-  tut4:"<b>4. Zarabiaj.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → 🏆 $GORWELDD. Pochwal się kartą na X.",
-  t_nofunds:"💸 BRAK GW — tańsza płyta, RESET POSTĘPU lub dokup COOK (wkrótce)", t_bought:"−%1 GW · materiał kupiony",
+  tut4:"<b>4. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
+  t_nofunds:"💸 BRAK GW (demo) — tańsza płyta albo RESET POSTĘPU. Nie da się kupić tokenem.", t_bought:"−%1 GW · materiał kupiony",
   eco_buy:"kupisz", eco_a:"za A netto", eco_cost:"koszt", eco_net:"netto", eco_bal:"saldo", eco_jack:"JACKPOT", rew_zero:"💀 SPALONA PŁYTA — materiał stracony",
   tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
-  cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nSpawasz — zarabiasz. GORWELD® Arc Welder\n#welding #spawanie #GorWeld $GORWELDD" },
+  cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld" },
  en:{ method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
@@ -457,9 +457,9 @@ const I18N={
   sev_ok:"OK", sev_major:"DEFECT", sev_minor:"MINOR",
   def_pen:"Lack of penetration / cold lap (%1% unfilled)", def_narrow:"Narrow bead — underfill (too fast)", def_wide:"Excess reinforcement (too slow)",
   def_undercut:"Undercut / sag outside groove (%1%)", def_porosity:"Porosity — %1 pores (unstable arc)", def_spatter:"Spatter — %1 (post-weld cleanup)", def_uneven:"Uneven bead width", def_clean:"No defects — weld meets requirements",
-  rew_none:"⚠ 0 $GORWELDD — pass unfinished or rejected", rew_none_sub:"finish the whole pass (coverage ≥80%), min grade D",
+  rew_none:"⚠ 0 GW (demo) — pass unfinished or rejected", rew_none_sub:"finish the whole pass (coverage ≥80%), min grade D",
   zoom_zoom:"zoom ×", car_title:"Welder career · WPQR", car_req:"req", car_reset:"RESET PROGRESS", car_close:"CLOSE", car_max:"MAX",
-  card_title:"Score card", card_dl:"💾 SAVE PNG", card_copy:"📋 COPY TEXT", card_close:"CLOSE", tagline:"WELD — EARN",
+  card_title:"Score card", card_dl:"💾 SAVE PNG", card_copy:"📋 COPY TEXT", card_close:"CLOSE", tagline:"WELD — LEARN · GW = demo",
   cov_lbl:"Coverage", cov_layer:"Layer", cov_inspect:"⚡ auto-inspect", cov_done:"✅ FULL BEAD — release",
   pass_root:"root", pass_fill:"fill", pass_cap:"cap",
   t_passdone:"✅ LAYER %1 → now: %2", t_passlast:"⚡ LAST LAYER — cap",
@@ -468,15 +468,15 @@ const I18N={
   t_cut_steelonly:"🔥 Oxy torch cuts STEEL only — not stainless or aluminium", t_cut_preheat:"🔥 Preheat at the start — hold slow until it pierces", t_cut_pierced:"✅ Pierced! Run the cut along the line", cut_word:"cut",
   cd_incomplete:"Incomplete cut — didn't sever through (%1%)", cd_wide:"Wide kerf / edge melt (too slow)", cd_dross:"Dross on the underside (too fast)", cd_dev:"Off the cut line — crooked kerf", cd_clean:"Clean cut — smooth, square edges",
   tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
-  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. The harder it is, the bigger the $GORWELDD reward (stars = multiplier).",
+  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. Harder jobs score more demo GW (stars = multiplier). Not real tokens.",
   tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — <b style='color:#5fe08a'>GOOD SPEED</b> = full penetration. Too fast = cold lap, too slow = burn-through.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
-  tut4:"<b>4. Earn.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → 🏆 $GORWELDD. Brag with a card on X.",
-  t_nofunds:"💸 NOT ENOUGH GW — cheaper plate, RESET PROGRESS, or COOK top-up (soon)", t_bought:"−%1 GW · plate bought",
+  tut4:"<b>4. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
+  t_nofunds:"💸 NOT ENOUGH GW (demo) — cheaper plate or RESET PROGRESS. No token top-up.", t_bought:"−%1 GW · plate bought",
   eco_buy:"buy-in", eco_a:"A net", eco_cost:"cost", eco_net:"net", eco_bal:"balance", eco_jack:"JACKPOT", rew_zero:"💀 PLATE BURNED — material lost",
   tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
-  cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nWeld — earn. GORWELD® Arc Welder\n#welding #GorWeld $GORWELDD" },
+  cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld" },
  ru:{ method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
@@ -492,9 +492,9 @@ const I18N={
   sev_ok:"OK", sev_major:"ДЕФЕКТ", sev_minor:"МЕЛКИЙ",
   def_pen:"Непровар / несплавление (%1% не заполнено)", def_narrow:"Узкий валик — недолив (быстро)", def_wide:"Чрезмерное усиление (медленно)",
   def_undercut:"Подрез / натёк вне шва (%1%)", def_porosity:"Поры — %1 (нестабильная дуга)", def_spatter:"Брызги — %1 (зачистка)", def_uneven:"Неравномерная ширина", def_clean:"Без дефектов — шов годен",
-  rew_none:"⚠ 0 $GORWELDD — шов не закончен или брак", rew_none_sub:"завершите весь шов (≥80%), мин. оценка D",
+  rew_none:"⚠ 0 GW (демо) — шов не закончен или брак", rew_none_sub:"завершите весь шов (≥80%), мин. оценка D",
   zoom_zoom:"увелич. ×", car_title:"Карьера сварщика · WPQR", car_req:"треб.", car_reset:"СБРОС ПРОГРЕССА", car_close:"ЗАКРЫТЬ", car_max:"МАКС",
-  card_title:"Карта результата", card_dl:"💾 СКАЧАТЬ PNG", card_copy:"📋 КОПИР. ТЕКСТ", card_close:"ЗАКРЫТЬ", tagline:"ВАРИШЬ — ЗАРАБАТЫВАЕШЬ",
+  card_title:"Карта результата", card_dl:"💾 СКАЧАТЬ PNG", card_copy:"📋 КОПИР. ТЕКСТ", card_close:"ЗАКРЫТЬ", tagline:"ВАРИШЬ — УЧИШЬСЯ · GW = демо",
   cov_lbl:"Заполнение", cov_layer:"Слой", cov_inspect:"⚡ авто-контроль", cov_done:"✅ ШОВ ЦЕЛИКОМ — отпусти",
   pass_root:"корень", pass_fill:"заполнение", pass_cap:"облицовка",
   t_passdone:"✅ СЛОЙ %1 → теперь: %2", t_passlast:"⚡ ПОСЛЕДНИЙ СЛОЙ — облицовка",
@@ -503,15 +503,15 @@ const I18N={
   t_cut_steelonly:"🔥 Кислородный резак режет ТОЛЬКО сталь — не нержавейку и не алюминий", t_cut_preheat:"🔥 Прогрев у старта — держи медленно до прожига", t_cut_pierced:"✅ Прожиг! Веди рез по линии", cut_word:"рез",
   cd_incomplete:"Недорез — не прошло насквозь (%1%)", cd_wide:"Широкий рез / оплавление кромки (медленно)", cd_dross:"Грат снизу (слишком быстро)", cd_dev:"Уход от линии — кривой рез", cd_clean:"Чистый рез — гладкие, прямые кромки",
   tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
-  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше награда $GORWELDD (звёзды = множитель).",
+  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше очков GW в демо (звёзды = множитель). Это не настоящие токены.",
   tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — <b style='color:#5fe08a'>ХОРОШИЙ ТЕМП</b> = полный провар. Быстро = непровар, медленно = прожог.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
-  tut4:"<b>4. Зарабатывай.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → 🏆 $GORWELDD. Похвались картой в X.",
-  t_nofunds:"💸 НЕ ХВАТАЕТ GW — дешевле плита, СБРОС или COOK (скоро)", t_bought:"−%1 GW · плита куплена",
+  tut4:"<b>4. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
+  t_nofunds:"💸 НЕ ХВАТАЕТ GW (демо) — дешевле плита или СБРОС. Токеном докупить нельзя.", t_bought:"−%1 GW · плита куплена",
   eco_buy:"вход", eco_a:"A нетто", eco_cost:"цена", eco_net:"нетто", eco_bal:"баланс", eco_jack:"ДЖЕКПОТ", rew_zero:"💀 ПЛИТА СОЖЖЕНА — материал потерян",
   tier_common:"ОБЫЧНАЯ", tier_rare:"РЕДКАЯ", tier_epic:"ЭПИЧЕСКАЯ", tier_legendary:"ЛЕГЕНДАРНАЯ",
   rank_helper:"Помощник", rank_tacker:"Прихватчик", rank_welder:"Сварщик", rank_cert:"Сертиф. сварщик", rank_coded:"Аттест. сварщик", rank_master:"Мастер сварки",
-  cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3 → 🏆 +%4 $GORWELDD. 🔥⚡\n\nВаришь — зарабатываешь. GORWELD® Arc Welder\n#welding #GorWeld $GORWELDD" },
+  cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3 → +%4 GW (демо, не токен). 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#welding #GorWeld" },
 };
 function t(k,a){ const v=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]!=null?I18N.pl[k]:k); return a!=null?String(v).replace("%1",a):v; }
 function fmt(k,arr){ let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]||k); arr.forEach((v,i)=>s=String(s).replace("%"+(i+1),v)); return s; }
@@ -573,7 +573,7 @@ const MATERIAL={
   ss:   {name:{pl:"Nierdzewka",en:"Stainless",ru:"Нержавейка"}, MIG:1.2, MMA:1.6, TIG:1.5, tol:0.82},
   alu:  {name:{pl:"Aluminium",en:"Aluminium",ru:"Алюминий"},    MIG:1.4, MMA:2.4, TIG:1.9, tol:0.70},
 };
-const BASE_REWARD=50; // $GORWELDD for a perfect A on the easiest coupon
+const BASE_REWARD=50; // demo GW points only — no on-chain token
 function difficulty(){
   const mb={MIG:1.0,MMA:1.6,TIG:2.2,CUT:1.1,PLASMA:1.3}[proc];
   const pm=[0,1.0,1.25,1.6,2.1,2.8][POSITIONS[posKey].stars]||1;
@@ -621,7 +621,7 @@ let passPlanArr=["cap"], passIndex=0, passMul=1, passLog=[], covSmoothed=0, last
 const PASS_W={root:0.72, fill:0.92, cap:1.00};   // bead width multiplier per layer type (cap = the visible face = baseline)
 function passPlan(){ if(thick<=3) return ["cap"]; if(thick<=5) return ["root","cap"]; return ["root","fill","cap"]; }
 
-// ── Economy (DEMO: GW wallet in localStorage; COOK→GW buy-in + cashout wired later) ──
+// ── Economy (DEMO ONLY: GW in localStorage. Real tokens are NOT wired. No COOK buy-in, no cashout.) ──
 const CONSUMABLE={MMA:2, MIG:2, TIG:3, CUT:3, PLASMA:4};            // electrode / wire — cheap, burned every job (the sink)
 const MAT_BASE={steel:6, ss:14, alu:26};           // plate price — alu = the expensive stake you can ruin
 let gw=120, pool=200, burned=0, jobCost=0, jobPaid=false, jobSettled=false;

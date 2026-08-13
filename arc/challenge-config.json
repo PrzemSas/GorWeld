@@ -9,5 +9,5 @@
   "thick": 5,
   "bead": "steel",
   "minScore": 90,
-  "note": "Kupon c12 '6G — KING'. Sufit punktowy 100, wiec prog 90 nie ociera sie o limit silnika. seed dziesietnie = 0xA8CD6F01. Seed PODMIEN i opublikuj dopiero w chwili startu challenge'u — musi zgadzac sie z tym, czego pilnuje verify-challenge.mjs."
+  "note": "Kupon c12 '6G — KING'. Sufit punktowy 100, wiec prog 90 nie ociera sie o limit silnika. UWAGA: ten seed (2832420865 = 0xA8D35001) NIE jest rowny stalej awaryjnej w index.html (0xA8CD6F01 = 2832035585) — dawna notatka mowila inaczej i to bylo blednie. Rozjazd jest nieszkodliwy, bo od 1.2.0 gra nie pozwala zaczac konkursu, dopoki nie wczyta tego pliku. Seed PODMIEN i opublikuj dopiero w chwili startu challenge'u — musi zgadzac sie z tym, czego pilnuje verify-challenge.mjs."
 }

@@ -387,6 +387,15 @@ const PLAY_W=1280, PLAY_H=720;
 const CHALLENGE={ id:"ARC-A-2026-08", seed:0xA8CD6F01>>>0, W:PLAY_W, H:PLAY_H,
   proc:"TIG", joint:"pipe", pos:"HL045", thick:5, bead:"steel", minScore:90 };
 function isChallenge(){ try{ return new URLSearchParams(location.search).has("challenge"); }catch(e){ return false; } }
+// Pole gry ma stałe 1280×720, ale kursor przychodzi w CAŁYCH pikselach CSS i jest przeskalowany
+// przez W/rect.width. Przy oknie 640 px krok kwantyzacji to 2 px play-space i wynik traci do 11 pkt
+// względem pełnego okna. Wolna gra: trudno. Konkurs: musi być równo dla wszystkich, więc minimum.
+const CHAL_MIN_W=1000;          // px szerokości renderu stanowiska wymagane w trybie challenge
+// Stałe w tym pliku to TYLKO fallback — obowiązuje challenge-config.json. Gdyby pobranie padło
+// albo gracz zdążył uderzyć przed jego wczytaniem, runda poszłaby na innym seedzie niż oficjalny
+// i weryfikator odrzuciłby ją po fakcie. Lepiej nie dać zacząć, niż spalić komuś całe przejście.
+let chalCfgOK=false;            // czy oficjalna konfiguracja konkursu jest już wczytana
+function chalWidthOK(){ try{ return stage.getBoundingClientRect().width>=CHAL_MIN_W; }catch(e){ return true; } }
 
 // ── Seeded PRNG (faza on-chain, krok 1) ───────────────────────────
 // Strumień losowości WPŁYWAJĄCEJ NA OCENĘ. Tylko to, co serwer odtwarza
@@ -401,7 +410,9 @@ function reseedRound(seed){ roundSeed=(seed!=null?seed:(Math.random()*4294967296
 // ── Rejestrator rundy (krok 2): surowe inputy do serwerowego replay + parity ──
 // To DOKŁADNIE artefakt, który klient wyśle na serwer: nasiono + parametry + ścieżka kursora.
 let rec=null;
-function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,events:[]}; }
+function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,
+  rw:Math.round((()=>{try{return stage.getBoundingClientRect().width;}catch(e){return 0;}})()),  // szerokość renderu → krok kwantyzacji kursora
+  events:[]}; }
 function recEv(type,x,y,now){ if(rec) rec.events.push({type,t:Math.round(now),x:Math.round(x*100)/100,y:Math.round(y*100)/100}); }
 
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
@@ -413,7 +424,7 @@ const I18N={
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
   tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — spoiwo dabami, prowadź wolno",
   fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
-  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
+  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", t_toosmall:"KONKURS: POWIĘKSZ OKNO — potrzeba min. 1000 px szerokości, żeby wszyscy mieli równo", t_cfgfail:"KONKURS: nie wczytano oficjalnej konfiguracji — odśwież stronę, inaczej runda nie zostanie uznana", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
   t_couponOk:"✅ COUPON ZALICZONY +%1 XP", t_couponFail:"COUPON NIEZALICZONY — wymóg %1%", t_copied:"TEKST SKOPIOWANY", t_clipFail:"BRAK DOSTĘPU DO SCHOWKA", t_couponSel:"COUPON: %1",
   rep_title:"Inspekcja wizualna VT", row_cov:"Pokrycie grani", row_spd:"Trzymanie tempa", row_hi:"Wkład ciepła (HI)", row_even:"Równość lica",
   hi_set:"HI zadane:", hi_actual:"HI faktyczne:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -448,7 +459,7 @@ const I18N={
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
   tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — dab the filler, move slowly",
   fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
-  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
+  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", t_toosmall:"CHALLENGE: ENLARGE THE WINDOW — 1000 px wide minimum, so everyone gets the same shot", t_cfgfail:"CHALLENGE: official config not loaded — reload the page or your run will not count", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
   t_couponOk:"✅ COUPON PASSED +%1 XP", t_couponFail:"COUPON FAILED — need %1%", t_copied:"TEXT COPIED", t_clipFail:"CLIPBOARD BLOCKED", t_couponSel:"COUPON: %1",
   rep_title:"Visual inspection (VT)", row_cov:"Groove coverage", row_spd:"Travel speed", row_hi:"Heat input (HI)", row_even:"Bead evenness",
   hi_set:"Set HI:", hi_actual:"Actual HI:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -483,7 +494,7 @@ const I18N={
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
   tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
   fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
-  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
+  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", t_toosmall:"КОНКУРС: УВЕЛИЧЬ ОКНО — нужно минимум 1000 px ширины, чтобы условия были равными", t_cfgfail:"КОНКУРС: официальная конфигурация не загружена — обнови страницу, иначе раунд не засчитают", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
   t_couponOk:"✅ КУПОН СДАН +%1 XP", t_couponFail:"КУПОН НЕ СДАН — нужно %1%", t_copied:"ТЕКСТ СКОПИРОВАН", t_clipFail:"БУФЕР НЕДОСТУПЕН", t_couponSel:"КУПОН: %1",
   rep_title:"Визуальный контроль (VT)", row_cov:"Заполнение шва", row_spd:"Темп", row_hi:"Тепловложение (HI)", row_even:"Равномерность",
   hi_set:"Задан. HI:", hi_actual:"Факт. HI:", hi_params:"%1 A · %2 V · %3 мм/с",
@@ -707,6 +718,12 @@ let passWeldMs=0;               // czas palenia łuku w tym passie (do spatteru 
 const V_TAU=0.045;              // stała czasowa wygładzania prędkości [s] — 1:1 z dawnym 0.3/klatkę @60Hz
 const V_TICK=0.016;             // referencyjny takt [s] — trzyma skalę `instab` jak dawniej
 const SPATTER_PEN_CAP=15;       // sufit kary za odpryski (dawniej bez limitu → grube MMA zawsze F)
+// Prędkość z PRZEMIESZCZENIA w oknie V_WIN, nie z sumy odcinków między próbkami — 1:1 z sim.js.
+// Tempo TIG 5 mm to 0,57 px na klatkę 60 Hz, a drżenie ręki i zaokrąglenie kursora do pikseli
+// dokładają ~1 px do każdej próbki: suma odcinków rosła z częstotliwością myszy i ten sam
+// idealny spaw dostawał 65 pkt przy 250 Hz, a 99 pkt przy 20 Hz.
+const V_WIN=0.05;               // okno pomiaru prędkości [s]
+let trail=[];                   // {t,x,y} z ostatnich V_WIN sekund
 // tool / consumable mechanics
 let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
 let electrodeLeft=1, replacing=false;
@@ -782,30 +799,41 @@ function moltenColor(age){ const c=BEADS[bead];
 function pos(e){ const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;
   const r=stage.getBoundingClientRect();
   return { x:(t.clientX-r.left)*(W/Math.max(1,r.width)), y:(t.clientY-r.top)*(H/Math.max(1,r.height)) }; }
+// Gra MUSI liczyć na dokładnie tych liczbach, które trafiają do nagrania (recEv zaokrągla do 0,01 px).
+// Bez tego weryfikator odtwarzał rundę z innych danych wejściowych niż ekran — stąd dawne
+// „218/221 punktów identycznych, reszta 1e-13". Kwantyzujemy raz, na wejściu, i po sprawie.
+function snap(p){ p.x=Math.round(p.x*100)/100; p.y=Math.round(p.y*100)/100; return p; }
 function uiHit(e){ return !!(e.target&&e.target.closest&&e.target.closest(".panel,.modal,.covbar,.toolhud,.mob-hud,button")); }
 function unlockAudio(){ try{ if(actx&&actx.state==="suspended") actx.resume(); }catch(e){} const v=document.getElementById("pagebg"); if(v&&v.paused) v.play&&v.play().catch(()=>{}); }
 function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
   if(uiHit(e)) return; unlockAudio();
   if(document.body.classList.contains("setup-open")){ document.body.classList.remove("setup-open"); return; }
-  if(isCut())return cutStart(e); if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  if(isCut())return cutStart(e); if(modalOpen())return; const p=snap(pos(e)); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
-  if(!jobPaid){ const price=jobPrice();                                  // buy consumable + plate on first strike
+  if(isChallenge()&&!chalWidthOK()){ showToast(t("t_toosmall"),"#ff5a4a"); e.preventDefault(); return; } // równe warunki albo wcale
+  if(isChallenge()&&!chalCfgOK){ showToast(t("t_cfgfail"),"#ff5a4a"); e.preventDefault(); return; }       // nie startuj na nieoficjalnym seedzie
+  if(!jobPaid){ const price=jobPrice();                                // buy consumable + plate on first strike
     if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
     showToast(fmt("t_bought",[price]),"#ffae3c"); }
   welding=true; last=p; const t0=Math.round(performance.now()); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
+  trail=[{t:t0,x:p.x,y:p.y}];
   lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud();
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault(); }
 function move(e){ if(isCut())return cutMove(e);
   // czas zaokrąglony do ms — DOKŁADNIE ten, który trafia do nagrania rundy,
   // żeby wynik na ekranie był bit-w-bit tym, co policzy weryfikator z sim.js
-  if(!welding)return; const p=pos(e),now=Math.round(performance.now()); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  if(!welding)return; const p=snap(pos(e)),now=Math.round(performance.now()); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   recEv('move',p.x,p.y,now);
   if(last){
     const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy);
     const dtS=Math.min(0.25,Math.max(0.001,(now-lastT)/1000));      // sekundy — bez dawnej podłogi 8 ms
-    const inst=dist/dtS,prev=vEMA,aEMA=1-Math.exp(-dtS/V_TAU);      // wygładzanie po czasie, nie po zdarzeniu
+    trail.push({t:now,x:p.x,y:p.y});
+    while(trail.length>2 && (now-trail[0].t)/1000>V_WIN) trail.shift();
+    const ref=trail[0], span=Math.max(0.001,(now-ref.t)/1000);
+    const inst=Math.hypot(p.x-ref.x,p.y-ref.y)/span;                // przemieszczenie w oknie — 1:1 z sim.js
+    const prev=vEMA,aEMA=1-Math.exp(-dtS/V_TAU);                    // wygładzanie po czasie, nie po zdarzeniu
     vEMA=vEMA+(inst-vEMA)*aEMA; vVarSum+=Math.abs(vEMA-prev);
     const w=beadWidth(); if(dist){ ux=ddx/dist; uy=ddy/dist; }
     if(proc==="TIG"){
@@ -1426,7 +1454,8 @@ async function loadChallengeConfig(){
     for(const k of ["id","seed","W","H","proc","joint","pos","thick","bead","minScore"])
       if(c[k]!==undefined && c[k]!==null) CHALLENGE[k]=c[k];
     CHALLENGE.seed=CHALLENGE.seed>>>0;
-  }catch(e){ /* offline → zostają stałe z pliku */ }
+    chalCfgOK=true;
+  }catch(e){ /* offline → chalCfgOK zostaje false, start() nie wpuści do konkursu */ }
   applyChallengePin();
 }
 function applyChallengePin(){
@@ -1471,7 +1500,7 @@ function copyProof(){
     ta.remove(); }
 }
 
-function clearWeld(){ reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0;
+function clearWeld(){ reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
   passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc(); updateToolHud(); }
 
 let openM=null;

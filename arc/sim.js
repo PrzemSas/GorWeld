@@ -49,6 +49,12 @@
   const V_TAU = 0.045;            // stała czasowa wygładzania prędkości [s]
   const V_TICK = 0.016;           // referencyjny takt [s] — skala `instab`
   const SPATTER_PEN_CAP = 15;     // sufit kary za odpryski
+  // Prędkość mierzymy z PRZEMIESZCZENIA w oknie V_WIN, nie z sumy odcinków między próbkami.
+  // Tempo docelowe TIG 5 mm to 35,8 px/s = 0,57 px na klatkę 60 Hz, czyli mniej niż piksel.
+  // Drżenie ręki i zaokrąglenie kursora do pikseli dokładają ~1 px do KAŻDEJ próbki, więc suma
+  // odcinków rosła wraz z częstotliwością próbkowania: ten sam idealny spaw dawał 65 pkt przy
+  // 250 Hz i 99 pkt przy 20 Hz. Okno patrzy tylko na pozycje odległe o V_WIN — szum się kasuje.
+  const V_WIN = 0.05;             // okno pomiaru prędkości [s]
 
   function simulate(round) {
     const { seed, W, H, proc, joint, pos: posKey, thick, bead, events } = round;
@@ -91,6 +97,7 @@
     let vSumT = 0, vTimeS = 0, depCarry = 0, passWeldMs = 0;
     let electrodeLeft = 1, replacing = false, vEMA = targetPx;
     let last = null, lastT = 0, lastDab = 0, ux = 1, uy = 0;
+    let trail = [];                 // {t,x,y} z ostatnich V_WIN sekund — baza pomiaru prędkości
     const passLog = [];
 
     function beadWidth() { const sr = vEMA / targetPx;
@@ -129,6 +136,7 @@
     // ── replay zdarzeń ──
     for (const ev of events) {
       if (ev.type === "down") { last = { x: ev.x, y: ev.y }; lastT = ev.t; vEMA = targetPx; lastDab = ev.t;
+        trail = [{ t: ev.t, x: ev.x, y: ev.y }];
         if (replacing) { electrodeLeft = 1; replacing = false; } continue; }
       if (ev.type === "up") { last = null; continue; }
       if (ev.type === "bank") { bankReset(); continue; }
@@ -136,7 +144,11 @@
       const p = { x: ev.x, y: ev.y }, now = ev.t;
       const ddx = p.x - last.x, ddy = p.y - last.y, dist = Math.hypot(ddx, ddy);
       const dtS = Math.min(0.25, Math.max(0.001, (now - lastT) / 1000));
-      const inst = dist / dtS, prev = vEMA, aEMA = 1 - Math.exp(-dtS / V_TAU);
+      trail.push({ t: now, x: p.x, y: p.y });
+      while (trail.length > 2 && (now - trail[0].t) / 1000 > V_WIN) trail.shift();
+      const ref = trail[0], span = Math.max(0.001, (now - ref.t) / 1000);
+      const inst = Math.hypot(p.x - ref.x, p.y - ref.y) / span;
+      const prev = vEMA, aEMA = 1 - Math.exp(-dtS / V_TAU);
       vEMA = vEMA + (inst - vEMA) * aEMA; vVarSum += Math.abs(vEMA - prev);
       const w = beadWidth(); if (dist) { ux = ddx / dist; uy = ddy / dist; }
       if (proc === "TIG") {
@@ -192,9 +204,12 @@
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2) };
   }
 
+  // 1.2.0 — prędkość z przemieszczenia w oknie V_WIN: wynik przestał zależeć od Hz myszy
+  //         i od rozmiaru okna przeglądarki (kwantyzacja kursora do pikseli). Przed poprawką
+  //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
-  // Rundy nagrane silnikiem 0.x liczą się inaczej i NIE są porównywalne z wynikami z challenge'u.
-  const API = { simulate, mulberry32, VERSION: "1.1.0" };
+  // Rundy nagrane silnikiem 1.1.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
+  const API = { simulate, mulberry32, VERSION: "1.2.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

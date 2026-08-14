@@ -23,7 +23,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ArcSim = require(join(here, "sim.js"));
 const CFG = JSON.parse(readFileSync(join(here, "challenge-config.json"), "utf8"));
 
-const PIN = ["W", "H", "proc", "joint", "pos", "thick", "bead"];
+const PIN_DEFAULT = ["proc", "joint", "pos", "thick", "bead"];
+const PIN = Array.isArray(CFG.pin) && CFG.pin.length ? CFG.pin : PIN_DEFAULT;
 // Kursor przychodzi w całych pikselach CSS i jest skalowany przez 1280/rect.width. Na wąskim
 // oknie krok kwantyzacji rośnie i ten sam ruch traci do 11 pkt — gra blokuje challenge poniżej
 // tej szerokości, a tu odrzucamy nagrania, które i tak by się prześlizgnęły.
@@ -63,6 +64,8 @@ function verify(path) {
   const problems = [];
 
   if ((r.seed >>> 0) !== (CFG.seed >>> 0)) problems.push(`seed ${r.seed >>> 0} ≠ oficjalny ${CFG.seed >>> 0}`);
+  if (r.W !== CFG.W) problems.push(`W=${r.W} ≠ ${CFG.W}`);
+  if (r.H !== CFG.H) problems.push(`H=${r.H} ≠ ${CFG.H}`);
   for (const k of PIN) if (r[k] !== CFG[k]) problems.push(`${k}=${r[k]} ≠ ${CFG[k]}`);
   if (!Array.isArray(r.events) || !r.events.length) problems.push("brak zdarzeń rundy");
   if (r.rw == null) problems.push("nagranie bez szerokości renderu (silnik starszy niż 1.2.0)");

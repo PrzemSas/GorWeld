@@ -384,8 +384,13 @@ const PLAY_W=1280, PLAY_H=720;
 // ── Tryb challenge ────────────────────────────────────────────────
 // /arc/?challenge=1 — wszystkim pinujemy ten sam seed i tę samą konfigurację,
 // żeby wyniki dało się w ogóle porównywać, a rundę zweryfikować przez sim.js.
-const CHALLENGE={ id:"ARC-A-2026-08", seed:0xA8CD6F01>>>0, W:PLAY_W, H:PLAY_H,
-  proc:"TIG", joint:"pipe", pos:"HL045", thick:5, bead:"steel", minScore:90 };
+const CHALLENGE={ id:"ARC-MMA-A-2026-08", seed:1296914737>>>0, W:PLAY_W, H:PLAY_H,
+  proc:"MMA", joint:"butt", pos:"PA", thick:5, bead:"steel", minScore:90, pin:["proc"] };
+function chalPinned(k){
+  const p=CHALLENGE.pin;
+  if(!p||!p.length) return true;          // brak listy = stary kupon, pinujemy wszystko
+  return p.indexOf(k)>=0;
+}
 function isChallenge(){ try{ return new URLSearchParams(location.search).has("challenge"); }catch(e){ return false; } }
 // Pole gry ma stałe 1280×720, ale kursor przychodzi w CAŁYCH pikselach CSS i jest przeskalowany
 // przez W/rect.width. Przy oknie 640 px krok kwantyzacji to 2 px play-space i wynik traci do 11 pkt
@@ -1451,7 +1456,7 @@ async function loadChallengeConfig(){
     const r=await fetch(new URL("challenge-config.json",location.href),{cache:"no-store"});
     if(!r.ok) return;
     const c=await r.json();
-    for(const k of ["id","seed","W","H","proc","joint","pos","thick","bead","minScore"])
+    for(const k of ["id","seed","W","H","proc","joint","pos","thick","bead","minScore","pin"])
       if(c[k]!==undefined && c[k]!==null) CHALLENGE[k]=c[k];
     CHALLENGE.seed=CHALLENGE.seed>>>0;
     chalCfgOK=true;
@@ -1460,27 +1465,40 @@ async function loadChallengeConfig(){
 }
 function applyChallengePin(){
   if(!isChallenge()) return;
-  proc=CHALLENGE.proc; joint=CHALLENGE.joint; posKey=CHALLENGE.pos; thick=CHALLENGE.thick; bead=CHALLENGE.bead;
+  if(chalPinned("proc")) proc=CHALLENGE.proc;
+  if(chalPinned("joint")) joint=CHALLENGE.joint;
+  if(chalPinned("pos")) posKey=CHALLENGE.pos;
+  if(chalPinned("thick")) thick=CHALLENGE.thick;
+  if(chalPinned("bead")) bead=CHALLENGE.bead;
   activeCoupon=null;
-  // odzwierciedl pin w UI i zablokuj wszystko, co zmienia geometrię/trudność
   document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
   document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
   document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
   document.querySelectorAll(".bead").forEach(b=>b.classList.toggle("on",b.dataset.bead===bead));
   refreshPositions();
-  document.querySelectorAll(".proc,.joint,.thk,.bead,.pos").forEach(b=>{
-    b.disabled=true; b.style.opacity=.55; b.style.cursor="not-allowed"; b.title="Zablokowane w trybie challenge"; });
+  const lock={proc:".proc",joint:".joint",thk:".thk",bead:".bead",pos:".pos"};
+  const want={proc:chalPinned("proc"),joint:chalPinned("joint"),thk:chalPinned("thick"),bead:chalPinned("bead"),pos:chalPinned("pos")};
+  Object.keys(lock).forEach(k=>{
+    document.querySelectorAll(lock[k]).forEach(b=>{
+      if(want[k]){ b.disabled=true; b.style.opacity=.55; b.style.cursor="not-allowed"; b.title="Zablokowane w trybie challenge"; }
+      else { b.disabled=false; b.style.opacity=""; b.style.cursor=""; b.title=""; }
+    });
+  });
   const car=document.getElementById("career"); if(car){ car.disabled=true; car.style.opacity=.55; }
   const pf=document.getElementById("cardProof"); if(pf) pf.style.display="";
-  document.title="ARC CHALLENGE "+CHALLENGE.id+" — "+CHALLENGE.proc+" "+CHALLENGE.pos;
+  document.title="ARC CHALLENGE "+CHALLENGE.id+" — MMA · ocena A";
   clearWeld();
 }
-// czy nagrana runda faktycznie jest z oficjalnego kuponu (to samo sprawdza weryfikator)
+// kupon: obowiązkowo seed + pole + to, co jest na liście pin (tu: tylko MMA)
 function roundMatchesChallenge(r){
   if(!r) return false;
-  return (r.seed>>>0)===(CHALLENGE.seed>>>0) && r.W===CHALLENGE.W && r.H===CHALLENGE.H &&
-         r.proc===CHALLENGE.proc && r.joint===CHALLENGE.joint && r.pos===CHALLENGE.pos &&
-         r.thick===CHALLENGE.thick && r.bead===CHALLENGE.bead;
+  if((r.seed>>>0)!==(CHALLENGE.seed>>>0) || r.W!==CHALLENGE.W || r.H!==CHALLENGE.H) return false;
+  if(chalPinned("proc") && r.proc!==CHALLENGE.proc) return false;
+  if(chalPinned("joint") && r.joint!==CHALLENGE.joint) return false;
+  if(chalPinned("pos") && r.pos!==CHALLENGE.pos) return false;
+  if(chalPinned("thick") && r.thick!==CHALLENGE.thick) return false;
+  if(chalPinned("bead") && r.bead!==CHALLENGE.bead) return false;
+  return true;
 }
 function buildProof(){
   if(!rec||!lastReport) return null;
@@ -1509,10 +1527,14 @@ function closeModal(id){ if(id){ const el=document.getElementById(id); el.classL
 function modalOpen(){ return !!openM; }
 addEventListener("keydown",e=>{ if(e.key==="Escape"&&openM) closeModal(openM); });
 
-document.querySelectorAll(".proc").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".proc").forEach(x=>x.classList.remove("on")); b.classList.add("on"); proc=b.dataset.proc; activeCoupon=null; selectPos(); });
-document.querySelectorAll(".joint").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".joint").forEach(x=>x.classList.remove("on")); b.classList.add("on"); joint=b.dataset.joint; activeCoupon=null; refreshPositions(); });
-document.querySelectorAll(".thk").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".thk").forEach(x=>x.classList.remove("on")); b.classList.add("on"); thick=+b.dataset.t; activeCoupon=null; selectPos(); });
-document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; drawPlate(); updateInfo(); });
+document.querySelectorAll(".proc").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("proc")) return;
+  document.querySelectorAll(".proc").forEach(x=>x.classList.remove("on")); b.classList.add("on"); proc=b.dataset.proc; activeCoupon=null; selectPos(); });
+document.querySelectorAll(".joint").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("joint")) return;
+  document.querySelectorAll(".joint").forEach(x=>x.classList.remove("on")); b.classList.add("on"); joint=b.dataset.joint; activeCoupon=null; refreshPositions(); });
+document.querySelectorAll(".thk").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("thick")) return;
+  document.querySelectorAll(".thk").forEach(x=>x.classList.remove("on")); b.classList.add("on"); thick=+b.dataset.t; activeCoupon=null; selectPos(); });
+document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("bead")) return;
+  document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; drawPlate(); updateInfo(); });
 document.querySelectorAll(".lng").forEach(b=>{ b.classList.toggle("on", b.dataset.lng===lang);
   b.onclick=()=>{ document.querySelectorAll(".lng").forEach(x=>x.classList.remove("on")); b.classList.add("on");
     lang=b.dataset.lng; try{localStorage.setItem("gorweld_lang",lang);}catch(e){} applyI18N(); }; });

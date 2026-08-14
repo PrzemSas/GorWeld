@@ -1,13 +1,14 @@
 {
-  "id": "ARC-A-2026-08",
-  "seed": 2832420865,
+  "id": "ARC-MMA-A-2026-08",
+  "seed": 1296914737,
   "W": 1280,
   "H": 720,
-  "proc": "TIG",
-  "joint": "pipe",
-  "pos": "HL045",
+  "proc": "MMA",
+  "joint": "butt",
+  "pos": "PA",
   "thick": 5,
   "bead": "steel",
   "minScore": 90,
-  "note": "Kupon c12 '6G — KING'. Sufit punktowy 100, wiec prog 90 nie ociera sie o limit silnika. UWAGA: ten seed (2832420865 = 0xA8D35001) NIE jest rowny stalej awaryjnej w index.html (0xA8CD6F01 = 2832035585) — dawna notatka mowila inaczej i to bylo blednie. Rozjazd jest nieszkodliwy, bo od 1.2.0 gra nie pozwala zaczac konkursu, dopoki nie wczyta tego pliku. Seed PODMIEN i opublikuj dopiero w chwili startu challenge'u — musi zgadzac sie z tym, czego pilnuje verify-challenge.mjs."
+  "pin": ["proc"],
+  "note": "Konkurs MMA: pin TYLKO proc. Grubosc dowolna. Ocena A (>=90) = 1 000 000 GORWELD. PULA 10 000 000 = DOKLADNIE 10 OSOB po 1M. 11. nie dostaje. Wyplata reczna PrzemSas. Seed 1296914737 na prod przy ogloszeniu."
 }

@@ -54,7 +54,11 @@
   // Drżenie ręki i zaokrąglenie kursora do pikseli dokładają ~1 px do KAŻDEJ próbki, więc suma
   // odcinków rosła wraz z częstotliwością próbkowania: ten sam idealny spaw dawał 65 pkt przy
   // 250 Hz i 99 pkt przy 20 Hz. Okno patrzy tylko na pozycje odległe o V_WIN — szum się kasuje.
-  const V_WIN = 0.05;             // okno pomiaru prędkości [s]
+  // 1.3.0 — okno 0,05 s radziło sobie z szumem myszy, ale nie z KWANTYZACJĄ kursora do pikseli CSS.
+  // Krok siatki w play-space = 1280/rect.width, więc w oknie 800 px to 1,6 px, a przemieszczenie
+  // w 50 ms przy tempie MMA 5 mm to 2,56 px — schodki dawały skok prędkości rzędu 100%, `instab`
+  // czytał to jako drżenie ręki i doliczał 2 pkt porowatości (−10 pkt) każdemu w mniejszym oknie.
+  const V_WIN = 0.10;             // okno pomiaru prędkości [s]
 
   function simulate(round) {
     const { seed, W, H, proc, joint, pos: posKey, thick, bead, events } = round;
@@ -98,6 +102,7 @@
     let electrodeLeft = 1, replacing = false, vEMA = targetPx;
     let last = null, lastT = 0, lastDab = 0, ux = 1, uy = 0;
     let trail = [];                 // {t,x,y} z ostatnich V_WIN sekund — baza pomiaru prędkości
+    let tickAcc = 0, vTickRef = targetPx;   // `instab` próbkowana na stałym takcie, nie na zdarzeniu
     const passLog = [];
 
     function beadWidth() { const sr = vEMA / targetPx;
@@ -130,7 +135,7 @@
     }
     function bankReset() { passLog.push(passMetrics());
       baked = []; speedSum = 0; speedN = 0; vVarSum = 0; spatterCount = 0; distAcc = 0;
-      vSumT = 0; vTimeS = 0; passWeldMs = 0; depCarry = 0;
+      vSumT = 0; vTimeS = 0; passWeldMs = 0; depCarry = 0; tickAcc = 0; vTickRef = vEMA;
       passIndex++; passMul = PASS_W[passPlanArr[passIndex]] || 1; recalc(); }
 
     // ── replay zdarzeń ──
@@ -147,9 +152,23 @@
       trail.push({ t: now, x: p.x, y: p.y });
       while (trail.length > 2 && (now - trail[0].t) / 1000 > V_WIN) trail.shift();
       const ref = trail[0], span = Math.max(0.001, (now - ref.t) / 1000);
-      const inst = Math.hypot(p.x - ref.x, p.y - ref.y) / span;
-      const prev = vEMA, aEMA = 1 - Math.exp(-dtS / V_TAU);
-      vEMA = vEMA + (inst - vEMA) * aEMA; vVarSum += Math.abs(vEMA - prev);
+      // Prędkość z REGRESJI LINIOWEJ po całym oknie, nie z różnicy jego końców: różnica końców bierze
+      // błąd kwantyzacji obu skrajnych próbek w całości, regresja rozkłada go na wszystkie i tłumi ~√N.
+      let inst;
+      if (trail.length >= 3) {
+        let st = 0, sx = 0, sy = 0; const n = trail.length;
+        for (const q of trail) { st += q.t; sx += q.x; sy += q.y; }
+        const mt = st / n, mx = sx / n, my = sy / n;
+        let stt = 0, stx = 0, sty = 0;
+        for (const q of trail) { const d = q.t - mt; stt += d * d; stx += d * (q.x - mx); sty += d * (q.y - my); }
+        inst = stt > 0 ? Math.hypot(stx / stt, sty / stt) * 1000 : Math.hypot(p.x - ref.x, p.y - ref.y) / span;
+      } else inst = Math.hypot(p.x - ref.x, p.y - ref.y) / span;
+      const aEMA = 1 - Math.exp(-dtS / V_TAU);
+      vEMA = vEMA + (inst - vEMA) * aEMA;
+      // suma modułów jest ≥ modułu sumy, więc licząc na KAŻDYM zdarzeniu mysz 250 Hz dostawała
+      // czterokrotnie więcej przyrostów na ten sam ruch ręki niż 60 Hz. Takt to wyrównuje.
+      tickAcc += dtS;
+      while (tickAcc >= V_TICK) { tickAcc -= V_TICK; vVarSum += Math.abs(vEMA - vTickRef); vTickRef = vEMA; }
       const w = beadWidth(); if (dist) { ux = ddx / dist; uy = ddy / dist; }
       if (proc === "TIG") {
         if (now - lastDab > 150 && onPlate(p.x, p.y)) { const dw = Math.max(idealHalf, w * 0.95); depositBead(p.x, p.y, dw); lastDab = now; }
@@ -204,12 +223,16 @@
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2) };
   }
 
+  // 1.3.0 — prędkość z regresji liniowej po oknie 0,10 s + `instab` próbkowana na stałym takcie:
+  //         wynik przestał zależeć od SZEROKOŚCI OKNA (kwantyzacja kursora do pikseli CSS).
+  //         Zmierzone na 8 rękach × 3 Hz × 8 szerokości 500–1920 px: różnica średnich 12,0 → 1,6 pkt.
+  //         Dzięki temu próg `CHAL_MIN_W` schodzi z 1000 na 600 px i konkurs otwiera się na telefony.
   // 1.2.0 — prędkość z przemieszczenia w oknie V_WIN: wynik przestał zależeć od Hz myszy
   //         i od rozmiaru okna przeglądarki (kwantyzacja kursora do pikseli). Przed poprawką
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
-  // Rundy nagrane silnikiem 1.1.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, VERSION: "1.2.0" };
+  // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
+  const API = { simulate, mulberry32, VERSION: "1.3.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

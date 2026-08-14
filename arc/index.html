@@ -393,9 +393,12 @@ function chalPinned(k){
 }
 function isChallenge(){ try{ return new URLSearchParams(location.search).has("challenge"); }catch(e){ return false; } }
 // Pole gry ma stałe 1280×720, ale kursor przychodzi w CAŁYCH pikselach CSS i jest przeskalowany
-// przez W/rect.width. Przy oknie 640 px krok kwantyzacji to 2 px play-space i wynik traci do 11 pkt
-// względem pełnego okna. Wolna gra: trudno. Konkurs: musi być równo dla wszystkich, więc minimum.
-const CHAL_MIN_W=1000;          // px szerokości renderu stanowiska wymagane w trybie challenge
+// przez W/rect.width — im mniejsze okno, tym grubsza siatka w play-space.
+// Do 1.2.0 kosztowało to do 12 pkt i próg musiał stać na 1000 px, co wykluczało KAŻDY telefon:
+// komórka w poziomie ma ~390 px wysokości, więc po letterboxie stanowisko ma ~690 px, nie 800.
+// Silnik 1.3.0 (regresja prędkości + takt `instab`) zbił tę różnicę do 1,6 pkt w zakresie 500–1920 px,
+// więc próg schodzi do 600. Poniżej ~500 px pomiar znowu się rozjeżdża (5 pkt) — stąd nie zero.
+const CHAL_MIN_W=600;           // px szerokości renderu stanowiska wymagane w trybie challenge
 // Stałe w tym pliku to TYLKO fallback — obowiązuje challenge-config.json. Gdyby pobranie padło
 // albo gracz zdążył uderzyć przed jego wczytaniem, runda poszłaby na innym seedzie niż oficjalny
 // i weryfikator odrzuciłby ją po fakcie. Lepiej nie dać zacząć, niż spalić komuś całe przejście.
@@ -429,7 +432,7 @@ const I18N={
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
   tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — spoiwo dabami, prowadź wolno",
   fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
-  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", t_toosmall:"KONKURS: POWIĘKSZ OKNO — potrzeba min. 1000 px szerokości, żeby wszyscy mieli równo", t_cfgfail:"KONKURS: nie wczytano oficjalnej konfiguracji — odśwież stronę, inaczej runda nie zostanie uznana", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
+  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", t_toosmall:"KONKURS: POWIĘKSZ OKNO — potrzeba min. 600 px szerokości stanowiska, żeby wszyscy mieli równo", t_cfgfail:"KONKURS: nie wczytano oficjalnej konfiguracji — odśwież stronę, inaczej runda nie zostanie uznana", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
   t_couponOk:"✅ COUPON ZALICZONY +%1 XP", t_couponFail:"COUPON NIEZALICZONY — wymóg %1%", t_copied:"TEKST SKOPIOWANY", t_clipFail:"BRAK DOSTĘPU DO SCHOWKA", t_couponSel:"COUPON: %1",
   rep_title:"Inspekcja wizualna VT", row_cov:"Pokrycie grani", row_spd:"Trzymanie tempa", row_hi:"Wkład ciepła (HI)", row_even:"Równość lica",
   hi_set:"HI zadane:", hi_actual:"HI faktyczne:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -465,7 +468,7 @@ const I18N={
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
   tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — dab the filler, move slowly",
   fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
-  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", t_toosmall:"CHALLENGE: ENLARGE THE WINDOW — 1000 px wide minimum, so everyone gets the same shot", t_cfgfail:"CHALLENGE: official config not loaded — reload the page or your run will not count", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
+  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", t_toosmall:"CHALLENGE: ENLARGE THE WINDOW — 600 px of bay width minimum, so everyone gets the same shot", t_cfgfail:"CHALLENGE: official config not loaded — reload the page or your run will not count", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
   t_couponOk:"✅ COUPON PASSED +%1 XP", t_couponFail:"COUPON FAILED — need %1%", t_copied:"TEXT COPIED", t_clipFail:"CLIPBOARD BLOCKED", t_couponSel:"COUPON: %1",
   rep_title:"Visual inspection (VT)", row_cov:"Groove coverage", row_spd:"Travel speed", row_hi:"Heat input (HI)", row_even:"Bead evenness",
   hi_set:"Set HI:", hi_actual:"Actual HI:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -501,7 +504,7 @@ const I18N={
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
   tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
   fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
-  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", t_toosmall:"КОНКУРС: УВЕЛИЧЬ ОКНО — нужно минимум 1000 px ширины, чтобы условия были равными", t_cfgfail:"КОНКУРС: официальная конфигурация не загружена — обнови страницу, иначе раунд не засчитают", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
+  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", t_toosmall:"КОНКУРС: УВЕЛИЧЬ ОКНО — нужно минимум 600 px ширины поста, чтобы условия были равными", t_cfgfail:"КОНКУРС: официальная конфигурация не загружена — обнови страницу, иначе раунд не засчитают", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
   t_couponOk:"✅ КУПОН СДАН +%1 XP", t_couponFail:"КУПОН НЕ СДАН — нужно %1%", t_copied:"ТЕКСТ СКОПИРОВАН", t_clipFail:"БУФЕР НЕДОСТУПЕН", t_couponSel:"КУПОН: %1",
   rep_title:"Визуальный контроль (VT)", row_cov:"Заполнение шва", row_spd:"Темп", row_hi:"Тепловложение (HI)", row_even:"Равномерность",
   hi_set:"Задан. HI:", hi_actual:"Факт. HI:", hi_params:"%1 A · %2 V · %3 мм/с",
@@ -733,8 +736,17 @@ const SPATTER_PEN_CAP=15;       // sufit kary za odpryski (dawniej bez limitu �
 // Tempo TIG 5 mm to 0,57 px na klatkę 60 Hz, a drżenie ręki i zaokrąglenie kursora do pikseli
 // dokładają ~1 px do każdej próbki: suma odcinków rosła z częstotliwością myszy i ten sam
 // idealny spaw dostawał 65 pkt przy 250 Hz, a 99 pkt przy 20 Hz.
-const V_WIN=0.05;               // okno pomiaru prędkości [s]
+// 1.3.0 — okno 0,05 s wystarczało na szum myszy, ale NIE na kwantyzację kursora do pikseli CSS.
+// Przy oknie 800 px krok siatki w play-space to 1,6 px, a przemieszczenie w 50 ms przy tempie MMA
+// 5 mm to 2,56 px — schodki siatki dawały skok prędkości rzędu 100%. Licznik `instab` czytał to
+// jako drżenie ręki i doliczał 2 pkt porowatości (−10 do wyniku) KAŻDEMU, kto grał w mniejszym oknie.
+// Zmierzone (8 rąk × 3 Hz × 8 szerokości): różnica średnich między szerokościami 12,0 pkt → 1,6 pkt.
+const V_WIN=0.10;               // okno pomiaru prędkości [s]
 let trail=[];                   // {t,x,y} z ostatnich V_WIN sekund
+// `instab` próbkujemy na STAŁYM takcie V_TICK, nie na każdym zdarzeniu: przy 250 Hz na jeden takt
+// przypadały 4 przyrosty zamiast 1, a suma modułów jest zawsze ≥ modułu sumy — szybsza mysz
+// dostawała wyższą karę za ten sam ruch ręki.
+let tickAcc=0, vTickRef=0;
 // tool / consumable mechanics
 let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
 let electrodeLeft=1, replacing=false;
@@ -846,9 +858,21 @@ function move(e){ if(isCut())return cutMove(e);
     trail.push({t:now,x:p.x,y:p.y});
     while(trail.length>2 && (now-trail[0].t)/1000>V_WIN) trail.shift();
     const ref=trail[0], span=Math.max(0.001,(now-ref.t)/1000);
-    const inst=Math.hypot(p.x-ref.x,p.y-ref.y)/span;                // przemieszczenie w oknie — 1:1 z sim.js
-    const prev=vEMA,aEMA=1-Math.exp(-dtS/V_TAU);                    // wygładzanie po czasie, nie po zdarzeniu
-    vEMA=vEMA+(inst-vEMA)*aEMA; vVarSum+=Math.abs(vEMA-prev);
+    // Prędkość z REGRESJI LINIOWEJ po całym oknie, nie z różnicy jego końców: różnica końców bierze
+    // błąd kwantyzacji obu skrajnych próbek w całości, regresja rozkłada go na wszystkie i tłumi ~√N.
+    let inst;
+    if(trail.length>=3){
+      let st=0,sx=0,sy=0; const n=trail.length;
+      for(const q of trail){ st+=q.t; sx+=q.x; sy+=q.y; }
+      const mt=st/n,mx=sx/n,my=sy/n;
+      let stt=0,stx=0,sty=0;
+      for(const q of trail){ const d=q.t-mt; stt+=d*d; stx+=d*(q.x-mx); sty+=d*(q.y-my); }
+      inst = stt>0 ? Math.hypot(stx/stt,sty/stt)*1000 : Math.hypot(p.x-ref.x,p.y-ref.y)/span;
+    } else inst=Math.hypot(p.x-ref.x,p.y-ref.y)/span;               // 1:1 z sim.js
+    const aEMA=1-Math.exp(-dtS/V_TAU);                              // wygładzanie po czasie, nie po zdarzeniu
+    vEMA=vEMA+(inst-vEMA)*aEMA;
+    tickAcc+=dtS;                                                   // niestabilność mierzona na takt, nie na zdarzenie
+    while(tickAcc>=V_TICK){ tickAcc-=V_TICK; vVarSum+=Math.abs(vEMA-vTickRef); vTickRef=vEMA; }
     const w=beadWidth(); if(dist){ ux=ddx/dist; uy=ddy/dist; }
     if(proc==="TIG"){
       // torch leads (one hand), filler added in dabs (other hand) — bead builds dab by dab
@@ -1229,7 +1253,7 @@ function bankPass(){
   passLog.push(passMetrics());
   wbctx.drawImage(seam,0,0,W,H); sctx.clearRect(0,0,W,H);
   baked=[]; molten=[]; speedSum=0; speedN=0; vVarSum=0; spatterCount=0; distAcc=0;
-  vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0;
+  vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; tickAcc=0; vTickRef=vEMA;   // takt `instab` — 1:1 z bankReset() w sim.js
   passIndex++; passMul=PASS_W[passPlanArr[passIndex]]||1; recalc();
   const nextType=t("pass_"+passPlanArr[passIndex]), isLast=passIndex===passPlanArr.length-1;
   showToast(isLast? t("t_passlast") : fmt("t_passdone",[passIndex,nextType]), "#5fe08a");
@@ -1534,7 +1558,9 @@ function copyProof(){
 }
 
 function clearWeld(){ reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
-  passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc(); updateToolHud(); }
+  passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc();
+  tickAcc=0; vTickRef=targetPx;                                          // stan startowy taktu — 1:1 z sim.js (po recalc, bo zależy od targetPx)
+  updateToolHud(); }
 
 let openM=null;
 function openModal(id){ closeModal(openM); const el=document.getElementById(id); el.style.display="flex"; requestAnimationFrame(()=>el.classList.add("open")); openM=id; }

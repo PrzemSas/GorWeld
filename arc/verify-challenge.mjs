@@ -25,10 +25,11 @@ const CFG = JSON.parse(readFileSync(join(here, "challenge-config.json"), "utf8")
 
 const PIN_DEFAULT = ["proc", "joint", "pos", "thick", "bead"];
 const PIN = Array.isArray(CFG.pin) && CFG.pin.length ? CFG.pin : PIN_DEFAULT;
-// Kursor przychodzi w całych pikselach CSS i jest skalowany przez 1280/rect.width. Na wąskim
-// oknie krok kwantyzacji rośnie i ten sam ruch traci do 11 pkt — gra blokuje challenge poniżej
-// tej szerokości, a tu odrzucamy nagrania, które i tak by się prześlizgnęły.
-const MIN_RW = 1000;
+// Kursor przychodzi w całych pikselach CSS i jest skalowany przez 1280/rect.width, więc na wąskim
+// oknie rośnie krok kwantyzacji. Silnik 1.3.0 zbił jego wpływ z 12,0 do 1,6 pkt w zakresie
+// 500–1920 px, dlatego próg schodzi z 1000 na 600 (musi być ten sam co `CHAL_MIN_W` w grze).
+// Poniżej ~500 px pomiar znowu się rozjeżdża — tu odrzucamy nagrania, które by się prześlizgnęły.
+const MIN_RW = 600;
 
 function readProof(path) {
   const raw = path === "-" ? readFileSync(0, "utf8") : readFileSync(path, "utf8");
@@ -68,7 +69,7 @@ function verify(path) {
   if (r.H !== CFG.H) problems.push(`H=${r.H} ≠ ${CFG.H}`);
   for (const k of PIN) if (r[k] !== CFG[k]) problems.push(`${k}=${r[k]} ≠ ${CFG[k]}`);
   if (!Array.isArray(r.events) || !r.events.length) problems.push("brak zdarzeń rundy");
-  if (r.rw == null) problems.push("nagranie bez szerokości renderu (silnik starszy niż 1.2.0)");
+  if (r.rw == null) problems.push("nagranie bez szerokości renderu (silnik starszy niż 1.3.0)");
   else if (r.rw < MIN_RW) problems.push(`okno ${r.rw} px < wymagane ${MIN_RW} px`);
 
   if (problems.length) return { path, ok: false, problems };

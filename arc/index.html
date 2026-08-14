@@ -455,6 +455,7 @@ const I18N={
   tut4:"<b>4. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
   t_nofunds:"💸 BRAK GW (demo) — tańsza płyta albo RESET POSTĘPU. Nie da się kupić tokenem.", t_bought:"−%1 GW · materiał kupiony",
   eco_buy:"kupisz", eco_a:"za A netto", eco_cost:"koszt", eco_net:"netto", eco_bal:"saldo", eco_jack:"JACKPOT", rew_zero:"💀 SPALONA PŁYTA — materiał stracony",
+  eco_free:"runda konkursowa — bez kosztów i bez wypłat GW", chal_wal:"KONKURS", chal_pass:"PRÓG ZALICZONY — skopiuj PROOF i wyślij zgłoszenie", chal_fail:"PONIŻEJ PROGU — płyta za darmo, spawaj dalej",
   tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
   cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld" },
@@ -490,6 +491,7 @@ const I18N={
   tut4:"<b>4. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
   t_nofunds:"💸 NOT ENOUGH GW (demo) — cheaper plate or RESET PROGRESS. No token top-up.", t_bought:"−%1 GW · plate bought",
   eco_buy:"buy-in", eco_a:"A net", eco_cost:"cost", eco_net:"net", eco_bal:"balance", eco_jack:"JACKPOT", rew_zero:"💀 PLATE BURNED — material lost",
+  eco_free:"challenge run — no GW cost, no payout", chal_wal:"CHALLENGE", chal_pass:"BAR CLEARED — copy the PROOF and submit", chal_fail:"BELOW THE BAR — plate is free, keep welding",
   tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
   cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld" },
@@ -525,6 +527,7 @@ const I18N={
   tut4:"<b>4. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
   t_nofunds:"💸 НЕ ХВАТАЕТ GW (демо) — дешевле плита или СБРОС. Токеном докупить нельзя.", t_bought:"−%1 GW · плита куплена",
   eco_buy:"вход", eco_a:"A нетто", eco_cost:"цена", eco_net:"нетто", eco_bal:"баланс", eco_jack:"ДЖЕКПОТ", rew_zero:"💀 ПЛИТА СОЖЖЕНА — материал потерян",
+  eco_free:"конкурсный заход — без затрат и без выплат GW", chal_wal:"КОНКУРС", chal_pass:"ПОРОГ ВЗЯТ — скопируй PROOF и отправь заявку", chal_fail:"НИЖЕ ПОРОГА — плита бесплатна, вари дальше",
   tier_common:"ОБЫЧНАЯ", tier_rare:"РЕДКАЯ", tier_epic:"ЭПИЧЕСКАЯ", tier_legendary:"ЛЕГЕНДАРНАЯ",
   rank_helper:"Помощник", rank_tacker:"Прихватчик", rank_welder:"Сварщик", rank_cert:"Сертиф. сварщик", rank_coded:"Аттест. сварщик", rank_master:"Мастер сварки",
   cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3 → +%4 GW (демо, не токен). 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#welding #GorWeld" },
@@ -647,7 +650,10 @@ function matCost(){ return Math.round(MAT_BASE[bead]*(0.6+thick/10)); }         
 function jobPrice(){ return CONSUMABLE[proc]+matCost(); }
 function payMult(score){ const st=POSITIONS[posKey].stars;                              // A scales with position; sub-A loses material
   if(score>=90) return 1.2+0.18*st; if(score>=78) return 1.0; if(score>=62) return 0.5; return 0; }
-function updateWallet(){ const el=document.getElementById("wal"); if(el) el.innerHTML='💰 <b>'+gw+'</b> GW · 🏦 '+Math.max(0,Math.round(pool)); }
+// W konkursie portfel demo nie gra żadnej roli — pokazujemy próg, nie saldo, żeby nikt nie liczył GW.
+function updateWallet(){ const el=document.getElementById("wal"); if(!el) return;
+  el.innerHTML=isChallenge() ? '🏁 <b>'+t("chal_wal")+'</b> · '+(CHALLENGE.minScore||90)+'%'
+                             : '💰 <b>'+gw+'</b> GW · 🏦 '+Math.max(0,Math.round(pool)); }
 
 function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; }
 
@@ -817,7 +823,10 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
   if(isChallenge()&&!chalWidthOK()){ showToast(t("t_toosmall"),"#ff5a4a"); e.preventDefault(); return; } // równe warunki albo wcale
   if(isChallenge()&&!chalCfgOK){ showToast(t("t_cfgfail"),"#ff5a4a"); e.preventDefault(); return; }       // nie startuj na nieoficjalnym seedzie
-  if(!jobPaid){ const price=jobPrice();                                // buy consumable + plate on first strike
+  // Konkurs jest DARMOWY: ekonomia demo (GW) nie może decydować, kto w ogóle podejdzie do próby.
+  // Gracz z wypalonym portfelem trafiał na „BRAK GW", a 🎓 KARIERA (jedyny RESET) jest w challenge
+  // wyłączona — czyli wejście bez wyjścia. Do tego startowe saldo różniłoby warunki między ludźmi.
+  if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // buy consumable + plate on first strike
     if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
     showToast(fmt("t_bought",[price]),"#ffae3c"); }
@@ -1272,7 +1281,9 @@ function inspect(){
 
   const diff=difficulty(), mat=matCost(), mult=payMult(score);
   let payout=Math.round(mat*mult), jackpot=0;
-  if(!jobSettled){                                                       // settle the job once
+  if(isChallenge()){                                                     // konkurs: liczy się wynik, nie kasa demo
+    payout=0; jackpot=0; if(score>=(CHALLENGE.minScore||90)) burstConfetti();
+  } else if(!jobSettled){                                                // settle the job once
     if(score>=90 && diff>=7 && pool>0){ jackpot=Math.round(pool*0.5); burstConfetti(); }     // LEGENDARNA A cracks the shop pool
     const won=payout+jackpot; gw+=won; pool-=won; jobSettled=true; saveWallet(); updateWallet();
   }
@@ -1294,8 +1305,11 @@ function inspect(){
   } else document.getElementById("rHi").innerHTML='<b>—</b>';
   renderStat("rEven", evenness*100, Math.round(evenness*100)+"%");
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
-  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
-  if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  const ecoTail=isChallenge()
+    ? '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_free")+'</small>'
+    : '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
+  else if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
   else rb.innerHTML=t("rew_zero")+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");
@@ -1485,6 +1499,7 @@ function applyChallengePin(){
     });
   });
   const car=document.getElementById("career"); if(car){ car.disabled=true; car.style.opacity=.55; }
+  updateWallet();                                                       // pasek pokazuje próg konkursu, nie saldo GW
   const pf=document.getElementById("cardProof"); if(pf) pf.style.display="";
   document.title="ARC CHALLENGE "+CHALLENGE.id+" — MMA · ocena A";
   clearWeld();
@@ -1680,7 +1695,7 @@ function cutStart(e){
   if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; }
   if(proc==="CUT" && bead!=="steel"){ showToast(t("t_cut_steelonly"),"#ff5a4a"); e.preventDefault(); return; }
-  if(!jobPaid){ const price=jobPrice();
+  if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // konkurs darmowy — jak w start()
     if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
     showToast(fmt("t_bought",[price]),"#ffae3c"); }
@@ -1758,7 +1773,8 @@ function cutInspect(){
   const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
   const diff=(proc==="PLASMA"?1.3:1.1)*(bead==="alu"?1.6:bead==="ss"?1.3:1.0)*(1+thick*0.05);
   const mat=matCost(), mult=payMult(score); let payout=Math.round(mat*mult),jackpot=0;
-  if(!jobSettled){ if(score>=90 && diff>=1.6 && pool>0) jackpot=Math.round(pool*0.4);
+  if(isChallenge()){ payout=0; jackpot=0; }                              // konkurs darmowy — jak w report()
+  else if(!jobSettled){ if(score>=90 && diff>=1.6 && pool>0) jackpot=Math.round(pool*0.4);
     const won=payout+jackpot; gw+=won; pool-=won; jobSettled=true; saveWallet(); updateWallet(); }
   const net=payout+jackpot-jobCost;
   lastReport={score,letter,iso,proc,posKey,thick,coverage,spdAcc,evenness:straight,avgV,diff,cost:jobCost,payout:payout+jackpot,jackpot,net,balance:gw,material:MATERIAL[bead].name[lang]};
@@ -1771,8 +1787,11 @@ function cutInspect(){
   document.getElementById("rHi").innerHTML='<b>—</b>';
   renderStat("rEven", straight*100, Math.round(straight*100)+"%");
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
-  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
-  if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  const ecoTail=isChallenge()
+    ? '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_free")+'</small>'
+    : '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
+  else if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">💥 '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
   else rb.innerHTML=t("rew_zero")+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");

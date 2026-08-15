@@ -9,6 +9,10 @@ exclude:
   # Ma w środku progi wykrywania botów; publikowanie ich to instrukcja obejścia.
   - arc/verify-challenge.mjs
 
+  # sterownik testu parytetu gra↔sim.js — narzędzie deweloperskie odpalane ręcznie
+  # w headless Edge. Na stronie byłby gotowym skryptem spawającym rundę za gracza.
+  - arc/parity-driver.js
+
   # domyślne wykluczenia Jekylla (odtworzone, bo `exclude` je nadpisuje)
   - .sass-cache/
   - .jekyll-cache/

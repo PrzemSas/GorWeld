@@ -13,7 +13,11 @@
 <meta property="og:title" content="GORWELD® ARC WELDER — MIG · TIG · MMA Simulator"><meta property="og:description" content="Free browser welding simulator — MIG, TIG, MMA. Real ISO 6947 positions, ISO 5817 inspection. No wallet required."><meta property="og:image" content="https://gorweld.com/banner.jpg"><meta property="og:url" content="https://gorweld.com/arc/"><meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@GorWeld">
 <style>
-  :root { --cyan:#1fd6e3; --amber:#ffae3c; --panel:rgba(10,14,18,.78); --line:rgba(42,52,60,.9); }
+  /* --mob to JEDYNA definicja „to jest telefon". JS czyta ja przez getComputedStyle w syncMobileLayout(),
+     zeby CSS i skrypt nie mogly sie rozjechac — bo wlasnie to sie stalo: CSS mial tylko max-width:680px,
+     a JS tez max-height:520px, wiec telefon W POZIOMIE (854x320) dostawal desktopowe menu przy prawej
+     krawedzi nad stanowiskiem i ukryty arkusz ustawien, do ktorego skrypt zdazyl juz przeniesc grupy. */
+  :root { --cyan:#1fd6e3; --amber:#ffae3c; --panel:rgba(10,14,18,.78); --line:rgba(42,52,60,.9); --mob:0; }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; overflow:hidden; background:#050709; font-family:"Segoe UI",system-ui,sans-serif; touch-action:none; color:#cfd8de; }
   #pagebg { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.58) contrast(1.14) saturate(1.2); pointer-events:none;
@@ -180,7 +184,8 @@
   .mob-hud b { color:var(--cyan); }
   .mob-actions { display:none; }
   /* ── MOBILE ── */
-  @media (max-width:680px){
+  @media (max-width:680px),(max-height:520px){
+    :root{ --mob:1; }   /* MUSI byc identyczne z warunkiem wyzej — patrz komentarz przy :root */
     .mob-only { display:inline-flex; }
     .desk-only { display:none !important; }
     .top{ gap:6px; padding:max(6px,env(safe-area-inset-top)) 8px 6px; flex-wrap:nowrap; overflow:visible; }
@@ -217,10 +222,19 @@
     .letter{ font-size:58px; }
     #zoom{ width:100%; height:auto; }
   }
-  @media (max-width:680px) and (orientation:landscape){
+  @media (max-width:680px) and (orientation:landscape),(max-height:520px) and (orientation:landscape){
     body.is-mobile .setup-sheet{ max-height:85vh; }
     .mob-hud{ top:44px; }
     .covbar{ top:68px; }
+  }
+  /* Bardzo niski viewport: pasek akcji zaczynal wchodzic na dolna krawedz blachy (zmierzone:
+     1 px przy 300 px wysokosci, 6 px przy 280 px). Szwu ANI geometrii pola nie ruszamy — `workCY()`
+     musi zostac na 0.66H, bo `sim.js` odtwarza runde wlasnie z tego zalozenia i kazda zmiana
+     rozjechalaby parytet gra<->weryfikator. Scinamy wiec sam pasek: przyciski zostaja 44 px
+     (minimum dotykowe), schodzi tylko padding. */
+  @media (max-height:360px) and (orientation:landscape){
+    body.is-mobile .bottom{ padding:4px 4px max(4px,env(safe-area-inset-bottom)); gap:3px; }
+    body.is-mobile .mob-actions{ min-height:44px; padding:4px 8px; font-size:17px; }
   }
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png"><link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -1614,9 +1628,13 @@ document.getElementById("help").onclick=openTut;
 const setupSlots={top:[],bottom:[]};
 function toggleSetup(open){ document.body.classList.toggle("setup-open", open===undefined?!document.body.classList.contains("setup-open"):!!open); }
 function syncMobileLayout(){
-  // Pole gry jest teraz stałym poziomym prostokątem, więc telefonem jest też
-  // NISKI viewport (komórka w poziomie) — inaczej panele desktopowe zasłaniałyby stanowisko.
-  const mob=matchMedia("(max-width:680px),(max-height:520px)").matches;
+  // Pole gry jest stałym poziomym prostokątem, więc telefonem jest też NISKI viewport
+  // (komórka w poziomie) — inaczej panele desktopowe zasłaniają stanowisko.
+  // ⚠️ Warunek czytamy z CSS (`--mob`), NIE z własnego matchMedia. Duplikat listy media zawsze
+  // się w końcu rozjedzie z arkuszem — i rozjechał się: JS uznawał telefon w poziomie za telefon,
+  // CSS nie, więc `.bottom` zostawało pionowym menu przy prawej krawędzi, a `.setup-sheet`
+  // (do którego JS zdążył przenieść wszystkie grupy) miało `display:none`.
+  const mob=getComputedStyle(document.documentElement).getPropertyValue("--mob").trim()==="1";
   document.body.classList.toggle("is-mobile",mob);
   const sheet=document.getElementById("setupSheet"), top=document.querySelector(".top"), bottom=document.querySelector(".bottom");
   if(mob){

@@ -394,11 +394,18 @@ function chalPinned(k){
 function isChallenge(){ try{ return new URLSearchParams(location.search).has("challenge"); }catch(e){ return false; } }
 // Pole gry ma stałe 1280×720, ale kursor przychodzi w CAŁYCH pikselach CSS i jest przeskalowany
 // przez W/rect.width — im mniejsze okno, tym grubsza siatka w play-space.
-// Do 1.2.0 kosztowało to do 12 pkt i próg musiał stać na 1000 px, co wykluczało KAŻDY telefon:
-// komórka w poziomie ma ~390 px wysokości, więc po letterboxie stanowisko ma ~690 px, nie 800.
-// Silnik 1.3.0 (regresja prędkości + takt `instab`) zbił tę różnicę do 1,6 pkt w zakresie 500–1920 px,
-// więc próg schodzi do 600. Poniżej ~500 px pomiar znowu się rozjeżdża (5 pkt) — stąd nie zero.
-const CHAL_MIN_W=600;           // px szerokości renderu stanowiska wymagane w trybie challenge
+// Do 1.2.0 kosztowało to do 12 pkt i próg musiał stać na 1000 px, co wykluczało KAŻDY telefon.
+// Silnik 1.3.0 (regresja prędkości + takt `instab`) tę zależność ZDJĄŁ, a próg 600 px został
+// ustawiony na oko i dalej wykluczał telefony: stanowisko jest letterboxowane 16:9, więc w poziomie
+// o jego szerokości decyduje WYSOKOŚĆ viewportu (stageW = innerHeight × 1,778). Na 600 px trzeba
+// 338 px czystej wysokości, a pasek adresu zjada 40–90 px — iPhone SE w poziomie daje ~569 px
+// i dostawał „powiększ okno", czego na telefonie wykonać się nie da.
+// Pomiar sterownikiem parity (2026-08-19, Edge headless, ta sama runda na kolejnych rozmiarach):
+//   213→81  249→82  267→81 │ 302→92  320→92  356→92  427→92  498→92  569→92  711→92  854→92  1173→92
+// Wynik jest PŁASKI od ~300 px w górę, kolano leży między 267 a 302. Próg 400 px zostawia 33%
+// marginesu nad kolanem i przechodzi każdy telefon w poziomie (wymaga 225 px wysokości viewportu).
+// Na komórce DPR≥2 daje jeszcze ułamkowe współrzędne wskaźnika, czyli warunki lepsze niż w teście (DPR 1).
+const CHAL_MIN_W=400;           // px szerokości renderu stanowiska wymagane w trybie challenge
 // Stałe w tym pliku to TYLKO fallback — obowiązuje challenge-config.json. Gdyby pobranie padło
 // albo gracz zdążył uderzyć przed jego wczytaniem, runda poszłaby na innym seedzie niż oficjalny
 // i weryfikator odrzuciłby ją po fakcie. Lepiej nie dać zacząć, niż spalić komuś całe przejście.
@@ -432,7 +439,7 @@ const I18N={
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
   tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — spoiwo dabami, prowadź wolno",
   fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
-  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", t_toosmall:"KONKURS: POWIĘKSZ OKNO — potrzeba min. 600 px szerokości stanowiska, żeby wszyscy mieli równo", t_cfgfail:"KONKURS: nie wczytano oficjalnej konfiguracji — odśwież stronę, inaczej runda nie zostanie uznana", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
+  t_replace:"WYMIEŃ ELEKTRODĘ — puść i złap nową", t_eye:"🔆 ŁUK W OCZY! ZAŁÓŻ HEŁM", t_layfirst:"POŁÓŻ NAJPIERW ŚCIEG", t_strikeoff:"PRZYŁÓŻ ELEKTRODĘ DO BLACHY", t_toosmall:"KONKURS: ZA MAŁE STANOWISKO — obróć telefon poziomo albo powiększ okno (min. 400 px), żeby wszyscy mieli równo", t_cfgfail:"KONKURS: nie wczytano oficjalnej konfiguracji — odśwież stronę, inaczej runda nie zostanie uznana", rot_t:"OBRÓĆ TELEFON", rot_s:"Stanowisko jest poziome — w pionie zostaje wąski pasek",
   t_couponOk:"✅ COUPON ZALICZONY +%1 XP", t_couponFail:"COUPON NIEZALICZONY — wymóg %1%", t_copied:"TEKST SKOPIOWANY", t_clipFail:"BRAK DOSTĘPU DO SCHOWKA", t_couponSel:"COUPON: %1",
   rep_title:"Inspekcja wizualna VT", row_cov:"Pokrycie grani", row_spd:"Trzymanie tempa", row_hi:"Wkład ciepła (HI)", row_even:"Równość lica",
   hi_set:"HI zadane:", hi_actual:"HI faktyczne:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -468,7 +475,7 @@ const I18N={
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
   tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — dab the filler, move slowly",
   fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
-  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", t_toosmall:"CHALLENGE: ENLARGE THE WINDOW — 600 px of bay width minimum, so everyone gets the same shot", t_cfgfail:"CHALLENGE: official config not loaded — reload the page or your run will not count", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
+  t_replace:"CHANGE ELECTRODE — release & grab a new one", t_eye:"🔆 ARC FLASH! PUT THE HELMET ON", t_layfirst:"LAY A BEAD FIRST", t_strikeoff:"STRIKE ON THE PLATE", t_toosmall:"CHALLENGE: BAY TOO SMALL — turn your phone landscape or enlarge the window (400 px min), so everyone gets the same shot", t_cfgfail:"CHALLENGE: official config not loaded — reload the page or your run will not count", rot_t:"ROTATE YOUR PHONE", rot_s:"The bay is landscape — portrait leaves a narrow strip",
   t_couponOk:"✅ COUPON PASSED +%1 XP", t_couponFail:"COUPON FAILED — need %1%", t_copied:"TEXT COPIED", t_clipFail:"CLIPBOARD BLOCKED", t_couponSel:"COUPON: %1",
   rep_title:"Visual inspection (VT)", row_cov:"Groove coverage", row_spd:"Travel speed", row_hi:"Heat input (HI)", row_even:"Bead evenness",
   hi_set:"Set HI:", hi_actual:"Actual HI:", hi_params:"%1 A · %2 V · %3 mm/s",
@@ -504,7 +511,7 @@ const I18N={
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
   tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
   fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
-  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", t_toosmall:"КОНКУРС: УВЕЛИЧЬ ОКНО — нужно минимум 600 px ширины поста, чтобы условия были равными", t_cfgfail:"КОНКУРС: официальная конфигурация не загружена — обнови страницу, иначе раунд не засчитают", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
+  t_replace:"СМЕНИ ЭЛЕКТРОД — отпусти и возьми новый", t_eye:"🔆 ЗАЙЧИКИ В ГЛАЗА! НАДЕНЬ МАСКУ", t_layfirst:"СНАЧАЛА ПОЛОЖИ ШОВ", t_strikeoff:"ВЕДИ ПО МЕТАЛЛУ", t_toosmall:"КОНКУРС: ПОСТ СЛИШКОМ МАЛ — поверни телефон горизонтально или увеличь окно (мин. 400 px), чтобы условия были равными", t_cfgfail:"КОНКУРС: официальная конфигурация не загружена — обнови страницу, иначе раунд не засчитают", rot_t:"ПОВЕРНИ ТЕЛЕФОН", rot_s:"Пост горизонтальный — вертикально остаётся узкая полоса",
   t_couponOk:"✅ КУПОН СДАН +%1 XP", t_couponFail:"КУПОН НЕ СДАН — нужно %1%", t_copied:"ТЕКСТ СКОПИРОВАН", t_clipFail:"БУФЕР НЕДОСТУПЕН", t_couponSel:"КУПОН: %1",
   rep_title:"Визуальный контроль (VT)", row_cov:"Заполнение шва", row_spd:"Темп", row_hi:"Тепловложение (HI)", row_even:"Равномерность",
   hi_set:"Задан. HI:", hi_actual:"Факт. HI:", hi_params:"%1 A · %2 V · %3 мм/с",

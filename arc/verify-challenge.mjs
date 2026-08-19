@@ -26,10 +26,11 @@ const CFG = JSON.parse(readFileSync(join(here, "challenge-config.json"), "utf8")
 const PIN_DEFAULT = ["proc", "joint", "pos", "thick", "bead"];
 const PIN = Array.isArray(CFG.pin) && CFG.pin.length ? CFG.pin : PIN_DEFAULT;
 // Kursor przychodzi w całych pikselach CSS i jest skalowany przez 1280/rect.width, więc na wąskim
-// oknie rośnie krok kwantyzacji. Silnik 1.3.0 zbił jego wpływ z 12,0 do 1,6 pkt w zakresie
-// 500–1920 px, dlatego próg schodzi z 1000 na 600 (musi być ten sam co `CHAL_MIN_W` w grze).
-// Poniżej ~500 px pomiar znowu się rozjeżdża — tu odrzucamy nagrania, które by się prześlizgnęły.
-const MIN_RW = 600;
+// oknie rośnie krok kwantyzacji. Silnik 1.3.0 tę zależność zdjął — pomiar sterownikiem parity
+// (2026-08-19) daje ten sam wynik 92 pkt od 302 px do 1173 px, a rozjeżdża się dopiero przy ≤267 px.
+// Stąd próg 400 px: margines nad kolanem, a telefon w poziomie się mieści (poprzednie 600 px
+// odbijało iPhone'a SE, który po letterboxie ma ~569 px). MUSI być ten sam co `CHAL_MIN_W` w grze.
+const MIN_RW = 400;
 
 function readProof(path) {
   const raw = path === "-" ? readFileSync(0, "utf8") : readFileSync(path, "utf8");

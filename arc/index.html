@@ -474,7 +474,7 @@ const I18N={
   cd_incomplete:"Niedocięcie — rzaz nie przeszedł na wylot (%1%)", cd_wide:"Szeroki rzaz / nadtopienie krawędzi (za wolno)", cd_dross:"Żużel i grat na dole (za szybko)", cd_dev:"Odchył od linii — krzywy rzaz", cd_clean:"Czysty rzaz — gładkie, prostopadłe krawędzie",
   tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
   tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym więcej punktów GW w demo (gwiazdki = mnożnik). To nie są prawdziwe tokeny.",
-  tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — napis <b style='color:#5fe08a'>DOBRE TEMPO</b> = pełny przetop. Za szybko = zimny zakład, za wolno = przepalenie.",
+  tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — dopóki <b style='color:#5fe08a'>nic nie wyskakuje</b>, tempo jest dobre. Pod blachą zapali się <b style='color:#ff9a3c'>ZA SZYBKO</b> (zimny zakład) albo <b style='color:#ff9a3c'>ZA WOLNO</b> (przepalenie) dopiero gdy naprawdę zjedziesz.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
   tut4:"<b>4. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
   t_nofunds:"💸 BRAK GW (demo) — tańsza płyta albo RESET POSTĘPU. Nie da się kupić tokenem.", t_bought:"−%1 GW · materiał kupiony",
@@ -510,7 +510,7 @@ const I18N={
   cd_incomplete:"Incomplete cut — didn't sever through (%1%)", cd_wide:"Wide kerf / edge melt (too slow)", cd_dross:"Dross on the underside (too fast)", cd_dev:"Off the cut line — crooked kerf", cd_clean:"Clean cut — smooth, square edges",
   tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
   tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. Harder jobs score more demo GW (stars = multiplier). Not real tokens.",
-  tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — <b style='color:#5fe08a'>GOOD SPEED</b> = full penetration. Too fast = cold lap, too slow = burn-through.",
+  tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — as long as <b style='color:#5fe08a'>nothing pops up</b>, you're on target. <b style='color:#ff9a3c'>TOO FAST</b> (cold lap) or <b style='color:#ff9a3c'>TOO SLOW</b> (burn-through) shows under the plate only once you really drift.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
   tut4:"<b>4. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
   t_nofunds:"💸 NOT ENOUGH GW (demo) — cheaper plate or RESET PROGRESS. No token top-up.", t_bought:"−%1 GW · plate bought",
@@ -546,7 +546,7 @@ const I18N={
   cd_incomplete:"Недорез — не прошло насквозь (%1%)", cd_wide:"Широкий рез / оплавление кромки (медленно)", cd_dross:"Грат снизу (слишком быстро)", cd_dev:"Уход от линии — кривой рез", cd_clean:"Чистый рез — гладкие, прямые кромки",
   tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
   tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше очков GW в демо (звёзды = множитель). Это не настоящие токены.",
-  tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — <b style='color:#5fe08a'>ХОРОШИЙ ТЕМП</b> = полный провар. Быстро = непровар, медленно = прожог.",
+  tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — пока <b style='color:#5fe08a'>ничего не всплывает</b>, темп верный. <b style='color:#ff9a3c'>СЛИШКОМ БЫСТРО</b> (непровар) или <b style='color:#ff9a3c'>СЛИШКОМ МЕДЛЕННО</b> (прожог) появится под пластиной, только если реально собьёшься.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
   tut4:"<b>4. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
   t_nofunds:"💸 НЕ ХВАТАЕТ GW (демо) — дешевле плита или СБРОС. Токеном докупить нельзя.", t_bought:"−%1 GW · плита куплена",
@@ -1083,14 +1083,34 @@ function drawHelmetFrame(now){
   }
   ctx.restore();
 }
-function drawSpeedPill(x,y,text,good){
+function drawSpeedPill(x,y,text,good,alpha){
   ctx.save(); ctx.font="700 11px 'Segoe UI',system-ui,sans-serif"; ctx.textAlign="center";
   const m=ctx.measureText(text), pw=m.width+18, ph=20;
   const col=good?"#5fe08a":"#ff9a3c";
+  x=Math.max(pw/2+8,Math.min(W-pw/2-8,x)); y=Math.max(ph/2+8,Math.min(H-ph/2-8,y));  // nie wychodz poza pole
+  ctx.globalAlpha=(alpha===undefined?1:Math.max(0,Math.min(1,alpha)));
   ctx.fillStyle="rgba(4,8,10,.82)"; ctx.strokeStyle=col+"88"; ctx.lineWidth=1;
   ctx.beginPath(); ctx.roundRect(x-pw/2,y-ph/2,pw,ph,10); ctx.fill(); ctx.stroke();
   ctx.shadowColor="rgba(0,0,0,.9)"; ctx.shadowBlur=6; ctx.fillStyle=col;
   ctx.fillText(text,x,y+4); ctx.restore();
+}
+// Coaching tempa. Dwie rzeczy, ktore denerwowaly:
+//  1) pigulka szla NAD lukiem (y-idealHalf-18), a tam stoi elektroda — ELEC_MAX=118 px w gore
+//     plus uchwyt, wiec napis lezal wprost na niej. Teraz idzie POD blache.
+//  2) speedFb liczy sie na KAZDYM zdarzeniu wskaznika (mysz 250 Hz), wiec napis migal
+//     DOBRE TEMPO <-> ZA WOLNO kilkanascie razy na sekunde. Teraz: pokazujemy tylko gdy
+//     naprawde zjechales z tempa (FB_ARM sekundy poza zakresem) i gasimy plynnie po powrocie.
+//     Brak napisu = tempo jest dobre. Czysta grafika — sim.js i ocena tego nie widza.
+const FB_ARM=0.40, FB_IN=0.20, FB_OUT=0.30;
+let fbBadT=0, fbAlpha=0, fbText="", fbCoachT=0;
+function resetSpeedCoach(){ fbBadT=0; fbAlpha=0; fbCoachT=0; }
+function drawSpeedCoach(now){
+  const dt=Math.min(0.05,Math.max(0,(now-(fbCoachT||now))/1000)); fbCoachT=now;
+  if(!(welding&&last&&speedFb)||(proc==="MMA"&&replacing)){ resetSpeedCoach(); return; }
+  if(fbGood) fbBadT=0; else fbBadT+=dt;
+  if(fbBadT>=FB_ARM){ fbText=speedFb; fbAlpha=Math.min(1,fbAlpha+dt/FB_IN); }
+  else fbAlpha=Math.max(0,fbAlpha-dt/FB_OUT);
+  if(fbAlpha>0.01) drawSpeedPill(last.x,last.y+idealHalf+22,fbText,false,fbAlpha);
 }
 // the molten pool — where the arc liquefies and fuses the base metal
 function drawPuddle(now){
@@ -1235,8 +1255,8 @@ function frame(now){
     }
     ctx.restore();
     drawHelmetFrame(now);
-    if(welding&&last&&speedFb) drawSpeedPill(last.x,last.y-idealHalf-18,speedFb,fbGood);
-  } else if(welding&&last&&speedFb) drawSpeedPill(last.x,last.y-idealHalf-18,speedFb,fbGood);
+    drawSpeedCoach(now);
+  } else drawSpeedCoach(now);
 
   // subtle canvas vignette — focus on the workpiece
   ctx.save(); const vcy=workCY(); const vg=ctx.createRadialGradient(W/2,vcy,H*0.15,W/2,vcy,Math.max(W,H)*0.72);

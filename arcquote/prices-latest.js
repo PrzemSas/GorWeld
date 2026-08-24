@@ -1,6 +1,6 @@
 /* auto-generowane przez update-prices.mjs — NIE edytuj ręcznie */
 window.GW_PRICES_LATEST = {
-  "updated": "2026-08-17",
+  "updated": "2026-08-24",
   "prices": {
     "drut_G3Si1_kg": 8.6,
     "elektroda_E6013_kg": 15.25,

@@ -1,0 +1,54 @@
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#050403;color:#e8dcc8;font-family:'Share Tech Mono',monospace;overflow:hidden}
+.hall{
+  position:fixed;inset:0;background:#050403 center/cover no-repeat;
+}
+.dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:5;
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  padding:12px 12px 18px;background:linear-gradient(transparent,#050403ee 40%);
+}
+.dock button,.dock a{
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;
+  color:#e8dcc8;background:#140c08cc;border:1px solid #e08a3a88;padding:8px 12px;cursor:pointer;text-decoration:none;
+}
+.dock button:hover,.dock a:hover{background:#e08a3a;color:#110804}
+.dock .ghost{border-color:#4a3a28;color:#9a7b58}
+.hint{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:5;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c9a57a;text-shadow:0 0 12px #000;
+}
+.room{
+  position:fixed;inset:0;z-index:8;background:#050403;
+  display:none;flex-direction:column;
+}
+.room.on{display:flex}
+.room video,.room img{
+  /* position+inset zamiast flex: bez zadanej wysokosci przegladarka liczyla ja
+     z proporcji filmu (pion 864x1376 -> pudelko 2813 px przy oknie 900 px),
+     przez co object-fit dzialal wewnatrz kadru poza ekranem. */
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;background:#050403;
+}
+.line{
+  position:absolute;left:50%;bottom:88px;transform:translateX(-50%);
+  max-width:720px;width:90%;text-align:center;
+  font-family:'Teko',sans-serif;font-size:clamp(20px,4vw,34px);letter-spacing:.06em;
+  color:#ffd9a8;text-shadow:0 8px 24px #000,0 0 18px #e08a3a55;
+}
+.actions{
+  position:absolute;left:0;right:0;bottom:18px;
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+}
+.actions a,.actions button{
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;
+  padding:10px 16px;border:1px solid #e08a3a;background:#e08a3a;color:#110804;cursor:pointer;text-decoration:none;
+}
+.actions button.back{background:transparent;color:#c9a57a;border-color:#4a3a28}
+
+/* Pokoj z klipem PIONOWYM: pokazujemy caly kadr, inaczej cover rozciaga go
+   na szerokosc ekranu i zostaje sama twarz. */
+.room.pion video,.room.pion img{
+  object-fit:contain !important;
+  padding:8vh 0 30vh;
+}

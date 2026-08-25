@@ -11,6 +11,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://gorweld.com/forge/</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://gorweld.com/relics/</loc>
     <lastmod>2026-04-04</lastmod>
     <priority>0.8</priority>

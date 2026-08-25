@@ -52,7 +52,10 @@
 
   if (hit) hit.addEventListener("click", playFilm);
   if (vid) {
-    vid.addEventListener("ended", function () { done(false); });
+    vid.addEventListener("ended", function () {
+      remember();
+      window.location.href = "/forge/";
+    });
     // Brak pliku, blad sieci albo kodeka — nie wiezimy nikogo za czarna plansza.
     vid.addEventListener("error", function () { done(false); });
   }

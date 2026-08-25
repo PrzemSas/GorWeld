@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dumpster Forge — Velda's tour</title>
+<meta name="description" content="Velda walks the underground forge. Arc, relics, docs, the yard.">
+<link rel="canonical" href="https://gorweld.com/forge/">
+<meta property="og:title" content="Dumpster Forge — Velda's tour">
+<meta property="og:description" content="Velda walks the underground forge. Pick a door: arc, relics, docs, the yard.">
+<meta property="og:url" content="https://gorweld.com/forge/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://gorweld.com/forge/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@GorWeld">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tour.css?v=12">
+</head>
+<body>
+  <div class="hall" style="background-image:url(hall.jpg)"></div>
+  <p class="hint">velda · pick a door</p>
+  <div class="dock">
+    <button type="button" data-room="origin">the weld</button>
+    <button type="button" data-room="arc">arc welder</button>
+    <button type="button" data-room="quote">arcquote</button>
+    <button type="button" data-room="relics">relics</button>
+    <button type="button" data-room="docs">docs</button>
+    <button type="button" data-room="demo">scavenger</button>
+    <button type="button" data-room="drop">retro drop</button>
+    <button type="button" data-room="shift">velda</button>
+    <a class="ghost" href="/">leave the floor</a>
+  </div>
+
+  <div id="room" class="room">
+    <img id="roomStill" alt="">
+    <video id="roomVid" playsinline></video>
+    <p id="roomLine" class="line"></p>
+    <div class="actions">
+      <a id="roomEnter" href="#">enter</a>
+      <a id="roomEnter2" href="#" style="display:none">enter</a>
+      <button type="button" class="back" id="roomBack">back to hall</button>
+    </div>
+  </div>
+  <script src="tour.js?v=12"></script>
+</body>
+</html>

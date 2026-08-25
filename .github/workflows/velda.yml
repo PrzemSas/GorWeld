@@ -4,8 +4,13 @@ name: Velda — nocna zmiana
 # ⚠️ Publikuje TYLKO jeśli sekret VELDA_LIVE ma wartość "1". Bez niego workflow robi
 # suchą próbę: generuje post, pokazuje go w logu i nic nie wysyła.
 on:
-  schedule:
-    - cron: '0 20 * * *'        # codziennie 20:00 UTC (22:00 CEST) — nocna zmiana
+  # ⏸️ HARMONOGRAM WYŁĄCZONY 2026-08-25 — brak sekretu ANTHROPIC_API_KEY, więc nocny
+  # przebieg padałby na czerwono i codziennie wysyłał maila o nieudanym workflow.
+  # ŻEBY WZNOWIĆ: dodaj sekret ANTHROPIC_API_KEY w Settings → Secrets → Actions,
+  # potem odkomentuj dwie linie poniżej. Ręczne uruchomienie działa cały czas
+  # (Actions → „Velda — nocna zmiana" → Run workflow).
+  # schedule:
+  #   - cron: '0 20 * * *'      # codziennie 20:00 UTC (22:00 CEST) — nocna zmiana
   workflow_dispatch:
     inputs:
       format:

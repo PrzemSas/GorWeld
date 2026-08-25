@@ -43,3 +43,22 @@ airdrop/wallet-connect.js
 airdrop/config.js
 airdrop/snippet-*.html
 airdrop/README.md
+
+# lokalny starter WSL — nie na Pages
+ODPAL-STRONE.bat
+
+# odpad z iteracji intro
+intro/*.bak
+intro/door-l.jpg
+intro/door-r.jpg
+intro/velda-hello.mp3
+intro/gate.jpg
+intro/velda.jpg
+
+# kopie zapasowe z sesji roboczych — nigdy do repo
+*.bak
+*.bak-*
+*.orig
+
+# lokalna notatka na pulpit, nie czesc serwisu
+GORWELD-CZYTAJ-DESKTOP.txt

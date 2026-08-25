@@ -1,0 +1,15 @@
+{
+  "name": "velda",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "VELDA — nocna zmiana Dumpster Forge. Generator postow na X dla ekosystemu GorWeld.",
+  "scripts": {
+    "dry": "node post.mjs",
+    "post": "VELDA_LIVE=1 node post.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.0"
+  },
+  "engines": { "node": ">=20" }
+}

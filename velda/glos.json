@@ -1,0 +1,26 @@
+{
+  "_": "Głos i tło dla odpowiedzi wideo. Podmiana głosu = zmiana voice_id poniżej.",
+  "voice_id": "XB0fDUnXU5powFXDhCwa",
+  "_voice_name": "Charlotte — mocna chrypka, niski rejestr, szwedzki akcent. Wybór Przemka 22.08: ma brzmieć bardziej zmysłowo.",
+  "model_id": "eleven_multilingual_v2",
+  "voice_settings": {
+    "stability": 0.45,
+    "similarity_boost": 0.75,
+    "style": 0.35,
+    "speed": 0.88
+  },
+  "_uwagi_do_ustawien": [
+    "stability 0.45 — niżej = więcej oddechu i nierówności w barwie; przy 0.7 robi się lektor",
+    "style 0.35 — tu akurat chcemy trochę gry, ale nie więcej: powyżej 0.5 zaczyna przesadzać",
+    "speed 0.88 — wolno. To jest najważniejsza gałka: tempo robi 'niebezpieczną', nie barwa",
+    "Jeśli wyjdzie zbyt słodko — wróć na Arię (9BWtsMINqrJLrRacOk9x) i style 0.1"
+  ],
+  "_alternatywy": {
+    "Aria": "9BWtsMINqrJLrRacOk9x — spokojna, z chrypką, średni wiek. Wersja 'z hali', mniej zmysłowa",
+    "Alice": "Xb7hH8MSUJpSbSDYk0k2 — brytyjski, rzeczowy, bez chrypki",
+    "_jak_sprawdzic": "node odpowiedz.mjs --glosy  wypisze głosy z Twojego konta wraz z opisami"
+  },
+  "tlo": "/mnt/c/Users/gorwe/Desktop/GORWELD/15-VELDA/VELDA-klip-10s.mp4",
+  "audio_fx": "asetrate=44100*0.90,aresample=44100,highpass=f=70,equalizer=f=180:width_type=o:width=1:g=3,equalizer=f=3000:width_type=o:width=1:g=-2,acompressor=threshold=-20dB:ratio=4:attack=12:release=250,alimiter=limit=0.95",
+  "_audio_fx": "Ten sam łańcuch co próbki B/C: ton w dół, ciepło 180 Hz, ścięte 3 kHz. Wyłącz = usuń pole audio_fx."
+}

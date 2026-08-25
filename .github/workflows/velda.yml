@@ -1,0 +1,74 @@
+name: Velda — nocna zmiana
+
+# Codzienny post Veldy na X.
+# ⚠️ Publikuje TYLKO jeśli sekret VELDA_LIVE ma wartość "1". Bez niego workflow robi
+# suchą próbę: generuje post, pokazuje go w logu i nic nie wysyła.
+on:
+  schedule:
+    - cron: '0 20 * * *'        # codziennie 20:00 UTC (22:00 CEST) — nocna zmiana
+  workflow_dispatch:
+    inputs:
+      format:
+        description: 'Wymuszony format (puste = rotacja dnia)'
+        required: false
+        default: ''
+      live:
+        description: 'Opublikować na X? (wpisz 1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write               # dopisanie posted-log.jsonl z powrotem do repo
+
+concurrency:
+  group: velda
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalacja
+        working-directory: velda
+        run: npm install --no-audit --no-fund
+
+      - name: Post Veldy
+        working-directory: velda
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VELDA_MODEL:       ${{ vars.VELDA_MODEL }}
+          # Publikacja wymaga sekretu VELDA_LIVE=1 (albo ręcznego uruchomienia z live=1).
+          VELDA_LIVE:        ${{ github.event.inputs.live || secrets.VELDA_LIVE }}
+          X_API_KEY:         ${{ secrets.X_API_KEY }}
+          X_API_SECRET:      ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN:    ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET:   ${{ secrets.X_ACCESS_SECRET }}
+          FORMAT:            ${{ github.event.inputs.format }}
+        run: |
+          if [ -n "$FORMAT" ]; then
+            node post.mjs "--format=$FORMAT"
+          else
+            node post.mjs
+          fi
+
+      - name: Zapis logu, jeśli coś poszło na X
+        if: success()
+        run: |
+          git config user.name  "velda-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # --porcelain, nie `git diff` — przy pierwszym poście log jest plikiem nieśledzonym.
+          if [ -z "$(git status --porcelain -- velda/posted-log.jsonl)" ]; then
+            echo "Nic nie opublikowano — log bez zmian."
+          else
+            git add velda/posted-log.jsonl
+            git commit -m "velda: post [skip ci]"
+            git push
+          fi

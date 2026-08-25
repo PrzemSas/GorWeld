@@ -1,0 +1,14 @@
+Official website: https://gorweld.com/
+Docs: https://gorweld.com/docs/
+Official X: https://x.com/GorWeld
+Founder X: https://x.com/PrzemSas
+Discord: https://discord.gg/ufqVEeFSHm
+Solscan mint: https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Pump.fun: https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+DexScreener: https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe
+GeckoTerminal: https://www.geckoterminal.com/solana/pools/4vTHxks5A7PSUDZG1RrcDmYKkEC6Cy7sDMCHjUbNghqe
+Jupiter: https://jup.ag/tokens/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Streamflow lock 50M: https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t
+RugCheck: https://rugcheck.xyz/tokens/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Logo: https://ipfs.io/ipfs/QmeXGUUefQVkDz34ow8GQXqBYvRxBD8qiTZnLv3bZoyL4L
+Canonical mint only: A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr

@@ -13,6 +13,10 @@ exclude:
   # w headless Edge. Na stronie byłby gotowym skryptem spawającym rundę za gracza.
   - arc/parity-driver.js
 
+  # agent Velda — system prompt, baza wiedzy i skrypt publikujący. Narzędzie operatorskie,
+  # nie część strony. Na serwerze byłby to gotowy przepis, jak podszyć się pod jej głos.
+  - velda/
+
   # domyślne wykluczenia Jekylla (odtworzone, bo `exclude` je nadpisuje)
   - .sass-cache/
   - .jekyll-cache/

@@ -16,32 +16,32 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0d;color:#e0e0e0;font-family:'Share Tech Mono',monospace;line-height:1.55;min-height:100vh}
-a{color:#3eb7f4;text-decoration:none}
+a{color:#e08a3a;text-decoration:none}
 a:hover{text-decoration:underline}
 .wrap{max-width:720px;margin:0 auto;padding:48px 20px 80px}
-.brand{font-family:'Teko',sans-serif;font-size:42px;letter-spacing:6px;color:#3eb7f4;text-shadow:0 0 18px #3eb7f455}
+.brand{font-family:'Teko',sans-serif;font-size:42px;letter-spacing:6px;color:#e08a3a;text-shadow:0 0 18px #e08a3a55}
 .sub{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#9c9c9c;margin-top:4px}
-.tag{margin:18px 0 28px;color:#c4c4c4;font-size:14px;border-left:2px solid #3eb7f4;padding-left:12px}
-h2{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#3eb7f4;margin:32px 0 12px;border-bottom:1px solid #24363f;padding-bottom:8px}
+.tag{margin:18px 0 28px;color:#c4c4c4;font-size:14px;border-left:2px solid #e08a3a;padding-left:12px}
+h2{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#e08a3a;margin:32px 0 12px;border-bottom:1px solid #2a2014;padding-bottom:8px}
 p,li{font-size:14px;color:#dcdcdc;margin-bottom:8px}
 ul{padding-left:18px;margin-bottom:8px}
-.card{background:#0c1014;border:1px solid #24363f;border-radius:6px;padding:16px 18px;margin:12px 0}
-.card.hl{border-color:#3eb7f466;box-shadow:0 0 24px #3eb7f415}
+.card{background:#100c08;border:1px solid #2a2014;border-radius:6px;padding:16px 18px;margin:12px 0}
+.card.hl{border-color:#e08a3a66;box-shadow:0 0 24px #e08a3a15}
 .label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9c9c9c;margin-bottom:6px}
 .ca{font-size:13px;word-break:break-all;color:#fff;user-select:all;line-height:1.6}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{display:inline-block;padding:8px 14px;border:1px solid #3eb7f4;border-radius:3px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#3eb7f4}
-.btn:hover{background:#3eb7f4;color:#000;text-decoration:none}
+.btn{display:inline-block;padding:8px 14px;border:1px solid #e08a3a;border-radius:3px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#e08a3a}
+.btn:hover{background:#e08a3a;color:#000;text-decoration:none}
 .btn.ghost{border-color:#4a4a4a;color:#adadad}
-.btn.ghost:hover{border-color:#3eb7f4;color:#3eb7f4;background:transparent}
+.btn.ghost:hover{border-color:#e08a3a;color:#e08a3a;background:transparent}
 table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
-td{padding:8px 6px;border-bottom:1px solid #1e242c;vertical-align:top}
+td{padding:8px 6px;border-bottom:1px solid #241a10;vertical-align:top}
 td:first-child{color:#9c9c9c;width:38%}
-.foot{margin-top:48px;padding-top:16px;border-top:1px solid #24363f;font-size:11px;color:#909090}
+.foot{margin-top:48px;padding-top:16px;border-top:1px solid #2a2014;font-size:11px;color:#909090}
 .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;font-size:11px}
 .nav a{color:#909090;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase}
-.nav a:hover{color:#3eb7f4}
-.copyok{font-size:11px;color:#3eb7f4;opacity:0;transition:opacity .2s;margin-left:8px}
+.nav a:hover{color:#e08a3a}
+.copyok{font-size:11px;color:#e08a3a;opacity:0;transition:opacity .2s;margin-left:8px}
 </style>
 </head>
 <body>
@@ -82,8 +82,12 @@ td:first-child{color:#9c9c9c;width:38%}
     <li>Loyalty for pure holders was run; past rewards ≠ future promises</li>
   </ul>
 
-  <h2>4 · On-chain lock</h2>
+  <h2>4 · On-chain locks</h2>
+  <p>Two Streamflow locks, <strong>75,000,000 $GorWeld</strong> total — 7.61% of supply. Both are
+  <strong>non-cancelable and non-transferable</strong> with a 100% cliff: the welder cannot pull them back early,
+  cannot sell them, and cannot hand them to anyone else.</p>
   <div class="card">
+    <div class="label">Lock 1 of 2</div>
     <table>
       <tr><td>Amount</td><td>50,000,000 $GorWeld</td></tr>
       <tr><td>Via</td><td>Streamflow (time-based)</td></tr>
@@ -92,9 +96,24 @@ td:first-child{color:#9c9c9c;width:38%}
       <tr><td>Contract</td><td><a href="https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t" target="_blank" rel="noopener">Streamflow app</a></td></tr>
     </table>
   </div>
-  <p style="color:#adadad;font-size:12px">Lock is transparency, not a price floor. Verify on-chain yourself.</p>
+  <div class="card">
+    <div class="label">Lock 2 of 2 — added 2026-08-15</div>
+    <table>
+      <tr><td>Amount</td><td>25,000,000 $GorWeld</td></tr>
+      <tr><td>Via</td><td>Streamflow (time-based, 100% cliff)</td></tr>
+      <tr><td>Locked on</td><td>2026-08-15</td></tr>
+      <tr><td>Unlock</td><td>2027-08-17 — one year</td></tr>
+      <tr><td>Tx</td><td><a href="https://solscan.io/tx/41oBrowKFXWihsdDzeAphwwDywyN8cat8YYRaNXAkizBrVGQBPjg9M9C9e4kFK1enPh9EN3E1oqN9SL3E6NVYunC" target="_blank" rel="noopener">Solscan</a></td></tr>
+      <tr><td>Contract</td><td><a href="https://app.streamflow.finance/contract/solana/mainnet/F43x8sDKFNUXsm3QhRNKYHXABsWHXA9CfhBGU5stXwTY" target="_blank" rel="noopener">Streamflow app</a></td></tr>
+    </table>
+  </div>
+  <p style="color:#adadad;font-size:12px">Locks are transparency, not a price floor. Verify on-chain yourself.</p>
 
-  <h2>5 · Links</h2>
+  <h2>5 · Night shift</h2>
+  <p><strong>Velda</strong> keeps the forge after the welder clocks out. She is a machine. She does not take DMs, seeds, or “support” tickets.</p>
+  <p><a href="/shift/">gorweld.com/shift</a> — who she is. The homepage gate is hers.</p>
+
+  <h2>6 · Links</h2>
   <div class="card">
     <table>
       <tr><td>Website</td><td><a href="https://gorweld.com/">gorweld.com</a></td></tr>
@@ -102,16 +121,17 @@ td:first-child{color:#9c9c9c;width:38%}
       <tr><td>ARC</td><td><a href="https://gorweld.com/arc/">gorweld.com/arc</a></td></tr>
       <tr><td>X official</td><td><a href="https://x.com/GorWeld">@GorWeld</a></td></tr>
       <tr><td>X dev</td><td><a href="https://x.com/PrzemSas">@PrzemSas</a></td></tr>
+      <tr><td>Night shift</td><td><a href="https://gorweld.com/shift/">Velda · /shift</a></td></tr>
       <tr><td>DexScreener</td><td><a href="https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe">pair chart</a></td></tr>
     </table>
   </div>
 
-  <h2>6 · Tagline</h2>
+  <h2>7 · Tagline</h2>
   <p><em>Everything is computer</em> = internet / AI / Matrix / meme screen culture.<br>
   <em>Until you strike an arc</em> = real welding arc — metal, hands, after shift.<br>
   Brand: we stand with steel and proof, not spam prompts.</p>
 
-  <h2>7 · Safety</h2>
+  <h2>8 · Safety</h2>
   <ul>
     <li>Only the CA above is official</li>
     <li>No seed phrases. No “support” DMs</li>
@@ -120,7 +140,7 @@ td:first-child{color:#9c9c9c;width:38%}
   </ul>
 
   <div class="foot">
-    Official docs · 2026-07-30 · Dumpster Forge<br>
+    Official docs · 2026-08-25 · Dumpster Forge<br>
     On-chain data always wins over this text.<br>
     Not financial advice.
   </div>

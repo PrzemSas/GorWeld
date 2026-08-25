@@ -1,0 +1,409 @@
+===============================================================
+  COINMARKETCAP — FORMULARZ POPRAWIONY (do wklejenia)
+  $GorWeld / WelderGor · 2026-08-09
+===============================================================
+Link:
+https://support.coinmarketcap.com/hc/en-us/requests/new?ticket_form_id=360000493112
+
+Email: 666sasiad666@gmail.com
+
+PRZED SEND:
+[x] One-liner = tagline (NIE tagi)
+[x] Block Explorer 1 = JEDEN URL (Solscan)
+[x] Hashing + ICO = NA
+[x] CMCP = No · Boost = No · SRD = Yes
+[x] Attachments: logo-200x200.png
+    Desktop\GORWELD-CMC-ATTACHMENTS\logo-200x200.png
+[ ] Po ticket #: public post na @GorWeld
+
+
+===============================================================
+Your email address*
+===============================================================
+666sasiad666@gmail.com
+
+
+===============================================================
+Subject Field*
+===============================================================
+WelderGor - GorWeld - Add cryptoasset
+
+
+===============================================================
+Terms & Conditions*
+===============================================================
+[x] Zaznacz checkbox
+
+
+===============================================================
+Relationship with the Project*
+===============================================================
+Founder / core builder of GORWELD and Dumpster Forge. I operate the official project channels (@GorWeld, website gorweld.com) and Solana token operations for mint A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr.
+
+
+===============================================================
+Project Launch Date*
+===============================================================
+July 20, 2025
+
+Evidence:
+https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe
+
+
+===============================================================
+Project Name*
+===============================================================
+WelderGor
+
+
+===============================================================
+Project Ticker/Symbol*  (BEZ $)
+===============================================================
+GorWeld
+
+
+===============================================================
+Cryptoasset Tags*
+===============================================================
+Memes
+(+ Solana Ecosystem jeśli jest na liście)
+
+
+===============================================================
+One-liner description*   << POPRAWIONE
+===============================================================
+WelderGor - Solana welder culture memecoin for the Dumpster Forge ecosystem.
+
+
+===============================================================
+Detailed Project Description*
+===============================================================
+WelderGor (ticker: GorWeld) is a community memecoin on the Solana blockchain associated with the Dumpster Forge and GORWELD brand. The project centers on welder culture and on-chain building, using the theme “from scrap to chain.” The token is an SPL asset with 6 decimals. The official mint address is A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr.
+
+The token was launched on 20 July 2025 via the pump.fun launchpad on Solana. Public market data and charts are available on DexScreener, GeckoTerminal, and Jupiter. The primary trading pair is denominated against SOL on pump.fun (pair address 4vTHxks5A7PSUDZG1RrcDmYKkEC6Cy7sDMCHjUbNghqe).
+
+On-chain configuration after launch: mint authority is renounced (disabled) and freeze authority is renounced (disabled). 50,000,000 tokens are locked under a public Streamflow vesting contract with unlock scheduled for January 2027:
+https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t
+
+Explorers and safety tools for the same mint include Solscan and RugCheck. The project maintains https://gorweld.com/ and documentation at https://gorweld.com/docs/. Official X: https://x.com/GorWeld. Discord: https://discord.gg/ufqVEeFSHm. Founder/builder: https://x.com/PrzemSas.
+
+The canonical mint is published on the website and social channels so users can verify they trade the correct asset. The token is also discoverable with chart data in the Nightly multichain wallet after wallet-side verification.
+
+Markets are currently on Solana decentralized venues (pump.fun bonding curve). There is no centralized exchange listing on CMC-tracked venues at the time of application. Circulating and total supply should be taken from Solana explorers / token indexers on the review date.
+
+In summary, WelderGor is a Solana SPL memecoin with renounced mint and freeze authorities, a public long-term lock on part of supply, official web and docs, and public DEX market pages. This request asks CoinMarketCap to associate the correct contract, metadata, and market references for users.
+
+
+===============================================================
+Platform*
+===============================================================
+Solana
+
+
+===============================================================
+Chain Fork
+===============================================================
+NA
+
+
+===============================================================
+Link to Logo*
+===============================================================
+https://ipfs.io/ipfs/QmeXGUUefQVkDz34ow8GQXqBYvRxBD8qiTZnLv3bZoyL4L
+
++ Attachments: logo-200x200.png (200x200 PNG)
+  Desktop\GORWELD-CMC-ATTACHMENTS\logo-200x200.png
+
+
+===============================================================
+Website 1*
+===============================================================
+https://gorweld.com/
+
+
+===============================================================
+Website 2 (Optional)
+===============================================================
+https://gorweld.com/docs/
+
+
+===============================================================
+Platform of Contract Address 1*
+===============================================================
+Solana
+(jeśli brak → "-")
+
+
+===============================================================
+Contract Address 1*
+===============================================================
+A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+
+===============================================================
+Number of Decimals
+===============================================================
+6
+
+
+===============================================================
+Block Explorer 1   << POPRAWIONE — TYLKO JEDEN URL
+===============================================================
+https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+
+===============================================================
+Contract Address 2 / 3
+===============================================================
+(puste)
+
+
+===============================================================
+Block Explorer(s) 2, 3, 4, 5
+===============================================================
+https://solana.fm/address/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr, https://explorer.solana.com/address/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+
+===============================================================
+Source Code
+===============================================================
+NA
+
+
+===============================================================
+Whitepaper / Technical Documentation
+===============================================================
+https://gorweld.com/docs/
+
+
+===============================================================
+Announcement
+===============================================================
+NA
+
+
+===============================================================
+Message Board 1
+===============================================================
+https://gorweld.com/docs/
+
+
+===============================================================
+Message Board(s) 2–5
+===============================================================
+NA
+
+
+===============================================================
+Twitter*
+===============================================================
+https://twitter.com/GorWeld
+
+
+===============================================================
+Reddit / Facebook / LinkedIn
+===============================================================
+NA
+NA
+NA
+
+
+===============================================================
+Chat 1* (Discord)
+===============================================================
+https://discord.gg/ufqVEeFSHm
+
+
+===============================================================
+Chat(s) 2–5
+===============================================================
+NA
+
+
+===============================================================
+Video Channel
+===============================================================
+NA
+
+
+===============================================================
+Mobile App 1 / 2–5
+===============================================================
+NA
+NA
+
+
+===============================================================
+Circulating Supply*
+===============================================================
+984951448
+
+(odśwież z Solscan w dniu wysyłki)
+
+
+===============================================================
+Total Supply
+===============================================================
+984951448
+
+
+===============================================================
+Max Supply*
+===============================================================
+1000000000
+
+
+===============================================================
+API Total / Circulating
+===============================================================
+NA
+NA
+
+
+===============================================================
+List of CMC-supported exchanges
+===============================================================
+NA
+
+
+===============================================================
+CMC Priority (CMCP)*
+===============================================================
+No
+
+
+===============================================================
+Media Coverage
+===============================================================
+NA
+
+
+===============================================================
+Country of Origin*
+===============================================================
+Poland
+
+
+===============================================================
+Team/Backers/Investors*
+===============================================================
+PrzemSas (https://x.com/PrzemSas) — founder and core builder of GORWELD and Dumpster Forge. Professional welding background combined with independent software and on-chain product building. Operates official channels @GorWeld and gorweld.com. No institutional VC backers disclosed. Independently operated project.
+
+
+===============================================================
+Traction/Adoption/Partnerships/MVPs*
+===============================================================
+- Website and docs: https://gorweld.com/ , https://gorweld.com/docs/
+- Mint+freeze renounced; 50M Streamflow lock (public contract)
+- Markets: DexScreener, GeckoTerminal, Jupiter, pump.fun
+- Nightly wallet: token verified with chart in-app
+- Community: X @GorWeld, Discord
+Market metrics change often — use Solscan/DexScreener/Jupiter on review date.
+
+
+===============================================================
+Annex A / Emission / Hashing / ICO
+===============================================================
+Annex A: NA
+Emission/release schedule: NA
+Hashing/Consensus Algorithm: NA
+ICO/IEO Start Date: NA
+ICO/IEO End Date: NA
+ICO/IEO/Launch Price: NA
+
+
+===============================================================
+Dofollow linkbacks to CMC*
+===============================================================
+Yes
+
+
+===============================================================
+Marketing consent
+===============================================================
+No
+
+(albo Yes — opcjonalne; No = mniej maili)
+
+
+===============================================================
+SRD Application
+===============================================================
+Yes. I am an official representative (founder) of WelderGor / GORWELD. I will complete Self-Reporting Dashboard onboarding after this application is processed if applicable.
+https://docs.google.com/presentation/d/1p0-EjHE4ELpLZ8kwzP855L5x3uq941oUpCfIYSraa0g/edit#slide=id.g8830a96fa9_0_1349
+
+
+===============================================================
+Interested in CMC Boost
+===============================================================
+No
+
+
+===============================================================
+Public verification post
+===============================================================
+Will publish a public verification post on the official project X account https://x.com/GorWeld within 24 hours of receiving the CMC ticket number, including (i) the ticket number and (ii) the CMC Dexscan URL if available. Will not tag CoinMarketCap. Contact: X @PrzemSas / @GorWeld
+
+
+===============================================================
+Proof/Supporting evidence/documents *
+===============================================================
+Official website: https://gorweld.com/
+Docs: https://gorweld.com/docs/
+Official X: https://x.com/GorWeld
+Founder X: https://x.com/PrzemSas
+Discord: https://discord.gg/ufqVEeFSHm
+Solscan mint: https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Pump.fun: https://pump.fun/coin/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+DexScreener: https://dexscreener.com/solana/4vthxks5a7psudzg1rrcdmykkec6cy7sdmchjubnghqe
+GeckoTerminal: https://www.geckoterminal.com/solana/pools/4vTHxks5A7PSUDZG1RrcDmYKkEC6Cy7sDMCHjUbNghqe
+Jupiter: https://jup.ag/tokens/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Streamflow lock 50M: https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t
+RugCheck: https://rugcheck.xyz/tokens/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+Logo: https://ipfs.io/ipfs/QmeXGUUefQVkDz34ow8GQXqBYvRxBD8qiTZnLv3bZoyL4L
+Canonical mint only: A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+
+===============================================================
+Privacy Notice*
+===============================================================
+[x] Zaznacz
+
+
+===============================================================
+Attachments
+===============================================================
+logo-200x200.png
+(ścieżka: Desktop\GORWELD-CMC-ATTACHMENTS\logo-200x200.png)
+opcjonalnie: dexscreener.png, solscan-mint.png, streamflow-lock.png
+
+
+===============================================================
+PO SUBMITCIE — post na @GorWeld (publiczny, BEZ tagu CMC)
+===============================================================
+CMC listing application submitted for $GorWeld.
+
+Ticket: #WSTAW_NUMER
+
+Official Solana mint:
+A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+Website: https://gorweld.com/
+
+
+===============================================================
+QUICK — 3 POPRAWKI KTÓRE MIAŁEŚ ŹLE
+===============================================================
+1) One-liner:
+   WelderGor - Solana welder culture memecoin for the Dumpster Forge ecosystem.
+
+2) Block Explorer 1 (TYLKO to):
+   https://solscan.io/token/A8cDgfn1tAQbsZfD8oZU5u2xZZqKtJTmq7m9E3PLNMqr
+
+3) Hashing + ICO Start/End/Price:
+   NA / NA / NA / NA
+===============================================================
+KONIEC
+===============================================================

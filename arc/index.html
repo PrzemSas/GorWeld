@@ -477,7 +477,7 @@ const I18N={
   tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — dopóki <b style='color:#5fe08a'>nic nie wyskakuje</b>, tempo jest dobre. Pod blachą zapali się <b style='color:#ff9a3c'>ZA SZYBKO</b> (zimny zakład) albo <b style='color:#ff9a3c'>ZA WOLNO</b> (przepalenie) dopiero gdy naprawdę zjedziesz.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
   tut4:"<b>4. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
-  t_nofunds:"💸 BRAK GW (demo) — tańsza płyta albo RESET POSTĘPU. Nie da się kupić tokenem.", t_bought:"−%1 GW · materiał kupiony",
+  t_topup:"🧯 ZASIŁEK — portfel demo odbudowany do 120 GW. Spawaj dalej.", t_bought:"−%1 GW · materiał kupiony",
   eco_buy:"kupisz", eco_a:"za A netto", eco_cost:"koszt", eco_net:"netto", eco_bal:"saldo", eco_jack:"JACKPOT", rew_zero:"💀 SPALONA PŁYTA — materiał stracony",
   eco_free:"runda konkursowa — bez kosztów i bez wypłat GW", chal_wal:"KONKURS", chal_pass:"PRÓG ZALICZONY — skopiuj PROOF i wyślij zgłoszenie", chal_fail:"PONIŻEJ PROGU — płyta za darmo, spawaj dalej",
   tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
@@ -513,7 +513,7 @@ const I18N={
   tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — as long as <b style='color:#5fe08a'>nothing pops up</b>, you're on target. <b style='color:#ff9a3c'>TOO FAST</b> (cold lap) or <b style='color:#ff9a3c'>TOO SLOW</b> (burn-through) shows under the plate only once you really drift.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
   tut4:"<b>4. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
-  t_nofunds:"💸 NOT ENOUGH GW (demo) — cheaper plate or RESET PROGRESS. No token top-up.", t_bought:"−%1 GW · plate bought",
+  t_topup:"🧯 STAKE RESTORED — demo wallet back to 120 GW. Keep welding.", t_bought:"−%1 GW · plate bought",
   eco_buy:"buy-in", eco_a:"A net", eco_cost:"cost", eco_net:"net", eco_bal:"balance", eco_jack:"JACKPOT", rew_zero:"💀 PLATE BURNED — material lost",
   eco_free:"challenge run — no GW cost, no payout", chal_wal:"CHALLENGE", chal_pass:"BAR CLEARED — copy the PROOF and submit", chal_fail:"BELOW THE BAR — plate is free, keep welding",
   tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
@@ -549,7 +549,7 @@ const I18N={
   tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — пока <b style='color:#5fe08a'>ничего не всплывает</b>, темп верный. <b style='color:#ff9a3c'>СЛИШКОМ БЫСТРО</b> (непровар) или <b style='color:#ff9a3c'>СЛИШКОМ МЕДЛЕННО</b> (прожог) появится под пластиной, только если реально собьёшься.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
   tut4:"<b>4. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
-  t_nofunds:"💸 НЕ ХВАТАЕТ GW (демо) — дешевле плита или СБРОС. Токеном докупить нельзя.", t_bought:"−%1 GW · плита куплена",
+  t_topup:"🧯 ПОСОБИЕ — демо-баланс восстановлен до 120 GW. Вари дальше.", t_bought:"−%1 GW · плита куплена",
   eco_buy:"вход", eco_a:"A нетто", eco_cost:"цена", eco_net:"нетто", eco_bal:"баланс", eco_jack:"ДЖЕКПОТ", rew_zero:"💀 ПЛИТА СОЖЖЕНА — материал потерян",
   eco_free:"конкурсный заход — без затрат и без выплат GW", chal_wal:"КОНКУРС", chal_pass:"ПОРОГ ВЗЯТ — скопируй PROOF и отправь заявку", chal_fail:"НИЖЕ ПОРОГА — плита бесплатна, вари дальше",
   tier_common:"ОБЫЧНАЯ", tier_rare:"РЕДКАЯ", tier_epic:"ЭПИЧЕСКАЯ", tier_legendary:"ЛЕГЕНДАРНАЯ",
@@ -667,9 +667,17 @@ function passPlan(){ if(thick<=3) return ["cap"]; if(thick<=5) return ["root","c
 // ── Economy (DEMO ONLY: GW in localStorage. Real tokens are NOT wired. No COOK buy-in, no cashout.) ──
 const CONSUMABLE={MMA:2, MIG:2, TIG:3, CUT:3, PLASMA:4};            // electrode / wire — cheap, burned every job (the sink)
 const MAT_BASE={steel:6, ss:14, alu:26};           // plate price — alu = the expensive stake you can ruin
-let gw=120, pool=200, burned=0, jobCost=0, jobPaid=false, jobSettled=false;
+const GW_STAKE=120, POOL_STAKE=200;                // stawka startowa demo — i poziom, do ktorego odbudowuje sie wypalony portfel
+let gw=GW_STAKE, pool=POOL_STAKE, burned=0, jobCost=0, jobPaid=false, jobSettled=false;
 try{ const a=localStorage.getItem("gorweld_gw"); if(a!=null) gw=+a; const b=localStorage.getItem("gorweld_pool"); if(b!=null) pool=+b; }catch(e){}
 function saveWallet(){ try{ localStorage.setItem("gorweld_gw",gw); localStorage.setItem("gorweld_pool",pool); }catch(e){} }
+// Ekonomia demo NIE MOZE zamykac gry. Elektroda pali sie co runde i NIE wraca w wyplacie
+// (payMult mnozy sam matCost), wiec nawet gracz na stale B schodzi do zera — a ponizej ceny plyty
+// start() odmawial klikniecia komunikatem „BRAK GW". Saldo siedzi w localStorage, wiec blokada byla
+// TRWALA, a jedyne wyjscie — RESET POSTEPU — bylo schowane w modalu KARIERA i kasowalo przy okazji
+// caly postep WPQR. Zamiast odmawiac: odbudowujemy stawke i wpuszczamy na plyte.
+function topUp(price){ if(gw>=price) return false;
+  gw=Math.max(GW_STAKE,price); pool=Math.max(pool,POOL_STAKE); saveWallet(); return true; }
 function matCost(){ return Math.round(MAT_BASE[bead]*(0.6+thick/10)); }                 // thicker plate = pricier
 function jobPrice(){ return CONSUMABLE[proc]+matCost(); }
 function payMult(score){ const st=POSITIONS[posKey].stars;                              // A scales with position; sub-A loses material
@@ -860,9 +868,9 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
   // Gracz z wypalonym portfelem trafiał na „BRAK GW", a 🎓 KARIERA (jedyny RESET) jest w challenge
   // wyłączona — czyli wejście bez wyjścia. Do tego startowe saldo różniłoby warunki między ludźmi.
   if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // buy consumable + plate on first strike
-    if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
+    const dole=topUp(price);                                          // wypalony portfel nie odbija juz od plyty
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
-    showToast(fmt("t_bought",[price]),"#ffae3c"); }
+    showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=Math.round(performance.now()); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
   trail=[{t:t0,x:p.x,y:p.y}];
   lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud();
@@ -1628,7 +1636,7 @@ document.getElementById("clear").onclick=()=>{ clearWeld(); flashEl.style.opacit
 document.getElementById("rClose").onclick=()=>closeModal("repModal");
 document.getElementById("rCard").onclick=()=>{ closeModal("repModal"); buildCard(); };
 document.getElementById("carClose").onclick=()=>closeModal("carModal");
-document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); gw=120; pool=200; burned=0; saveWallet(); updateWallet(); updateInfo(); updateRank(); openCareer(); };
+document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); gw=GW_STAKE; pool=POOL_STAKE; burned=0; saveWallet(); updateWallet(); updateInfo(); updateRank(); openCareer(); };
 document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
 document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
 document.getElementById("cardProof").onclick=copyProof;
@@ -1767,9 +1775,9 @@ function cutStart(e){
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; }
   if(proc==="CUT" && bead!=="steel"){ showToast(t("t_cut_steelonly"),"#ff5a4a"); e.preventDefault(); return; }
   if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // konkurs darmowy — jak w start()
-    if(gw<price){ showToast(t("t_nofunds"),"#ff5a4a"); e.preventDefault(); return; }
+    const dole=topUp(price);                                          // jak w start()
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
-    showToast(fmt("t_bought",[price]),"#ffae3c"); }
+    showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx;
   cutHeat=0; pierced=(proc==="PLASMA");
   if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); arcIntensity(0.3);

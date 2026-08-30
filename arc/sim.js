@@ -54,6 +54,12 @@
   // Drżenie ręki i zaokrąglenie kursora do pikseli dokładają ~1 px do KAŻDEJ próbki, więc suma
   // odcinków rosła wraz z częstotliwością próbkowania: ten sam idealny spaw dawał 65 pkt przy
   // 250 Hz i 99 pkt przy 20 Hz. Okno patrzy tylko na pozycje odległe o V_WIN — szum się kasuje.
+  // 1.4.0 — odpryski przestały być STAŁĄ kary. Do 1.3.0 `spatterCount` zależał wyłącznie od
+  //         `proc`/`thick`/czasu łuku, więc idealny przebieg MMA tracił 7 pkt przy 3 mm i 14 pkt
+  //         przy 12 mm — sufit wynosił 93, a 8/12 mm NIE MOGŁY dostać A nawet zagrane bezbłędnie.
+  //         Teraz mnożnik `spatFac` = odchyłka tempa od docelowego / 0,30 (sufit 2×): tempo w oknie
+  //         = zero odprysków = 100 pkt, galop 200% = 26–31 odprysków. Kara mierzy grę, nie ustawienia.
+  //         Rundy nagrane silnikiem 1.3.0 i starszym NIE są porównywalne z 1.4.0.
   // 1.3.0 — okno 0,05 s radziło sobie z szumem myszy, ale nie z KWANTYZACJĄ kursora do pikseli CSS.
   // Krok siatki w play-space = 1280/rect.width, więc w oknie 800 px to 1,6 px, a przemieszczenie
   // w 50 ms przy tempie MMA 5 mm to 2,56 px — schodki dawały skok prędkości rzędu 100%, `instab`
@@ -181,7 +187,10 @@
             if (electrodeLeft <= ELEC_STUB) { replacing = true; break; } }
           depositBead(x, y, w); distAcc += step; }
       }
-      spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
+      // 1.4.0: tempo poza oknem = rozprysk (1:1 z index.html). Kara przestała być stałą dla
+      // danego proc/thick — idealny przebieg nie płaci za nic, zły płaci do 2×.
+      const spatFac = Math.min(2, Math.abs(vEMA / targetPx - 1) / 0.30);
+      spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * spatFac * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
       vSumT += vEMA * dtS; vTimeS += dtS;
       speedSum += vEMA; speedN++;
       last = p; lastT = now;
@@ -232,7 +241,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, VERSION: "1.3.0" };
+  const API = { simulate, mulberry32, VERSION: "1.4.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

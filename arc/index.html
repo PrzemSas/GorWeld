@@ -289,8 +289,8 @@
   <div class="panel bottom">
     <div class="group"><span class="lbl" data-i18n="thickness">Grubość</span>
       <button class="thk" data-t="2">2</button>
-      <button class="thk" data-t="3">3</button>
-      <button class="thk on" data-t="5">5</button>
+      <button class="thk on" data-t="3">3</button>
+      <button class="thk" data-t="5">5</button>
       <button class="thk" data-t="8">8</button>
       <button class="thk" data-t="12">12</button>
     </div>
@@ -399,7 +399,7 @@ const PLAY_W=1280, PLAY_H=720;
 // /arc/?challenge=1 — wszystkim pinujemy ten sam seed i tę samą konfigurację,
 // żeby wyniki dało się w ogóle porównywać, a rundę zweryfikować przez sim.js.
 const CHALLENGE={ id:"ARC-MMA-A-2026-08", seed:1296914737>>>0, W:PLAY_W, H:PLAY_H,
-  proc:"MMA", joint:"butt", pos:"PA", thick:5, bead:"steel", minScore:90, pin:["proc"] };
+  proc:"MMA", joint:"butt", pos:"PA", thick:3, bead:"steel", minScore:90, pin:["proc"] };
 function chalPinned(k){
   const p=CHALLENGE.pin;
   if(!p||!p.length) return true;          // brak listy = stary kupon, pinujemy wszystko
@@ -656,7 +656,7 @@ try{ const s=localStorage.getItem("gorweld_welder"); if(s) progress=JSON.parse(s
 function saveProgress(){ try{ localStorage.setItem("gorweld_welder",JSON.stringify(progress)); }catch(e){} }
 function rankFor(xp){ let r=RANKS[0]; for(const x of RANKS) if(xp>=x[0]) r=x; return r; }
 
-let proc="MMA",joint="butt",posKey="PA",bead="steel",thick=5,helmetOn=true,activeCoupon=null;
+let proc="MMA",joint="butt",posKey="PA",bead="steel",thick=3,helmetOn=true,activeCoupon=null;
 let seamPts=[],grooveHalf=8,bevelW=14,idealHalf=11,targetPx=50;
 let lastReport=null;
 // ── Multipass (root → fill → cap) — thick plate needs several layers ──
@@ -923,7 +923,11 @@ function move(e){ if(isCut())return cutMove(e);
         const rip=w*(1.5+vEMA*0.012)/PROCESS[proc].rippleK; if(distAcc>=rip){ drawRipple(pl.x,pl.y,w,ux,uy); distAcc=0; } }
     }
     // odpryski do OCENY liczone po czasie łuku (1:1 z sim.js) — spawnSparks robi już tylko grafikę
-    spatterCount+=Math.round((3+(thick>>1))*PROCESS[proc].sparks)*(dtS*1000/16); passWeldMs+=dtS*1000;
+    // 1.4.0: tempo poza oknem = rozprysk. Przedtem kara była STAŁA dla danego proc/thick, więc
+    // idealny przebieg MMA i tak tracił 7–14 pkt i 8/12 mm nie mogły dostać A. Teraz płacisz za
+    // to, co faktycznie robisz: 0 przy tempie docelowym, sufit 2× przy odchyłce ≥60%.
+    const spatFac=Math.min(2,Math.abs(vEMA/targetPx-1)/0.30);
+    spatterCount+=Math.round((3+(thick>>1))*PROCESS[proc].sparks)*spatFac*(dtS*1000/16); passWeldMs+=dtS*1000;
     vSumT+=vEMA*dtS; vTimeS+=dtS;
     speedSum+=vEMA; speedN++; speedFb=feedback();
     if(!(proc==="MMA"&&replacing)) arcIntensity(Math.min(1,dist/14));

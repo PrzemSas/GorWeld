@@ -55,6 +55,7 @@
   // przechodzi z łukiem wyłączonym i liczy się bit-w-bit jak 1.5.0.
   const ELEC_DIA = {2:2.0,3:2.5,5:3.25,8:4.0,12:4.0};
   const ARC_RISE = 1.0, ARC_PUSH = 3.5, ARC_LIFT = 1.5, ARC_STICK_T = 0.80;
+  const ELEC_TRAVEL_ARC = 1000, ARC_BURN_S = 55;   // zapas drogi i czas jarzenia na całą elektrodę (1:1 z grą)
   const ARC_MAX_MUL = 3.2, ARC_V_SLOPE = 2.4, ARC_LO = 0.6, ARC_HI = 1.6;
   const VOLT_TABLES = {
     MMA:[[1,3,20],[3,6,22],[6,10,24],[10,15,26]],
@@ -213,6 +214,8 @@
         arcPenAcc += arcPenNow(r) * dtS; arcTime += dtS; arcRSum += r * dtS;
         arcVSum += (recommendedVolts(proc, thick) + ARC_V_SLOPE * (arcLen - arcL0)) * dtS;
         if (r > ARC_HI) arcPorAcc += (r - ARC_HI) * dtS;
+        if (proc === "MMA" && !replacing) { electrodeLeft -= dtS / ARC_BURN_S;   // łuk zjada elektrodę w czasie
+          if (electrodeLeft <= ELEC_STUB) { replacing = true; last = null; continue; } }
       }
       trail.push({ t: now, x: p.x, y: p.y });
       while (trail.length > 2 && (now - trail[0].t) / 1000 > V_WIN) trail.shift();
@@ -242,7 +245,7 @@
         const n = Math.floor(depCarry / step); if (n > 0) depCarry -= n * step;
         for (let i = 1; i <= n; i++) { const x = last.x + ddx * (i / n), y = last.y + ddy * (i / n);
           if (!onPlate(x, y)) continue;
-          if (proc === "MMA") { if (replacing) break; electrodeLeft -= step / 650;
+          if (proc === "MMA") { if (replacing) break; electrodeLeft -= step / (arcLive ? ELEC_TRAVEL_ARC : 650);
             if (electrodeLeft <= ELEC_STUB) { replacing = true; break; } }
           depositBead(x, y, w); distAcc += step; }
       }

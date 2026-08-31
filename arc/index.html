@@ -813,7 +813,12 @@ let tickAcc=0, vTickRef=0;
 // tool / consumable mechanics
 let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
 let electrodeLeft=1, replacing=false;
-const ELEC_MAX=118, ELEC_STUB=0.16;
+const ELEC_MAX=158, ELEC_STUB=0.16;    // dłuższa elektroda (było 118 px) — +34% na oko
+// Łuk zjada elektrodę TAKŻE W CZASIE, nie tylko po przebytej drodze: stanie w miejscu z zapalonym
+// łukiem przestało być darmowe. Zapas drogi urósł z 650 na 1000 px, żeby to zrekompensować.
+// Oba WYŁĄCZNIE przy żywym łuku (`arcLive`) — inaczej stare rundy i dotyk liczyłyby się inaczej.
+const ELEC_TRAVEL_ARC=1000;            // px przejazdu na całą elektrodę przy żywym łuku (dawniej 650)
+const ARC_BURN_S=55;                   // sekund samego jarzenia na całą elektrodę
 // ── DŁUGOŚĆ ŁUKU (2.0.0) — oś Z wyjęta z dwóch przycisków myszy ────────────────
 // Mysz ma tylko dwie osie i obie są zajęte pozycją elektrody, ale ma DWA przyciski,
 // a przy MMA elektroda jarzy się przez DOTYK blachy. Stąd cała sekwencja:
@@ -974,6 +979,9 @@ function move(e){ if(isCut())return cutMove(e);
       arcPenAcc+=arcPenNow(r)*dtS; arcTime+=dtS; arcRSum+=r*dtS;
       arcVSum+=(recommendedVolts(proc,thick)+ARC_V_SLOPE*(arcLen-L0))*dtS;
       if(r>ARC_HI) arcPorAcc+=(r-ARC_HI)*dtS;                        // długi łuk gubi osłonę → pęcherze
+      if(proc==="MMA"&&!replacing){ electrodeLeft-=dtS/ARC_BURN_S;   // łuk zjada elektrodę samym paleniem
+        if(electrodeLeft<=ELEC_STUB){ replacing=true; arcIntensity(0.02); showToast(t("t_replace"),"#ff9a3c");
+          end(null); updateToolHud(); e.preventDefault(); return; } }
     }
     trail.push({t:now,x:p.x,y:p.y});
     while(trail.length>2 && (now-trail[0].t)/1000>V_WIN) trail.shift();
@@ -1007,7 +1015,7 @@ function move(e){ if(isCut())return cutMove(e);
         const x=last.x+ddx*(i/n),y=last.y+ddy*(i/n);
         if(!onPlate(x,y)) continue;                                 // arc only fuses on the plate
         if(proc==="MMA"){ if(replacing) break;
-          electrodeLeft-=step/650;                                  // stick burns down as you weld
+          electrodeLeft-=step/(arcLive?ELEC_TRAVEL_ARC:650);        // stick burns down as you weld
           if(electrodeLeft<=ELEC_STUB){ replacing=true; arcIntensity(0.02); showToast(t("t_replace"),"#ff9a3c");
             // Ogarek = łuk gaśnie. Świeżą elektrodę podaje wyłącznie `start()`, a od 2.0.0 łuk nie kończy
             // się na puszczeniu przycisku — bez tego wyjścia gracz zostawał z palącym się ogarkiem na zawsze.

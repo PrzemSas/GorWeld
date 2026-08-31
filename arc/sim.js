@@ -1,5 +1,12 @@
 /**
- * GORWELD™ Arc Welder — headless deterministyczny silnik oceny (faza on-chain, krok 2).
+ * GORWELD ARC WELDER — silnik oceny spoiny.
+ * © 2026 Przemysław Sąsiadek (gorweld.com). Wszelkie prawa zastrzeżone / All rights reserved.
+ * GORWELD® — zarejestrowany znak towarowy UPRP, prawo wyłączne nr R.396313 (kl. 9, 36, 37, 42).
+ * Oprogramowanie zastrzeżone, NIE open source — warunki w pliku /LICENSE.
+ * Proprietary software. Copying, redistribution or commercial use without prior written
+ * permission is prohibited.
+ *
+ * headless deterministyczny silnik oceny (faza on-chain, krok 2).
  *
  * `ArcSim.simulate(round)` odtwarza rundę z surowych inputów i SAM liczy wynik — bez grafiki.
  * Ta sama funkcja działa w przeglądarce (parity-check) i w Node (przyszły serwer-oracle).

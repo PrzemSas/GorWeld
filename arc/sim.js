@@ -44,6 +44,19 @@
     alu:  { MIG:1.4, MMA:2.4, TIG:1.9, tol:0.70 },
   };
   const PASS_W = { root:0.72, fill:0.92, cap:1.00 };
+  // Prąd — tablice 1:1 z index.html (AMP_TABLES / POS_AMP_MUL / recommendedAmps).
+  const AMP_TABLES = {
+    MMA:[[1,3,60],[3,6,90],[6,10,130],[10,15,170]],
+    MIG:[[1,3,80],[3,6,140],[6,12,200]],
+    TIG:[[1,2,45],[2,4,70],[4,6,100],[6,10,140]],
+  };
+  const POS_AMP_MUL = {1:1.0,2:0.95,3:0.90,4:0.85,5:0.80};
+  function recommendedAmps(p, t, posK) {
+    const tbl = AMP_TABLES[p]; if (!tbl) return null;
+    let base = null; for (const [lo,hi,v] of tbl) if (lo < t && t <= hi) { base = v; break; }   // pierwszy trafiony, jak tableLookup()
+    if (base == null) return null;
+    return Math.round(base * (POS_AMP_MUL[POSITIONS[posK].stars] || 1));
+  }
   const BASE_REWARD = 50;
   const ELEC_STUB = 0.16;
   const V_TAU = 0.045;            // stała czasowa wygładzania prędkości [s]
@@ -67,9 +80,20 @@
   const V_WIN = 0.10;             // okno pomiaru prędkości [s]
 
   function simulate(round) {
-    const { seed, W, H, proc, joint, pos: posKey, thick, bead, events } = round;
+    const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, events } = round;
     const rng = mulberry32(seed >>> 0);
     const P = POSITIONS[posKey];
+
+    // ── Prąd gracza (1.5.0) ──
+    // `amps` brak / równe zaleceniu WPS ⇒ ar=1 ⇒ wszystkie współczynniki 1/false i silnik
+    // liczy bit-w-bit jak 1.4.0. Rundy sprzed 1.5.0 (bez pola `amps`) replayują się identycznie.
+    const ampRec = recommendedAmps(proc, thick, posKey);
+    const ampAr = (ampRec && amps) ? amps / ampRec : 1;
+    const ampF = { ar: ampAr, w: Math.pow(ampAr, 0.55),
+                   pen: ampAr < 1 ? Math.min(30, (1 - ampAr) * 70) : Math.min(30, (ampAr - 1) * 50),
+                   sev: ampAr === 1 ? null : (Math.abs(ampAr - 1) >= 0.25 ? "major" : "minor"),
+                   spatAdd: ampAr > 1 ? (ampAr - 1) * 2 : 0,
+                   por: ampAr < 0.85 ? Math.round((0.85 - ampAr) * 6) : 0 };
 
     // ── passy ──
     function passPlan() { if (thick <= 3) return ["cap"]; if (thick <= 5) return ["root","cap"]; return ["root","fill","cap"]; }
@@ -111,10 +135,11 @@
     let tickAcc = 0, vTickRef = targetPx;   // `instab` próbkowana na stałym takcie, nie na zdarzeniu
     const passLog = [];
 
-    function beadWidth() { const sr = vEMA / targetPx;
-      if (sr < 0.7) return Math.min(idealHalf * 1.9, idealHalf * Math.pow(0.7 / Math.max(sr, 0.08), 0.55));
-      if (sr > 1.3) return Math.max(idealHalf * 0.42, idealHalf * Math.pow(1.3 / sr, 0.7));
-      return idealHalf; }
+    function beadWidth() { const sr = vEMA / targetPx; let w;
+      if (sr < 0.7) w = Math.min(idealHalf * 1.9, idealHalf * Math.pow(0.7 / Math.max(sr, 0.08), 0.55));
+      else if (sr > 1.3) w = Math.max(idealHalf * 0.42, idealHalf * Math.pow(1.3 / sr, 0.7));
+      else w = idealHalf;
+      return w * ampF.w; }
     function depositBead(x, y, w) { const ns = nearestSeam(x, y);
       if (ns.d < grooveHalf + bevelW) { x += (ns.x - x) * 0.4; y += (ns.y - y) * 0.4; }
       const jit = proc === "MMA" ? (rng() * 0.18 - 0.09) * w : 0;   // jedyny pobór z rng (jak w grze)
@@ -133,7 +158,7 @@
       const tol = MATERIAL[bead].tol;
       const avgV = vTimeS ? vSumT / vTimeS : targetPx, spdAcc = Math.max(0, 1 - Math.abs(avgV - targetPx) / (targetPx * tol));
       const ticks = Math.max(1, vTimeS / V_TICK);
-      const instab = vTimeS ? vVarSum / ticks : 0; const porosity = Math.max(0, Math.round((instab / 8 + (proc === "MIG" && spdAcc < 0.4 ? 2 : 0)) / tol));
+      const instab = vTimeS ? vVarSum / ticks : 0; const porosity = Math.max(0, Math.round((instab / 8 + (proc === "MIG" && spdAcc < 0.4 ? 2 : 0)) / tol)) + ampF.por;
       const weldSec = Math.max(0.5, passWeldMs / 1000);
       const spatter = Math.round((spatterCount / weldSec) * PROCESS[proc].sparks / 40);
       let endGap = 0; for (const e of [seamPts[0], seamPts[K - 1]]) { let d = 1e18; for (const b of baked) { const dd = (b.x - e.x) ** 2 + (b.y - e.y) ** 2; if (dd < d) d = dd; } if (Math.sqrt(d) > grooveHalf * 1.7) endGap++; }
@@ -189,7 +214,8 @@
       }
       // 1.4.0: tempo poza oknem = rozprysk (1:1 z index.html). Kara przestała być stałą dla
       // danego proc/thick — idealny przebieg nie płaci za nic, zły płaci do 2×.
-      const spatFac = Math.min(2, Math.abs(vEMA / targetPx - 1) / 0.30);
+      let spatFac = Math.min(2, Math.abs(vEMA / targetPx - 1) / 0.30);
+      if (ampF.spatAdd) spatFac = Math.min(2.6, spatFac + ampF.spatAdd);
       spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * spatFac * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
       vSumT += vEMA * dtS; vTimeS += dtS;
       speedSum += vEMA; speedN++;
@@ -207,7 +233,8 @@
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
-              - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5);
+              - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
+              - ampF.pen;
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze
@@ -216,7 +243,8 @@
       (overflow > 0.3) ||
       (porosity > 3) ||
       (endGap > 1) ||
-      (passPlanArr[0] === "root" && rootCov < 0.8);
+      (passPlanArr[0] === "root" && rootCov < 0.8) ||
+      (ampF.sev === "major");
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -229,9 +257,19 @@
     const pf = 1 + 0.18 * (passPlanArr.length - 1);
     const difficulty = mb * pm * jm * mf * pf;
 
-    return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2) };
+    return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2) };
   }
 
+  // 1.5.0 — PRĄD stał się parametrem gracza. `round.amps` (absolutne ampery) porównywane z
+  //         zaleceniem WPS daje `ar`; przy ar=1 każdy współczynnik wynosi 1/false, więc wynik jest
+  //         BIT-W-BIT taki jak 1.4.0 — rundy 1.4.0 i rundy zagrane „po WPS" pozostają porównywalne.
+  //         Kara `pen` jest ODJEMNIKIEM (jak porowatość), nie kolejną wagą dodatnią — suma wag
+  //         dodatnich zostaje 100 i idealny przejazd po WPS nadal sięga sufitu.
+  //         ⚠ Pierwsze podejście liczyło prąd przez GEOMETRIĘ (próg pokrycia i rozlanie ściegu).
+  //         Pomiar 2026-08-31 pokazał, że to martwe: przy spawaniu środkiem rowka odległość ścieg↔szew
+  //         jest bliska zeru, więc zwężenie progu nic nie zmienia, a 130% prądu dawało dalej 100 pkt.
+  //         Kary NIE wolno też wpiąć w `coverage` — ten licznik napędza pasek live i przejście na
+  //         następną warstwę (>=0,9), więc obcięcie go zablokowałoby grę przy niskim prądzie.
   // 1.3.0 — prędkość z regresji liniowej po oknie 0,10 s + `instab` próbkowana na stałym takcie:
   //         wynik przestał zależeć od SZEROKOŚCI OKNA (kwantyzacja kursora do pikseli CSS).
   //         Zmierzone na 8 rękach × 3 Hz × 8 szerokości 500–1920 px: różnica średnich 12,0 → 1,6 pkt.
@@ -241,7 +279,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, VERSION: "1.4.0" };
+  const API = { simulate, mulberry32, recommendedAmps, VERSION: "1.5.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

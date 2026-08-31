@@ -55,7 +55,9 @@
   button.on { border-color:var(--cyan); color:#fff; background:linear-gradient(180deg,#143238,#0e2226); box-shadow:0 0 14px rgba(31,214,227,.28); }
   button:active { transform:translateY(1px); }
   button:disabled { opacity:.35; cursor:not-allowed; }
-  .pos,.thk,.lng { padding:6px 9px; font-size:11px; }
+  .pos,.thk,.lng,.amp { padding:6px 9px; font-size:11px; }
+  .amp.wps { box-shadow:inset 0 0 0 1px rgba(95,224,138,.5); }
+  .amp.wps.on { box-shadow:0 0 14px rgba(31,214,227,.28), inset 0 0 0 1px rgba(95,224,138,.5); }
   .proc.on { border-color:var(--amber); box-shadow:0 0 14px rgba(255,174,60,.32); background:linear-gradient(180deg,#2e2414,#1e160c); }
 
   .bottom { top:50%; right:12px; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; align-items:stretch; padding:11px; max-height:94vh; overflow-y:auto; width:max-content; }
@@ -193,7 +195,7 @@
     .top .brand img{ height:26px; width:26px; }
     .wal{ font-size:11px; padding:6px 9px; flex-shrink:0; }
     .lbl{ font-size:9px; width:100%; margin-bottom:2px; }
-    .proc,.joint,.bead,.thk,.lng,.pos{ padding:10px 12px; font-size:12px; min-height:44px; min-width:44px; }
+    .proc,.joint,.bead,.thk,.lng,.pos,.amp{ padding:10px 12px; font-size:12px; min-height:44px; min-width:44px; }
     button{ min-height:44px; }
     .info-card,.grav,.rankbar,#watermark{ display:none !important; }
     .mob-hud{ display:block; }
@@ -293,6 +295,13 @@
       <button class="thk" data-t="5">5</button>
       <button class="thk" data-t="8">8</button>
       <button class="thk" data-t="12">12</button>
+    </div>
+    <div class="group"><span class="lbl" data-i18n="amperage">Prąd (A)</span>
+      <button class="amp" data-a="0.7">—</button>
+      <button class="amp" data-a="0.85">—</button>
+      <button class="amp wps on" data-a="1">—</button>
+      <button class="amp" data-a="1.15">—</button>
+      <button class="amp" data-a="1.3">—</button>
     </div>
     <div class="group"><span class="lbl" data-i18n="material">Materiał</span>
       <button class="bead on" data-bead="steel" data-i18n="mat_steel">Stal</button>
@@ -439,7 +448,7 @@ function reseedRound(seed){ roundSeed=(seed!=null?seed:(Math.random()*4294967296
 // ── Rejestrator rundy (krok 2): surowe inputy do serwerowego replay + parity ──
 // To DOKŁADNIE artefakt, który klient wyśle na serwer: nasiono + parametry + ścieżka kursora.
 let rec=null;
-function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,
+function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,amps:ampsSetFor(posKey),
   rw:Math.round((()=>{try{return stage.getBoundingClientRect().width;}catch(e){return 0;}})()),  // szerokość renderu → krok kwantyzacji kursora
   events:[]}; }
 function recEv(type,x,y,now){ if(rec) rec.events.push({type,t:Math.round(now),x:Math.round(x*100)/100,y:Math.round(y*100)/100}); }
@@ -447,7 +456,7 @@ function recEv(type,x,y,now){ if(rec) rec.events.push({type,t:Math.round(now),x:
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
 let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
- pl:{ method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał",
+ pl:{ method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
   btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
@@ -461,6 +470,7 @@ const I18N={
   iso_reject:"ODRZUCONA", iso_B:"poziom B (rygor.)", iso_C:"poziom C", iso_D:"poziom D",
   sev_ok:"OK", sev_major:"WADA", sev_minor:"DROBNA",
   def_pen:"Brak przetopu / przyklejenie grani (%1% niewypełnione)", def_narrow:"Wąskie lico — niedolew (za szybkie tempo)", def_wide:"Nadmierny nadlew lica (za wolno)",
+  def_amp_low:"Za mały prąd — brak wtopienia (%1 A przy WPS %2 A)", def_amp_high:"Za duży prąd — przepalenie / podtopienie (%1 A przy WPS %2 A)",
   def_undercut:"Podtopienie / zwis poza granią (%1%)", def_porosity:"Porowatość — %1 pęcherzy (niestabilny łuk)", def_spatter:"Odpryski — %1 (czyszczenie po spawaniu)", def_uneven:"Nierówna szerokość lica", def_clean:"Brak wad — spoina zgodna z wymaganiami",
   rew_none:"⚠ 0 GW (demo) — łaga niewyspawana lub odrzucona", rew_none_sub:"dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
   zoom_zoom:"powiększenie ×", car_title:"Kariera spawacza · WPQR", car_req:"wymóg", car_reset:"RESET POSTĘPU", car_close:"ZAMKNIJ", car_max:"MAX",
@@ -473,7 +483,7 @@ const I18N={
   t_cut_steelonly:"🔥 Palnik tlenowy tnie TYLKO stal — nie nierdzewkę ani alu", t_cut_preheat:"🔥 Podgrzewaj przy starcie — trzymaj wolno aż przebije", t_cut_pierced:"✅ Przebite! Prowadź rzaz po linii", cut_word:"cięcie",
   cd_incomplete:"Niedocięcie — rzaz nie przeszedł na wylot (%1%)", cd_wide:"Szeroki rzaz / nadtopienie krawędzi (za wolno)", cd_dross:"Żużel i grat na dole (za szybko)", cd_dev:"Odchył od linii — krzywy rzaz", cd_clean:"Czysty rzaz — gładkie, prostopadłe krawędzie",
   tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
-  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał. Im trudniej, tym więcej punktów GW w demo (gwiazdki = mnożnik). To nie są prawdziwe tokeny.",
+  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał · <b>prąd</b>. Prąd startuje na wartości z WPS (zielona ramka): zejdziesz niżej — brak wtopienia, podbijesz — przepalenie i odpryski. Im trudniej, tym więcej punktów GW w demo (gwiazdki = mnożnik). To nie są prawdziwe tokeny.",
   tut2:"<b>2. Spawaj.</b> Wciśnij i ciągnij wzdłuż grani. Trzymaj tempo — dopóki <b style='color:#5fe08a'>nic nie wyskakuje</b>, tempo jest dobre. Pod blachą zapali się <b style='color:#ff9a3c'>ZA SZYBKO</b> (zimny zakład) albo <b style='color:#ff9a3c'>ZA WOLNO</b> (przepalenie) dopiero gdy naprawdę zjedziesz.",
   tut3:"<b>3. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
   tut4:"<b>4. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
@@ -483,7 +493,7 @@ const I18N={
   tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
   cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld" },
- en:{ method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material",
+ en:{ method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
@@ -497,6 +507,7 @@ const I18N={
   iso_reject:"REJECTED", iso_B:"level B (strict)", iso_C:"level C", iso_D:"level D",
   sev_ok:"OK", sev_major:"DEFECT", sev_minor:"MINOR",
   def_pen:"Lack of penetration / cold lap (%1% unfilled)", def_narrow:"Narrow bead — underfill (too fast)", def_wide:"Excess reinforcement (too slow)",
+  def_amp_low:"Current too low — lack of fusion (%1 A vs WPS %2 A)", def_amp_high:"Current too high — burn-through / undercut (%1 A vs WPS %2 A)",
   def_undercut:"Undercut / sag outside groove (%1%)", def_porosity:"Porosity — %1 pores (unstable arc)", def_spatter:"Spatter — %1 (post-weld cleanup)", def_uneven:"Uneven bead width", def_clean:"No defects — weld meets requirements",
   rew_none:"⚠ 0 GW (demo) — pass unfinished or rejected", rew_none_sub:"finish the whole pass (coverage ≥80%), min grade D",
   zoom_zoom:"zoom ×", car_title:"Welder career · WPQR", car_req:"req", car_reset:"RESET PROGRESS", car_close:"CLOSE", car_max:"MAX",
@@ -509,7 +520,7 @@ const I18N={
   t_cut_steelonly:"🔥 Oxy torch cuts STEEL only — not stainless or aluminium", t_cut_preheat:"🔥 Preheat at the start — hold slow until it pierces", t_cut_pierced:"✅ Pierced! Run the cut along the line", cut_word:"cut",
   cd_incomplete:"Incomplete cut — didn't sever through (%1%)", cd_wide:"Wide kerf / edge melt (too slow)", cd_dross:"Dross on the underside (too fast)", cd_dev:"Off the cut line — crooked kerf", cd_clean:"Clean cut — smooth, square edges",
   tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
-  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material. Harder jobs score more demo GW (stars = multiplier). Not real tokens.",
+  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material · <b>current</b>. Current starts at the WPS figure (green outline): go under and you lose fusion, go over and you burn through and spatter. Harder jobs score more demo GW (stars = multiplier). Not real tokens.",
   tut2:"<b>2. Weld.</b> Press and drag along the groove. Keep the pace — as long as <b style='color:#5fe08a'>nothing pops up</b>, you're on target. <b style='color:#ff9a3c'>TOO FAST</b> (cold lap) or <b style='color:#ff9a3c'>TOO SLOW</b> (burn-through) shows under the plate only once you really drift.",
   tut3:"<b>3. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
   tut4:"<b>4. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
@@ -519,7 +530,7 @@ const I18N={
   tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
   cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld" },
- ru:{ method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал",
+ ru:{ method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
@@ -533,6 +544,7 @@ const I18N={
   iso_reject:"БРАК", iso_B:"уровень B (строгий)", iso_C:"уровень C", iso_D:"уровень D",
   sev_ok:"OK", sev_major:"ДЕФЕКТ", sev_minor:"МЕЛКИЙ",
   def_pen:"Непровар / несплавление (%1% не заполнено)", def_narrow:"Узкий валик — недолив (быстро)", def_wide:"Чрезмерное усиление (медленно)",
+  def_amp_low:"Ток занижен — непровар (%1 А при WPS %2 А)", def_amp_high:"Ток завышен — прожог / подрез (%1 А при WPS %2 А)",
   def_undercut:"Подрез / натёк вне шва (%1%)", def_porosity:"Поры — %1 (нестабильная дуга)", def_spatter:"Брызги — %1 (зачистка)", def_uneven:"Неравномерная ширина", def_clean:"Без дефектов — шов годен",
   rew_none:"⚠ 0 GW (демо) — шов не закончен или брак", rew_none_sub:"завершите весь шов (≥80%), мин. оценка D",
   zoom_zoom:"увелич. ×", car_title:"Карьера сварщика · WPQR", car_req:"треб.", car_reset:"СБРОС ПРОГРЕССА", car_close:"ЗАКРЫТЬ", car_max:"МАКС",
@@ -545,7 +557,7 @@ const I18N={
   t_cut_steelonly:"🔥 Кислородный резак режет ТОЛЬКО сталь — не нержавейку и не алюминий", t_cut_preheat:"🔥 Прогрев у старта — держи медленно до прожига", t_cut_pierced:"✅ Прожиг! Веди рез по линии", cut_word:"рез",
   cd_incomplete:"Недорез — не прошло насквозь (%1%)", cd_wide:"Широкий рез / оплавление кромки (медленно)", cd_dross:"Грат снизу (слишком быстро)", cd_dev:"Уход от линии — кривой рез", cd_clean:"Чистый рез — гладкие, прямые кромки",
   tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
-  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал. Чем сложнее — тем больше очков GW в демо (звёзды = множитель). Это не настоящие токены.",
+  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал · <b>ток</b>. Ток стоит на значении из WPS (зелёная рамка): занизишь — непровар, завысишь — прожог и брызги. Чем сложнее — тем больше очков GW в демо (звёзды = множитель). Это не настоящие токены.",
   tut2:"<b>2. Вари.</b> Зажми и веди вдоль шва. Держи темп — пока <b style='color:#5fe08a'>ничего не всплывает</b>, темп верный. <b style='color:#ff9a3c'>СЛИШКОМ БЫСТРО</b> (непровар) или <b style='color:#ff9a3c'>СЛИШКОМ МЕДЛЕННО</b> (прожог) появится под пластиной, только если реально собьёшься.",
   tut3:"<b>3. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
   tut4:"<b>4. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
@@ -604,7 +616,9 @@ function weldElectrics(posK){ if(isCut()) return null;
   const a=recommendedAmps(proc, thick, posK), v=recommendedVolts(proc, thick);
   if(a==null||v==null) return null;
   const eff=WELD_EFF[proc]||0.8, travel=targetPx/PX_PER_MM;
-  return {amps:a, volts:v, travel, hi:heatInputKJmm(v,a,travel,eff), eff}; }
+  const aUse=Math.round(a*ampMul);
+  // `hi` = referencja z WPS (do niej porównuje raport). `hiUse` = to, co gracz sobie nakręcił.
+  return {amps:a, ampsUse:aUse, volts:v, travel, hi:heatInputKJmm(v,a,travel,eff), hiUse:heatInputKJmm(v,aUse,travel,eff), eff}; }
 const BEADS={
   steel:{hot:"#fff6d8",solid:"#7e8990",high:"#cdd6db",dark:"#2c3136"},
   ss:{hot:"#fffaf0",solid:"#aeb6bb",high:"#e6ecef",dark:"#3a4146"},
@@ -657,6 +671,22 @@ function saveProgress(){ try{ localStorage.setItem("gorweld_welder",JSON.stringi
 function rankFor(xp){ let r=RANKS[0]; for(const x of RANKS) if(xp>=x[0]) r=x; return r; }
 
 let proc="MMA",joint="butt",posKey="PA",bead="steel",thick=3,helmetOn=true,activeCoupon=null;
+// ── Prąd jako parametr GRACZA (1.5.0) ───────────────────────────
+// `ampMul` = krotność zalecenia z WPS. Przy 1 WSZYSTKIE współczynniki wychodzą 1/false,
+// więc silnik liczy bit-w-bit tak jak 1.4.0 — stare rundy pozostają porównywalne.
+// Za mało prądu → brak wtopienia; za dużo → przepalenie/podtopienie. Oba jako WŁASNA kara `pen`
+// (jak porowatość/odpryski), więc suma dodatnich wag zostaje 100 i sufit nadal jest osiągalny.
+// Kary nie da się wpiąć w `coverage`: ten sam licznik napędza pasek live i przejście na następną
+// warstwę (`coverageNow()>=0.9`), więc obcięcie go zablokowałoby grę przy niskim prądzie.
+let ampMul=1, ampF={ar:1,w:1,pen:0,sev:null,spatAdd:0,por:0};
+function ampsSetFor(posK){ const r=recommendedAmps(proc,thick,posK); return r==null?null:Math.round(r*ampMul); }
+function updateAmpF(){ const r=recommendedAmps(proc,thick,posKey), a=r==null?null:Math.round(r*ampMul);
+  const ar=(r&&a)?a/r:1;
+  ampF={ar, w:Math.pow(ar,0.55),
+        pen: ar<1 ? Math.min(30,(1-ar)*70) : Math.min(30,(ar-1)*50),   // 0 dokładnie przy ar=1
+        sev: ar===1 ? null : (Math.abs(ar-1)>=0.25 ? "major" : "minor"),
+        spatAdd: ar>1 ? (ar-1)*2 : 0,
+        por: ar<0.85 ? Math.round((0.85-ar)*6) : 0}; }
 let seamPts=[],grooveHalf=8,bevelW=14,idealHalf=11,targetPx=50;
 let lastReport=null;
 // ── Multipass (root → fill → cap) — thick plate needs several layers ──
@@ -687,7 +717,7 @@ function updateWallet(){ const el=document.getElementById("wal"); if(!el) return
   el.innerHTML=isChallenge() ? '🏁 <b>'+t("chal_wal")+'</b> · '+(CHALLENGE.minScore||90)+'%'
                              : '💰 <b>'+gw+'</b> GW · 🏦 '+Math.max(0,Math.round(pool)); }
 
-function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; }
+function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; updateAmpF(); }
 
 // ── Geometry ──────────────────────────────────────────────────────
 function isMob(){ return document.body.classList.contains("is-mobile"); }
@@ -828,10 +858,11 @@ function drawRipple(x,y,w,dx,dy){
   sctx.globalAlpha=1;
 }
 function beadWidth(){
-  const sr=vEMA/targetPx;
-  if(sr<0.7) return Math.min(idealHalf*1.9,idealHalf*Math.pow(0.7/Math.max(sr,0.08),0.55));
-  if(sr>1.3) return Math.max(idealHalf*0.42,idealHalf*Math.pow(1.3/sr,0.7));
-  return idealHalf;
+  const sr=vEMA/targetPx; let w;
+  if(sr<0.7) w=Math.min(idealHalf*1.9,idealHalf*Math.pow(0.7/Math.max(sr,0.08),0.55));
+  else if(sr>1.3) w=Math.max(idealHalf*0.42,idealHalf*Math.pow(1.3/sr,0.7));
+  else w=idealHalf;
+  return w*ampF.w;                      // gorętszy łuk = szersze, bardziej płynne jeziorko
 }
 let fbGood=false;
 function feedback(){ const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
@@ -926,7 +957,8 @@ function move(e){ if(isCut())return cutMove(e);
     // 1.4.0: tempo poza oknem = rozprysk. Przedtem kara była STAŁA dla danego proc/thick, więc
     // idealny przebieg MMA i tak tracił 7–14 pkt i 8/12 mm nie mogły dostać A. Teraz płacisz za
     // to, co faktycznie robisz: 0 przy tempie docelowym, sufit 2× przy odchyłce ≥60%.
-    const spatFac=Math.min(2,Math.abs(vEMA/targetPx-1)/0.30);
+    let spatFac=Math.min(2,Math.abs(vEMA/targetPx-1)/0.30);
+    if(ampF.spatAdd) spatFac=Math.min(2.6,spatFac+ampF.spatAdd);   // za duży prąd pryska nawet przy idealnym tempie
     spatterCount+=Math.round((3+(thick>>1))*PROCESS[proc].sparks)*spatFac*(dtS*1000/16); passWeldMs+=dtS*1000;
     vSumT+=vEMA*dtS; vTimeS+=dtS;
     speedSum+=vEMA; speedN++; speedFb=feedback();
@@ -1293,7 +1325,7 @@ function passMetrics(){
   const tol=MATERIAL[bead].tol;
   const avgV=vTimeS?vSumT/vTimeS:targetPx, spdAcc=Math.max(0,1-Math.abs(avgV-targetPx)/(targetPx*tol));
   const ticks=Math.max(1,vTimeS/V_TICK);                                     // „na takt 16 ms", nie „na zdarzenie”
-  const instab=vTimeS?vVarSum/ticks:0; const porosity=Math.max(0,Math.round((instab/8 + (proc==="MIG"&&spdAcc<0.4?2:0))/tol));
+  const instab=vTimeS?vVarSum/ticks:0; const porosity=Math.max(0,Math.round((instab/8 + (proc==="MIG"&&spdAcc<0.4?2:0))/tol))+ampF.por;
   const weldSec=Math.max(0.5,passWeldMs/1000);
   const spatter=Math.round((spatterCount/weldSec)*PROCESS[proc].sparks/40);  // odpryski NA SEKUNDĘ, nie suma
   // crater — the two ends of the seam left unfilled (no bead within reach of an endpoint)
@@ -1330,7 +1362,8 @@ function inspect(){
             + evenness*15          // równość lica
             + (1-overflow)*15      // brak podtopień / zwisów
             - porosity*5           // pęcherze
-            - Math.min(SPATTER_PEN_CAP, proc==="TIG"?spatter*3:spatter*0.5); // TIG ma być czysty; kara ograniczona
+            - Math.min(SPATTER_PEN_CAP, proc==="TIG"?spatter*3:spatter*0.5)  // TIG ma być czysty; kara ograniczona
+            - ampF.pen;            // prąd poza WPS (0 przy ustawieniu zgodnym z WPS)
   score=Math.max(0,Math.min(100,Math.round(score)));
 
   // PARITY (krok 2): odtwórz tę samą rundę headless i porównaj z wynikiem live.
@@ -1345,6 +1378,8 @@ function inspect(){
   if(wide/baked.length>0.2) D.push({s:"minor",t:t("def_wide")});
   if(overflow>0.12) D.push({s:overflow>0.3?"major":"minor",t:fmt("def_undercut",[Math.round(overflow*100)])});
   if(porosity>0) D.push({s:porosity>3?"major":"minor",t:fmt("def_porosity",[porosity])});
+  if(ampF.sev){ const wA=weldElectrics(posKey);
+    if(wA) D.push({s:ampF.sev,t:fmt(ampF.ar<1?"def_amp_low":"def_amp_high",[wA.ampsUse,wA.amps])}); }
   if(spatter>4&&proc!=="TIG") D.push({s:"minor",t:fmt("def_spatter",[spatter])});
   if(evenness<0.6) D.push({s:"minor",t:t("def_uneven")});
   if(endGap>0) D.push({s:endGap>1?"major":"minor",t:t("def_crater")});                                   // unfilled stop/start
@@ -1375,7 +1410,7 @@ function inspect(){
   renderStat("rSpd", spdAcc*100, Math.round(spdAcc*100)+"% ("+(avgV/PX_PER_MM).toFixed(1)+"/"+(targetPx/PX_PER_MM).toFixed(1)+" mm/s)", spdAcc<0.5);
   const we=weldElectrics(posKey);
   if(we){
-    const actHi=heatInputKJmm(we.volts,we.amps,avgV/PX_PER_MM,we.eff);
+    const actHi=heatInputKJmm(we.volts,we.ampsUse,avgV/PX_PER_MM,we.eff);   // HI faktyczne = prąd GRACZA × jego tempo
     const hiWarn=actHi&&Math.abs(actHi-we.hi)/we.hi>0.25;
     const hiPct=actHi?Math.max(0,100-Math.abs(actHi-we.hi)/we.hi*100):0;
     renderStat("rHi", hiPct, actHi+' / '+we.hi+' kJ/mm', hiWarn);
@@ -1518,11 +1553,22 @@ function refreshPositions(){
     wrap.appendChild(b); }
   selectPos();
 }
+function refreshAmps(){
+  const r=recommendedAmps(proc,thick,posKey);
+  document.querySelectorAll(".amp").forEach(b=>{ const m=+b.dataset.a;
+    b.textContent = r==null ? "—" : Math.round(r*m);
+    b.classList.toggle("on", m===ampMul); });
+}
 function updateInfo(){
-  const P=POSITIONS[posKey]; recalc(); const d=difficulty(), tr=valueTier(d), plan=passPlan();
+  const P=POSITIONS[posKey]; recalc(); refreshAmps(); const d=difficulty(), tr=valueTier(d), plan=passPlan();
   const passInfo = plan.length>1 ? `<br>${t("cov_layer")}: <b style="color:#ffae3c">${plan.map(p=>t("pass_"+p)).join(" → ")}</b>` : "";
   const cost=jobPrice(), aNet=Math.round(matCost()*(1.2+0.18*P.stars))-cost;
-  const el=weldElectrics(posKey), hiLine=el?`<div class="hi-line">${t("hi_set")} <span class="v">${el.hi} kJ/mm</span> · ${fmt("hi_params",[el.amps,el.volts,el.travel.toFixed(1)])}</div>`:"";
+  const el=weldElectrics(posKey);
+  const off=el&&el.ampsUse!==el.amps;
+  const ampTxt=el?(off?`<b style="color:#ffae3c">${el.ampsUse}</b>/${el.amps}`:el.amps):"";
+  // Wkład ciepła MUSI iść za pokrętłem prądu — inaczej gracz nie zobaczy, że I i v robią to samo HI.
+  const hiTxt=el?(off?`<b style="color:#ffae3c">${el.hiUse}</b> <small>(WPS ${el.hi})</small>`:el.hi)+" kJ/mm":"";
+  const hiLine=el?`<div class="hi-line">${t("hi_set")} <span class="v">${hiTxt}</span> · ${fmt("hi_params",[ampTxt,el.volts,el.travel.toFixed(1)])}</div>`:"";
   const infoEl=document.getElementById("info");
   infoEl.className="panel info-card"+(d>=7?" tier-legend":d>=4?" tier-epic":"");
   infoEl.innerHTML=
@@ -1567,8 +1613,9 @@ function applyChallengePin(){
   document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
   document.querySelectorAll(".bead").forEach(b=>b.classList.toggle("on",b.dataset.bead===bead));
   refreshPositions();
-  const lock={proc:".proc",joint:".joint",thk:".thk",bead:".bead",pos:".pos"};
-  const want={proc:chalPinned("proc"),joint:chalPinned("joint"),thk:chalPinned("thick"),bead:chalPinned("bead"),pos:chalPinned("pos")};
+  if(chalPinned("amps")) ampMul=1;
+  const lock={proc:".proc",joint:".joint",thk:".thk",bead:".bead",pos:".pos",amps:".amp"};
+  const want={proc:chalPinned("proc"),joint:chalPinned("joint"),thk:chalPinned("thick"),bead:chalPinned("bead"),pos:chalPinned("pos"),amps:chalPinned("amps")};
   Object.keys(lock).forEach(k=>{
     document.querySelectorAll(lock[k]).forEach(b=>{
       if(want[k]){ b.disabled=true; b.style.opacity=.55; b.style.cursor="not-allowed"; b.title="Zablokowane w trybie challenge"; }
@@ -1625,6 +1672,8 @@ document.querySelectorAll(".proc").forEach(b=>b.onclick=()=>{ if(isChallenge()&&
   document.querySelectorAll(".proc").forEach(x=>x.classList.remove("on")); b.classList.add("on"); proc=b.dataset.proc; activeCoupon=null; selectPos(); });
 document.querySelectorAll(".joint").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("joint")) return;
   document.querySelectorAll(".joint").forEach(x=>x.classList.remove("on")); b.classList.add("on"); joint=b.dataset.joint; activeCoupon=null; refreshPositions(); });
+document.querySelectorAll(".amp").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("amps")) return;
+  ampMul=+b.dataset.a; selectPos(); });
 document.querySelectorAll(".thk").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("thick")) return;
   document.querySelectorAll(".thk").forEach(x=>x.classList.remove("on")); b.classList.add("on"); thick=+b.dataset.t; activeCoupon=null; selectPos(); });
 document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("bead")) return;

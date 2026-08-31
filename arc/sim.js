@@ -51,6 +51,19 @@
     TIG:[[1,2,45],[2,4,70],[4,6,100],[6,10,140]],
   };
   const POS_AMP_MUL = {1:1.0,2:0.95,3:0.90,4:0.85,5:0.80};
+  // Długość łuku — 1:1 z index.html. Runda bez `arc` (dotyk, demo, wszystko sprzed 2.0.0)
+  // przechodzi z łukiem wyłączonym i liczy się bit-w-bit jak 1.5.0.
+  const ELEC_DIA = {2:2.0,3:2.5,5:3.25,8:4.0,12:4.0};
+  const ARC_RISE = 1.0, ARC_PUSH = 3.5, ARC_LIFT = 1.5, ARC_STICK_T = 0.80;
+  const ARC_MAX_MUL = 3.2, ARC_V_SLOPE = 2.4, ARC_LO = 0.6, ARC_HI = 1.6;
+  const VOLT_TABLES = {
+    MMA:[[1,3,20],[3,6,22],[6,10,24],[10,15,26]],
+    MIG:[[1,3,18],[3,6,22],[6,12,26]],
+    TIG:[[1,2,11],[2,4,12],[4,6,13],[6,10,14]],
+  };
+  function recommendedVolts(p, t) { const tbl = VOLT_TABLES[p]; if (!tbl) return null;
+    for (const [lo,hi,v] of tbl) if (lo < t && t <= hi) return v; return null; }
+  function arcPenNow(r) { return r < ARC_LO ? Math.min(25, (ARC_LO - r) * 70) : r > ARC_HI ? Math.min(25, (r - ARC_HI) * 35) : 0; }
   function recommendedAmps(p, t, posK) {
     const tbl = AMP_TABLES[p]; if (!tbl) return null;
     let base = null; for (const [lo,hi,v] of tbl) if (lo < t && t <= hi) { base = v; break; }   // pierwszy trafiony, jak tableLookup()
@@ -80,7 +93,7 @@
   const V_WIN = 0.10;             // okno pomiaru prędkości [s]
 
   function simulate(round) {
-    const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, events } = round;
+    const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, arc, events } = round;
     const rng = mulberry32(seed >>> 0);
     const P = POSITIONS[posKey];
 
@@ -94,6 +107,12 @@
                    sev: ampAr === 1 ? null : (Math.abs(ampAr - 1) >= 0.25 ? "major" : "minor"),
                    spatAdd: ampAr > 1 ? (ampAr - 1) * 2 : 0,
                    por: ampAr < 0.85 ? Math.round((0.85 - ampAr) * 6) : 0 };
+
+    // ── łuk (2.0.0) ──
+    const arcLive = !!arc;
+    const arcL0 = ELEC_DIA[thick] || 2.5;
+    let arcLen = 0, btnMask = 0, stickCount = 0, arcBroke = 0, contactT = 0;
+    let arcPenAcc = 0, arcTime = 0, arcVSum = 0, arcPorAcc = 0, arcRSum = 0;
 
     // ── passy ──
     function passPlan() { if (thick <= 3) return ["cap"]; if (thick <= 5) return ["root","cap"]; return ["root","fill","cap"]; }
@@ -139,7 +158,8 @@
       if (sr < 0.7) w = Math.min(idealHalf * 1.9, idealHalf * Math.pow(0.7 / Math.max(sr, 0.08), 0.55));
       else if (sr > 1.3) w = Math.max(idealHalf * 0.42, idealHalf * Math.pow(1.3 / sr, 0.7));
       else w = idealHalf;
-      return w * ampF.w; }
+      const arcW = arcLive ? Math.min(1.6, Math.max(0.62, Math.pow(Math.max(0.15, arcLen / arcL0), 0.35))) : 1;
+      return w * ampF.w * arcW; }        // 1:1 z arcWFac() w index.html
     function depositBead(x, y, w) { const ns = nearestSeam(x, y);
       if (ns.d < grooveHalf + bevelW) { x += (ns.x - x) * 0.4; y += (ns.y - y) * 0.4; }
       const jit = proc === "MMA" ? (rng() * 0.18 - 0.09) * w : 0;   // jedyny pobór z rng (jak w grze)
@@ -172,14 +192,28 @@
     // ── replay zdarzeń ──
     for (const ev of events) {
       if (ev.type === "down") { last = { x: ev.x, y: ev.y }; lastT = ev.t; vEMA = targetPx; lastDab = ev.t;
+        btnMask = ev.b | 0; arcLen = 0; contactT = 0;   // dotyk blachy = zajarzenie
         trail = [{ t: ev.t, x: ev.x, y: ev.y }];
         if (replacing) { electrodeLeft = 1; replacing = false; } continue; }
       if (ev.type === "up") { last = null; continue; }
       if (ev.type === "bank") { bankReset(); continue; }
       if (ev.type !== "move" || !last) continue;
       const p = { x: ev.x, y: ev.y }, now = ev.t;
+      if (arcLive && !onPlate(p.x, p.y)) { last = null; continue; }   // zjazd z blachy gasi łuk (1:1 z grą)
       const ddx = p.x - last.x, ddy = p.y - last.y, dist = Math.hypot(ddx, ddy);
       const dtS = Math.min(0.25, Math.max(0.001, (now - lastT) / 1000));
+      if (arcLive) {
+        btnMask = ev.b | 0;
+        arcLen += (ARC_RISE + ((btnMask & 2) ? ARC_LIFT : 0) - ((btnMask & 1) ? ARC_PUSH : 0)) * dtS;
+        if (arcLen <= 0) { arcLen = 0; contactT += dtS;
+          if (contactT >= ARC_STICK_T) { stickCount++; last = null; continue; }        // przywarcie
+        } else contactT = 0;
+        if (arcLen >= arcL0 * ARC_MAX_MUL) { arcLen = arcL0 * ARC_MAX_MUL; arcBroke++; last = null; continue; }  // zerwany łuk
+        const r = arcLen / arcL0;
+        arcPenAcc += arcPenNow(r) * dtS; arcTime += dtS; arcRSum += r * dtS;
+        arcVSum += (recommendedVolts(proc, thick) + ARC_V_SLOPE * (arcLen - arcL0)) * dtS;
+        if (r > ARC_HI) arcPorAcc += (r - ARC_HI) * dtS;
+      }
       trail.push({ t: now, x: p.x, y: p.y });
       while (trail.length > 2 && (now - trail[0].t) / 1000 > V_WIN) trail.shift();
       const ref = trail[0], span = Math.max(0.001, (now - ref.t) / 1000);
@@ -216,6 +250,7 @@
       // danego proc/thick — idealny przebieg nie płaci za nic, zły płaci do 2×.
       let spatFac = Math.min(2, Math.abs(vEMA / targetPx - 1) / 0.30);
       if (ampF.spatAdd) spatFac = Math.min(2.6, spatFac + ampF.spatAdd);
+      if (arcLive) { const rr = arcLen / arcL0; if (rr > ARC_HI) spatFac = Math.min(3.2, spatFac + (rr - ARC_HI) * 1.2); }
       spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * spatFac * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
       vSumT += vEMA * dtS; vTimeS += dtS;
       speedSum += vEMA; speedN++;
@@ -227,14 +262,16 @@
     const cur = passMetrics(), all = passLog.concat([cur]), n = all.length, avg = k => all.reduce((a, m) => a + m[k], 0) / n;
     const coverage = avg("coverage"), spdAcc = avg("spdAcc"), evenness = avg("evenness");
     const overflow = Math.max.apply(null, all.map(m => m.overflow));
-    const porosity = all.reduce((a, m) => a + m.porosity, 0);
+    const arcPen = arcTime ? arcPenAcc / arcTime : 0, arcR = arcTime ? arcRSum / arcTime : 1;
+    const arcFails = stickCount + arcBroke;
+    const porosity = all.reduce((a, m) => a + m.porosity, 0) + Math.round(arcPorAcc);
     const spatter = Math.round(avg("spatter"));   // tempo — uśredniamy po passach, nie sumujemy
     const endGap = Math.max.apply(null, all.map(m => m.endGap));
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
               - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
-              - ampF.pen;
+              - ampF.pen - arcPen - Math.min(15, arcFails * 4);
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze
@@ -244,7 +281,8 @@
       (porosity > 3) ||
       (endGap > 1) ||
       (passPlanArr[0] === "root" && rootCov < 0.8) ||
-      (ampF.sev === "major");
+      (ampF.sev === "major") ||
+      (arcPen >= 12) || (arcFails > 2);
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -257,9 +295,19 @@
     const pf = 1 + 0.18 * (passPlanArr.length - 1);
     const difficulty = mb * pm * jm * mf * pf;
 
-    return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2) };
+    return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2),
+             arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
+             volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick) };
   }
 
+  // 2.0.0 — DŁUGOŚĆ ŁUKU z dwóch przycisków myszy. LPM to DOTYK BLACHY: nim się zajarza, a trzymany
+  //         za długo (ARC_STICK_T) powoduje przywarcie. Puszczony — elektroda odjeżdża sama, bo się topi.
+  //         Łuk pali się niezależnie od przycisków; kończy go przywarcie albo odciągnięcie za daleko.
+  //         Zdarzenia niosą teraz maskę przycisków `b`, a runda flagę `arc`. Bez `arc` (dotyk = demo,
+  //         każda runda sprzed 2.0.0) model jest WYŁĄCZONY i wynik wychodzi bit-w-bit jak 1.5.0.
+  //         Łuk domyka równanie wkładu ciepła: napięcie przestało być stałą z tablicy, więc U, I oraz v
+  //         są już wszystkie w rękach gracza. Kara liczona CHWILOWO i całkowana po czasie — na średniej
+  //         ktoś skaczący 0,2 ↔ 3,0 wyszedłby idealnie.
   // 1.5.0 — PRĄD stał się parametrem gracza. `round.amps` (absolutne ampery) porównywane z
   //         zaleceniem WPS daje `ar`; przy ar=1 każdy współczynnik wynosi 1/false, więc wynik jest
   //         BIT-W-BIT taki jak 1.4.0 — rundy 1.4.0 i rundy zagrane „po WPS" pozostają porównywalne.
@@ -279,7 +327,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, VERSION: "1.5.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "2.0.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

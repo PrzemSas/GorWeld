@@ -448,15 +448,18 @@ function reseedRound(seed){ roundSeed=(seed!=null?seed:(Math.random()*4294967296
 // ── Rejestrator rundy (krok 2): surowe inputy do serwerowego replay + parity ──
 // To DOKŁADNIE artefakt, który klient wyśle na serwer: nasiono + parametry + ścieżka kursora.
 let rec=null;
-function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,amps:ampsSetFor(posKey),
+function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,amps:ampsSetFor(posKey),arc:0,
   rw:Math.round((()=>{try{return stage.getBoundingClientRect().width;}catch(e){return 0;}})()),  // szerokość renderu → krok kwantyzacji kursora
   events:[]}; }
-function recEv(type,x,y,now){ if(rec) rec.events.push({type,t:Math.round(now),x:Math.round(x*100)/100,y:Math.round(y*100)/100}); }
+function recEv(type,x,y,now,b){ if(!rec) return;
+  const ev={type,t:Math.round(now),x:Math.round(x*100)/100,y:Math.round(y*100)/100};
+  if(b!==undefined) ev.b=b|0;                       // maska przycisków — bez niej replay nie odtworzy łuku
+  rec.events.push(ev); }
 
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
 let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
- pl:{ method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)",
+ pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
   btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
@@ -493,7 +496,7 @@ const I18N={
   tier_common:"POSPOLITA", tier_rare:"RZADKA", tier_epic:"EPICKA", tier_legendary:"LEGENDARNA",
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
   cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld" },
- en:{ method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)",
+ en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
@@ -530,7 +533,7 @@ const I18N={
   tier_common:"COMMON", tier_rare:"RARE", tier_epic:"EPIC", tier_legendary:"LEGENDARY",
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
   cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld" },
- ru:{ method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)",
+ ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
@@ -606,7 +609,8 @@ const VOLT_TABLES={
 };
 const WELD_EFF={MMA:0.8,MIG:0.8,TIG:0.6};
 const POS_AMP_MUL={1:1.0,2:0.95,3:0.90,4:0.85,5:0.80};
-function tableLookup(tbl, t){ for(const [lo,hi,v] of tbl) if(lo<t&&t<=hi) return v; return null; }
+function tableLookup(tbl, t){ if(!tbl) return null;   // CUT/PLASMA nie mają tablic — brak tego wyjścia wywracał selectPos()
+  for(const [lo,hi,v] of tbl) if(lo<t&&t<=hi) return v; return null; }
 function recommendedAmps(p, t, posK){ const base=tableLookup(AMP_TABLES[p], t); if(base==null) return null;
   const mul=POS_AMP_MUL[POSITIONS[posK].stars]||1; return Math.round(base*mul); }
 function recommendedVolts(p, t){ return tableLookup(VOLT_TABLES[p], t); }
@@ -810,6 +814,37 @@ let tickAcc=0, vTickRef=0;
 let cursor={x:0,y:0,seen:false}, ux=1, uy=0, dipT=-1e9, lastDab=0;
 let electrodeLeft=1, replacing=false;
 const ELEC_MAX=118, ELEC_STUB=0.16;
+// ── DŁUGOŚĆ ŁUKU (2.0.0) — oś Z wyjęta z dwóch przycisków myszy ────────────────
+// Mysz ma tylko dwie osie i obie są zajęte pozycją elektrody, ale ma DWA przyciski,
+// a przy MMA elektroda jarzy się przez DOTYK blachy. Stąd cała sekwencja:
+//   LPM  → elektroda dotyka blachy (arcLen = 0) i zajarza łuk;
+//   trzymasz dalej → dalej dotyka → po ARC_STICK_T PRZYWIERA;
+//   puszczasz → elektroda odjeżdża sama, bo się topi (ARC_RISE);
+//   dalej: LPM dociska, PPM odciąga — i tym trzymasz odległość od blachy.
+// Łuk NIE gaśnie od puszczenia przycisku: raz zajarzony pali się, dopóki go nie
+// przywrzesz albo nie odciągniesz za daleko (to drugie = wygaszenie łuku na koniec).
+// Dzięki temu brak przycisku jest stanem legalnym — i sam się kończy, bo łuk rośnie.
+// ⚠ Model działa TYLKO dla myszy (`arcLive`). Dotyk = demo: łuk stoi na nominale,
+//   wszystkie współczynniki wychodzą 1 i silnik liczy bit-w-bit jak 1.5.0.
+const ELEC_DIA={2:2.0,3:2.5,5:3.25,8:4.0,12:4.0};   // średnica elektrody wg grubości [mm]
+const ARC_RISE=1.0;      // nic nie trzymasz: elektroda się topi i odjeżdża [mm/s]
+const ARC_PUSH=3.5;      // LPM dociska  → netto −2,5 mm/s
+const ARC_LIFT=1.5;      // PPM odciąga  → netto +2,5 mm/s  (oba naraz = −1,0, dociskanie wygrywa)
+const ARC_STICK_T=0.80;  // ile sekund elektroda może dotykać blachy, zanim przywrze [s]
+const ARC_IDLE_MS=2500;  // bezruch dłuższy niż tyle = łuk zgasł (gracz odszedł od myszy)
+const ARC_MAX_MUL=3.2;   // powyżej L0×tego łuk się rwie
+const ARC_V_SLOPE=2.4;   // [V/mm] o ile rośnie napięcie na milimetr łuku
+const ARC_LO=0.6, ARC_HI=1.6;   // pasmo bez kary, w krotnościach L0
+let arcLive=false, arcLen=0, btnMask=0, stickCount=0, arcBroke=0, contactT=0;
+let arcPenAcc=0, arcTime=0, arcVSum=0, arcPorAcc=0, arcRSum=0;
+// `end(null)` woła się też z fizyki łuku (przywarcie / zerwanie), nie tylko ze zdarzenia myszy.
+function arcL0(){ return ELEC_DIA[thick]||2.5; }
+// Jeziorko MUSI iść za łukiem, bo to po nim spawacz reguluje — długi łuk rozlewa je szeroko
+// i płytko, krótki ściąga w wąskie i głębokie. Przy r=1 wychodzi dokładnie 1, więc runda bez
+// łuku (dotyk, demo, wszystko sprzed 2.0.0) liczy się bit-w-bit jak dotąd.
+function arcWFac(){ return arcLive ? Math.min(1.6,Math.max(0.62,Math.pow(Math.max(0.15,arcLen/arcL0()),0.35))) : 1; }
+// kara liczona CHWILOWO i całkowana po czasie — inaczej ktoś skaczący 0,2↔3,0 wyszedłby na średniej idealnie
+function arcPenNow(r){ return r<ARC_LO ? Math.min(25,(ARC_LO-r)*70) : r>ARC_HI ? Math.min(25,(r-ARC_HI)*35) : 0; }
 // arc-eye: looking at the arc with no helmet fries your eyes after ~2s
 let eyeBurn=0, lastFrameT=0, eyeWarned=false;
 
@@ -862,10 +897,14 @@ function beadWidth(){
   if(sr<0.7) w=Math.min(idealHalf*1.9,idealHalf*Math.pow(0.7/Math.max(sr,0.08),0.55));
   else if(sr>1.3) w=Math.max(idealHalf*0.42,idealHalf*Math.pow(1.3/sr,0.7));
   else w=idealHalf;
-  return w*ampF.w;                      // gorętszy łuk = szersze, bardziej płynne jeziorko
+  return w*ampF.w*arcWFac();            // prąd i długość łuku razem robią szerokość jeziorka
 }
 let fbGood=false;
-function feedback(){ const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
+function feedback(){
+  if(arcLive){ const r=arcLen/arcL0();
+    if(r>ARC_HI*1.15){ fbGood=false; return t("fb_arclong"); }
+    if(r<ARC_LO*0.90){ fbGood=false; return t("fb_arcshort"); } }
+  const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
   if(sr>1.45) return t("fb_fast");
   if(sr<0.62) return t("fb_slow");
   return t("fb_good"); }
@@ -888,8 +927,10 @@ function pos(e){ const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changed
 function snap(p){ p.x=Math.round(p.x*100)/100; p.y=Math.round(p.y*100)/100; return p; }
 function uiHit(e){ return !!(e.target&&e.target.closest&&e.target.closest(".panel,.modal,.covbar,.toolhud,.mob-hud,button")); }
 function unlockAudio(){ try{ if(actx&&actx.state==="suspended") actx.resume(); }catch(e){} const v=document.getElementById("pagebg"); if(v&&v.paused) v.play&&v.play().catch(()=>{}); }
-function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
+function start(e){ if(e.pointerType==="mouse"&&e.button!==0&&e.button!==2) return;
   if(uiHit(e)) return; unlockAudio();
+  // drugi przycisk dociśnięty w trakcie ściegu to NIE nowe zajarzenie — nie płać znowu za płytę
+  if(welding){ btnMask=e.buttons|0; e.preventDefault(); return; }
   if(document.body.classList.contains("setup-open")){ document.body.classList.remove("setup-open"); return; }
   if(isCut())return cutStart(e); if(modalOpen())return; const p=snap(pos(e)); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
@@ -903,18 +944,37 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0) return;
     gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
     showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=Math.round(performance.now()); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
+  arcLive=(e.pointerType==="mouse"); btnMask=e.buttons|0; arcLen=0; contactT=0;   // dotyk blachy = zajarzenie
   trail=[{t:t0,x:p.x,y:p.y}];
-  lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); updateToolHud();
+  lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0,btnMask); arcOn(); updateToolHud();
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault(); }
 function move(e){ if(isCut())return cutMove(e);
   // czas zaokrąglony do ms — DOKŁADNIE ten, który trafia do nagrania rundy,
   // żeby wynik na ekranie był bit-w-bit tym, co policzy weryfikator z sim.js
   if(!welding)return; const p=snap(pos(e)),now=Math.round(performance.now()); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
-  recEv('move',p.x,p.y,now);
+  if(arcLive){ btnMask=e.buttons|0; if(rec) rec.arc=1; }
+  recEv('move',p.x,p.y,now,arcLive?btnMask:undefined);
+  // Zjazd z blachy gasi łuk — nie ma do czego się jarzyć. Dotychczas sprawdzaliśmy `onPlate`
+  // tylko przy zajarzeniu i przy odkładaniu ściegu, więc poza płytą łuk palił się dalej.
+  if(arcLive&&!onPlate(p.x,p.y)){ showToast(t("t_offplate"),"#ff9a3c"); end(null); updateToolHud(); e.preventDefault(); return; }
   if(last){
     const ddx=p.x-last.x,ddy=p.y-last.y,dist=Math.hypot(ddx,ddy);
     const dtS=Math.min(0.25,Math.max(0.001,(now-lastT)/1000));      // sekundy — bez dawnej podłogi 8 ms
+    if(arcLive){
+      const L0=arcL0();
+      arcLen += (ARC_RISE + ((btnMask&2)?ARC_LIFT:0) - ((btnMask&1)?ARC_PUSH:0))*dtS;
+      if(arcLen<=0){ arcLen=0; contactT+=dtS;                        // elektroda leży na blasze
+        if(contactT>=ARC_STICK_T){                                   // za długo w kontakcie → przywarła
+          stickCount++; showToast(t("t_stick"),"#ff5a4a"); end(null); updateToolHud(); e.preventDefault(); return; }
+      } else contactT=0;
+      if(arcLen>=L0*ARC_MAX_MUL){                                    // odciągnięta za daleko — łuk zgasł
+        arcLen=L0*ARC_MAX_MUL; arcBroke++; showToast(t("t_arcbreak"),"#ff9a3c"); end(null); updateToolHud(); e.preventDefault(); return; }
+      const r=arcLen/L0;
+      arcPenAcc+=arcPenNow(r)*dtS; arcTime+=dtS; arcRSum+=r*dtS;
+      arcVSum+=(recommendedVolts(proc,thick)+ARC_V_SLOPE*(arcLen-L0))*dtS;
+      if(r>ARC_HI) arcPorAcc+=(r-ARC_HI)*dtS;                        // długi łuk gubi osłonę → pęcherze
+    }
     trail.push({t:now,x:p.x,y:p.y});
     while(trail.length>2 && (now-trail[0].t)/1000>V_WIN) trail.shift();
     const ref=trail[0], span=Math.max(0.001,(now-ref.t)/1000);
@@ -948,7 +1008,11 @@ function move(e){ if(isCut())return cutMove(e);
         if(!onPlate(x,y)) continue;                                 // arc only fuses on the plate
         if(proc==="MMA"){ if(replacing) break;
           electrodeLeft-=step/650;                                  // stick burns down as you weld
-          if(electrodeLeft<=ELEC_STUB){ replacing=true; arcIntensity(0.02); showToast(t("t_replace"),"#ff9a3c"); break; } }
+          if(electrodeLeft<=ELEC_STUB){ replacing=true; arcIntensity(0.02); showToast(t("t_replace"),"#ff9a3c");
+            // Ogarek = łuk gaśnie. Świeżą elektrodę podaje wyłącznie `start()`, a od 2.0.0 łuk nie kończy
+            // się na puszczeniu przycisku — bez tego wyjścia gracz zostawał z palącym się ogarkiem na zawsze.
+            if(arcLive){ end(null); updateToolHud(); e.preventDefault(); return; }
+            break; } }
         const pl=depositBead(x,y,w);
         molten.push({x:pl.x,y:pl.y,r:w,t:now}); distAcc+=step;
         const rip=w*(1.5+vEMA*0.012)/PROCESS[proc].rippleK; if(distAcc>=rip){ drawRipple(pl.x,pl.y,w,ux,uy); distAcc=0; } }
@@ -959,6 +1023,7 @@ function move(e){ if(isCut())return cutMove(e);
     // to, co faktycznie robisz: 0 przy tempie docelowym, sufit 2× przy odchyłce ≥60%.
     let spatFac=Math.min(2,Math.abs(vEMA/targetPx-1)/0.30);
     if(ampF.spatAdd) spatFac=Math.min(2.6,spatFac+ampF.spatAdd);   // za duży prąd pryska nawet przy idealnym tempie
+    if(arcLive){ const rr=arcLen/arcL0(); if(rr>ARC_HI) spatFac=Math.min(3.2,spatFac+(rr-ARC_HI)*1.2); }
     spatterCount+=Math.round((3+(thick>>1))*PROCESS[proc].sparks)*spatFac*(dtS*1000/16); passWeldMs+=dtS*1000;
     vSumT+=vEMA*dtS; vTimeS+=dtS;
     speedSum+=vEMA; speedN++; speedFb=feedback();
@@ -968,12 +1033,25 @@ function move(e){ if(isCut())return cutMove(e);
   last=p; lastT=now; e.preventDefault();
 }
 function end(e){ if(e&&uiHit(e)) return;
+  // Raz zajarzony łuk pali się niezależnie od przycisków — puszczenie ich znaczy tylko
+  // „przestaję dociskać", a nie „koniec ściegu". Łuk kończy się sam: przywarciem albo
+  // odciągnięciem za daleko. Bez tego nie da się oderwać elektrody od blachy po zajarzeniu.
+  if(e&&e.type==="pointerup"&&welding&&arcLive){ btnMask=e.buttons|0; return; }
   if(e&&e.pointerId!==undefined) try{ stage.releasePointerCapture(e.pointerId); }catch(err){}
   if(isCut())return cutEnd(); if(welding&&last) recEv('up',last.x,last.y,performance.now()); welding=false; last=null; speedFb=""; arcOff(); cursor.seen=false;
   if(baked.length>=10 && coverageNow()>=0.9){               // full layer covered
     if(passIndex < passPlanArr.length-1) bankPass();        // more layers to go → freeze this one, weld the next
     else inspect();                                         // last layer done → grade the whole joint
   } }
+// Łuk bez ruchu myszy nie ma jak urosnąć — fizyka liczy się na zdarzeniach ruchu — więc porzucona
+// runda zostawałaby zapalony łuk i zablokowane `welding` na zawsze. Strażnik NIE może wisieć na
+// requestAnimationFrame: w nieaktywnej karcie (i w headless) pętla klatek stoi, czyli akurat wtedy,
+// gdy gracz najpewniej odszedł od myszy. Własny licznik działa niezależnie od rysowania.
+// ⚠ BEZ `arcBroke++`: odejście od myszy to nie błąd techniki, a `sim.js` przy odtwarzaniu widzi tu
+// wyłącznie zwykłe `up` — doliczenie zerwania rozjechałoby wynik na ekranie z wynikiem weryfikatora.
+setInterval(()=>{ if(welding&&arcLive&&last&&performance.now()-lastT>ARC_IDLE_MS){
+  showToast(t("t_arcbreak"),"#ff9a3c"); end(null); updateToolHud(); } },500);
+stage.addEventListener("contextmenu",e=>e.preventDefault());   // PPM to odciąganie elektrody, nie menu
 stage.addEventListener("pointerdown",start); stage.addEventListener("pointermove",move);
 addEventListener("pointerup",end); addEventListener("pointercancel",end);
 // krzyżyk MUSI iść przez pos() — pole gry jest wyskalowanym letterboxem,
@@ -1009,11 +1087,28 @@ function drawCutTorch(x,y,ex,ey){
   }
   ctx.restore();
 }
+// Pomarańczowy odcinek na czubku elektrody TO JEST łuk, więc jego długość = odległość elektrody
+// od blachy: odciągniesz (PPM) — wydłuża się, dogrywasz (LPM) — kurczy. Stalowa część zaczyna się
+// dokładnie tam, gdzie kończy się łuk, więc elektroda fizycznie odjeżdża od blachy razem z nim.
+// Przy nominale wychodzi dokładnie 14 px, czyli bez łuku (dotyk/demo) obraz jest jak dotąd.
+function arcGapPx(){ return arcLive ? Math.min(46,Math.max(1.5,arcLen*(14/arcL0()))) : 14; }
 function drawElectrode(x,y,ex,ey){
-  const len=ELEC_MAX*Math.max(electrodeLeft,0.05), hx=x+ex*len, hy=y+ey*len, ang=Math.atan2(ey,ex);
+  // Odległość rękojeści od blachy = ŁUK + to, co zostało z ELEKTRODY.
+  //   • elektroda się wypala → jej widoczna część maleje → rękojeść sama schodzi ku blasze;
+  //   • dokładasz rękę (LPM) → łuk się skraca → rękojeść schodzi jeszcze niżej i łuk się jarzy;
+  //   • odciągasz (PPM) → łuk rośnie → ręka idzie w górę.
+  // Dzięki temu widać dwie osobne rzeczy naraz: ile elektrody zostało i jak wysoko ją trzymasz.
+  const len=ELEC_MAX*Math.max(electrodeLeft,0.05);
+  const gap=arcGapPx();
+  const reach=gap+len-14, hx=x+ex*reach, hy=y+ey*reach, ang=Math.atan2(ey,ex);
   const eg=ctx.createLinearGradient(x,y,hx,hy); eg.addColorStop(0,"#6a7075"); eg.addColorStop(0.5,"#9aa0a5"); eg.addColorStop(1,"#5a6065");
-  ctx.strokeStyle=eg; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(x+ex*14,y+ey*14); ctx.lineTo(hx,hy); ctx.stroke();
-  if(welding&&!replacing){ ctx.strokeStyle="#ffb347"; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+ex*14,y+ey*14); ctx.stroke();
+  ctx.strokeStyle=eg; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(x+ex*gap,y+ey*gap); ctx.lineTo(hx,hy); ctx.stroke();
+  if(welding&&!replacing){
+    // im dłuższy łuk, tym bledszy i cieńszy — tak samo jak naprawdę traci skupienie
+    const r=arcLive?Math.min(3.2,arcLen/arcL0()):1;
+    ctx.strokeStyle = r>1.6 ? "#ffd9a0" : "#ffb347";
+    ctx.lineWidth = Math.max(2.2, 5 - (r-1)*1.1);
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+ex*gap,y+ey*gap); ctx.stroke();
     ctx.fillStyle="rgba(255,150,40,.5)"; ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.fill(); }
   ctx.save(); ctx.translate(hx,hy); ctx.rotate(ang);
   ctx.fillStyle="#15181b"; ctx.fillRect(-2,-4,14,8);
@@ -1351,7 +1446,8 @@ function inspect(){
   const cur=passMetrics(), all=passLog.concat([cur]), n=all.length, avg=k=>all.reduce((a,m)=>a+m[k],0)/n;
   const coverage=avg("coverage"), spdAcc=avg("spdAcc"), evenness=avg("evenness");
   const overflow=Math.max.apply(null,all.map(m=>m.overflow));
-  const porosity=all.reduce((a,m)=>a+m.porosity,0), spatter=Math.round(avg("spatter")); // tempo → średnia po passach
+  const arcPen=arcTime?arcPenAcc/arcTime:0, arcR=arcTime?arcRSum/arcTime:1, arcFails=stickCount+arcBroke;
+  const porosity=all.reduce((a,m)=>a+m.porosity,0)+Math.round(arcPorAcc), spatter=Math.round(avg("spatter")); // tempo → średnia po passach
   const narrow=cur.narrow, wide=cur.wide, gaps=cur.gaps, out=cur.out, avgV=cur.avgV;
   const endGap=Math.max.apply(null,all.map(m=>m.endGap));
   const rootCov=(passPlanArr[0]==="root"&&passLog.length)?passLog[0].coverage:1;
@@ -1363,7 +1459,9 @@ function inspect(){
             + (1-overflow)*15      // brak podtopień / zwisów
             - porosity*5           // pęcherze
             - Math.min(SPATTER_PEN_CAP, proc==="TIG"?spatter*3:spatter*0.5)  // TIG ma być czysty; kara ograniczona
-            - ampF.pen;            // prąd poza WPS (0 przy ustawieniu zgodnym z WPS)
+            - ampF.pen             // prąd poza WPS (0 przy ustawieniu zgodnym z WPS)
+            - arcPen                                  // długość łuku poza pasmem (0 na dotyku i w starych rundach)
+            - Math.min(15,arcFails*4);                // przywarcia i zerwania łuku
   score=Math.max(0,Math.min(100,Math.round(score)));
 
   // PARITY (krok 2): odtwórz tę samą rundę headless i porównaj z wynikiem live.
@@ -1378,6 +1476,8 @@ function inspect(){
   if(wide/baked.length>0.2) D.push({s:"minor",t:t("def_wide")});
   if(overflow>0.12) D.push({s:overflow>0.3?"major":"minor",t:fmt("def_undercut",[Math.round(overflow*100)])});
   if(porosity>0) D.push({s:porosity>3?"major":"minor",t:fmt("def_porosity",[porosity])});
+  if(arcPen>0) D.push({s:arcPen>=12?"major":"minor",t:t(arcR<1?"def_arc_short":"def_arc_long")});
+  if(arcFails>0) D.push({s:arcFails>2?"major":"minor",t:fmt("def_stick",[arcFails])});
   if(ampF.sev){ const wA=weldElectrics(posKey);
     if(wA) D.push({s:ampF.sev,t:fmt(ampF.ar<1?"def_amp_low":"def_amp_high",[wA.ampsUse,wA.amps])}); }
   if(spatter>4&&proc!=="TIG") D.push({s:"minor",t:fmt("def_spatter",[spatter])});
@@ -1410,7 +1510,8 @@ function inspect(){
   renderStat("rSpd", spdAcc*100, Math.round(spdAcc*100)+"% ("+(avgV/PX_PER_MM).toFixed(1)+"/"+(targetPx/PX_PER_MM).toFixed(1)+" mm/s)", spdAcc<0.5);
   const we=weldElectrics(posKey);
   if(we){
-    const actHi=heatInputKJmm(we.volts,we.ampsUse,avgV/PX_PER_MM,we.eff);   // HI faktyczne = prąd GRACZA × jego tempo
+    const uAct=(arcLive&&arcTime)?arcVSum/arcTime:we.volts;                 // długi łuk = wyższe napięcie = wyższe HI
+    const actHi=heatInputKJmm(uAct,we.ampsUse,avgV/PX_PER_MM,we.eff);       // HI faktyczne = U łuku × prąd GRACZA × jego tempo
     const hiWarn=actHi&&Math.abs(actHi-we.hi)/we.hi>0.25;
     const hiPct=actHi?Math.max(0,100-Math.abs(actHi-we.hi)/we.hi*100):0;
     renderStat("rHi", hiPct, actHi+' / '+we.hi+' kJ/mm', hiWarn);
@@ -1555,6 +1656,8 @@ function refreshPositions(){
 }
 function refreshAmps(){
   const r=recommendedAmps(proc,thick,posKey);
+  const grp=document.querySelector(".amp") && document.querySelector(".amp").closest(".group");
+  if(grp) grp.style.display = (r==null) ? "none" : "";     // przy cięciu nie ma czego regulować
   document.querySelectorAll(".amp").forEach(b=>{ const m=+b.dataset.a;
     b.textContent = r==null ? "—" : Math.round(r*m);
     b.classList.toggle("on", m===ampMul); });
@@ -1657,13 +1760,20 @@ function copyProof(){
     ta.remove(); }
 }
 
-function clearWeld(){ reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
+function clearWeld(){
+  // Najpierw ZGASIĆ łuk. Od 2.0.0 nie gaśnie sam od puszczenia przycisku, więc bez tego zmiana
+  // grubości albo pozycji zostawiała `welding=true` przy świeżym, pustym nagraniu: gra odkładałaby
+  // ścieg bez zdarzenia zajarzenia, a `sim.js` pomijałby te ruchy (`!last`) — czysty rozjazd.
+  if(welding){ welding=false; last=null; speedFb=""; arcOff(); }
+  reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
+  arcLive=false; arcLen=0; btnMask=0; stickCount=0; arcBroke=0; contactT=0; arcPenAcc=0; arcTime=0; arcVSum=0; arcPorAcc=0; arcRSum=0;
   passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc();
   tickAcc=0; vTickRef=targetPx;                                          // stan startowy taktu — 1:1 z sim.js (po recalc, bo zależy od targetPx)
   updateToolHud(); }
 
 let openM=null;
-function openModal(id){ closeModal(openM); const el=document.getElementById(id); el.style.display="flex"; requestAnimationFrame(()=>el.classList.add("open")); openM=id; }
+function openModal(id){ if(welding) end(null);   // modal w trakcie palącego się łuku = koniec ściegu
+  closeModal(openM); const el=document.getElementById(id); el.style.display="flex"; requestAnimationFrame(()=>el.classList.add("open")); openM=id; }
 function closeModal(id){ if(id){ const el=document.getElementById(id); el.classList.remove("open"); setTimeout(()=>{ if(!el.classList.contains("open")) el.style.display="none"; },220); } if(openM===id) openM=null; }
 function modalOpen(){ return !!openM; }
 addEventListener("keydown",e=>{ if(e.key==="Escape"&&openM) closeModal(openM); });

@@ -72,6 +72,34 @@
   function recommendedVolts(p, t) { const tbl = VOLT_TABLES[p]; if (!tbl) return null;
     for (const [lo,hi,v] of tbl) if (lo < t && t <= hi) return v; return null; }
   function arcPenNow(r) { return r < ARC_LO ? Math.min(25, (ARC_LO - r) * 70) : r > ARC_HI ? Math.min(25, (r - ARC_HI) * 35) : 0; }
+  // ── KĄT ELEKTRODY (3.0.0) — 1:1 z index.html ──
+  // Dwa kąty, tak jak uczą w szkole i jak liczą je symulatory AR:
+  //   • ROBOCZY (wa)      — odchyłka od dwusiecznej złącza, mierzona w poprzek jazdy;
+  //   • POCHYLENIA (ta)   — ciągnięcie / pchanie, mierzone WZGLĘDEM kierunku jazdy,
+  //     więc ta sama liczba znaczy to samo na prostej, na pionie i na obwodzie rury.
+  // Obie to ODCHYŁKI OD WPS (jak `amps`), nie kąty bezwzględne. Gracz, który nie dotknie
+  // klawiatury, stoi dokładnie na zaleceniu (MMA +10° ciągnięcia) i NIE płaci nic — inaczej
+  // mechanika byłaby pułapką, a nie umiejętnością. Runda bez `ang` liczy się bit-w-bit jak 2.0.0.
+  const DEG = Math.PI / 180;
+  const ANG_RATE = 42;                        // [°/s] tempo obrotu przy trzymanym klawiszu
+  const WA_MAX = 35, TA_MAX = 45;             // zakres odchyłki [°]
+  const TA_IDEAL = { MMA: 10, MIG: -8, TIG: -15 };   // kąt WPS: + ciągnięcie (drag), − pchanie (push)
+  const WA_BAND = 8, TA_BAND = 9;             // pasmo bez kary [°]
+  const ANG_PEN_CAP = 28;
+  // Pasmo kąta roboczego zwęża się z trudnością pozycji: w pułapowej ręka ma mniej luzu niż w podolnej.
+  function waBandFor(posK) { return WA_BAND * (1 - 0.08 * ((POSITIONS[posK].stars || 1) - 1)); }
+  function angOverW(wa, posK) { return Math.max(0, Math.abs(wa) - waBandFor(posK)); }
+  function angOverT(ta) { return Math.max(0, Math.abs(ta) - TA_BAND); }
+  // Kara CHWILOWA, całkowana po czasie — na średniej ktoś machający +30 ↔ −30 wyszedłby idealnie.
+  function angPenNow(wa, ta, posK) {
+    return Math.min(ANG_PEN_CAP, Math.min(20, angOverW(wa, posK) * 1.1) + Math.min(20, angOverT(ta) * 0.9)); }
+  // Pchana elektroda rozlewa jeziorko szeroko i płytko, ciągnięta ściąga je w wąskie. Przy 0 wychodzi 1.
+  function angWFac(ta) { return Math.max(0.82, Math.min(1.20, 1 - ta * 0.006)); }
+  // Krzywo trzymana elektroda kładzie ścieg OBOK osi rowka. Przesunięcie jest CELOWO małe
+  // (sufit 0,45·grooveHalf przy progu pokrycia 1,6·grooveHalf): ma być WIDAĆ, że ścieg ucieka,
+  // ale nie wolno mu zablokować przejścia na następną warstwę. Kara siedzi w `angPen`, nie w geometrii
+  // — dokładnie ta lekcja co przy prądzie w 1.5.0.
+  function angOffPx(wa, gh) { const m = gh * 0.45; return Math.max(-m, Math.min(m, wa * 0.03 * gh)); }
   function recommendedAmps(p, t, posK) {
     const tbl = AMP_TABLES[p]; if (!tbl) return null;
     let base = null; for (const [lo,hi,v] of tbl) if (lo < t && t <= hi) { base = v; break; }   // pierwszy trafiony, jak tableLookup()
@@ -101,7 +129,7 @@
   const V_WIN = 0.10;             // okno pomiaru prędkości [s]
 
   function simulate(round) {
-    const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, arc, events } = round;
+    const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, arc, ang, events } = round;
     const rng = mulberry32(seed >>> 0);
     const P = POSITIONS[posKey];
 
@@ -121,6 +149,14 @@
     const arcL0 = ELEC_DIA[thick] || 2.5;
     let arcLen = 0, btnMask = 0, stickCount = 0, arcBroke = 0, contactT = 0;
     let arcPenAcc = 0, arcTime = 0, arcVSum = 0, arcPorAcc = 0, arcRSum = 0;
+
+    // ── kąt (3.0.0) ──
+    const angLive = !!ang;
+    let waDeg = 0, taDeg = 0, keyMask = 0;
+    let angPenAcc = 0, angTime = 0, angPorAcc = 0, angWSum = 0, angTSum = 0;
+    // Kąt rusza się WYŁĄCZNIE w trakcie jazdy (na zdarzeniach `move`), tak samo jak długość łuku.
+    // Gdyby dało się go przekręcić przed zajarzeniem, replay startowałby z innej pozycji niż ekran.
+    function angOff() { return angLive ? angOffPx(waDeg, grooveHalf) : 0; }
 
     // ── passy ──
     function passPlan() { if (thick <= 3) return ["cap"]; if (thick <= 5) return ["root","cap"]; return ["root","fill","cap"]; }
@@ -167,7 +203,7 @@
       else if (sr > 1.3) w = Math.max(idealHalf * 0.42, idealHalf * Math.pow(1.3 / sr, 0.7));
       else w = idealHalf;
       const arcW = arcLive ? Math.min(1.6, Math.max(0.62, Math.pow(Math.max(0.15, arcLen / arcL0), 0.35))) : 1;
-      return w * ampF.w * arcW; }        // 1:1 z arcWFac() w index.html
+      return w * ampF.w * arcW * (angLive ? angWFac(taDeg) : 1); }   // 1:1 z arcWFac()/angWFac() w index.html
     function depositBead(x, y, w) { const ns = nearestSeam(x, y);
       if (ns.d < grooveHalf + bevelW) { x += (ns.x - x) * 0.4; y += (ns.y - y) * 0.4; }
       const jit = proc === "MMA" ? (rng() * 0.18 - 0.09) * w : 0;   // jedyny pobór z rng (jak w grze)
@@ -224,6 +260,16 @@
         if (proc === "MMA" && !replacing) { electrodeLeft -= dtS / ARC_BURN_S;   // łuk zjada elektrodę w czasie
           if (electrodeLeft <= ELEC_STUB) { replacing = true; last = null; continue; } }
       }
+      if (angLive) {
+        keyMask = ev.k | 0;                                          // A/D = roboczy, W/S = pochylenia
+        const kd = ((keyMask & 2) ? 1 : 0) - ((keyMask & 1) ? 1 : 0);
+        const ks = ((keyMask & 8) ? 1 : 0) - ((keyMask & 4) ? 1 : 0);
+        if (kd) waDeg = Math.max(-WA_MAX, Math.min(WA_MAX, waDeg + kd * ANG_RATE * dtS));
+        if (ks) taDeg = Math.max(-TA_MAX, Math.min(TA_MAX, taDeg + ks * ANG_RATE * dtS));
+        angPenAcc += angPenNow(waDeg, taDeg, posKey) * dtS; angTime += dtS;
+        angWSum += Math.abs(waDeg) * dtS; angTSum += taDeg * dtS;
+        const tOv = angOverT(taDeg); if (tOv > 0) angPorAcc += tOv / 120 * dtS;   // żużel przed łukiem → wtrącenia
+      }
       trail.push({ t: now, x: p.x, y: p.y });
       while (trail.length > 2 && (now - trail[0].t) / 1000 > V_WIN) trail.shift();
       const ref = trail[0], span = Math.max(0.001, (now - ref.t) / 1000);
@@ -245,12 +291,13 @@
       tickAcc += dtS;
       while (tickAcc >= V_TICK) { tickAcc -= V_TICK; vVarSum += Math.abs(vEMA - vTickRef); vTickRef = vEMA; }
       const w = beadWidth(); if (dist) { ux = ddx / dist; uy = ddy / dist; }
+      const ao = angOff(), aox = -uy * ao, aoy = ux * ao;            // krzywy kąt roboczy = ścieg obok osi rowka
       if (proc === "TIG") {
-        if (now - lastDab > 150 && onPlate(p.x, p.y)) { const dw = Math.max(idealHalf, w * 0.95); depositBead(p.x, p.y, dw); lastDab = now; }
+        if (now - lastDab > 150 && onPlate(p.x + aox, p.y + aoy)) { const dw = Math.max(idealHalf, w * 0.95); depositBead(p.x + aox, p.y + aoy, dw); lastDab = now; }
       } else {
         const step = Math.max(2, w * 0.35); depCarry += dist;
         const n = Math.floor(depCarry / step); if (n > 0) depCarry -= n * step;
-        for (let i = 1; i <= n; i++) { const x = last.x + ddx * (i / n), y = last.y + ddy * (i / n);
+        for (let i = 1; i <= n; i++) { const x = last.x + ddx * (i / n) + aox, y = last.y + ddy * (i / n) + aoy;
           if (!onPlate(x, y)) continue;
           if (proc === "MMA") { if (replacing) break; electrodeLeft -= step / (arcLive ? ELEC_TRAVEL_ARC : 650);
             if (electrodeLeft <= ELEC_STUB) { replacing = true; break; } }
@@ -261,6 +308,7 @@
       let spatFac = Math.min(2, Math.abs(vEMA / targetPx - 1) / 0.30);
       if (ampF.spatAdd) spatFac = Math.min(2.6, spatFac + ampF.spatAdd);
       if (arcLive) { const rr = arcLen / arcL0; if (rr > ARC_HI) spatFac = Math.min(3.2, spatFac + (rr - ARC_HI) * 1.2); }
+      if (angLive) { const so = angOverT(taDeg); if (so > 0) spatFac = Math.min(3.2, spatFac + Math.min(0.8, so / 45)); }
       spatterCount += Math.round((3 + (thick >> 1)) * PROCESS[proc].sparks) * spatFac * (dtS * 1000 / 16); passWeldMs += dtS * 1000;
       vSumT += vEMA * dtS; vTimeS += dtS;
       speedSum += vEMA; speedN++;
@@ -274,14 +322,16 @@
     const overflow = Math.max.apply(null, all.map(m => m.overflow));
     const arcPen = arcTime ? arcPenAcc / arcTime : 0, arcR = arcTime ? arcRSum / arcTime : 1;
     const arcFails = stickCount + arcBroke;
-    const porosity = all.reduce((a, m) => a + m.porosity, 0) + Math.round(arcPorAcc);
+    const angPen = angTime ? angPenAcc / angTime : 0;
+    const angW = angTime ? angWSum / angTime : 0, angT = angTime ? angTSum / angTime : 0;
+    const porosity = all.reduce((a, m) => a + m.porosity, 0) + Math.round(arcPorAcc) + Math.round(angPorAcc);
     const spatter = Math.round(avg("spatter"));   // tempo — uśredniamy po passach, nie sumujemy
     const endGap = Math.max.apply(null, all.map(m => m.endGap));
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
               - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
-              - ampF.pen - arcPen - Math.min(15, arcFails * 4);
+              - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen;
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze
@@ -292,7 +342,8 @@
       (endGap > 1) ||
       (passPlanArr[0] === "root" && rootCov < 0.8) ||
       (ampF.sev === "major") ||
-      (arcPen >= 12) || (arcFails > 2);
+      (arcPen >= 12) || (arcFails > 2) ||
+      (angPen >= 10);
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -307,9 +358,20 @@
 
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2),
              arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
+             angPen: +angPen.toFixed(2), waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
+             angW: +angW.toFixed(2), angT: +angT.toFixed(2), taIdeal: TA_IDEAL[proc] != null ? TA_IDEAL[proc] : 0,
              volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick) };
   }
 
+  // 3.0.0 — KĄT ELEKTRODY z klawiatury: A/D kąt roboczy, W/S pochylenia (ciągnięcie ↔ pchanie).
+  //         Mysz nie ma już wolnej osi — obie zajmuje pozycja, oba przyciski długość łuku — więc
+  //         druga ręka idzie na klawiaturę. To jest zresztą prawdziwa postawa: elektroda w jednej
+  //         ręce, druga podpiera. Obie liczby to ODCHYŁKI OD WPS, więc kto nie dotknie klawiszy,
+  //         stoi na zaleceniu i nie płaci nic; runda bez flagi `ang` liczy się bit-w-bit jak 2.0.0.
+  //         Kąt rusza się wyłącznie na zdarzeniach `move` (jak długość łuku) — inaczej dałoby się
+  //         przekręcić go przed zajarzeniem i replay startowałby z innej pozycji niż ekran.
+  //         ⚠ Przesunięcie ściegu w bok jest CELOWO za małe, żeby zbić `coverage` poniżej 0,9:
+  //         ten sam licznik przełącza warstwy, więc kara musi siedzieć w `angPen` — jak w 1.5.0.
   // 2.0.0 — DŁUGOŚĆ ŁUKU z dwóch przycisków myszy. LPM to DOTYK BLACHY: nim się zajarza, a trzymany
   //         za długo (ARC_STICK_T) powoduje przywarcie. Puszczony — elektroda odjeżdża sama, bo się topi.
   //         Łuk pali się niezależnie od przycisków; kończy go przywarcie albo odciągnięcie za daleko.
@@ -337,7 +399,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "2.0.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.0.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

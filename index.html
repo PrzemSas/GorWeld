@@ -77,6 +77,10 @@ section{padding:80px 24px;position:relative}.si{max-width:1100px;margin:0 auto}
 .stitle{font-family:'Teko',sans-serif;font-size:clamp(38px,7vw,64px);font-weight:700;color:#fff;line-height:.95;margin-bottom:12px}
 .stitle em{color:#e08a3a;font-style:normal}
 .sdesc{color:#adadad;font-size:12px;line-height:1.7;max-width:520px;margin-bottom:36px}
+.upd{max-width:520px;margin:-22px 0 32px;padding:14px 16px;border-left:2px solid #e08a3a;background:#e08a3a08;font-size:11px;line-height:1.75;color:#adadad}
+.upd-t{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:#e08a3a;margin-bottom:6px}
+.upd b{color:#e9eef2}
+.upd kbd{font-family:'Orbitron',sans-serif;font-size:9px;color:#e08a3a;border:1px solid #e08a3a44;border-radius:3px;padding:1px 5px;margin:0 1px;white-space:nowrap}
 .sdiv{width:36px;height:2px;background:#e08a3a;margin-bottom:18px;box-shadow:0 0 8px #e08a3a44}
 .sec-dark{background:linear-gradient(180deg,#08080a,#120d0a,#08080a)}
 .about-g{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
@@ -384,6 +388,18 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
   <div class="stag">// ARC WELDER</div><div class="sdiv"></div>
   <h2 class="stitle">Weld for a <em>living</em></h2>
   <p class="sdesc">Browser welding simulator — MIG, TIG, MMA. Real positions (ISO 6947), real inspection standards (ISO 5817). Lay your beads, climb the board. Top welders of the week earn <b>$GORWELDD</b>.</p>
+  <div class="upd">
+    <div class="upd-t">// UPDATE · 2026-09-01 · ENGINE 3.0.0</div>
+    <b>The whole heat-input equation is now in your hands.</b> Current sits on the knob, arc length on
+    the two mouse buttons, and — new today — the <b>electrode angle</b> on the keyboard:
+    <kbd>W</kbd><kbd>S</kbd> push ↔ drag, <kbd>A</kbd><kbd>D</kbd> work angle. Both are measured against
+    the WPS figure and <b>start exactly on it</b>, so touching nothing costs you nothing — but a stick
+    held crooked undercuts one edge, and one dragged too hard drags slag under the arc.
+    <b>Old runs still score the same, to the bit.</b>
+    <br><br>Fixed alongside it: <b>a job now pays what the card promises.</b> Payout had been computed
+    from the plate price alone, so even a flawless <b>A</b> cleared between −2 and +2 GW and difficulty
+    never reached your wallet. It does now — an easy MIG plate pays 43, a 6G pipe pays 392.
+  </div>
   <div class="game-card">
     <div class="game-vis"><div class="game-vis-in"><div class="gv-ic">🔧</div><div class="gv-t">ARC WELDER</div><div class="gv-s">PLAYABLE IN BROWSER</div><a href="/arc" class="btn btn1" style="margin-top:14px;display:inline-flex">▶ PLAY NOW</a></div></div>
     <div><div class="gfeats">

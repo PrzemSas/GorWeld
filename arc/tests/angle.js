@@ -9,7 +9,7 @@
  * Opublikowane po to, zeby KAZDY mogl sam sprawdzic, ze gra i weryfikator licza tak samo —
  * od tego zalezy wiarygodnosc oceny w konkursie. Patrz README.md w tym katalogu.
  */
-const NEW=require("/mnt/d/GorWeld/arc/sim.js");
+const NEW=require("../sim.js");
 const {build}=require("./gen.js");
 const J=r=>JSON.parse(JSON.stringify(r));
 

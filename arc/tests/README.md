@@ -9,6 +9,11 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node parity.js     # regresja: rundy BEZ nowej mechaniki liczą się bit-w-bit jak w starym silniku
     node angle.js      # kąt: neutralność na WPS, kara rośnie, warstwy się nie blokują
 
+Testy wołają silnik przez `require("../sim.js")` — ścieżkę WZGLĘDNĄ. Nie wstawiaj tu ścieżki
+bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i — gorzej — na maszynie
+autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
+i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
+
 `sim-2.0.0.js` to zamrożony silnik sprzed kąta — punkt odniesienia dla `parity.js`.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.
 

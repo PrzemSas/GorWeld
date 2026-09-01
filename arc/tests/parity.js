@@ -11,7 +11,7 @@
  */
 // TEST 1 — REGRESJA: runda BEZ kąta musi liczyć się w 3.0.0 bit-w-bit tak jak w 2.0.0.
 const OLD=require("./sim-2.0.0.js");
-const NEW=require("/mnt/d/GorWeld/arc/sim.js");
+const NEW=require("../sim.js");
 const {build}=require("./gen.js");
 console.log("stary silnik",OLD.VERSION,"→ nowy",NEW.VERSION);
 

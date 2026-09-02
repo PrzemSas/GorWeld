@@ -10,7 +10,7 @@
  * od tego zalezy wiarygodnosc oceny w konkursie. Patrz README.md w tym katalogu.
  */
 // TEST 1 — REGRESJA: runda BEZ kąta musi liczyć się w 3.0.0 bit-w-bit tak jak w 2.0.0.
-const OLD=require("./sim-3.1.0.js");
+const OLD=require("./sim-3.2.0.js");
 const NEW=require("../sim.js");
 const {build}=require("./gen.js");
 console.log("stary silnik",OLD.VERSION,"→ nowy",NEW.VERSION);

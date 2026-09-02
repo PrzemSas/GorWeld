@@ -11,14 +11,16 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node amps.js       # prąd: AUTO vs RĘCZNIE — oba tryby zerują się na WPS, kara monotoniczna
     node arcstop.js    # LPM+PPM: gest kończy ścieg, wymaga obu przycisków, nie jest zerwaniem
     node offaxis.js    # tor: odchyłka od grani karana zboczem, nie schodkiem; stałe zgodne w obu plikach
+    node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
 
 Testy wołają silnik przez `require("../sim.js")` — ścieżkę WZGLĘDNĄ. Nie wstawiaj tu ścieżki
 bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i — gorzej — na maszynie
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
 i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
 
-`sim-3.1.0.js` to zamrożony silnik sprzed kary za odchyłkę toru — punkt odniesienia dla `parity.js`.
-`sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js` (sprzed kąta) leżą obok jako starsze punkty.
+`sim-3.2.0.js` to zamrożony silnik sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
+`sim-3.1.0.js` (sprzed kary za odchyłkę toru), `sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js`
+(sprzed kąta) leżą obok jako starsze punkty.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.
 
 `gen.js` buduje surowe zdarzenia wskaźnika. Dwie pułapki, które już kosztowały czas:

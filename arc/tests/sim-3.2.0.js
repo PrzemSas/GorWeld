@@ -100,12 +100,6 @@
   // ale nie wolno mu zablokować przejścia na następną warstwę. Kara siedzi w `angPen`, nie w geometrii
   // — dokładnie ta lekcja co przy prądzie w 1.5.0.
   const OFF_CAP = 1.6, OFF_SLOPE = 22, OFF_PEN_CAP = 18, OFF_MAJOR = 15;   // odchyłka toru (3.2.0)
-  // SPOIWO TIG (3.3.0) — druga ręka podaje pręt SPACJĄ. Rytm liczony po DRODZE między dabami,
-  // nie po czasie: przy wolniejszym posuwie dabuje się rzadziej i to jest poprawne.
-  // Idealny odstęp = ten, który dawał stary automat 150 ms przy tempie z WPS.
-  const FIL_DT = 0.15, FIL_LO = 0.6, FIL_HI = 1.6, FIL_PEN_CAP = 20, FIL_MAJOR = 17;   // spoiwo TIG (3.3.0)
-  function filPenNow(r){ return r < FIL_LO ? Math.min(25, (FIL_LO - r) * 40)
-                       : r > FIL_HI ? Math.min(25, (r - FIL_HI) * 22) : 0; }
   function angOffPx(wa, gh) { const m = gh * 0.45; return Math.max(-m, Math.min(m, wa * 0.03 * gh)); }
   function recommendedAmps(p, t, posK) {
     const tbl = AMP_TABLES[p]; if (!tbl) return null;
@@ -159,11 +153,6 @@
 
     // ── kąt (3.0.0) ──
     const angLive = !!ang;
-    // 3.3.0 — TIG MA WŁASNE STEROWANIE. LPM zapala łuk, PPM go gasi, a spoina powstaje WYŁĄCZNIE
-    // tam, gdzie gracz dołoży spoiwo spacją: sam łuk grzeje blachę i nic nie odkłada. Długość łuku
-    // NIE jest modelowana — obie ręce mają inne zadania, więc `arcLen` stoi na nominale (kara 0).
-    // Flaga `tig` jest w każdej rundzie TIG nagranej od 3.3.0; starsze idą dawną ścieżką = parytet.
-    const tigLive = !!round.tig && proc === "TIG";
     let waDeg = 0, taDeg = 0, keyMask = 0;
     let angPenAcc = 0, angTime = 0, angPorAcc = 0, angWSum = 0, angTSum = 0;
     // Kąt rusza się WYŁĄCZNIE w trakcie jazdy (na zdarzeniach `move`), tak samo jak długość łuku.
@@ -206,7 +195,6 @@
     let vSumT = 0, vTimeS = 0, depCarry = 0, passWeldMs = 0;
     let electrodeLeft = 1, replacing = false, vEMA = targetPx;
     let last = null, lastT = 0, lastDab = 0, ux = 1, uy = 0;
-    let filPenAcc = 0, filCount = 0, lastDabPos = null;
     let trail = [];                 // {t,x,y} z ostatnich V_WIN sekund — baza pomiaru prędkości
     let tickAcc = 0, vTickRef = targetPx;   // `instab` próbkowana na stałym takcie, nie na zdarzeniu
     const passLog = [];
@@ -220,7 +208,7 @@
     function depositBead(x, y, w) { const ns = nearestSeam(x, y);
       if (ns.d < grooveHalf + bevelW) { x += (ns.x - x) * 0.4; y += (ns.y - y) * 0.4; }
       const jit = proc === "MMA" ? (rng() * 0.18 - 0.09) * w : 0;   // jedyny pobór z rng (jak w grze)
-      x += jit; baked.push({ x, y, r: w, off: ns.d }); return { x, y }; }
+      x += jit; baked.push({ x, y, r: w, off: ns.d }); }
 
     function passMetrics() {
       const K = seamPts.length; let covered = 0; const gaps = [];
@@ -269,11 +257,7 @@
       if (arcLive && !onPlate(p.x, p.y)) { last = null; continue; }   // zjazd z blachy gasi łuk (1:1 z grą)
       const ddx = p.x - last.x, ddy = p.y - last.y, dist = Math.hypot(ddx, ddy);
       const dtS = Math.min(0.25, Math.max(0.001, (now - lastT) / 1000));
-      if (tigLive) {
-        btnMask = ev.b | 0;
-        if (btnMask & 2) { last = null; continue; }              // PPM = świadome zgaszenie łuku (bez kary)
-        arcLen = arcL0;                                          // łuk trzymany na nominale → arcWFac 1, arcPen 0
-      } else if (arcLive) {
+      if (arcLive) {
         btnMask = ev.b | 0;
         // 3.1.0 — LPM+PPM RAZEM = świadome zgaszenie łuku. Odróżnione od zerwania (odciągnięcia
         // za daleko): tam gracz TRACI łuk i płaci `arcBroke`, tu go GASI i nie płaci nic ponad
@@ -325,16 +309,7 @@
       const w = beadWidth(); if (dist) { ux = ddx / dist; uy = ddy / dist; }
       const ao = angOff(), aox = -uy * ao, aoy = ux * ao;            // krzywy kąt roboczy = ścieg obok osi rowka
       if (proc === "TIG") {
-        // 3.3.0 — bit 16 maski klawiszy to POJEDYNCZY dab spacją (zbocze, nie stan trzymania),
-        // zatrzaśnięty w grze do najbliższego `move`, żeby krótkie stuknięcie nie przepadło
-        // między zdarzeniami.
-        // Bez `tig` (rundy sprzed 3.3.0) zostaje dawny automat co 150 ms.
-        const dab = tigLive ? !!((ev.k | 0) & 16) : (now - lastDab > 150);
-        if (dab && onPlate(p.x + aox, p.y + aoy)) { const dw = Math.max(idealHalf, w * 0.95);
-          const pl = depositBead(p.x + aox, p.y + aoy, dw); lastDab = now;
-          if (tigLive) { if (lastDabPos) { const gap = Math.hypot(pl.x - lastDabPos.x, pl.y - lastDabPos.y);
-              filPenAcc += filPenNow(gap / Math.max(1e-6, targetPx * FIL_DT)); filCount++; }
-            lastDabPos = { x: pl.x, y: pl.y }; } }
+        if (now - lastDab > 150 && onPlate(p.x + aox, p.y + aoy)) { const dw = Math.max(idealHalf, w * 0.95); depositBead(p.x + aox, p.y + aoy, dw); lastDab = now; }
       } else {
         const step = Math.max(2, w * 0.35); depCarry += dist;
         const n = Math.floor(depCarry / step); if (n > 0) depCarry -= n * step;
@@ -369,12 +344,11 @@
     const spatter = Math.round(avg("spatter"));   // tempo — uśredniamy po passach, nie sumujemy
     const endGap = Math.max.apply(null, all.map(m => m.endGap));
     const offPen = avg("offPen");
-    const filPen = filCount ? Math.min(FIL_PEN_CAP, filPenAcc / filCount) : 0;
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
               - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
-              - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen - offPen - filPen;
+              - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen - offPen;
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze
@@ -386,7 +360,7 @@
       (passPlanArr[0] === "root" && rootCov < 0.8) ||
       (ampF.sev === "major") ||
       (arcPen >= 12) || (arcFails > 2) ||
-      (angPen >= 10) || (offPen >= OFF_MAJOR) || (filPen >= FIL_MAJOR);
+      (angPen >= 10) || (offPen >= OFF_MAJOR);
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -401,7 +375,7 @@
 
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2),
              arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
-             angPen: +angPen.toFixed(2), offPen: +offPen.toFixed(2), filPen: +filPen.toFixed(2), filDabs: filCount, waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
+             angPen: +angPen.toFixed(2), offPen: +offPen.toFixed(2), waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
              angW: +angW.toFixed(2), angT: +angT.toFixed(2), taIdeal: TA_IDEAL[proc] != null ? TA_IDEAL[proc] : 0,
              volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick) };
   }
@@ -442,7 +416,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.3.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.2.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

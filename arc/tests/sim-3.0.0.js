@@ -248,11 +248,6 @@
       const dtS = Math.min(0.25, Math.max(0.001, (now - lastT) / 1000));
       if (arcLive) {
         btnMask = ev.b | 0;
-        // 3.1.0 — LPM+PPM RAZEM = świadome zgaszenie łuku. Odróżnione od zerwania (odciągnięcia
-        // za daleko): tam gracz TRACI łuk i płaci `arcBroke`, tu go GASI i nie płaci nic ponad
-        // to, czego i tak nie zaspawał. Wcześniej oba przyciski naraz dawały netto −1,0 mm/s,
-        // więc gest był wolny — stąd tu, a nie na osobnym klawiszu.
-        if ((btnMask & 3) === 3) { last = null; continue; }
         arcLen += (ARC_RISE + ((btnMask & 2) ? ARC_LIFT : 0) - ((btnMask & 1) ? ARC_PUSH : 0)) * dtS;
         if (arcLen <= 0) { arcLen = 0; contactT += dtS;
           if (contactT >= ARC_STICK_T) { stickCount++; last = null; continue; }        // przywarcie
@@ -404,7 +399,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.1.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.0.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

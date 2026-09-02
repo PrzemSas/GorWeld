@@ -1039,10 +1039,26 @@ function beadWidth(){
   return w*ampF.w*arcWFac()*angWFac();  // prąd, długość łuku i kąt razem robią szerokość jeziorka
 }
 let fbGood=false;
+const HI_FB_MIN_S=0.5;   // HUD-only: ile sekund ściegu, zanim średnia bieżąca HI ma prawo głosu
 function feedback(){
   if(arcLive){ const r=arcLen/arcL0();
     if(r>ARC_HI*1.15){ fbGood=false; return t("fb_arclong"); }
     if(r<ARC_LO*0.90){ fbGood=false; return t("fb_arcshort"); } }
+  // Wkład ciepła odzywa się PO łuku, bo długi łuk sam podnosi napięcie, a więc i HI — gdyby HI szło
+  // pierwsze, gracz dostawałby „jedź szybciej" zamiast „skróć łuk", czyli lekarstwo na objaw.
+  // Sufit widać PRZED rundą (karta) i PO niej (raport), ale tempo — drugą połowę wzoru — gracz robi
+  // ręką na żywo, więc bez tego zwolnienie w połowie ściegu kończyło się odrzutem-niespodzianką.
+  // Liczymy DOKŁADNIE tę liczbę, którą oceni raport: napięcie i tempo jako średnie BIEŻĄCE
+  // (`arcVSum/arcTime`, `vSumT/vTimeS`), nie chwilowe — inaczej jedno szarpnięcie krzyczałoby
+  // o odrzucie, którego nie ma, a przyspieszenie dalej i tak ściąga średnią z powrotem pod sufit.
+  // ⚠️ BEZ marginesu „ciszy na krawędzi", jaki mają kąt, tor i tempo: tam granica jest TOLERANCJĄ,
+  // tu jest LIMITEM KODU — przekroczenie już oznacza odrzut, więc milczenie byłoby kłamstwem.
+  if(welding&&!isCut()&&CVN_BEADS[bead]&&vTimeS>HI_FB_MIN_S){
+    const wE=weldElectrics(posKey);
+    if(wE&&wE.hi!=null){
+      const uRun=arcTime?arcVSum/arcTime:wE.volts;
+      const hiRun=heatInputKJmm(uRun,wE.ampsUse,(vSumT/vTimeS)/PX_PER_MM,WELD_EFF[proc]||0.8);
+      if(hiRun!=null&&hiRun>Math.round(wE.hi*HI_MAX_R*1000)/1000){ fbGood=false; return t("fb_hi"); } } }
   // Kąt odzywa się dopiero 6° ZA pasmem — na krawędzi pasma cisza, tak jak przy tempie od 20.08.
   if(angLive){
     if(angOverW(waDeg,posKey)>6){ fbGood=false; return t("fb_angwork"); }
@@ -1097,7 +1113,11 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0&&e.button!==2) retur
   tigLive=(arcLive&&proc==="TIG"); if(tigLive) arcLen=arcL0();                    // TIG: LPM zapalił łuk, trzyma się na nominale
   angLive=arcLive;                                                                // kąt żyje dokładnie tam, gdzie łuk — telefon zostaje demo
   trail=[{t:t0,x:p.x,y:p.y}];
-  lastDab=t0; if(!rec)recStart(); recEv('down',p.x,p.y,t0,btnMask); arcOn(); updateToolHud();
+  // Nagranie opisuje rundę, którą gracz WŁAŚNIE zaczyna. Dopóki nie padło ani jedno zdarzenie,
+  // przepisujemy parametry na żywo — dzięki temu przeoczenie w JAKIMKOLWIEK przełączniku panelu
+  // (tak jak `.bead` do 3.4.0) nie może już po cichu rozjechać ekranu z `sim.js`. Po pierwszym
+  // zdarzeniu nagranie jest nietykalne, więc kolejne pociągnięcia w tej samej rundzie nic nie kasują.
+  lastDab=t0; if(!rec||!rec.events.length)recStart(); recEv('down',p.x,p.y,t0,btnMask); arcOn(); updateToolHud();
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault(); }
 function move(e){ if(isCut())return cutMove(e);
@@ -2106,8 +2126,12 @@ function setAmpSet(v){ const r=recommendedAmps(proc,thick,posKey); if(r==null) r
   if(num) num.onchange=e=>setAmpSet(e.target.value); }
 document.querySelectorAll(".thk").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("thick")) return;
   document.querySelectorAll(".thk").forEach(x=>x.classList.remove("on")); b.classList.add("on"); thick=+b.dataset.t; activeCoupon=null; selectPos(); });
+// Materiał ZMIENIA ocenę (`MATERIAL[bead].tol`) i to, czy w ogóle obowiązuje limit HI (`CVN_BEADS`),
+// więc musi resetować rundę DOKŁADNIE tak jak grubość i proces. Do 3.4.0 robił tylko `drawPlate()`:
+// gra grała nowym materiałem, a nagranie zostawało ze starym — `sim.js` sądził wtedy `steel` przy
+// nierdzewce, przykładał jej limit udarnościowy i rozjeżdżał się z ekranem o kilka punktów.
 document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ if(isChallenge()&&chalPinned("bead")) return;
-  document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; drawPlate(); updateInfo(); });
+  document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; activeCoupon=null; selectPos(); });
 document.querySelectorAll(".lng").forEach(b=>{ b.classList.toggle("on", b.dataset.lng===lang);
   b.onclick=()=>{ document.querySelectorAll(".lng").forEach(x=>x.classList.remove("on")); b.classList.add("on");
     lang=b.dataset.lng; try{localStorage.setItem("gorweld_lang",lang);}catch(e){} applyI18N(); }; });
@@ -2263,7 +2287,7 @@ function cutStart(e){
     showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx;
   cutHeat=0; pierced=(proc==="PLASMA");
-  if(!rec)recStart(); recEv('down',p.x,p.y,t0); arcOn(); arcIntensity(0.3);
+  if(!rec||!rec.events.length)recStart(); recEv('down',p.x,p.y,t0); arcOn(); arcIntensity(0.3);   // jak przy spawaniu — parametry na żywo, póki runda pusta
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   showToast(proc==="PLASMA"?t("t_cut_pierced"):t("t_cut_preheat"), proc==="PLASMA"?"#1fd6e3":"#ffae3c");
   e.preventDefault();

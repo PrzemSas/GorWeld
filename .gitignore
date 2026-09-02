@@ -62,3 +62,8 @@ intro/velda.jpg
 
 # lokalna notatka na pulpit, nie czesc serwisu
 GORWELD-CZYTAJ-DESKTOP.txt
+
+# Stanowisko porównawcze renderera (A/B). `proto.html` i `current.html` to KOPIE gry
+# ze sterownikiem demo, który sam zaspawuje ścieg — świetny do oceny grafiki, ale pod
+# publicznym URL-em byłby drugą, nieaktualną wersją /arc/ obok prawdziwej. Zostaje lokalnie.
+arc/proto/

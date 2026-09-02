@@ -482,7 +482,7 @@ function recEv(type,x,y,now,b,k){ if(!rec) return;
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
 let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
- pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
+ pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_offaxis:"ZJECHAŁEŚ Z OSI — wracaj na grań",def_offaxis:"Ścieg poza osią złącza — podtopienie jednej krawędzi, brak wtopienia po drugiej",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
   btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
@@ -521,7 +521,7 @@ const I18N={
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
   cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld",
   cardtext_cut:"Przeciąłem %1 — ocena %2, ISO 9013 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#ciecie #spawanie #GorWeld" },
- en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
+ en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_offaxis:"OFF THE CENTRELINE — get back on the seam",def_offaxis:"Bead off the joint centreline — undercut on one edge, lack of fusion on the other",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
@@ -560,7 +560,7 @@ const I18N={
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
   cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld",
   cardtext_cut:"Cut %1 — grade %2, ISO 9013 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#cutting #welding #GorWeld" },
- ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
+ ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_offaxis:"УШЁЛ С ОСИ — возвращайся на стык",def_offaxis:"Шов вне оси соединения — подрез с одной кромки, непровар с другой",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
@@ -885,6 +885,7 @@ const ARC_STICK_T=0.80;  // ile sekund elektroda może dotykać blachy, zanim pr
 const ARC_IDLE_MS=2500;  // bezruch dłuższy niż tyle = łuk zgasł (gracz odszedł od myszy)
 const ARC_MAX_MUL=3.2;   // powyżej L0×tego łuk się rwie
 const ARC_V_SLOPE=2.4;   // [V/mm] o ile rośnie napięcie na milimetr łuku
+const OFF_CAP=1.6, OFF_SLOPE=22, OFF_PEN_CAP=18, OFF_MAJOR=15;   // odchyłka toru (3.2.0) — 1:1 z sim.js
 const ARC_LO=0.6, ARC_HI=1.6;   // pasmo bez kary, w krotnościach L0
 let arcLive=false, arcLen=0, btnMask=0, stickCount=0, arcBroke=0, contactT=0;
 let arcPenAcc=0, arcTime=0, arcVSum=0, arcPorAcc=0, arcRSum=0;
@@ -993,6 +994,8 @@ function feedback(){
   if(angLive){
     if(angOverW(waDeg,posKey)>6){ fbGood=false; return t("fb_angwork"); }
     if(angOverT(taDeg)>6){ fbGood=false; return t(taDeg>0?"fb_angdrag":"fb_angpush"); } }
+  // Tor odzywa się dopiero wyraźnie ZA rowkiem — na jego krawędzi cisza, tak jak przy kącie i tempie.
+  if(welding&&cursor.seen&&nearestSeam(cursor.x,cursor.y).d>grooveHalf+bevelW*0.35){ fbGood=false; return t("fb_offaxis"); }
   const sr=vEMA/targetPx; fbGood=(sr<=1.45&&sr>=0.62);
   if(sr>1.45) return t("fb_fast");
   if(sr<0.62) return t("fb_slow");
@@ -1549,6 +1552,16 @@ function passMetrics(){
   let out=0,narrow=0,wide=0,rs=[];
   for(const b of baked){ if(b.off>grooveHalf+bevelW*0.7) out++; if(b.r<grooveHalf*0.9) narrow++; if(b.r>idealHalf*1.65) wide++; rs.push(b.r); }
   const overflow=baked.length?out/baked.length:0;
+  // 3.2.0 — ODCHYŁKA TORU OD GRANI jako ZBOCZE, nie schodek. Do 3.1.0 zjechanie z osi
+  // kosztowało DOKŁADNIE ZERO aż do progu `out`, a tuż za nim leciał od razu REJECT —
+  // bo `depositBead()` przyciąga kroplę 40% z powrotem do grani i `coverage` tego nie widzi.
+  // `b.off` to odległość RĘKI GRACZA od osi, zapisana PRZED tym przyciągnięciem, więc mierzy
+  // technikę, a nie rysunek. Zero w rowku (tam ścieg ma prawo być), potem liniowo aż do progu
+  // podtopienia. Kara siedzi we WŁASNYM członie, nie w `coverage` — ten sam licznik przełącza
+  // warstwy, więc obcięcie go zablokowałoby grę przy krzywym torze.
+  let offSum=0;
+  for(const b of baked) offSum+=Math.min(OFF_CAP,Math.max(0,(b.off-grooveHalf)/(bevelW*0.7)));
+  const offPen=baked.length?Math.min(OFF_PEN_CAP,(offSum/baked.length)*OFF_SLOPE):0;
   const mean=rs.reduce((a,v)=>a+v,0)/(rs.length||1);
   const evenness=rs.length?Math.max(0,1-(Math.sqrt(rs.reduce((a,v)=>a+(v-mean)**2,0)/rs.length)/mean)*1.4):0;
   const tol=MATERIAL[bead].tol;
@@ -1559,7 +1572,7 @@ function passMetrics(){
   const spatter=Math.round((spatterCount/weldSec)*PROCESS[proc].sparks/40);  // odpryski NA SEKUNDĘ, nie suma
   // crater — the two ends of the seam left unfilled (no bead within reach of an endpoint)
   let endGap=0; for(const e of [seamPts[0],seamPts[K-1]]){ let d=1e18; for(const b of baked){ const dd=(b.x-e.x)**2+(b.y-e.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)>grooveHalf*1.7) endGap++; }
-  return {coverage,overflow,evenness,spdAcc,porosity,spatter,narrow,wide,out,gaps,avgV,endGap};
+  return {coverage,overflow,evenness,spdAcc,porosity,spatter,narrow,wide,out,gaps,avgV,endGap,offPen};
 }
 // freeze the finished layer underneath and arm the next one
 function bankPass(){
@@ -1586,6 +1599,7 @@ function inspect(){
   const porosity=all.reduce((a,m)=>a+m.porosity,0)+Math.round(arcPorAcc)+Math.round(angPorAcc), spatter=Math.round(avg("spatter")); // tempo → średnia po passach
   const narrow=cur.narrow, wide=cur.wide, gaps=cur.gaps, out=cur.out, avgV=cur.avgV;
   const endGap=Math.max.apply(null,all.map(m=>m.endGap));
+  const offPen=avg("offPen");
   const rootCov=(passPlanArr[0]==="root"&&passLog.length)?passLog[0].coverage:1;
 
   // grade = weighted weld-quality (positives sum to 100) minus defect penalties
@@ -1598,7 +1612,8 @@ function inspect(){
             - ampF.pen             // prąd poza WPS (0 przy ustawieniu zgodnym z WPS)
             - arcPen                                  // długość łuku poza pasmem (0 na dotyku i w starych rundach)
             - Math.min(15,arcFails*4)                 // przywarcia i zerwania łuku
-            - angPen;                                 // kąt elektrody poza pasmem (0 przy ustawieniu wg WPS)
+            - angPen                                  // kąt elektrody poza pasmem (0 przy ustawieniu wg WPS)
+            - offPen;                                 // ścieg poza osią złącza (0, dopóki trzymasz się rowka)
   score=Math.max(0,Math.min(100,Math.round(score)));
 
   // PARITY (krok 2): odtwórz tę samą rundę headless i porównaj z wynikiem live.
@@ -1618,6 +1633,7 @@ function inspect(){
   if(angPen>0){ const sev=angPen>=10?"major":"minor";               // pokazujemy TEN kąt, który kosztował więcej
     const wo=angOverW(angW,posKey)*1.1, to=angOverT(Math.abs(angT))*0.9;
     D.push({s:sev, t: wo>=to ? t("def_ang_work") : t(angT>0?"def_ang_drag":"def_ang_push")}); }
+  if(offPen>0) D.push({s:offPen>=OFF_MAJOR?"major":"minor",t:t("def_offaxis")});
   if(ampF.sev){ const wA=weldElectrics(posKey);
     if(wA) D.push({s:ampF.sev,t:fmt(ampF.ar<1?"def_amp_low":"def_amp_high",[wA.ampsUse,wA.amps])}); }
   if(spatter>4&&proc!=="TIG") D.push({s:"minor",t:fmt("def_spatter",[spatter])});

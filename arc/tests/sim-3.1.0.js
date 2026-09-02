@@ -99,7 +99,6 @@
   // (sufit 0,45·grooveHalf przy progu pokrycia 1,6·grooveHalf): ma być WIDAĆ, że ścieg ucieka,
   // ale nie wolno mu zablokować przejścia na następną warstwę. Kara siedzi w `angPen`, nie w geometrii
   // — dokładnie ta lekcja co przy prądzie w 1.5.0.
-  const OFF_CAP = 1.6, OFF_SLOPE = 22, OFF_PEN_CAP = 18, OFF_MAJOR = 15;   // odchyłka toru (3.2.0)
   function angOffPx(wa, gh) { const m = gh * 0.45; return Math.max(-m, Math.min(m, wa * 0.03 * gh)); }
   function recommendedAmps(p, t, posK) {
     const tbl = AMP_TABLES[p]; if (!tbl) return null;
@@ -218,16 +217,6 @@
       let out = 0, narrow = 0, wide = 0, rs = [];
       for (const b of baked) { if (b.off > grooveHalf + bevelW * 0.7) out++; if (b.r < grooveHalf * 0.9) narrow++; if (b.r > idealHalf * 1.65) wide++; rs.push(b.r); }
       const overflow = baked.length ? out / baked.length : 0;
-      // 3.2.0 — ODCHYŁKA TORU OD GRANI jako ZBOCZE, nie schodek. Do 3.1.0 zjechanie z osi
-      // kosztowało DOKŁADNIE ZERO aż do progu `out`, a tuż za nim leciał od razu REJECT —
-      // bo `depositBead()` przyciąga kroplę 40% z powrotem do grani i `coverage` tego nie widzi.
-      // `b.off` to odległość RĘKI GRACZA od osi, zapisana PRZED tym przyciągnięciem, więc mierzy
-      // technikę, a nie rysunek. Zero w rowku (tam ścieg ma prawo być), potem liniowo aż do progu
-      // podtopienia. Kara siedzi we WŁASNYM członie, nie w `coverage` — ten sam licznik przełącza
-      // warstwy, więc obcięcie go zablokowałoby grę przy krzywym torze.
-      let offSum = 0;
-      for (const b of baked) offSum += Math.min(OFF_CAP, Math.max(0, (b.off - grooveHalf) / (bevelW * 0.7)));
-      const offPen = baked.length ? Math.min(OFF_PEN_CAP, (offSum / baked.length) * OFF_SLOPE) : 0;
       const mean = rs.reduce((a, v) => a + v, 0) / (rs.length || 1);
       const evenness = rs.length ? Math.max(0, 1 - (Math.sqrt(rs.reduce((a, v) => a + (v - mean) ** 2, 0) / rs.length) / mean) * 1.4) : 0;
       const tol = MATERIAL[bead].tol;
@@ -237,7 +226,7 @@
       const weldSec = Math.max(0.5, passWeldMs / 1000);
       const spatter = Math.round((spatterCount / weldSec) * PROCESS[proc].sparks / 40);
       let endGap = 0; for (const e of [seamPts[0], seamPts[K - 1]]) { let d = 1e18; for (const b of baked) { const dd = (b.x - e.x) ** 2 + (b.y - e.y) ** 2; if (dd < d) d = dd; } if (Math.sqrt(d) > grooveHalf * 1.7) endGap++; }
-      return { coverage, overflow, evenness, spdAcc, porosity, spatter, narrow, wide, out, gaps, avgV, endGap, offPen };
+      return { coverage, overflow, evenness, spdAcc, porosity, spatter, narrow, wide, out, gaps, avgV, endGap };
     }
     function bankReset() { passLog.push(passMetrics());
       baked = []; speedSum = 0; speedN = 0; vVarSum = 0; spatterCount = 0; distAcc = 0;
@@ -343,12 +332,11 @@
     const porosity = all.reduce((a, m) => a + m.porosity, 0) + Math.round(arcPorAcc) + Math.round(angPorAcc);
     const spatter = Math.round(avg("spatter"));   // tempo — uśredniamy po passach, nie sumujemy
     const endGap = Math.max.apply(null, all.map(m => m.endGap));
-    const offPen = avg("offPen");
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
               - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
-              - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen - offPen;
+              - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen;
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     // wady major (do oceny ISO / odrzutu) — te same progi co w grze
@@ -360,7 +348,7 @@
       (passPlanArr[0] === "root" && rootCov < 0.8) ||
       (ampF.sev === "major") ||
       (arcPen >= 12) || (arcFails > 2) ||
-      (angPen >= 10) || (offPen >= OFF_MAJOR);
+      (angPen >= 10);
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -375,7 +363,7 @@
 
     return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampF.pen.toFixed(2),
              arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
-             angPen: +angPen.toFixed(2), offPen: +offPen.toFixed(2), waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
+             angPen: +angPen.toFixed(2), waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
              angW: +angW.toFixed(2), angT: +angT.toFixed(2), taIdeal: TA_IDEAL[proc] != null ? TA_IDEAL[proc] : 0,
              volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick) };
   }
@@ -416,7 +404,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.2.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.1.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

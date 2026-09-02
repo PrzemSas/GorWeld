@@ -80,6 +80,19 @@ const game = fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
 t.push(["`recStart()` nie zgaduje tig z metody", /arc:0,\s*ang:0,\s*tig:0,/.test(game) && !/tig:\s*proc\s*===/.test(game)]);
 t.push(["flaga tig wchodzi tylko przy żywym `tigLive`", /if\(tigLive&&rec\)\s*rec\.tig=1;/.test(game)]);
 
+// ── 6. ODBIÓR SPACJI — silnik bez zmian, pilnujemy WEJŚCIA z klawiatury ────────
+// Silnik może być bez zarzutu, a spoiwa i tak nie ma, bo dab nigdy nie wchodzi do nagrania.
+// Fokus zostaje na ostatniej klikniętej kontrolce (lista metod = SELECT, „SPAWAJ DALEJ" = BUTTON)
+// na całą rundę, więc guard z tymi tagami zjadał KAŻDE naciśnięcie spacji. Testy jednostkowe tego
+// nie widzą — czytają nagranie, nie klawiaturę — więc guard sprawdzamy tu, wprost w źródle gry.
+const spaceBlk=(game.match(/if\(e\.code==="Space"\)\{[\s\S]*?return; \}/)||[""])[0];
+// bez komentarzy — inaczej test wywraca się o własne uzasadnienie w tekście obok kodu
+const spaceCode=spaceBlk.replace(/\/\/[^\n]*/g,"");
+t.push(["guard spacji nie odrzuca BUTTON ani SELECT", !!spaceBlk && !/\bBUTTON\b/.test(spaceCode) && !/\bSELECT\b/.test(spaceCode)]);
+t.push(["pole tekstowe dalej zabiera spację", /INPUT\|TEXTAREA/.test(spaceBlk) && /isContentEditable/.test(spaceBlk)]);
+t.push(["dab to ZBOCZE — trzymana spacja nie leje spoiwa", /if\(!e\.repeat\)\s*filPend=true;/.test(spaceBlk)]);
+t.push(["spacja odbiera fokus kontrolce, nie wciska jej", /\.blur\(\)/.test(spaceBlk)]);
+
 let bad=same?0:1; console.log("");
 for(const [n,ok] of t){ console.log(`  ${ok?"✓":"✗"} ${n}`); if(!ok) bad++; }
 console.log(bad?`\n✗ ${bad} NIEZGODNOŚCI`:"\n✓ wszystko przeszło");

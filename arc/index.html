@@ -1240,9 +1240,20 @@ function angKey(e,on){
   // SPACJA (3.3.0) = jeden dab spoiwa przy TIG. ZATRZASK, nie stan trzymania: stuknięcie między
   // dwoma `move` przepadłoby, więc czeka na najbliższe zdarzenie ruchu i tam trafia do nagrania.
   if(e.code==="Space"){
-    const ae0=document.activeElement; if(ae0&&/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(ae0.tagName)) return;
-    if(on&&welding&&tigLive){ filPend=true; }
-    if(welding) e.preventDefault();                            // spacja nie ma przewijać strony w trakcie ściegu
+    // Spację NA WŁASNOŚĆ ma tylko pole tekstowe — tam to znak, nie dab. `BUTTON`/`SELECT` w tym
+    // guardzie były BŁĘDEM, przez który spoiwo „nie działało" mimo poprawnego silnika i testów:
+    // fokus ZOSTAJE na kontrolce, którą gracz kliknął ostatnio, do samego końca rundy. Wybierasz
+    // TIG z listy metod → activeElement=SELECT; klikasz „SPAWAJ DALEJ" → activeElement=BUTTON —
+    // i od tej chwili KAŻDE naciśnięcie spacji przez całą spoinę wypadało tu na `return`.
+    // Kąt (W/A/S/D) nigdy nie miał tych dwóch w guardzie i dlatego działał — stąd asymetria.
+    // (E2E tego nie łapał, bo po programowym `.click()` robił `blur()`; żywy gracz nie robi.)
+    const ae0=document.activeElement;
+    if(ae0&&(/^(INPUT|TEXTAREA)$/.test(ae0.tagName)||ae0.isContentEditable)) return;
+    if(on&&welding&&tigLive){
+      if(!e.repeat) filPend=true;                              // ZBOCZE, nie stan: trzymana spacja = jeden dab
+      if(ae0&&ae0!==document.body&&ae0.blur) ae0.blur();       // spacja nie może wciskać przycisku spod spoiny
+    }
+    if(welding) e.preventDefault();                            // spacja nie przewija strony ani nie klika przycisku
     return; }
   const bit=ANG_KEYS[e.code]; if(!bit) return;
   const ae=document.activeElement; if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;

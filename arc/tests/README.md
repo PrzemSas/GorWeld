@@ -13,6 +13,12 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node offaxis.js    # tor: odchyłka od grani karana zboczem, nie schodkiem; stałe zgodne w obu plikach
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
 
+Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab
+nigdy nie wchodzi do nagrania (tak było w 3.3.0: guard spacji odrzucał zdarzenie, gdy fokus
+siedział na przycisku wyboru metody). `filler.js` pilnuje więc guardu wprost w źródle gry, a
+pełny przebieg sprawdza `e2e-filler.js` — przepis w nagłówku pliku. W E2E NIE WOLNO robić
+`blur()` po kliknięciu w TIG: to właśnie maskowało błąd, bo żywy gracz blura nie robi.
+
 Testy wołają silnik przez `require("../sim.js")` — ścieżkę WZGLĘDNĄ. Nie wstawiaj tu ścieżki
 bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i — gorzej — na maszynie
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
@@ -31,7 +37,7 @@ Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `requir
    CELOWO — świeżą elektrodę silnik podaje tylko na `down` i tylko gdy sam już
    ustawił `replacing`. Generator musi spóźnić się za nim, a nie go wyprzedzić.
 
-## Przeglądarka — gra vs `sim.js` (jedyny test, który sprawdza `index.html`)
+## Przeglądarka — gra vs `sim.js` (testy, które sprawdzają `index.html`)
 
 `parity-driver-3.0.0.js` = `../parity-driver.js` + klawisze kąta (`?k=KeyD&kn=40`).
 Przepis uruchomieniowy w nagłówku `../parity-driver.js`. Trzeba czasu wirtualnego:

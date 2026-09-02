@@ -12,11 +12,13 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node arcstop.js    # LPM+PPM: gest kończy ścieg, wymaga obu przycisków, nie jest zerwaniem
     node offaxis.js    # tor: odchyłka od grani karana zboczem, nie schodkiem; stałe zgodne w obu plikach
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
+    node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
 
 Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab
 nigdy nie wchodzi do nagrania (tak było w 3.3.0: guard spacji odrzucał zdarzenie, gdy fokus
 siedział na przycisku wyboru metody). `filler.js` pilnuje więc guardu wprost w źródle gry, a
-pełny przebieg sprawdza `e2e-filler.js` — przepis w nagłówku pliku. W E2E NIE WOLNO robić
+pełny przebieg sprawdzają sterowniki `e2e-*.js` (`e2e-filler.js` — spoiwo spacją;
+`e2e-heatinput.js` — limit wkładu ciepła i parytet litery ISO) — przepis w nagłówku `e2e-filler.js`. W E2E NIE WOLNO robić
 `blur()` po kliknięciu w TIG: to właśnie maskowało błąd, bo żywy gracz blura nie robi.
 
 Testy wołają silnik przez `require("../sim.js")` — ścieżkę WZGLĘDNĄ. Nie wstawiaj tu ścieżki
@@ -24,7 +26,7 @@ bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i —
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
 i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
 
-`sim-3.2.0.js` to zamrożony silnik sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
+`sim-3.3.0.js` to zamrożony silnik sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
 `sim-3.1.0.js` (sprzed kary za odchyłkę toru), `sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js`
 (sprzed kąta) leżą obok jako starsze punkty.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.

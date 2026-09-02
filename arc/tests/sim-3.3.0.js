@@ -104,20 +104,6 @@
   // nie po czasie: przy wolniejszym posuwie dabuje się rzadziej i to jest poprawne.
   // Idealny odstęp = ten, który dawał stary automat 150 ms przy tempie z WPS.
   const FIL_DT = 0.15, FIL_LO = 0.6, FIL_HI = 1.6, FIL_PEN_CAP = 20, FIL_MAJOR = 17;   // spoiwo TIG (3.3.0)
-
-  // ── WKŁAD CIEPŁA (3.4.0) ────────────────────────────────────────────────────────────────────
-  // Na materiale badanym udarnościowo max heat input z WPS to LIMIT KODU, nie preferencja:
-  // procedura kwalifikowana z próbą udarności ma HI jako zmienną istotną dodatkową
-  // (ASME IX QW-409.1; analogicznie AWS D1.1 dla procedur z CVN). Przekroczysz — kwalifikacja
-  // CVN NIE POKRYWA złącza produkcyjnego i złącze leci NIEZALEŻNIE od tego, jak ładne jest lico.
-  // Dlatego to WARUNEK DOPUSZCZENIA (wada major → REJECT), a NIE kolejny człon kary: punktów za
-  // to nie odejmujemy, bo to nie jest wada wykonania — spoina może być bez zarzutu i i tak odpaść.
-  // Dół zostaje płynny i nietknięty: za mały wkład ciepła gra już karze brakiem wtopu i pokryciem.
-  const WELD_EFF = { MMA: 0.8, MIG: 0.8, TIG: 0.6 };   // sprawność cieplna procesu — 1:1 z index.html
-  const HI_MAX_R = 1.25;        // górna granica zakresu z WPS = te same 25%, które gra pokazuje na pasku HI
-  const CVN_BEADS = { steel: 1 };   // stal węglowa. Austenityczna nierdzewka i alu — bez próby udarności, bez limitu
-  function heatInputKJmm(volts, amps, travelMmS, eff) { if (!travelMmS) return null;
-    const travelMmMin = travelMmS * 60; return Math.round((volts * amps * 60) / (travelMmMin * 1000) * eff * 1000) / 1000; }
   function filPenNow(r){ return r < FIL_LO ? Math.min(25, (FIL_LO - r) * 40)
                        : r > FIL_HI ? Math.min(25, (r - FIL_HI) * 22) : 0; }
   function angOffPx(wa, gh) { const m = gh * 0.45; return Math.max(-m, Math.min(m, wa * 0.03 * gh)); }
@@ -178,10 +164,6 @@
     // NIE jest modelowana — obie ręce mają inne zadania, więc `arcLen` stoi na nominale (kara 0).
     // Flaga `tig` jest w każdej rundzie TIG nagranej od 3.3.0; starsze idą dawną ścieżką = parytet.
     const tigLive = !!round.tig && proc === "TIG";
-    // Jak `tig`: flaga jest w każdej rundzie nagranej od 3.4.0. Rundy starsze jej nie mają i idą
-    // dawną ścieżką — bez limitu HI, bit-w-bit jak 3.3.0. Inaczej stare nagrania stali zaczęłyby
-    // nagle wracać jako REJECT za regułę, której w chwili spawania nie było.
-    const cvn = !!round.cvn && !!CVN_BEADS[bead];
     let waDeg = 0, taDeg = 0, keyMask = 0;
     let angPenAcc = 0, angTime = 0, angPorAcc = 0, angWSum = 0, angTSum = 0;
     // Kąt rusza się WYŁĄCZNIE w trakcie jazdy (na zdarzeniach `move`), tak samo jak długość łuku.
@@ -390,17 +372,6 @@
     const filPen = filCount ? Math.min(FIL_PEN_CAP, filPenAcc / filCount) : 0;
     const rootCov = (passPlanArr[0] === "root" && passLog.length) ? passLog[0].coverage : 1;
 
-    // HI liczony DOKŁADNIE tak, jak raport w grze: napięcie z przebiegu łuku (dłuższy łuk = wyższe U),
-    // prąd GRACZA i JEGO tempo. `arcTime` rośnie wyłącznie przy żywym łuku, więc na dotyku i przy TIG
-    // (brak modelu długości łuku) schodzimy na napięcie z WPS — tak samo jak index.html.
-    const vWps = recommendedVolts(proc, thick), effP = WELD_EFF[proc] || 0.8;
-    const ampsUse = (ampRec && amps) ? amps : ampRec;
-    const uAct = arcTime ? arcVSum / arcTime : vWps;
-    const hiWps = (vWps != null && ampRec != null) ? heatInputKJmm(vWps, ampRec, targetPx / PX_PER_MM, effP) : null;
-    const hiAct = (uAct != null && ampsUse != null) ? heatInputKJmm(uAct, ampsUse, cur.avgV / PX_PER_MM, effP) : null;
-    const hiMax = hiWps != null ? Math.round(hiWps * HI_MAX_R * 1000) / 1000 : null;
-    const hiOver = !!(cvn && hiMax != null && hiAct != null && hiAct > hiMax);
-
     let score = coverage * 50 + spdAcc * 20 + evenness * 15 + (1 - overflow) * 15
               - porosity * 5 - Math.min(SPATTER_PEN_CAP, proc === "TIG" ? spatter * 3 : spatter * 0.5)
               - ampF.pen - arcPen - Math.min(15, arcFails * 4) - angPen - offPen - filPen;
@@ -415,8 +386,7 @@
       (passPlanArr[0] === "root" && rootCov < 0.8) ||
       (ampF.sev === "major") ||
       (arcPen >= 12) || (arcFails > 2) ||
-      (angPen >= 10) || (offPen >= OFF_MAJOR) || (filPen >= FIL_MAJOR) ||
-      hiOver;                       // poza zakresem kwalifikacji WPS — ocena lica tego nie ratuje
+      (angPen >= 10) || (offPen >= OFF_MAJOR) || (filPen >= FIL_MAJOR);
 
     const letter = score >= 90 ? "A" : score >= 78 ? "B" : score >= 62 ? "C" : score >= 45 ? "D" : "F";
     const iso = (Dmajor || score < 50) ? "REJECT" : score >= 88 ? "B" : score >= 72 ? "C" : "D";
@@ -433,8 +403,7 @@
              arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
              angPen: +angPen.toFixed(2), offPen: +offPen.toFixed(2), filPen: +filPen.toFixed(2), filDabs: filCount, waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
              angW: +angW.toFixed(2), angT: +angT.toFixed(2), taIdeal: TA_IDEAL[proc] != null ? TA_IDEAL[proc] : 0,
-             volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick),
-             hi: hiAct, hiWps, hiMax, hiOver, cvn };
+             volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick) };
   }
 
   // 3.0.0 — KĄT ELEKTRODY z klawiatury: A/D kąt roboczy, W/S pochylenia (ciągnięcie ↔ pchanie).
@@ -473,7 +442,7 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, VERSION: "3.4.0" };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, VERSION: "3.3.0-FROZEN" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

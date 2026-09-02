@@ -471,6 +471,7 @@ function reseedRound(seed){ roundSeed=(seed!=null?seed:(Math.random()*4294967296
 // To DOKŁADNIE artefakt, który klient wyśle na serwer: nasiono + parametry + ścieżka kursora.
 let rec=null;
 function recStart(){ rec={seed:roundSeed,W,H,proc,joint,pos:posKey,thick,bead,amps:ampsSetFor(posKey),arc:0,ang:0,tig:0,
+  cvn:CVN_BEADS[bead]?1:0,        // „ta runda podlega limitowi HI" — starsze nagrania go nie mają i liczą się jak 3.3.0
   rw:Math.round((()=>{try{return stage.getBoundingClientRect().width;}catch(e){return 0;}})()),  // szerokość renderu → krok kwantyzacji kursora
   events:[]}; }
 function recEv(type,x,y,now,b,k){ if(!rec) return;
@@ -482,7 +483,7 @@ function recEv(type,x,y,now,b,k){ if(!rec) return;
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
 let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
- pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM",t_tigstop:"✔ ŁUK ZGASZONY — PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_offaxis:"ZJECHAŁEŚ Z OSI — wracaj na grań",fb_filler:"DODAJ SPOIWO — SPACJA",def_filler:"Nierówny rytm spoiwa — faliste lico, miejscami nadlew, miejscami niedolew",def_offaxis:"Ścieg poza osią złącza — podtopienie jednej krawędzi, brak wtopienia po drugiej",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
+ pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM",t_tigstop:"✔ ŁUK ZGASZONY — PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_offaxis:"ZJECHAŁEŚ Z OSI — wracaj na grań",fb_filler:"DODAJ SPOIWO — SPACJA",def_filler:"Nierówny rytm spoiwa — faliste lico, miejscami nadlew, miejscami niedolew",def_hi_over:"Przekroczony wkład ciepła — %1 kJ/mm przy dopuszczalnych %2. Materiał badany udarnościowo: powyżej granicy z WPS kwalifikacja udarnościowa nie pokrywa złącza — odrzut niezależnie od wyglądu lica",hi_max:"max",hi_cvn:"max wg WPS (udarność)",fb_hi:"ZA DUŻY WKŁAD CIEPŁA — jedź szybciej albo zbij prąd",def_offaxis:"Ścieg poza osią złącza — podtopienie jednej krawędzi, brak wtopienia po drugiej",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
   btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
@@ -521,7 +522,7 @@ const I18N={
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
   cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld",
   cardtext_cut:"Przeciąłem %1 — ocena %2, ISO 9013 %3 → +%4 GW (demo, nie token). 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#ciecie #spawanie #GorWeld" },
- en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB",t_tigstop:"✔ ARC STOPPED — RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_offaxis:"OFF THE CENTRELINE — get back on the seam",fb_filler:"ADD FILLER — SPACE",def_filler:"Uneven filler rhythm — rippled face, excess in places, starved in others",def_offaxis:"Bead off the joint centreline — undercut on one edge, lack of fusion on the other",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
+ en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB",t_tigstop:"✔ ARC STOPPED — RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_offaxis:"OFF THE CENTRELINE — get back on the seam",fb_filler:"ADD FILLER — SPACE",def_filler:"Uneven filler rhythm — rippled face, excess in places, starved in others",def_hi_over:"Heat input exceeded — %1 kJ/mm against %2 allowed. Impact-tested material: above the WPS limit the CVN qualification no longer covers the joint — reject regardless of how the face looks",hi_max:"max",hi_cvn:"WPS max (impact-tested)",fb_hi:"HEAT INPUT TOO HIGH — travel faster or drop the current",def_offaxis:"Bead off the joint centreline — undercut on one edge, lack of fusion on the other",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
@@ -560,7 +561,7 @@ const I18N={
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
   cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld",
   cardtext_cut:"Cut %1 — grade %2, ISO 9013 %3 → +%4 GW (demo, not a token). 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#cutting #welding #GorWeld" },
- ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ",t_tigstop:"✔ ДУГА ПОГАШЕНА — ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_offaxis:"УШЁЛ С ОСИ — возвращайся на стык",fb_filler:"ДОБАВЬ ПРИСАДКУ — ПРОБЕЛ",def_filler:"Неровный ритм присадки — волнистый валик, местами наплыв, местами непровар",def_offaxis:"Шов вне оси соединения — подрез с одной кромки, непровар с другой",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
+ ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ",t_tigstop:"✔ ДУГА ПОГАШЕНА — ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_offaxis:"УШЁЛ С ОСИ — возвращайся на стык",fb_filler:"ДОБАВЬ ПРИСАДКУ — ПРОБЕЛ",def_filler:"Неровный ритм присадки — волнистый валик, местами наплыв, местами непровар",def_hi_over:"Превышен погонный тепловложение — %1 кДж/мм при допустимых %2. Материал с испытанием на удар: выше предела по WPS квалификация не покрывает соединение — брак независимо от вида валика",hi_max:"макс",hi_cvn:"макс по WPS (удар.)",fb_hi:"СЛИШКОМ БОЛЬШОЕ ТЕПЛОВЛОЖЕНИЕ — иди быстрее или убавь ток",def_offaxis:"Шов вне оси соединения — подрез с одной кромки, непровар с другой",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
@@ -637,6 +638,13 @@ const VOLT_TABLES={
   TIG:[[1,2,11],[2,4,12],[4,6,13],[6,10,14]],
 };
 const WELD_EFF={MMA:0.8,MIG:0.8,TIG:0.6};
+// ── WKŁAD CIEPŁA (3.4.0) — na materiale badanym udarnościowo max HI z WPS to LIMIT KODU, nie
+// preferencja: procedura kwalifikowana z próbą udarności ma HI jako zmienną istotną dodatkową
+// (ASME IX QW-409.1), więc powyżej granicy kwalifikacja CVN nie pokrywa złącza produkcyjnego
+// i złącze leci NIEZALEŻNIE od tego, jak ładne jest lico. Stąd wada MAJOR (→ REJECT), a nie
+// odjęcie punktów: to nie jest wada wykonania. Stałe MUSZĄ się zgadzać z sim.js — pilnuje tego test.
+const HI_MAX_R=1.25;          // górna granica zakresu z WPS = te same 25%, co pasek HI w raporcie
+const CVN_BEADS={steel:1};    // stal węglowa. Austenityczna nierdzewka i alu — bez próby udarności
 const POS_AMP_MUL={1:1.0,2:0.95,3:0.90,4:0.85,5:0.80};
 function tableLookup(tbl, t){ if(!tbl) return null;   // CUT/PLASMA nie mają tablic — brak tego wyjścia wywracał selectPos()
   for(const [lo,hi,v] of tbl) if(lo<t&&t<=hi) return v; return null; }
@@ -1729,7 +1737,18 @@ function inspect(){
       console.log('%c[PARITY]','color:#3cb9ff;font-weight:700','live',score,'· sim',sr.score,'· Δ',score-sr.score, sr);
     }catch(err){ console.warn('[PARITY] sim error',err); } } }
 
+  // HI faktyczny: napięcie z przebiegu łuku (dłuższy łuk = wyższe U), prąd GRACZA, JEGO tempo.
+  // `arcTime` rośnie wyłącznie przy żywym łuku, więc dotyk i TIG schodzą na napięcie z WPS — 1:1 z sim.js.
+  const wE=weldElectrics(posKey), effP=WELD_EFF[proc]||0.8;
+  const uAct=arcTime?arcVSum/arcTime:(wE?wE.volts:null);
+  const hiAct=(wE&&uAct!=null)?heatInputKJmm(uAct,wE.ampsUse,avgV/PX_PER_MM,effP):null;
+  const hiWps=wE?wE.hi:null;
+  const hiMax=hiWps!=null?Math.round(hiWps*HI_MAX_R*1000)/1000:null;
+  const cvnJob=!!CVN_BEADS[bead];
+  const hiOver=!!(cvnJob&&hiMax!=null&&hiAct!=null&&hiAct>hiMax);
+
   const D=[];
+  if(hiOver) D.push({s:"major",t:fmt("def_hi_over",[hiAct,hiMax])});   // poza zakresem kwalifikacji — lico tego nie ratuje
   if(coverage<0.85) D.push({s:coverage<0.6?"major":"minor",t:fmt("def_pen",[Math.round((1-coverage)*100)])});
   if(narrow/baked.length>0.25) D.push({s:"minor",t:t("def_narrow")});
   if(wide/baked.length>0.2) D.push({s:"minor",t:t("def_wide")});
@@ -1774,11 +1793,13 @@ function inspect(){
   renderStat("rSpd", spdAcc*100, Math.round(spdAcc*100)+"% ("+(avgV/PX_PER_MM).toFixed(1)+"/"+(targetPx/PX_PER_MM).toFixed(1)+" mm/s)", spdAcc<0.5);
   const we=weldElectrics(posKey);
   if(we){
-    const uAct=(arcLive&&arcTime)?arcVSum/arcTime:we.volts;                 // długi łuk = wyższe napięcie = wyższe HI
-    const actHi=heatInputKJmm(uAct,we.ampsUse,avgV/PX_PER_MM,we.eff);       // HI faktyczne = U łuku × prąd GRACZA × jego tempo
-    const hiWarn=actHi&&Math.abs(actHi-we.hi)/we.hi>0.25;
+    // Ten sam `hiAct`, który zadecydował o dopuszczeniu — bez drugiego, rozjeżdżającego się rachunku.
+    const actHi=hiAct;
+    const hiWarn=hiOver||(actHi&&Math.abs(actHi-we.hi)/we.hi>0.25);
     const hiPct=actHi?Math.max(0,100-Math.abs(actHi-we.hi)/we.hi*100):0;
-    renderStat("rHi", hiPct, actHi+' / '+we.hi+' kJ/mm', hiWarn);
+    // Na materiale badanym udarnościowo górna granica NIE jest ostrzeżeniem, tylko sufitem — mówimy to wprost.
+    const hiTxt=cvnJob ? actHi+' / '+we.hi+' kJ/mm · '+t("hi_max")+' '+hiMax : actHi+' / '+we.hi+' kJ/mm';
+    renderStat("rHi", hiPct, hiTxt, hiWarn);
   } else document.getElementById("rHi").innerHTML='<b>—</b>';
   renderStat("rEven", evenness*100, Math.round(evenness*100)+"%");
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
@@ -1951,7 +1972,12 @@ function updateInfo(){
   const ampTxt=el?(off?`<b style="color:#ffae3c">${el.ampsUse}</b>/${el.amps}`:el.amps):"";
   // Wkład ciepła MUSI iść za pokrętłem prądu — inaczej gracz nie zobaczy, że I i v robią to samo HI.
   const hiTxt=el?(off?`<b style="color:#ffae3c">${el.hiUse}</b> <small>(WPS ${el.hi})</small>`:el.hi)+" kJ/mm":"";
-  const hiLine=el?`<div class="hi-line">${t("hi_set")} <span class="v">${hiTxt}</span> · ${fmt("hi_params",[ampTxt,el.volts,el.travel.toFixed(1)])}</div>`:"";
+  // Na materiale badanym udarnościowo gracz MUSI widzieć sufit ZANIM zacznie spawać — odrzut
+  // za przekroczenie zakresu kwalifikacji nie może być niespodzianką z raportu. Czerwienieje,
+  // gdy sam prąd już przebija granicę (tempo dołoży resztę).
+  const hiCap=(el&&CVN_BEADS[bead])?Math.round(el.hi*HI_MAX_R*1000)/1000:null;
+  const capTxt=hiCap!=null?` · <span style="color:${el.hiUse>hiCap?"#ff5a4a":"#8b97a0"}">${t("hi_cvn")} ${hiCap}</span>`:"";
+  const hiLine=el?`<div class="hi-line">${t("hi_set")} <span class="v">${hiTxt}</span> · ${fmt("hi_params",[ampTxt,el.volts,el.travel.toFixed(1)])}${capTxt}</div>`:"";
   const infoEl=document.getElementById("info");
   infoEl.className="panel info-card"+(d>=7?" tier-legend":d>=4?" tier-epic":"");
   infoEl.innerHTML=

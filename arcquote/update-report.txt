@@ -1,4 +1,4 @@
-GORWELD — aktualizacja cen 2026-08-31 11:21
+GORWELD — aktualizacja cen 2026-09-07 09:57
 
 ⚠ drut_G3Si1_kg: brak cen na stronie → zostaje 8.6 (sprawdź ręcznie)
 ✓ elektroda_E6013_kg: 15.25 → 15.25 zł/jedn. = (0%)

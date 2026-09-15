@@ -69,6 +69,21 @@
   .bottom { top:50%; right:12px; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; align-items:stretch; padding:11px; max-height:94vh; overflow-y:auto; width:max-content; }
   .bottom .group { justify-content:center; }
   .bottom > button { width:100%; }
+  /* Desktop: panel byl `width:max-content`, wiec rozpychal sie do najszerszego wiersza (PRAD: AUTO +
+     RECZNIE + 5 wartosci = 435 px) i zaslanial blache na kazdym oknie wezszym niz ~1440 px, takze na
+     laptopie 1280x720. Teraz ma stala, waska szerokosc: wiersze sie zawijaja, a 8 przyciskow akcji
+     idzie w dwie kolumny (polowa wysokosci). Tylko desktop — telefon ma wlasny uklad paska. */
+  body:not(.is-mobile) .bottom { display:grid; grid-template-columns:1fr 1fr; width:252px; gap:6px; }
+  body:not(.is-mobile) .bottom .group { grid-column:1/-1; gap:5px; }
+  body:not(.is-mobile) .bottom .group .lbl { width:100%; text-align:center; margin:2px 0 0; }
+  body:not(.is-mobile) .bottom .ampwrap { justify-content:center; max-width:none; }
+  /* Waskie okno desktopowe: karta z opisem roboty (lewy dol) wchodzila na lewy brzeg blachy. */
+  @media (max-width:1000px){
+    body:not(.is-mobile) .info-card { max-width:210px; font-size:11px; line-height:1.45; padding:10px 11px; }
+    body:not(.is-mobile) .bottom { width:228px; right:8px; }
+  }
+  @media (max-width:760px){ body:not(.is-mobile) .bottom { width:206px; padding:9px; } }
+  body:not(.is-mobile) .bottom > button:not(.mob-actions) { padding:6px 4px; font-size:11px; line-height:1.25; white-space:normal; overflow-wrap:anywhere; }
 
   .info-card { left:12px; bottom:124px; padding:12px 14px; max-width:320px; pointer-events:none; font-size:12px; line-height:1.55; color:#8b97a0; }
   .info-card .pname { color:var(--cyan); font-weight:700; font-size:13px; }
@@ -2390,7 +2405,19 @@ function hideSplash(){ const s=document.getElementById("splash"); if(!s||s.class
 function resize(){ syncMobileLayout(); W=PLAY_W; H=PLAY_H; DPR=Math.min(devicePixelRatio||1,2);
   for(const c of [stage,plate,seam,weldbg]){ c.width=W*DPR; c.height=H*DPR; }
   for(const c of [ctx,pctx,sctx,wbctx]) c.setTransform(DPR,0,0,DPR,0,0);
-  buildWorkpiece(); updateMobHud(); }
+  buildWorkpiece(); updateMobHud(); placeDeskPanel(); }
+// Desktop: prawy panel jest wyśrodkowany w pionie, a górny pasek na wąskim oknie (albo po rosyjsku)
+// zawija się w 2–3 wiersze — panel wchodził wtedy pod niego i chował przyciski metod. Zsuwamy go
+// pod pasek tylko wtedy, gdy naprawdę zachodzi; resztę wysokości przewija sam panel.
+function placeDeskPanel(){
+  const bb=document.querySelector(".bottom"), tb=document.querySelector(".top"); if(!bb||!tb) return;
+  bb.style.top=""; bb.style.transform=""; bb.style.maxHeight="";
+  if(isMob()) return;
+  const t=tb.getBoundingClientRect().bottom+8;
+  if(bb.getBoundingClientRect().top<t){
+    bb.style.top=t+"px"; bb.style.transform="none"; bb.style.maxHeight=Math.max(120,innerHeight-t-12)+"px"; }
+}
+try{ new ResizeObserver(placeDeskPanel).observe(document.querySelector(".top")); }catch(e){}
 // Letterbox: pole zostaje 1280×720, do okna dopasowujemy je wyłącznie skalą CSS.
 // Telefon: całe pole wpasowane w ekran dawało blachę ~170 px szerokości (w pionie gra w ogóle
 // zasłaniała się „OBRÓĆ TELEFON") — palcem nie dało się tego prowadzić. Na telefonie przybliżamy

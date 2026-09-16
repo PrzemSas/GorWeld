@@ -201,6 +201,16 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
 .ctrl-badge{display:inline-block;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:#000;background:#e08a3a;padding:4px 9px;border-radius:2px}
 .ctrl h3{font-family:'Teko',sans-serif;font-size:clamp(28px,4vw,38px);line-height:1;color:#fff;margin:12px 0 8px;font-weight:600}
 .ctrl p{font-size:11px;color:#adadad;line-height:1.7}
+.bp{position:relative;border:1px solid #3eb7f433;border-radius:10px;padding:16px;background-color:#060a0d;background-image:linear-gradient(#3eb7f40d 1px,transparent 1px),linear-gradient(90deg,#3eb7f40d 1px,transparent 1px);background-size:18px 18px;align-self:center}
+.bp-t{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;color:#3eb7f4aa;margin-bottom:12px}
+.bp-flow{display:flex;align-items:center;gap:8px}
+.bp-s{display:grid;gap:6px;flex:1.6}
+.bp-n{border:1px dashed #3eb7f466;border-radius:4px;padding:7px 8px;font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:1px;color:#cfe9f7;text-align:center;background:#060a0dcc}
+.bp-n span{display:block;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0;color:#7fa9bf;margin-top:2px}
+.bp-end{flex:1}
+.bp-arc{border-style:solid;border-color:#e08a3a88;color:#e08a3a}
+.bp-a{color:#3eb7f488;font-size:14px;flex:0 0 auto}
+@media(max-width:1100px){.bp-flow{flex-direction:column;align-items:stretch}.bp-a{transform:rotate(90deg);text-align:center;align-self:center}}
 .ctrl ul{list-style:none;display:grid;gap:8px;align-content:center}
 .ctrl li{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;color:#d0d0d0;padding:9px 12px;border-left:2px solid #e08a3a;background:#e08a3a0a}
 .ctrl li span{display:block;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0;color:#8a8a8a;margin-top:3px;text-transform:none}
@@ -215,7 +225,7 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
 .oc-sub{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:#e08a3a;margin:34px 0 4px}
 @media(max-width:900px){.arc-top,.ctrl,.forge-g{grid-template-columns:1fr}.arc-feats{grid-template-columns:1fr 1fr}.oc-g{grid-template-columns:1fr 1fr}
 .nlinks.open .dd{flex-direction:column;align-items:flex-start}.nlinks.open .dd-m{display:flex;position:static;margin:6px 0 0;padding:0 0 0 12px;border:0;background:none;min-width:0;gap:8px}.nlinks .dd>a::after{content:""}}
-@media(max-width:600px){.arc-feats,.oc-g{grid-template-columns:1fr}}
+@media(max-width:600px){.arc-feats,.oc-g{grid-template-columns:1fr}.soc{min-width:0}.soc-h{overflow-wrap:anywhere}}
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png"><link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/favicon.png">
@@ -262,7 +272,7 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
   <div class="hero-badge">WELDING · SIMULATION · DUMPSTER FORGE // EST. 2025</div>
   <h1 class="hero-brand">GORWELD<sup>®</sup></h1>
   <div class="hero-tag">FORGED, NOT GIVEN.</div>
-  <p class="hero-sub">Welding simulation. Games. The Dumpster Forge.<br><b>Built by a working MMA welder</b> — steel by day, code after shift.</p>
+  <p class="hero-sub">Welding simulation. Training hardware in development. Games. The Dumpster Forge.<br><b>Built by a working MMA welder</b> — steel by day, code after shift.</p>
   <div class="hero-btns"><a href="/arc" class="btn btn1">▶ Enter ARC Welder</a><a href="#forge" class="btn btn2">🔥 Discover the Forge</a></div>
   <a href="#onchain" class="chain-strip">ON-CHAIN LAYER · SOLANA · GORBAGANA · COOKIE CHAIN →</a>
   <img src="/banner.jpg" width="1760" height="576" alt="GORWELD — Dumpster Forge. Welding the future from the scraps of the old world. A welder in a black hood and glowing helmet stands in a burning night scrapyard; behind him a second figure in a red hoodie and gas mask cuts steel, throwing sparks." style="position:relative;z-index:1;width:min(820px,94vw);height:auto;border-radius:10px;margin:28px 0 10px;border:1px solid #e08a3a33;box-shadow:0 0 45px rgba(59,183,244,.2)">
@@ -306,16 +316,28 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
   <div class="ctrl" id="controller">
     <div>
       <span class="ctrl-badge">ARC CONTROLLER · IN DEVELOPMENT</span>
-      <h3>From mouse to real hand movement.</h3>
-      <p>A physical MMA stick controller for GORWELD® ARC — you hold it like an electrode holder and the simulator reads your hand. It is at the design stage: no prototype yet, nothing to buy and no dates promised. It gets shown when it welds.</p>
+      <h3>From screen to steel.</h3>
+      <p>A physical MMA training controller for GORWELD® ARC — you hold it like an electrode holder and the simulator reads your hand. It is at the design stage: no prototype yet, nothing to buy and no dates promised. It gets shown when it welds.</p>
+      <p style="margin-top:10px;color:#8a8a8a">Design is still evolving. No final enclosure or production form has been chosen yet — so there is no render here on purpose.</p>
       <div class="gw-btns"><a href="https://x.com/Przemsas" class="btn btn2" target="_blank" rel="noopener">Follow the build on X →</a></div>
     </div>
-    <ul>
-      <li>MOTION SENSOR (IMU)<span>angle and travel speed from the real hand</span></li>
-      <li>ARC DISTANCE<span>how far the tip is from the plate</span></li>
-      <li>ELECTRODE BURN-OFF<span>the stick physically shortens as you weld</span></li>
-      <li>WEBHID<span>plugs straight into the browser, no driver</span></li>
-    </ul>
+    <div class="bp" aria-label="Function diagram of the ARC Controller: the hand moves the controller, its sensors measure motion, electrode angle, arc distance and electrode burn-off, WebHID sends it to ARC in the browser.">
+      <div class="bp-t">FUNCTION DIAGRAM · NOT A PRODUCT SHAPE</div>
+      <div class="bp-flow">
+        <div class="bp-n bp-end">YOUR HAND</div>
+        <div class="bp-a">→</div>
+        <div class="bp-s">
+          <div class="bp-n">MOTION TRACKING<span>IMU</span></div>
+          <div class="bp-n">ELECTRODE ANGLE<span>work · travel</span></div>
+          <div class="bp-n">ARC DISTANCE<span>tip ↔ plate</span></div>
+          <div class="bp-n">ELECTRODE BURN-OFF<span>stick shortens as you weld</span></div>
+        </div>
+        <div class="bp-a">→</div>
+        <div class="bp-n bp-end">WEBHID<span>no driver</span></div>
+        <div class="bp-a">→</div>
+        <div class="bp-n bp-end bp-arc">ARC<span>in the browser</span></div>
+      </div>
+    </div>
   </div>
 </div></section>
 
@@ -386,7 +408,7 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
         <div class="tok-row"><span class="tl">LOCKED</span><span class="tv" style="color:#e08a3a">100,000,000</span></div>
         <div class="tok-row"><span class="tl">UNLOCK</span><span class="tv">50M 2027-01-29 · 50M 2027-08-17</span></div>
       </div>
-      <div class="gw-btns"><a href="https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t" class="btn btn3" target="_blank" rel="noopener">🔒 Verify lock 1 — 50M ↗</a><a href="https://app.streamflow.finance/contract/solana/mainnet/F43x8sDKFNUXsm3QhRNKYHXABsWHXA9CfhBGU5stXwTY" class="btn btn3" target="_blank" rel="noopener">🔒 Verify lock 2 — 25M ↗</a><a href="https://app.streamflow.finance/contract/solana/mainnet/6jQnJqK8RGYKJ9GBCzU6HJQ2DAsJrMTfcVmuc35jCiWE" class="btn btn3" target="_blank" rel="noopener">🔒 Verify lock 3 — 25M ↗</a></div>
+      <div class="gw-btns"><a href="https://app.streamflow.finance/contract/solana/mainnet/GbQMTJ3Wkx8ihPo1BfUXkvggqyKZMYh6HzJhhWNLW76t" class="btn btn3" target="_blank" rel="noopener">🔒 Lock 1 — 50M → Jan 2027 ↗</a><a href="https://app.streamflow.finance/contract/solana/mainnet/F43x8sDKFNUXsm3QhRNKYHXABsWHXA9CfhBGU5stXwTY" class="btn btn3" target="_blank" rel="noopener">🔒 Lock 2 — 25M → Aug 2027 ↗</a><a href="https://app.streamflow.finance/contract/solana/mainnet/6jQnJqK8RGYKJ9GBCzU6HJQ2DAsJrMTfcVmuc35jCiWE" class="btn btn3" target="_blank" rel="noopener">🔒 Lock 3 — 25M → Aug 2027 ↗</a></div>
       <div class="gw-warn" style="border-color:#3eb7f455;color:#8fb3c4">The lock is transparency, not a price floor. On-chain data always wins over this page.</div>
     </div>
   </div>

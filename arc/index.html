@@ -180,7 +180,7 @@
   .xpbar > div::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent); animation:xpShine 2.2s ease-in-out infinite; }
   @keyframes xpShine { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
 
-  /* GW wallet chip */
+  /* challenge chip */
   .wal { font-size:12px; font-weight:700; color:#ffd23f; letter-spacing:.3px; padding:5px 10px; background:linear-gradient(135deg,#1a1408cc,#121008cc); border:1px solid #ffae3c55; border-radius:8px; white-space:nowrap; box-shadow:0 0 12px rgba(255,174,60,.1); }
   .wal b { color:#fff; }
   .method-card { border:1px solid #232a31; border-left:3px solid var(--cyan); border-radius:10px; padding:12px 14px; margin:10px 0; background:linear-gradient(135deg,#0c1116,#0a0e12); }
@@ -279,7 +279,7 @@
 
   <div class="panel top">
     <div class="brand"><img src="/favicon.png" alt="GORWELD" style="height:30px;width:30px;border-radius:50%"><span><b>GORWELD</b>® ARC</span><span class="demo-badge">DEMO</span></div>
-    <div class="wal" id="wal">💰 120 GW</div>
+    <div class="wal" id="wal" hidden></div>
     <button id="setupBtn" class="mob-only on" type="button" title="Ustawienia">⚙️</button>
     <button id="mobInspect" class="mob-only" type="button" title="Inspekcja">🔎</button>
     <div class="group"><span class="lbl" data-i18n="method">Metoda</span>
@@ -343,7 +343,6 @@
     <button id="career" data-i18n="btn_career">🎓 KARIERA</button>
     <button id="help" data-i18n="btn_help">❔ JAK GRAĆ</button>
     <button id="methods" data-i18n="btn_methods">📖 METODY</button>
-    <button id="pricing" data-i18n="btn_pricing">💲 CENNIK</button>
     <button id="clear" data-i18n="btn_clear">✕ ZETRZYJ</button>
     <button id="mobHelmet" class="mob-actions on" type="button" title="Hełm">🥽</button>
     <button id="mobSnd" class="mob-actions" type="button" title="Dźwięk">🔊</button>
@@ -402,11 +401,6 @@
     <div class="act"><button id="tutSkip" data-i18n="tut_skip">POMIŃ</button><button id="tutStart" class="on" data-i18n="tut_start">DO ROBOTY ⚡</button></div>
   </div></div>
 
-  <!-- CENNIK -->
-  <div id="priceModal" class="modal" style="padding:0;"><div class="card" style="width:100vw; height:100vh; max-height:100vh; padding:0; margin:0; border:0; border-radius:0; overflow:hidden; position:relative; background:#05070a;">
-    <button id="priceClose" title="ESC" style="position:absolute; top:10px; left:12px; z-index:3; background:#11161bcc; color:#e9eef2; border:1px solid #2b333a; border-radius:8px; padding:6px 11px; font-weight:800; cursor:pointer;">✕</button>
-    <iframe id="priceFrame" title="Cennik" allow="autoplay; fullscreen" style="width:100%; height:100%; border:0; display:block; background:#05070a;"></iframe>
-  </div></div>
 
   <!-- METODY / GLOSSARY -->
   <div id="methodsModal" class="modal"><div class="card" style="width:min(580px,94vw);max-height:88vh;overflow:auto;text-align:left">
@@ -506,29 +500,27 @@ const I18N={
   def_pen:"Brak przetopu / przyklejenie grani (%1% niewypełnione)", def_narrow:"Wąskie lico — niedolew (za szybkie tempo)", def_wide:"Nadmierny nadlew lica (za wolno)",
   def_amp_low:"Za mały prąd — brak wtopienia (%1 A przy WPS %2 A)", def_amp_high:"Za duży prąd — przepalenie / podtopienie (%1 A przy WPS %2 A)",
   def_undercut:"Podtopienie / zwis poza granią (%1%)", def_porosity:"Porowatość — %1 pęcherzy (niestabilny łuk)", def_spatter:"Odpryski — %1 (czyszczenie po spawaniu)", def_uneven:"Nierówna szerokość lica", def_clean:"Brak wad — spoina zgodna z wymaganiami",
-  rew_none:"⚠ 0 GW (demo) — łaga niewyspawana lub odrzucona", rew_none_sub:"dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
   zoom_zoom:"powiększenie ×", car_title:"Kariera spawacza · WPQR", car_req:"wymóg", car_reset:"RESET POSTĘPU", car_close:"ZAMKNIJ", car_max:"MAX",
-  card_title:"Karta wyniku", card_dl:"💾 POBIERZ PNG", card_copy:"📋 KOPIUJ TEKST", card_close:"ZAMKNIJ", tagline:"SPAWASZ — UCZYSZ SIĘ · GW = demo",
+  card_title:"Karta wyniku", card_dl:"💾 POBIERZ PNG", card_copy:"📋 KOPIUJ TEKST", card_close:"ZAMKNIJ", tagline:"SPAWASZ — UCZYSZ SIĘ",
   cov_lbl:"Pokrycie", cov_layer:"Warstwa", cov_inspect:"⚡ auto-inspekcja", cov_done:"✅ PEŁNA ŁAGA — puść",
   pass_root:"przetop", pass_fill:"wypełnienie", pass_cap:"lico",
   t_passdone:"✅ WARSTWA %1 → teraz: %2", t_passlast:"⚡ OSTATNIA WARSTWA — lico",
   def_crater:"Krater / niewypełniony koniec ściegu", def_rootlack:"Słaby przetop w grani (warstwa przetopowa %1%)",
-  btn_pricing:"💲 CENNIK", btn_help:"❔ JAK GRAĆ", btn_methods:"📖 METODY", methods_title:"Metody — opis fachu", btn_close:"ZAMKNIJ",
+  btn_help:"❔ JAK GRAĆ", btn_methods:"📖 METODY", methods_title:"Metody — opis fachu", btn_close:"ZAMKNIJ",
   t_cut_steelonly:"🔥 Palnik tlenowy tnie TYLKO stal — nie nierdzewkę ani alu", t_cut_preheat:"🔥 Podgrzewaj przy starcie — trzymaj wolno aż przebije", t_cut_pierced:"✅ Przebite! Prowadź rzaz po linii", cut_word:"cięcie",
   cd_incomplete:"Niedocięcie — rzaz nie przeszedł na wylot (%1%)", cd_wide:"Szeroki rzaz / nadtopienie krawędzi (za wolno)", cd_dross:"Żużel i grat na dole (za szybko)", cd_dev:"Odchył od linii — krzywy rzaz", cd_clean:"Czysty rzaz — gładkie, prostopadłe krawędzie",
   tut_title:"Jak spawać — 30 sekund", tut_skip:"POMIŃ", tut_start:"DO ROBOTY ⚡",
-  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał · <b>prąd</b>. Prąd startuje na wartości z WPS (zielona ramka): zejdziesz niżej — brak wtopienia, podbijesz — przepalenie i odpryski. Im trudniej, tym więcej punktów GW w demo (gwiazdki = mnożnik).",
+  tut1:"<b>1. Ustaw robotę.</b> Metoda · złącze · pozycja · grubość · materiał · <b>prąd</b>. Prąd startuje na wartości z WPS (zielona ramka): zejdziesz niżej — brak wtopienia, podbijesz — przepalenie i odpryski. Im trudniej, tym wyższa klasa roboty (gwiazdki = trudność).",
   tut2:"<b>2. Zajarz łuk.</b> <b>LPM</b> dotyka blachy i zapala łuk — ale <b style='color:#ff5a4a'>nie trzymaj</b>, bo elektroda przywrze. Puść, a odjedzie sama, bo się topi. Dalej dogrywaj krótkimi kliknięciami <b>LPM</b>, a <b>PPM</b> odciąga. Pomarańczowy pasek na czubku to Twoja odległość od blachy — im dłuższy, tym dalej jesteś. <b>Kąt</b> ustawiasz drugą ręką: <b>W/S</b> pchanie ↔ ciągnięcie, <b>A/D</b> kąt roboczy. Zaczynasz dokładnie na kącie z WPS — jak nic nie ruszysz, nie tracisz ani punktu. <b>LPM+PPM naraz gasi łuk</b>, gdy chcesz skończyć ścieg w wybranym miejscu — to nie to samo co zerwanie, nie liczy się jako błąd. <b>TIG ma własne sterowanie:</b> LPM zapala łuk, <b>SPACJA</b> dokłada spoiwo drugą ręką, PPM gasi. Sam łuk tylko grzeje — <b>bez spoiwa nie ma spoiny</b>. <i>Na telefonie prościej: dotknij i ciągnij, łuk trzyma się sam, kąt stoi na WPS.</i>",
   tut3:"<b>3. Trzymaj tempo.</b> Ciągnij wzdłuż grani — dopóki <b style='color:#5fe08a'>nic nie wyskakuje</b>, tempo jest dobre. Pod blachą zapali się <b style='color:#ff9a3c'>ZA SZYBKO</b> (zimny zakład) albo <b style='color:#ff9a3c'>ZA WOLNO</b> (przepalenie) dopiero gdy naprawdę zjedziesz.",
   tut4:"<b>4. Hełm i warstwy.</b> Bez hełmu łuk oślepia po 2 s. Grube blachy spawasz w kilku warstwach: <b>przetop → wypełnienie → lico</b>.",
-  tut5:"<b>5. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → punkty GW (tylko w przeglądarce). Pochwal się kartą na X.",
-  t_topup:"📦 DOSTAWA — magazyn uzupełniony do 120 GW. Spawaj dalej.", t_bought:"−%1 GW · materiał kupiony",
-  eco_buy:"materiał", eco_a:"za A netto", eco_cost:"koszt", eco_net:"netto", eco_bal:"budżet", eco_jack:"PREMIA MISTRZA", rew_zero:"💀 SPALONA PŁYTA — materiał stracony",
-  eco_free:"runda konkursowa — bez kosztów i bez wypłat GW", chal_wal:"KONKURS", chal_pass:"PRÓG ZALICZONY — skopiuj PROOF i wyślij zgłoszenie", chal_fail:"PONIŻEJ PROGU — płyta za darmo, spawaj dalej",
+  tut5:"<b>5. Ocena.</b> Wyspawaj CAŁĄ łagę (pasek u góry) → automatyczna inspekcja ISO 5817 → ocena i postęp kariery. Pochwal się kartą na X.",
+  res_ok:"🏆 ŁAGA ZALICZONA", rew_zero:"💀 ŁAGA ODRZUCONA — dokończ całą spoinę (pokrycie ≥80%), min. ocena D",
+  eco_free:"runda konkursowa", chal_wal:"KONKURS", chal_pass:"PRÓG ZALICZONY — skopiuj PROOF i wyślij zgłoszenie", chal_fail:"PONIŻEJ PROGU — spawaj dalej",
   tier_common:"PODSTAWOWA", tier_rare:"ŚREDNIA", tier_epic:"TRUDNA", tier_legendary:"MISTRZOWSKA",
   rank_helper:"Pomocnik", rank_tacker:"Sczepiacz", rank_welder:"Spawacz", rank_cert:"Spawacz cert.", rank_coded:"Coded Welder", rank_master:"Mistrz Spawalnictwa",
-  cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld",
-  cardtext_cut:"Przeciąłem %1 — ocena %2, ISO 9013 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#ciecie #spawanie #GorWeld" },
+  cardtext:"Wyspawałem łagę %1 — ocena %2, ISO 5817 %3. 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#welding #spawanie #GorWeld",
+  cardtext_cut:"Przeciąłem %1 — ocena %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#ciecie #spawanie #GorWeld" },
  en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB",t_tigstop:"✔ ARC STOPPED — RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_offaxis:"OFF THE CENTRELINE — get back on the seam",fb_filler:"ADD FILLER — SPACE",def_filler:"Uneven filler rhythm — rippled face, excess in places, starved in others",def_hi_over:"Heat input exceeded — %1 kJ/mm against %2 allowed. Impact-tested material: above the WPS limit the CVN qualification no longer covers the joint — reject regardless of how the face looks",hi_max:"max",hi_cvn:"WPS max (impact-tested)",fb_hi:"HEAT INPUT TOO HIGH — travel faster or drop the current",def_offaxis:"Bead off the joint centreline — undercut on one edge, lack of fusion on the other",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
   btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
@@ -545,29 +537,27 @@ const I18N={
   def_pen:"Lack of penetration / cold lap (%1% unfilled)", def_narrow:"Narrow bead — underfill (too fast)", def_wide:"Excess reinforcement (too slow)",
   def_amp_low:"Current too low — lack of fusion (%1 A vs WPS %2 A)", def_amp_high:"Current too high — burn-through / undercut (%1 A vs WPS %2 A)",
   def_undercut:"Undercut / sag outside groove (%1%)", def_porosity:"Porosity — %1 pores (unstable arc)", def_spatter:"Spatter — %1 (post-weld cleanup)", def_uneven:"Uneven bead width", def_clean:"No defects — weld meets requirements",
-  rew_none:"⚠ 0 GW (demo) — pass unfinished or rejected", rew_none_sub:"finish the whole pass (coverage ≥80%), min grade D",
   zoom_zoom:"zoom ×", car_title:"Welder career · WPQR", car_req:"req", car_reset:"RESET PROGRESS", car_close:"CLOSE", car_max:"MAX",
-  card_title:"Score card", card_dl:"💾 SAVE PNG", card_copy:"📋 COPY TEXT", card_close:"CLOSE", tagline:"WELD — LEARN · GW = demo",
+  card_title:"Score card", card_dl:"💾 SAVE PNG", card_copy:"📋 COPY TEXT", card_close:"CLOSE", tagline:"WELD — LEARN",
   cov_lbl:"Coverage", cov_layer:"Layer", cov_inspect:"⚡ auto-inspect", cov_done:"✅ FULL BEAD — release",
   pass_root:"root", pass_fill:"fill", pass_cap:"cap",
   t_passdone:"✅ LAYER %1 → now: %2", t_passlast:"⚡ LAST LAYER — cap",
   def_crater:"Crater / unfilled bead end", def_rootlack:"Poor root penetration (root pass %1%)",
-  btn_pricing:"💲 PRICES", btn_help:"❔ HOW TO", btn_methods:"📖 METHODS", methods_title:"Methods — the trade", btn_close:"CLOSE",
+  btn_help:"❔ HOW TO", btn_methods:"📖 METHODS", methods_title:"Methods — the trade", btn_close:"CLOSE",
   t_cut_steelonly:"🔥 Oxy torch cuts STEEL only — not stainless or aluminium", t_cut_preheat:"🔥 Preheat at the start — hold slow until it pierces", t_cut_pierced:"✅ Pierced! Run the cut along the line", cut_word:"cut",
   cd_incomplete:"Incomplete cut — didn't sever through (%1%)", cd_wide:"Wide kerf / edge melt (too slow)", cd_dross:"Dross on the underside (too fast)", cd_dev:"Off the cut line — crooked kerf", cd_clean:"Clean cut — smooth, square edges",
   tut_title:"How to weld — 30 seconds", tut_skip:"SKIP", tut_start:"LET'S WELD ⚡",
-  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material · <b>current</b>. Current starts at the WPS figure (green outline): go under and you lose fusion, go over and you burn through and spatter. Harder jobs score more demo GW (stars = multiplier).",
+  tut1:"<b>1. Set the job.</b> Method · joint · position · thickness · material · <b>current</b>. Current starts at the WPS figure (green outline): go under and you lose fusion, go over and you burn through and spatter. Harder jobs rank higher (stars = difficulty).",
   tut2:"<b>2. Strike the arc.</b> <b>Left button</b> touches the plate and lights the arc — but <b style='color:#ff5a4a'>don't hold it</b> or the electrode sticks. Let go and it drifts away as it melts. Feed it back with short <b>left</b> clicks; <b>right</b> pulls it off. The orange bar at the tip is your distance from the plate — the longer it gets, the further you are. Set the <b>angle</b> with your other hand: <b>W/S</b> push ↔ drag, <b>A/D</b> work angle. You start exactly on the WPS angle — touch nothing and you lose nothing. <b>LMB+RMB together puts the arc out</b> when you want to end the bead where you choose — that is not the same as breaking it and costs you no penalty. <b>TIG has its own controls:</b> LMB lights the arc, <b>SPACE</b> dabs filler with your other hand, RMB puts it out. The arc alone only heats — <b>no filler, no weld</b>. <i>On a phone it is simpler: touch and drag, the arc holds itself and the angle sits on WPS.</i>",
   tut3:"<b>3. Keep the pace.</b> Drag along the groove — as long as <b style='color:#5fe08a'>nothing pops up</b>, you're on target. <b style='color:#ff9a3c'>TOO FAST</b> (cold lap) or <b style='color:#ff9a3c'>TOO SLOW</b> (burn-through) shows under the plate only once you really drift.",
   tut4:"<b>4. Helmet & layers.</b> No helmet and the arc blinds you after 2 s. Thick plate is welded in several layers: <b>root → fill → cap</b>.",
-  tut5:"<b>5. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → demo GW points (browser only). Brag with a card on X.",
-  t_topup:"📦 RESTOCK — workshop budget back to 120 GW. Keep welding.", t_bought:"−%1 GW · plate bought",
-  eco_buy:"material", eco_a:"A net", eco_cost:"cost", eco_net:"net", eco_bal:"budget", eco_jack:"MASTER BONUS", rew_zero:"💀 PLATE BURNED — material lost",
-  eco_free:"challenge run — no GW cost, no payout", chal_wal:"CHALLENGE", chal_pass:"BAR CLEARED — copy the PROOF and submit", chal_fail:"BELOW THE BAR — plate is free, keep welding",
+  tut5:"<b>5. Grade.</b> Weld the WHOLE bead (top bar) → automatic ISO 5817 inspection → grade and career progress. Brag with a card on X.",
+  res_ok:"🏆 PASS ACCEPTED", rew_zero:"💀 PASS REJECTED — finish the whole pass (coverage ≥80%), min grade D",
+  eco_free:"challenge run", chal_wal:"CHALLENGE", chal_pass:"BAR CLEARED — copy the PROOF and submit", chal_fail:"BELOW THE BAR — keep welding",
   tier_common:"BASIC", tier_rare:"MEDIUM", tier_epic:"HARD", tier_legendary:"MASTER",
   rank_helper:"Helper", rank_tacker:"Tacker", rank_welder:"Welder", rank_cert:"Certified welder", rank_coded:"Coded welder", rank_master:"Welding Master",
-  cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld",
-  cardtext_cut:"Cut %1 — grade %2, ISO 9013 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#cutting #welding #GorWeld" },
+  cardtext:"Welded a %1 pass — grade %2, ISO 5817 %3. 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#welding #GorWeld",
+  cardtext_cut:"Cut %1 — grade %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#cutting #welding #GorWeld" },
  ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ",t_tigstop:"✔ ДУГА ПОГАШЕНА — ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_offaxis:"УШЁЛ С ОСИ — возвращайся на стык",fb_filler:"ДОБАВЬ ПРИСАДКУ — ПРОБЕЛ",def_filler:"Неровный ритм присадки — волнистый валик, местами наплыв, местами непровар",def_hi_over:"Превышен погонный тепловложение — %1 кДж/мм при допустимых %2. Материал с испытанием на удар: выше предела по WPS квалификация не покрывает соединение — брак независимо от вида валика",hi_max:"макс",hi_cvn:"макс по WPS (удар.)",fb_hi:"СЛИШКОМ БОЛЬШОЕ ТЕПЛОВЛОЖЕНИЕ — иди быстрее или убавь ток",def_offaxis:"Шов вне оси соединения — подрез с одной кромки, непровар с другой",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
   btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
@@ -584,29 +574,27 @@ const I18N={
   def_pen:"Непровар / несплавление (%1% не заполнено)", def_narrow:"Узкий валик — недолив (быстро)", def_wide:"Чрезмерное усиление (медленно)",
   def_amp_low:"Ток занижен — непровар (%1 А при WPS %2 А)", def_amp_high:"Ток завышен — прожог / подрез (%1 А при WPS %2 А)",
   def_undercut:"Подрез / натёк вне шва (%1%)", def_porosity:"Поры — %1 (нестабильная дуга)", def_spatter:"Брызги — %1 (зачистка)", def_uneven:"Неравномерная ширина", def_clean:"Без дефектов — шов годен",
-  rew_none:"⚠ 0 GW (демо) — шов не закончен или брак", rew_none_sub:"завершите весь шов (≥80%), мин. оценка D",
   zoom_zoom:"увелич. ×", car_title:"Карьера сварщика · WPQR", car_req:"треб.", car_reset:"СБРОС ПРОГРЕССА", car_close:"ЗАКРЫТЬ", car_max:"МАКС",
-  card_title:"Карта результата", card_dl:"💾 СКАЧАТЬ PNG", card_copy:"📋 КОПИР. ТЕКСТ", card_close:"ЗАКРЫТЬ", tagline:"ВАРИШЬ — УЧИШЬСЯ · GW = демо",
+  card_title:"Карта результата", card_dl:"💾 СКАЧАТЬ PNG", card_copy:"📋 КОПИР. ТЕКСТ", card_close:"ЗАКРЫТЬ", tagline:"ВАРИШЬ — УЧИШЬСЯ",
   cov_lbl:"Заполнение", cov_layer:"Слой", cov_inspect:"⚡ авто-контроль", cov_done:"✅ ШОВ ЦЕЛИКОМ — отпусти",
   pass_root:"корень", pass_fill:"заполнение", pass_cap:"облицовка",
   t_passdone:"✅ СЛОЙ %1 → теперь: %2", t_passlast:"⚡ ПОСЛЕДНИЙ СЛОЙ — облицовка",
   def_crater:"Кратер / незаваренный конец шва", def_rootlack:"Слабый провар корня (корневой слой %1%)",
-  btn_pricing:"💲 ЦЕНЫ", btn_help:"❔ КАК ИГРАТЬ", btn_methods:"📖 МЕТОДЫ", methods_title:"Методы — ремесло", btn_close:"ЗАКРЫТЬ",
+  btn_help:"❔ КАК ИГРАТЬ", btn_methods:"📖 МЕТОДЫ", methods_title:"Методы — ремесло", btn_close:"ЗАКРЫТЬ",
   t_cut_steelonly:"🔥 Кислородный резак режет ТОЛЬКО сталь — не нержавейку и не алюминий", t_cut_preheat:"🔥 Прогрев у старта — держи медленно до прожига", t_cut_pierced:"✅ Прожиг! Веди рез по линии", cut_word:"рез",
   cd_incomplete:"Недорез — не прошло насквозь (%1%)", cd_wide:"Широкий рез / оплавление кромки (медленно)", cd_dross:"Грат снизу (слишком быстро)", cd_dev:"Уход от линии — кривой рез", cd_clean:"Чистый рез — гладкие, прямые кромки",
   tut_title:"Как варить — 30 секунд", tut_skip:"ПРОПУСТИТЬ", tut_start:"ЗА РАБОТУ ⚡",
-  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал · <b>ток</b>. Ток стоит на значении из WPS (зелёная рамка): занизишь — непровар, завысишь — прожог и брызги. Чем сложнее — тем больше очков GW в демо (звёзды = множитель).",
+  tut1:"<b>1. Задай работу.</b> Метод · соединение · позиция · толщина · материал · <b>ток</b>. Ток стоит на значении из WPS (зелёная рамка): занизишь — непровар, завысишь — прожог и брызги. Чем сложнее — тем выше класс работы (звёзды = сложность).",
   tut2:"<b>2. Зажги дугу.</b> <b>ЛКМ</b> касается пластины и зажигает дугу — но <b style='color:#ff5a4a'>не удерживай</b>, электрод прилипнет. Отпусти — он отойдёт сам, потому что плавится. Дальше подавай короткими нажатиями <b>ЛКМ</b>, а <b>ПКМ</b> оттягивает. Оранжевая полоска на кончике — расстояние до пластины. <b>Угол</b> задаёшь второй рукой: <b>W/S</b> толкание ↔ волочение, <b>A/D</b> рабочий угол. Стартуешь ровно на угле из WPS — ничего не трогаешь, ничего не теряешь. <b>ЛКМ+ПКМ вместе гасят дугу</b>, когда хочешь закончить шов в выбранном месте — это не обрыв и штрафа не даёт. <b>У TIG своё управление:</b> ЛКМ зажигает дугу, <b>ПРОБЕЛ</b> подаёт присадку второй рукой, ПКМ гасит. Сама дуга только греет — <b>без присадки шва нет</b>. <i>На телефоне проще: коснись и веди, дуга держится сама, угол стоит на WPS.</i>",
   tut3:"<b>3. Держи темп.</b> Веди вдоль шва — пока <b style='color:#5fe08a'>ничего не всплывает</b>, темп верный. <b style='color:#ff9a3c'>СЛИШКОМ БЫСТРО</b> (непровар) или <b style='color:#ff9a3c'>СЛИШКОМ МЕДЛЕННО</b> (прожог) появится под пластиной, только если реально собьёшься.",
   tut4:"<b>4. Маска и слои.</b> Без маски дуга слепит через 2 с. Толстый металл варят в несколько слоёв: <b>корень → заполнение → облицовка</b>.",
-  tut5:"<b>5. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → очки GW (только в браузере). Похвались картой в X.",
-  t_topup:"📦 ПОСТАВКА — склад пополнен до 120 GW. Вари дальше.", t_bought:"−%1 GW · плита куплена",
-  eco_buy:"материал", eco_a:"A нетто", eco_cost:"цена", eco_net:"нетто", eco_bal:"бюджет", eco_jack:"ПРЕМИЯ МАСТЕРА", rew_zero:"💀 ПЛИТА СОЖЖЕНА — материал потерян",
-  eco_free:"конкурсный заход — без затрат и без выплат GW", chal_wal:"КОНКУРС", chal_pass:"ПОРОГ ВЗЯТ — скопируй PROOF и отправь заявку", chal_fail:"НИЖЕ ПОРОГА — плита бесплатна, вари дальше",
+  tut5:"<b>5. Оценка.</b> Завари ВЕСЬ шов (полоса сверху) → авто-контроль ISO 5817 → оценка и прогресс карьеры. Похвались картой в X.",
+  res_ok:"🏆 ШОВ ПРИНЯТ", rew_zero:"💀 ШОВ ОТКЛОНЁН — завершите весь шов (≥80%), мин. оценка D",
+  eco_free:"конкурсный заход", chal_wal:"КОНКУРС", chal_pass:"ПОРОГ ВЗЯТ — скопируй PROOF и отправь заявку", chal_fail:"НИЖЕ ПОРОГА — вари дальше",
   tier_common:"БАЗОВАЯ", tier_rare:"СРЕДНЯЯ", tier_epic:"СЛОЖНАЯ", tier_legendary:"МАСТЕРСКАЯ",
   rank_helper:"Помощник", rank_tacker:"Прихватчик", rank_welder:"Сварщик", rank_cert:"Сертиф. сварщик", rank_coded:"Аттест. сварщик", rank_master:"Мастер сварки",
-  cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#welding #GorWeld",
-  cardtext_cut:"Разрезал %1 — оценка %2, ISO 9013 %3 → +%4 GW. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#cutting #welding #GorWeld" },
+  cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#welding #GorWeld",
+  cardtext_cut:"Разрезал %1 — оценка %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#cutting #welding #GorWeld" },
 };
 function t(k,a){ const v=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]!=null?I18N.pl[k]:k); return a!=null?String(v).replace("%1",a):v; }
 function fmt(k,arr){ let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]||k); arr.forEach((v,i)=>s=String(s).replace("%"+(i+1),v)); return s; }
@@ -678,7 +666,6 @@ const MATERIAL={
   ss:   {name:{pl:"Nierdzewka",en:"Stainless",ru:"Нержавейка"}, MIG:1.2, MMA:1.6, TIG:1.5, tol:0.82},
   alu:  {name:{pl:"Aluminium",en:"Aluminium",ru:"Алюминий"},    MIG:1.4, MMA:2.4, TIG:1.9, tol:0.70},
 };
-const BASE_REWARD=50; // demo GW points only — no on-chain token
 function difficulty(){
   const mb={MIG:1.0,MMA:1.6,TIG:2.2,CUT:1.1,PLASMA:1.3}[proc];
   const pm=[0,1.0,1.25,1.6,2.1,2.8][POSITIONS[posKey].stars]||1;
@@ -687,19 +674,12 @@ function difficulty(){
   const pn=passPlan().length, pf=1+0.18*(pn-1);   // multipass coupons are worth more
   return mb*pm*jm*mf*pf;
 }
-function gradeQ(s){ return s>=90?1.0:s>=78?0.7:s>=62?0.45:s>=45?0.2:0; }
 // Trudnosc roboty — spawanie liczy ja inaczej niz ciecie, ale WOLA JA JEDNO MIEJSCE, zeby pasek
-// „LEGENDARNA ×N", wyplata i szacunek w panelu nigdy nie rozjechaly sie miedzy soba.
+// klasa roboty w panelu, raporcie i na karcie nigdy nie rozjechala sie miedzy soba.
 function jobDiff(){ return isCut()
   ? (proc==="PLASMA"?1.3:1.1)*(bead==="alu"?1.6:bead==="ss"?1.3:1.0)*(1+thick*0.05)
   : difficulty(); }
-// ⚠ Ta funkcja BYLA MARTWA do 01.09.2026 — zdefiniowana i nigdy nie wolana. Zamiast niej `inspect()`
-// i `cutInspect()` liczyly wyplate jako `matCost*payMult`, czyli z SAMEJ CENY PLYTY, podczas gdy koszt
-// roboty to plyta PLUS materialy dodatkowe. Marza przy ocenie A wychodzila od −2 do +2 GW: TIG i CUT
-// na cienkiej blasze oraz CALA PLAZMA tracily nawet zagrane bezblednie, a trudnosc (do ×9,4 za rure 6G)
-// nie wplywala na wyplate w ogole. Teraz placi to, co obiecuje karta: 50 × trudnosc × ocena.
-function rewardFor(score,coverage){ if(coverage<0.8) return 0; return Math.round(BASE_REWARD*jobDiff()*gradeQ(score)); }
-// rarity tier — harder coupon = rarer = pays more
+// job class — harder coupon = higher class
 function valueTier(d){
   if(d>=7)   return {name:t("tier_legendary"), col:"#ff8a3c"};
   if(d>=4)   return {name:t("tier_epic"),      col:"#c07bff"};
@@ -761,26 +741,11 @@ let passPlanArr=["cap"], passIndex=0, passMul=1, passLog=[], covSmoothed=0, last
 const PASS_W={root:0.72, fill:0.92, cap:1.00};   // bead width multiplier per layer type (cap = the visible face = baseline)
 function passPlan(){ if(thick<=3) return ["cap"]; if(thick<=5) return ["root","cap"]; return ["root","fill","cap"]; }
 
-// ── Economy (DEMO ONLY: GW in localStorage. Real tokens are NOT wired. No COOK buy-in, no cashout.) ──
-const CONSUMABLE={MMA:2, MIG:2, TIG:3, CUT:3, PLASMA:4};            // electrode / wire — cheap, burned every job (the sink)
-const MAT_BASE={steel:6, ss:14, alu:26};           // plate price — alu = the expensive stake you can ruin
-const GW_STAKE=120, POOL_STAKE=200;                // stawka startowa demo — i poziom, do ktorego odbudowuje sie wypalony portfel
-let gw=GW_STAKE, pool=POOL_STAKE, burned=0, jobCost=0, jobPaid=false, jobSettled=false;
-try{ const a=localStorage.getItem("gorweld_gw"); if(a!=null) gw=+a; const b=localStorage.getItem("gorweld_pool"); if(b!=null) pool=+b; }catch(e){}
-function saveWallet(){ try{ localStorage.setItem("gorweld_gw",gw); localStorage.setItem("gorweld_pool",pool); }catch(e){} }
-// Ekonomia demo NIE MOZE zamykac gry. Do 01.09.2026 wyplata szla z SAMEJ ceny plyty, wiec elektroda
-// nie wracala i nawet gracz na stale B schodzil do zera — a ponizej ceny plyty
-// start() odmawial klikniecia komunikatem „BRAK GW". Saldo siedzi w localStorage, wiec blokada byla
-// TRWALA, a jedyne wyjscie — RESET POSTEPU — bylo schowane w modalu KARIERA i kasowalo przy okazji
-// caly postep WPQR. Zamiast odmawiac: odbudowujemy stawke i wpuszczamy na plyte.
-function topUp(price){ if(gw>=price) return false;
-  gw=Math.max(GW_STAKE,price); pool=Math.max(pool,POOL_STAKE); saveWallet(); return true; }
-function matCost(){ return Math.round(MAT_BASE[bead]*(0.6+thick/10)); }                 // thicker plate = pricier
-function jobPrice(){ return CONSUMABLE[proc]+matCost(); }
-// W konkursie portfel demo nie gra żadnej roli — pokazujemy próg, nie saldo, żeby nikt nie liczył GW.
+let jobSettled=false;                              // raport rundy rozliczony raz (konfetti nie strzela przy ponownej inspekcji)
+// Pasek konkursu — poza trybem challenge ukryty (ARC nie ma zadnej waluty ani salda).
 function updateWallet(){ const el=document.getElementById("wal"); if(!el) return;
-  el.innerHTML=isChallenge() ? '🏁 <b>'+t("chal_wal")+'</b> · '+(CHALLENGE.minScore||90)+'%'
-                             : '🧰 <b>'+gw+'</b> GW · ⭐ '+Math.max(0,Math.round(pool)); }
+  el.hidden=!isChallenge();
+  if(isChallenge()) el.innerHTML='🏁 <b>'+t("chal_wal")+'</b> · '+(CHALLENGE.minScore||90)+'%'; }
 
 function recalc(){ grooveHalf=3+thick*0.7; bevelW=7+thick*1.3; idealHalf=grooveHalf*1.25*passMul; targetPx=SPEED[thick]*PX_PER_MM*PROCESS[proc].vMul; updateAmpF(); }
 
@@ -1108,13 +1073,6 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0&&e.button!==2) retur
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
   if(isChallenge()&&!chalWidthOK()){ showToast(t("t_toosmall"),"#ff5a4a"); e.preventDefault(); return; } // równe warunki albo wcale
   if(isChallenge()&&!chalCfgOK){ showToast(t("t_cfgfail"),"#ff5a4a"); e.preventDefault(); return; }       // nie startuj na nieoficjalnym seedzie
-  // Konkurs jest DARMOWY: ekonomia demo (GW) nie może decydować, kto w ogóle podejdzie do próby.
-  // Gracz z wypalonym portfelem trafiał na „BRAK GW", a 🎓 KARIERA (jedyny RESET) jest w challenge
-  // wyłączona — czyli wejście bez wyjścia. Do tego startowe saldo różniłoby warunki między ludźmi.
-  if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // buy consumable + plate on first strike
-    const dole=topUp(price);                                          // wypalony portfel nie odbija juz od plyty
-    gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
-    showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=Math.round(performance.now()); lastT=t0; vEMA=targetPx; if(replacing){ electrodeLeft=1; replacing=false; } // grab a fresh electrode
   arcLive=(e.pointerType==="mouse"); btnMask=e.buttons|0; arcLen=0; contactT=0;   // dotyk blachy = zajarzenie
   tigLive=(arcLive&&proc==="TIG"); if(tigLive) arcLen=arcL0();                    // TIG: LPM zapalił łuk, trzyma się na nominale
@@ -1802,15 +1760,10 @@ function inspect(){
   const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
 
   const diff=jobDiff();
-  let payout=rewardFor(score,coverage), jackpot=0;
-  if(isChallenge()){                                                     // konkurs: liczy się wynik, nie kasa demo
-    payout=0; jackpot=0; if(score>=(CHALLENGE.minScore||90)) burstConfetti();
-  } else if(!jobSettled){                                                // settle the job once
-    if(score>=90 && diff>=7 && pool>0){ jackpot=Math.round(pool*0.5); burstConfetti(); }     // LEGENDARNA A cracks the shop pool
-    gw+=payout+jackpot; pool-=jackpot; jobSettled=true; saveWallet(); updateWallet();       // z puli schodzi TYLKO jackpot
-  }
-  const net=payout+jackpot-jobCost;
-  lastReport={score,letter,iso,std:"ISO 5817",procLbl:proc,cut:false,proc,posKey,thick,coverage,spdAcc,evenness,avgV,diff,cost:jobCost,payout:payout+jackpot,jackpot,net,balance:gw,material:MATERIAL[bead].name[lang]};
+  const passed=coverage>=0.8&&score>=45;                                 // ukonczona laga, min. ocena D
+  if(isChallenge()){ if(score>=(CHALLENGE.minScore||90)) burstConfetti(); }
+  else if(!jobSettled){ jobSettled=true; if(score>=90 && diff>=7) burstConfetti(); }   // MISTRZOWSKA na A
+  lastReport={score,letter,iso,std:"ISO 5817",procLbl:proc,cut:false,proc,posKey,thick,coverage,spdAcc,evenness,avgV,diff,passed,material:MATERIAL[bead].name[lang]};
 
   const letEl=document.getElementById("rLetter"); letEl.textContent=letter; letEl.style.color=col;
   letEl.classList.remove("pop"); void letEl.offsetWidth; letEl.classList.add("pop");
@@ -1830,11 +1783,9 @@ function inspect(){
   } else document.getElementById("rHi").innerHTML='<b>—</b>';
   renderStat("rEven", evenness*100, Math.round(evenness*100)+"%");
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
-  const ecoTail=isChallenge()
-    ? '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_free")+'</small>'
-    : '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+(isChallenge()?' · '+t("eco_free"):'')+'</small>';
   if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
-  else if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">⭐ '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  else if(passed) rb.innerHTML=t("res_ok")+ecoTail;
   else rb.innerHTML=t("rew_zero")+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");
@@ -1927,14 +1878,14 @@ function buildCard(){
     x.fillStyle=fg; x.fillRect(bx,by,bw*p,bh);
     x.fillStyle="#8b97a0"; x.font="600 11px 'Segoe UI'"; x.fillText(m[1]+" "+Math.round(p*100)+"%", bx+bw+10, by+7);
   });
-  x.fillStyle=(r.net>=0)?"#5fe08a":"#ff5a4a"; x.font="800 24px 'Segoe UI'"; x.fillText(((r.net>=0)?"+":"")+(r.net||0)+" GW"+(r.jackpot?"  ⭐":""), 32, 310);
+  x.fillStyle=r.passed?"#5fe08a":"#ff5a4a"; x.font="800 20px 'Segoe UI'"; x.fillText(t(r.passed?"res_ok":"rew_zero").split(" — ")[0], 32, 310);
   x.fillStyle="#ffae3c"; x.font="800 15px 'Segoe UI'"; x.fillText(t("tagline"), 32, 332);
   openModal("cardModal");
 }
 function cardText(){ const r=lastReport;
   return fmt(r.cut?"cardtext_cut":"cardtext",
     [ (r.procLbl||r.proc)+" · "+r.material+" · "+POSITIONS[r.posKey].lbl+" ("+r.thick+"mm)",
-      r.letter+" ("+r.score+"%)", r.iso, (r.payout||0) ]); }
+      r.letter+" ("+r.score+"%)", r.iso ]); }
 
 // ── Audio ─────────────────────────────────────────────────────────
 let actx,master,noiseSrc,buzzOsc,bpFilter,crackleTimer,soundOn=true;
@@ -1993,7 +1944,6 @@ function refreshAmps(){
 function updateInfo(){
   const P=POSITIONS[posKey]; recalc(); refreshAmps(); const d=jobDiff(), tr=valueTier(d), plan=passPlan();
   const passInfo = plan.length>1 ? `<br>${t("cov_layer")}: <b style="color:#ffae3c">${plan.map(p=>t("pass_"+p)).join(" → ")}</b>` : "";
-  const cost=jobPrice(), aNet=rewardFor(90,1)-cost;      // 1:1 z tym, co naprawde wyplaci inspekcja
   const el=weldElectrics(posKey);
   const off=el&&el.ampsUse!==el.amps;
   const ampTxt=el?(off?`<b style="color:#ffae3c">${el.ampsUse}</b>/${el.amps}`:el.amps):"";
@@ -2010,8 +1960,7 @@ function updateInfo(){
   infoEl.innerHTML=
     `<span class="proc">${PROCESS[proc].name[lang]}</span><br><span class="pname">${P.name[lang]}</span><br>`+
     `<span class="stars">${"★".repeat(P.stars)}${"☆".repeat(5-P.stars)}</span> &nbsp; ${t("vset")} <span class="v">${(targetPx/PX_PER_MM).toFixed(1)} mm/s</span> · ${thick}mm<br>`+
-    `${MATERIAL[bead].name[lang]} · <b style="color:${tr.col}">${tr.name}</b> ×${d.toFixed(1)}<br>`+
-    `${t("eco_buy")} <b style="color:#ff9a3c">${cost} GW</b> · ${t("eco_a")} <b style="color:#5fe08a">${aNet>=0?'+':''}${aNet} GW</b>`+passInfo+hiLine;
+    `${MATERIAL[bead].name[lang]} · <b style="color:${tr.col}">${tr.name}</b> ×${d.toFixed(1)}`+passInfo+hiLine;
   updateMobHud();
 }
 function selectPos(){
@@ -2059,7 +2008,7 @@ function applyChallengePin(){
     });
   });
   const car=document.getElementById("career"); if(car){ car.disabled=true; car.style.opacity=.55; }
-  updateWallet();                                                       // pasek pokazuje próg konkursu, nie saldo GW
+  updateWallet();                                                       // pasek konkursu: pokaz albo schowaj
   const pf=document.getElementById("cardProof"); if(pf) pf.style.display="";
   document.title="ARC CHALLENGE "+CHALLENGE.id+" — MMA · ocena A";
   clearWeld();
@@ -2102,7 +2051,7 @@ function clearWeld(){
   arcLive=false; arcLen=0; btnMask=0; stickCount=0; arcBroke=0; contactT=0; arcPenAcc=0; arcTime=0; arcVSum=0; arcPorAcc=0; arcRSum=0;
   angLive=false; waDeg=0; taDeg=0; keyMask=0; angPenAcc=0; angTime=0; angPorAcc=0; angWSum=0; angTSum=0;
   tigLive=false; filPend=false; filPenAcc=0; filCount=0; lastDabPos=null;
-  passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobPaid=false; jobSettled=false; jobCost=0; recalc();
+  passPlanArr=passPlan(); passIndex=0; passMul=PASS_W[passPlanArr[0]]; passLog=[]; covSmoothed=0; jobSettled=false; recalc();
   tickAcc=0; vTickRef=targetPx;                                          // stan startowy taktu — 1:1 z sim.js (po recalc, bo zależy od targetPx)
   updateToolHud(); }
 
@@ -2150,7 +2099,7 @@ document.getElementById("clear").onclick=()=>{ clearWeld(); flashEl.style.opacit
 document.getElementById("rClose").onclick=()=>closeModal("repModal");
 document.getElementById("rCard").onclick=()=>{ closeModal("repModal"); buildCard(); };
 document.getElementById("carClose").onclick=()=>closeModal("carModal");
-document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); gw=GW_STAKE; pool=POOL_STAKE; burned=0; saveWallet(); updateWallet(); updateInfo(); updateRank(); openCareer(); };
+document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); updateInfo(); updateRank(); openCareer(); };
 document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
 document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
 document.getElementById("cardProof").onclick=copyProof;
@@ -2184,11 +2133,10 @@ function syncMobileLayout(){
       top.querySelectorAll(".group").forEach(g=>{ setupSlots.top.push(g); sheet.appendChild(g); });
       bottom.querySelectorAll(".group").forEach(g=>{ setupSlots.bottom.push(g); sheet.appendChild(g); });
       const ex=document.createElement("div"); ex.className="group setup-extras";
-      ex.innerHTML='<button type="button" id="mobCareer">🎓</button><button type="button" id="mobMethods">📖</button><button type="button" id="mobPricing">💲</button>';
+      ex.innerHTML='<button type="button" id="mobCareer">🎓</button><button type="button" id="mobMethods">📖</button>';
       sheet.appendChild(ex);
       document.getElementById("mobCareer").onclick=()=>{ toggleSetup(false); openCareer(); };
       document.getElementById("mobMethods").onclick=()=>{ toggleSetup(false); fillMethods(); openModal("methodsModal"); };
-      document.getElementById("mobPricing").onclick=()=>{ toggleSetup(false); document.getElementById("pricing").click(); };
       sheet.dataset.ready="1";
     }
   } else if(sheet.dataset.ready){
@@ -2288,10 +2236,6 @@ function cutStart(e){
   if(modalOpen())return; const p=pos(e); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; }
   if(proc==="CUT" && bead!=="steel"){ showToast(t("t_cut_steelonly"),"#ff5a4a"); e.preventDefault(); return; }
-  if(!jobPaid&&!isChallenge()){ const price=jobPrice();                // konkurs darmowy — jak w start()
-    const dole=topUp(price);                                          // jak w start()
-    gw-=price; burned+=CONSUMABLE[proc]; pool+=matCost(); jobCost=price; jobPaid=true; saveWallet(); updateWallet();
-    showToast(dole?t("t_topup"):fmt("t_bought",[price]), dole?"#1fd6e3":"#ffae3c"); }
   welding=true; last=p; const t0=performance.now(); lastT=t0; vEMA=targetPx;
   cutHeat=0; pierced=(proc==="PLASMA");
   if(!rec||!rec.events.length)recStart(); recEv('down',p.x,p.y,t0); arcOn(); arcIntensity(0.3);   // jak przy spawaniu — parametry na żywo, póki runda pusta
@@ -2365,13 +2309,10 @@ function cutInspect(){
   const letter=score>=90?"A":score>=78?"B":score>=62?"C":score>=45?"D":"F";
   const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
   const diff=jobDiff();
-  let payout=rewardFor(score,coverage), jackpot=0;   // ta sama formula co przy spawaniu
-  if(isChallenge()){ payout=0; jackpot=0; }                              // konkurs darmowy — jak w report()
-  else if(!jobSettled){ if(score>=90 && diff>=1.6 && pool>0) jackpot=Math.round(pool*0.4);
-    gw+=payout+jackpot; pool-=jackpot; jobSettled=true; saveWallet(); updateWallet(); }     // z puli schodzi TYLKO jackpot
-  const net=payout+jackpot-jobCost;
+  const passed=coverage>=0.8&&score>=45;                                 // ten sam prog co przy spawaniu
+  if(!isChallenge()) jobSettled=true;
   // ISO 9013 to norma dla CIECIA TERMICZNEGO; 5817 dotyczy spoin i na karcie z rzazu bylaby klamstwem
-  lastReport={score,letter,iso,std:"ISO 9013",procLbl:(proc==="PLASMA"?"PLAZMA":"TLEN"),cut:true,proc,posKey,thick,coverage,spdAcc,evenness:straight,avgV,diff,cost:jobCost,payout:payout+jackpot,jackpot,net,balance:gw,material:MATERIAL[bead].name[lang]};
+  lastReport={score,letter,iso,std:"ISO 9013",procLbl:(proc==="PLASMA"?"PLAZMA":"TLEN"),cut:true,proc,posKey,thick,coverage,spdAcc,evenness:straight,avgV,diff,passed,material:MATERIAL[bead].name[lang]};
   const letEl2=document.getElementById("rLetter"); letEl2.textContent=letter; letEl2.style.color=col;
   letEl2.classList.remove("pop"); void letEl2.offsetWidth; letEl2.classList.add("pop");
   const isoEl=document.getElementById("rIso"); isoEl.textContent="ISO 9013 · "+iso; isoEl.style.background=isoCol+"22"; isoEl.style.color=isoCol;
@@ -2381,11 +2322,9 @@ function cutInspect(){
   document.getElementById("rHi").innerHTML='<b>—</b>';
   renderStat("rEven", straight*100, Math.round(straight*100)+"%");
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
-  const ecoTail=isChallenge()
-    ? '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_free")+'</small>'
-    : '<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+' · '+t("eco_cost")+' '+jobCost+' → '+t("eco_net")+' <b style="color:'+(net>=0?'#5fe08a':'#ff5a4a')+'">'+(net>=0?'+':'')+net+' GW</b> · '+t("eco_bal")+' '+gw+'</small>';
+  const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+(isChallenge()?' · '+t("eco_free"):'')+'</small>';
   if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
-  else if(payout+jackpot>0) rb.innerHTML='🏆 +'+(payout+jackpot)+' GW'+(jackpot?' <span style="color:#ff8a3c">⭐ '+t("eco_jack")+' +'+jackpot+'</span>':'')+ecoTail;
+  else if(passed) rb.innerHTML=t("res_ok")+ecoTail;
   else rb.innerHTML=t("rew_zero")+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");
@@ -2393,8 +2332,6 @@ function cutInspect(){
   const mid=seamPts[Math.floor(seamPts.length/2)]; drawZoom(mid.x,mid.y, D.find(d=>d.s!=="ok"));
   openModal("repModal");
 }
-document.getElementById("pricing").onclick=()=>{ document.getElementById("priceFrame").src="cennik.html?l="+lang+"&t="+Date.now(); openModal("priceModal"); };
-document.getElementById("priceClose").onclick=()=>closeModal("priceModal");
 (()=>{ const v=document.getElementById("pagebg"); if(!v)return; v.muted=true; const p=v.play&&v.play(); if(p&&p.catch)p.catch(()=>{}); document.addEventListener("click",()=>v.play&&v.play(),{once:true}); })();
 document.getElementById("tutStart").onclick=dismissTut;
 document.getElementById("tutSkip").onclick=dismissTut;

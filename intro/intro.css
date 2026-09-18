@@ -1,4 +1,5 @@
-/* GORWELD homepage — Velda intro film */
+/* GORWELD homepage — Velda intro film (odtwarzany na zadanie, nie na wejsciu) */
+.fi[hidden]{display:none}
 .fi{
   position:fixed;inset:0;z-index:10050;
   background:#050403;color:#e8dcc8;
@@ -11,24 +12,10 @@ body.fi-lock{overflow:hidden}
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:cover;background:#050403;
 }
-.fi-hit{
-  position:absolute;inset:0;z-index:6;
-  background:transparent;border:0;cursor:pointer;
-}
-.fi.is-playing .fi-hit{pointer-events:none}
-.fi-hint,.fi-skip{
-  position:absolute;z-index:8;
+.fi-close{
+  position:absolute;top:14px;right:16px;z-index:8;
   letter-spacing:.18em;text-transform:uppercase;
-}
-.fi-hint{
-  left:50%;bottom:7%;transform:translateX(-50%);
-  font-size:11px;color:#c9a57a;text-shadow:0 0 12px #000;
-  animation:fiBlink 2.4s ease-in-out infinite;pointer-events:none;
-}
-.fi.is-playing .fi-hint{display:none}
-@keyframes fiBlink{0%,100%{opacity:.35}50%{opacity:1}}
-.fi-skip{
-  top:14px;right:16px;
   background:none;border:0;color:#9a7b58;font-size:10px;cursor:pointer;
+  padding:8px 10px;
 }
-.fi-skip:hover{color:#e8dcc8}
+.fi-close:hover,.fi-close:focus-visible{color:#e8dcc8}

@@ -13,6 +13,9 @@ exclude:
   # w headless Edge. Na stronie byłby gotowym skryptem spawającym rundę za gracza.
   - arc/parity-driver.js
 
+  # smoke strony glownej — sterownik playwrighta odpalany recznie, nie czesc strony.
+  - tests/
+
   # agent Velda — system prompt, baza wiedzy i skrypt publikujący. Narzędzie operatorskie,
   # nie część strony. Na serwerze byłby to gotowy przepis, jak podszyć się pod jej głos.
   - velda/

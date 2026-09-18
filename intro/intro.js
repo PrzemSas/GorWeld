@@ -1,34 +1,26 @@
 (function () {
+  // Film Veldy jest atrakcja, nie bramka: strona startuje normalnie,
+  // a intro odtwarza sie dopiero po swiadomym kliknieciu w sekcji Forge.
   var root = document.getElementById("forge-intro");
-  if (!root) return;
+  var open = document.getElementById("fiOpen");
+  if (!root || !open) return;
 
   var vid = document.getElementById("fiFilm");
-  var hit = document.getElementById("fiHit");
-  var skip = document.getElementById("fiSkip");
-  var hint = document.getElementById("fiHint");
+  var close = document.getElementById("fiClose");
+  var lastFocus = null;
 
-  // sessionStorage rzuca wyjatkiem w trybie prywatnym i przy zablokowanych danych witryny.
-  function seen() {
-    try { return sessionStorage.getItem("gw-intro") === "1"; } catch (e) { return false; }
-  }
-  function remember() {
-    try { sessionStorage.setItem("gw-intro", "1"); } catch (e) {}
-  }
-
-  var skipQ = /(?:^|[?&])skipIntro=1(?:&|$)/.test(location.search);
-  var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (skipQ || calm || seen()) {
-    done(true);
-    return;
+  function show() {
+    lastFocus = document.activeElement;
+    root.hidden = false;
+    document.body.classList.add("fi-lock");
+    if (close) close.focus();
+    play();
   }
 
-  document.body.classList.add("fi-lock");
-
-  function playFilm() {
-    if (!vid) return done(false);
+  function play() {
+    if (!vid) return hide();
     root.classList.add("is-playing");
-    if (hint) hint.hidden = true;
+    vid.currentTime = 0;
     vid.muted = false;
     var p = vid.play();
     if (p && p.catch) {
@@ -36,28 +28,31 @@
         // Przegladarka odmowila dzwieku — lecimy bez niego zamiast zostawiac czarny ekran.
         vid.muted = true;
         var q = vid.play();
-        if (q && q.catch) q.catch(function () { done(false); });
+        if (q && q.catch) q.catch(hide);
       });
     }
   }
 
-  function done(instant) {
-    remember();
+  function hide() {
     document.body.classList.remove("fi-lock");
     if (vid) { try { vid.pause(); } catch (e) {} }
-    if (instant) { root.remove(); return; }
     root.classList.add("is-out");
-    setTimeout(function () { root.remove(); }, 950);
+    setTimeout(function () {
+      root.hidden = true;
+      root.classList.remove("is-out", "is-playing");
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }, 700);
   }
 
-  if (hit) hit.addEventListener("click", playFilm);
+  open.addEventListener("click", show);
+  if (close) close.addEventListener("click", hide);
+  // Koniec filmu zostawia czlowieka tam, gdzie byl — zadnego przerzucania na /forge/.
   if (vid) {
-    vid.addEventListener("ended", function () {
-      remember();
-      window.location.href = "/forge/";
-    });
+    vid.addEventListener("ended", hide);
     // Brak pliku, blad sieci albo kodeka — nie wiezimy nikogo za czarna plansza.
-    vid.addEventListener("error", function () { done(false); });
+    vid.addEventListener("error", hide);
   }
-  if (skip) skip.addEventListener("click", function () { done(false); });
+  document.addEventListener("keydown", function (e) {
+    if (!root.hidden && (e.key === "Escape" || e.key === "Esc")) hide();
+  });
 })();

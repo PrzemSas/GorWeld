@@ -238,17 +238,15 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"GORWELD","url":"https://gorweld.com/"}</script>
 </head>
 <body>
-<div id="forge-intro" class="fi" role="dialog" aria-label="Dumpster Forge intro">
-  <video id="fiFilm" class="fi-vid" playsinline preload="metadata" poster="/intro/dungeon.jpg?v=3">
+<div id="forge-intro" class="fi" role="dialog" aria-modal="true" aria-label="Dumpster Forge intro film" hidden>
+  <video id="fiFilm" class="fi-vid" playsinline preload="none" poster="/intro/dungeon.jpg?v=3">
     <source src="/intro/velda-intro.mp4" type="video/mp4">
   </video>
-  <button class="fi-hit" id="fiHit" type="button" aria-label="Play intro"></button>
-  <p class="fi-hint" id="fiHint">click to enter</p>
-  <button class="fi-skip" id="fiSkip" type="button">skip</button>
+  <button class="fi-close" id="fiClose" type="button">close</button>
 </div>
 <div class="scanlines"></div>
 <div class="scan-after"></div>
-<nav id="nav"><a href="#" class="nlogo" style="display:flex;align-items:center;gap:8px"><img src="/favicon.png" alt="GORWELD" style="height:36px;width:36px;border-radius:50%;display:block"></a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><div class="dd"><a href="#arc">ARC</a><div class="dd-m"><a href="/arc">Arc Welder</a><a href="#controller">ARC Controller</a><a href="/arcquote">ArcQuote</a></div></div><div class="dd"><a href="#forge">Forge</a><div class="dd-m"><a href="/forge/">Forge tour</a><a href="/shift/">Velda</a><a href="/relics">Burn Relics</a></div></div><a href="#game">Game</a><div class="dd"><a href="#onchain">On-chain</a><div class="dd-m"><a href="#gorweld">$GorWeld · official CA</a><a href="/docs">Token data &amp; proofs</a><a href="/airdrop/">Airdrop</a></div></div><div class="dd"><a href="#about">About</a><div class="dd-m"><a href="#community">Community</a><a href="https://x.com/Przemsas" target="_blank" rel="noopener">@Przemsas</a></div></div><a href="/arc" class="ncta">▶ Play ARC</a></div></nav>
+<nav id="nav"><a href="#" class="nlogo" style="display:flex;align-items:center;gap:8px"><img src="/favicon.png" alt="GORWELD" style="height:36px;width:36px;border-radius:50%;display:block"></a><button class="mmenu" onclick="document.querySelector('.nlinks').classList.toggle('open')">☰</button><div class="nlinks"><div class="dd"><a href="#arc">ARC</a><div class="dd-m"><a href="/arc">Arc Welder</a><a href="#controller">ARC Controller</a><a href="/arcquote">ArcQuote</a></div></div><div class="dd"><a href="#forge">Forge</a><div class="dd-m"><a href="/forge/">Forge tour</a><a href="/shift/">Velda</a><a href="/relics">Burn Relics</a></div></div><a href="#game">Game</a><div class="dd"><a href="#onchain">On-chain</a><div class="dd-m"><a href="#gorweld">$GorWeld · official CA</a><a href="/docs">Token data &amp; proofs</a><a href="/airdrop/">Airdrop</a></div></div><div class="dd"><a href="#about">About</a><div class="dd-m"><a href="#community">Community</a><a href="#contact">Contact &amp; legal</a><a href="https://x.com/Przemsas" target="_blank" rel="noopener">@Przemsas</a></div></div><a href="/arc" class="ncta">▶ Play ARC</a></div></nav>
 
 <section class="hero">
   <div class="hero-vig"></div><div class="hero-floor"></div><div class="hero-embers" id="heroEmbers"></div>
@@ -352,7 +350,7 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
         <div class="feat"><div class="ft">🚪 FORGE TOUR</div><div class="fd">Walk the underground forge with Velda and pick a door: arc, relics, docs, the yard.</div></div>
         <div class="feat"><div class="ft">🔥 BURN RELICS</div><div class="fd">Ten Genesis NFTs forged from the ashes of the first great $GORWELDD burn.</div></div>
       </div>
-      <div class="gw-btns" style="margin-top:20px"><a href="/forge/" class="btn btn1">🚪 Enter the Forge tour</a><a href="/shift/" class="btn btn2">⚡ Meet Velda</a></div>
+      <div class="gw-btns" style="margin-top:20px"><a href="/forge/" class="btn btn1">🚪 Enter the Forge tour</a><a href="/shift/" class="btn btn2">⚡ Meet Velda</a><button id="fiOpen" type="button" class="btn btn2">▶ Watch the intro film</button></div>
     </div>
     <a href="/forge/" class="forge-img"><img src="/forge/arc.jpg" width="1280" height="720" loading="lazy" alt="Velda, a cyborg welder in a torn coat, stands in the underground Dumpster Forge next to a workbench throwing sparks, welding helmets hanging on the stone wall."></a>
   </div>
@@ -504,9 +502,40 @@ footer{padding:28px 24px;border-top:1px solid #e08a3a0a;text-align:center;backgr
   JOIN DISCORD
 </a>
 
+<section id="contact" class="sec-dark"><div class="si">
+  <div class="stag">// CONTACT &amp; LEGAL</div><div class="sdiv"></div>
+  <h2 class="stitle">Who stands behind this</h2>
+  <p class="sdesc">GORWELD® is built and run by one working welder. For schools, training centres, press or partnership enquiries, write — a real person answers.</p>
+  <div class="feats">
+    <div class="feat">
+      <div class="ft">CONTACT</div>
+      <div class="fd">
+        <!-- Adres tymczasowy, wybrany swiadomie 18.09: dziala od zaraz.
+             Docelowo kontakt@gorweld.com — MX domeny juz ida do Google, brakuje samego
+             aliasu (admin.google.com -> Users -> Alternate email addresses). Podmiana
+             to ta jedna linia; wczesniej przetestowac mailem, bo kontakt@ ODBIJA (18.09). -->
+        <a href="mailto:gorwelddumpster@gmail.com">gorwelddumpster@gmail.com</a><br>
+        or <a href="https://x.com/GorWeld" target="_blank" rel="noopener">@GorWeld</a> on X.
+      </div>
+    </div>
+    <div class="feat">
+      <div class="ft">TRADEMARK</div>
+      <div class="fd">GORWELD® is a registered trademark (R.396313). The simulator, the Forge and the games are original work — not affiliated with any welding equipment manufacturer or standards body.</div>
+    </div>
+    <div class="feat">
+      <div class="ft">PRIVACY</div>
+      <div class="fd">ARC needs no account and no sign-up. It runs entirely in your browser: your runs and progress stay in your own device storage, and the simulator makes no calls to any outside server. This landing page does load Google Fonts and IPFS gateways for the Relic thumbnails, so those services see your IP.</div>
+    </div>
+    <div class="feat">
+      <div class="ft">STANDARDS</div>
+      <div class="fd">ARC grades against ISO 6947 positions and ISO 5817 quality levels as a teaching aid. It is training practice, not a substitute for certified instruction, a WPQR or any formal qualification.</div>
+    </div>
+  </div>
+</div></section>
+
 <footer>
   <div class="flogo">GORWELD®</div>
-  <div class="flinks"><a href="/arc">ARC</a><a href="/arcquote">ArcQuote</a><a href="/forge/">Forge tour</a><a href="/relics">Burn Relics</a><a href="/demo">Scrap Scavenger</a><a href="#gorweld">$GorWeld · CA</a><a href="/docs">Docs</a><a href="https://x.com/Przemsas" target="_blank">@Przemsas</a><a href="https://x.com/GorWeld" target="_blank">@GorWeld</a></div>
+  <div class="flinks"><a href="/arc">ARC</a><a href="/arcquote">ArcQuote</a><a href="/forge/">Forge tour</a><a href="/relics">Burn Relics</a><a href="/demo">Scrap Scavenger</a><a href="#contact">Contact</a><a href="#gorweld">$GorWeld · CA</a><a href="/docs">Docs</a><a href="https://x.com/Przemsas" target="_blank">@Przemsas</a><a href="https://x.com/GorWeld" target="_blank">@GorWeld</a></div>
   <div class="fcopy">GORWELD® // FORGED, NOT GIVEN. // DUMPSTER FORGE INDUSTRIES // 2025—2026</div>
 </footer>
 

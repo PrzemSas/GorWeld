@@ -175,6 +175,16 @@
     background:linear-gradient(135deg,#143238,#0e2226); border:1px solid var(--cyan); color:var(--cyan); font-size:11px; font-weight:800;
     display:flex; align-items:center; justify-content:center; }
   .tutsteps b { color:#e9eef2; }
+  .qs-card { width:min(440px,92vw); }
+  .qs-sub { font-size:12px; color:#8b97a0; margin:-6px 0 14px; letter-spacing:.5px; }
+  .qs-opts { display:flex; flex-direction:column; gap:8px; }
+  .qs-opt { display:flex; flex-direction:column; align-items:flex-start; gap:3px; text-align:left; padding:12px 14px; border-radius:10px; }
+  .qs-opt b { font-size:14px; letter-spacing:1px; }
+  .qs-opt span { font-size:12px; font-weight:400; letter-spacing:0; text-transform:none; opacity:.8; }
+  .qs-how { margin-top:14px; padding:10px 12px; border-left:2px solid var(--cyan); background:#0d1418; font-size:12.5px; line-height:1.55; color:#9aa6ad; border-radius:0 8px 8px 0; }
+  .qs-how b { color:#e9eef2; }
+  .qs-links { margin-top:12px; text-align:center; font-size:12px; color:#6b767e; }
+  .qs-links button { background:none; border:none; padding:2px 4px; color:#9aa6ad; text-decoration:underline; font-size:12px; letter-spacing:0; text-transform:none; cursor:pointer; box-shadow:none; }
   #watermark { position:fixed; right:14px; bottom:14px; z-index:5; pointer-events:none; font-size:9px; letter-spacing:2.5px; color:rgba(93,105,115,.45); font-weight:700; }
   .xpbar > div { transition:width .6s cubic-bezier(.2,.9,.3,1); position:relative; overflow:hidden; }
   .xpbar > div::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent); animation:xpShine 2.2s ease-in-out infinite; }
@@ -402,6 +412,20 @@
   </div></div>
 
 
+  <!-- QUICK START — pierwsza wizyta: wybierz metodę, reszta z WPS -->
+  <div id="qsModal" class="modal"><div class="card qs-card">
+    <h2 data-i18n="qs_title">Wybierz pierwszy spaw</h2>
+    <div class="qs-sub" data-i18n="qs_sub">Stal 3 mm · doczołowe · PA · prąd z WPS</div>
+    <div class="qs-opts">
+      <button class="qs-opt on" data-qs="MMA"><b>MMA 111</b><span data-i18n="qs_mma">Elektroda otulona. Najlepszy start.</span></button>
+      <button class="qs-opt" data-qs="MIG"><b>MIG/MAG 135</b><span data-i18n="qs_mig">Drut w osłonie gazu. Równa ręka, równe tempo.</span></button>
+      <button class="qs-opt" data-qs="TIG"><b>TIG 141</b><span data-i18n="qs_tig">Dwie ręce: łuk i pręt. Najtrudniejsza.</span></button>
+    </div>
+    <div class="qs-how" id="qsHow"></div>
+    <div class="act"><button id="qsGo" class="on" data-i18n="qs_go">START TRENINGU ▶</button></div>
+    <div class="qs-links"><button id="qsGuide" type="button" data-i18n="qs_guide">Pełna instrukcja</button> · <button id="qsSkip" type="button" data-i18n="qs_skip">Ustawię sam</button></div>
+  </div></div>
+
   <!-- METODY / GLOSSARY -->
   <div id="methodsModal" class="modal"><div class="card" style="width:min(580px,94vw);max-height:88vh;overflow:auto;text-align:left">
     <h2 data-i18n="methods_title">Metody — opis fachu</h2>
@@ -482,7 +506,11 @@ function recEv(type,x,y,now,b,k){ if(!rec) return;
   rec.events.push(ev); }
 
 // ── i18n (PL / EN / RU) ───────────────────────────────────────────
-let lang='pl'; try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
+// Bez zapisanego wyboru bierzemy język przeglądarki: home jest po angielsku, więc gość z niej
+// nie może lądować w polskim ARC. pl → pl, ru/uk/be → ru, reszta → en.
+let lang=(()=>{ const n=((navigator.languages&&navigator.languages[0])||navigator.language||"").toLowerCase().slice(0,2);
+  return n==="pl"?"pl":(["ru","uk","be"].includes(n)?"ru":"en"); })();
+try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
  pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM",t_tigstop:"✔ ŁUK ZGASZONY — PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_offaxis:"ZJECHAŁEŚ Z OSI — wracaj na grań",fb_filler:"DODAJ SPOIWO — SPACJA",def_filler:"Nierówny rytm spoiwa — faliste lico, miejscami nadlew, miejscami niedolew",def_hi_over:"Przekroczony wkład ciepła — %1 kJ/mm przy dopuszczalnych %2. Materiał badany udarnościowo: powyżej granicy z WPS kwalifikacja udarnościowa nie pokrywa złącza — odrzut niezależnie od wyglądu lica",hi_max:"max",hi_cvn:"max wg WPS (udarność)",fb_hi:"ZA DUŻY WKŁAD CIEPŁA — jedź szybciej albo zbij prąd",def_offaxis:"Ścieg poza osią złącza — podtopienie jednej krawędzi, brak wtopienia po drugiej",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
@@ -596,6 +624,24 @@ const I18N={
   cardtext:"Сварил шов %1 — оценка %2, ISO 5817 %3. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#welding #GorWeld",
   cardtext_cut:"Разрезал %1 — оценка %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — бесплатный симулятор\n#cutting #welding #GorWeld" },
 };
+Object.assign(I18N.pl,{ qs_title:"Wybierz pierwszy spaw", qs_sub:"Stal 3 mm · doczołowe · PA · prąd z WPS",
+  qs_mma:"Elektroda otulona. Najlepszy start.", qs_mig:"Drut w osłonie gazu. Równa ręka, równe tempo.", qs_tig:"Dwie ręce: łuk i pręt spoiwa. Najtrudniejsza.",
+  qs_go:"START TRENINGU ▶", qs_guide:"Pełna instrukcja", qs_skip:"Ustawię sam",
+  qs_how:"<b>LPM</b> — krótko, zajarz łuk (nie trzymaj, przywrze). Prowadź wzdłuż grani. Krótkie <b>LPM</b> dosuwają, <b>PPM</b> odciąga, <b>LPM+PPM</b> kończy ścieg.",
+  qs_how_tig:"<b>LPM</b> zapala łuk, <b>SPACJA</b> dokłada spoiwo, <b>PPM</b> gasi. Prowadź wzdłuż grani — bez spoiwa nie ma spoiny.",
+  qs_how_mob:"<b>Dotknij i ciągnij</b> wzdłuż grani. Łuk trzyma się sam, kąt stoi na WPS." });
+Object.assign(I18N.en,{ qs_title:"Choose your first weld", qs_sub:"3 mm steel · butt joint · PA flat · current from WPS",
+  qs_mma:"Stick electrode. The best place to start.", qs_mig:"Wire under shielding gas. Steady hand, steady pace.", qs_tig:"Two hands: arc and filler rod. The hardest.",
+  qs_go:"START TRAINING ▶", qs_guide:"Full guide", qs_skip:"I'll set it up myself",
+  qs_how:"<b>Left click</b> — tap to strike (don't hold, it sticks). Travel along the joint. Short <b>left</b> clicks feed in, <b>right</b> pulls back, <b>left+right</b> ends the bead.",
+  qs_how_tig:"<b>Left click</b> lights the arc, <b>SPACE</b> dabs filler, <b>right click</b> puts it out. Travel along the joint — no filler, no weld.",
+  qs_how_mob:"<b>Touch and drag</b> along the joint. The arc holds itself, the angle stays on WPS." });
+Object.assign(I18N.ru,{ qs_title:"Выбери первый шов", qs_sub:"Сталь 3 мм · стыковое · PA · ток по WPS",
+  qs_mma:"Покрытый электрод. Лучший старт.", qs_mig:"Проволока в защитном газе. Ровная рука, ровный темп.", qs_tig:"Две руки: дуга и присадочный пруток. Самый сложный.",
+  qs_go:"НАЧАТЬ ТРЕНИРОВКУ ▶", qs_guide:"Полная инструкция", qs_skip:"Настрою сам",
+  qs_how:"<b>ЛКМ</b> — коротко, зажги дугу (не удерживай, прилипнет). Веди вдоль шва. Короткие <b>ЛКМ</b> подают, <b>ПКМ</b> оттягивает, <b>ЛКМ+ПКМ</b> заканчивает валик.",
+  qs_how_tig:"<b>ЛКМ</b> зажигает дугу, <b>ПРОБЕЛ</b> подаёт присадку, <b>ПКМ</b> гасит. Веди вдоль шва — без присадки шва нет.",
+  qs_how_mob:"<b>Коснись и веди</b> вдоль шва. Дуга держится сама, угол стоит на WPS." });
 function t(k,a){ const v=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]!=null?I18N.pl[k]:k); return a!=null?String(v).replace("%1",a):v; }
 function fmt(k,arr){ let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]||k); arr.forEach((v,i)=>s=String(s).replace("%"+(i+1),v)); return s; }
 
@@ -1849,7 +1895,7 @@ function updateRank(){ const r=rankFor(progress.xp); document.getElementById("ra
 function applyI18N(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.getElementById("snd").textContent = soundOn? t("btn_arc") : t("btn_mute");
-  updateInfo(); updateToolHud(); updateRank(); fillTut(); updateWallet(); updateMobHud();
+  updateInfo(); updateToolHud(); updateRank(); fillTut(); fillQs(); updateWallet(); updateMobHud();
 }
 
 // ── Share card ────────────────────────────────────────────────────
@@ -2114,6 +2160,22 @@ function fillTut(){ const el=document.getElementById("tutSteps"); if(!el) return
 function openTut(){ fillTut(); openModal("tutModal"); }
 function dismissTut(){ try{ localStorage.setItem("gorweld_tut","1"); }catch(e){} closeModal("tutModal"); }
 document.getElementById("help").onclick=openTut;
+
+// ── Quick start (pierwsza wizyta) ─────────────────────────────────
+// Zamiast ściany tekstu: jedna decyzja (metoda), reszta zostaje na domyślnych z WPS.
+// Wybór idzie przez zwykły przycisk .proc — ten sam handler co w panelu, więc nagranie i
+// parytet z sim.js nie mają tu żadnej osobnej ścieżki.
+let qsProc="MMA";
+function fillQs(){ document.querySelectorAll(".qs-opt").forEach(b=>b.classList.toggle("on",b.dataset.qs===qsProc));
+  const how=document.getElementById("qsHow"); if(!how) return;
+  how.innerHTML=document.body.classList.contains("is-mobile")?t("qs_how_mob"):t(qsProc==="TIG"?"qs_how_tig":"qs_how"); }
+function openQs(){ fillQs(); openModal("qsModal"); }
+function doneQs(){ try{ localStorage.setItem("gorweld_tut","1"); }catch(e){} closeModal("qsModal"); }
+document.querySelectorAll(".qs-opt").forEach(b=>b.onclick=()=>{ qsProc=b.dataset.qs; fillQs(); });
+document.getElementById("qsGo").onclick=()=>{ const b=document.querySelector('.proc[data-proc="'+qsProc+'"]');
+  if(b&&proc!==qsProc) b.click(); doneQs(); };
+document.getElementById("qsSkip").onclick=doneQs;
+document.getElementById("qsGuide").onclick=()=>{ doneQs(); setTimeout(openTut,240); };
 
 // ── Mobile layout ─────────────────────────────────────────────────
 const setupSlots={top:[],bottom:[]};
@@ -2390,7 +2452,7 @@ resize(); refreshPositions(); updateRank(); applyI18N(); updateWallet(); request
 fitStage(); applyChallengePin(); loadChallengeConfig();   // pin od razu ze stałych, potem doprecyzuj z challenge-config.json
 const _bgV=document.getElementById("pagebg"); if(_bgV){ _bgV.addEventListener("canplay",hideSplash,{once:true}); }
 setTimeout(hideSplash,900);
-try{ if(!localStorage.getItem("gorweld_tut")) setTimeout(openTut,1100); }catch(e){}
+try{ if(!localStorage.getItem("gorweld_tut")) setTimeout(isChallenge()?openTut:openQs,1100); }catch(e){}
 </script>
 </body>
 </html>

@@ -642,6 +642,25 @@ Object.assign(I18N.ru,{ qs_title:"Выбери первый шов", qs_sub:"С�
   qs_how:"<b>ЛКМ</b> — коротко, зажги дугу (не удерживай, прилипнет). Веди вдоль шва. Короткие <b>ЛКМ</b> подают, <b>ПКМ</b> оттягивает, <b>ЛКМ+ПКМ</b> заканчивает валик.",
   qs_how_tig:"<b>ЛКМ</b> зажигает дугу, <b>ПРОБЕЛ</b> подаёт присадку, <b>ПКМ</b> гасит. Веди вдоль шва — без присадки шва нет.",
   qs_how_mob:"<b>Коснись и веди</b> вдоль шва. Дуга держится сама, угол стоит на WPS." });
+// Komunikaty wspólnego werdyktu treningu (spawanie, cięcie i kupony).
+Object.assign(I18N.pl,{
+  accept_pass:"%1 pkt — ZALICZONE", accept_fail:"%1 pkt — NIEZALICZONE: %2",
+  accept_score:"wynik poniżej %1 pkt", accept_coverage:"pokrycie poniżej 80%",
+  accept_coupon:"ćwiczenie wymaga co najmniej %1 pkt", accept_major:"krytyczna wada jakościowa",
+  accept_hi:"przekroczony wkład ciepła"
+});
+Object.assign(I18N.en,{
+  accept_pass:"%1 pts — PASSED", accept_fail:"%1 pts — NOT PASSED: %2",
+  accept_score:"score below %1 pts", accept_coverage:"coverage below 80%",
+  accept_coupon:"this exercise requires at least %1 pts", accept_major:"critical quality defect",
+  accept_hi:"heat input exceeded"
+});
+Object.assign(I18N.ru,{
+  accept_pass:"%1 балл. — ЗАЧТЕНО", accept_fail:"%1 балл. — НЕ ЗАЧТЕНО: %2",
+  accept_score:"результат ниже %1 балл.", accept_coverage:"покрытие менее 80%",
+  accept_coupon:"для упражнения нужно не менее %1 балл.", accept_major:"критический дефект качества",
+  accept_hi:"превышено тепловложение"
+});
 function t(k,a){ const v=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]!=null?I18N.pl[k]:k); return a!=null?String(v).replace("%1",a):v; }
 function fmt(k,arr){ let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.pl[k]||k); arr.forEach((v,i)=>s=String(s).replace("%"+(i+1),v)); return s; }
 
@@ -1731,6 +1750,22 @@ function bankPass(){
   flashEl.style.opacity="0.32"; setTimeout(()=>flashEl.style.opacity="0",90);
   updateToolHud(); updateInfo();
 }
+// ── Wspólny werdykt treningu — bez DOM, tłumaczeń i skutków ubocznych ──
+// Odrzut dokładnie jak plakietka ISO: major || score < 50. Dawne 45–49 pkt
+// nie zalicza już treningu. Kupony zachowują próg punktowy i wymagają też 80% pokrycia.
+// Konkurs nadal ma własną regułę score >= minScore; nie korzysta z zaliczenia treningu.
+function inspectionVerdict(score,coverage,major,minScore=50){
+  const rejected=major||score<50;
+  const reason=major?"accept_major":score<50?"accept_score":coverage<0.8?"accept_coverage":score<minScore?"accept_coupon":null;
+  return {passed:reason===null,rejected,reason,minScore:reason==="accept_score"?50:minScore};
+}
+function acceptanceText(score,verdict,defects){
+  if(verdict.passed) return fmt("accept_pass",[score]);
+  const defect=defects.find(d=>d.s==="major");
+  const reason=verdict.reason==="accept_major"&&defect
+    ? (defect.reason?t(defect.reason):defect.t) : fmt(verdict.reason,[verdict.minScore]);
+  return fmt("accept_fail",[score,reason]);
+}
 function inspect(){
   if(baked.length<10){ showToast(t("t_layfirst"),"#ff9a3c"); return; }
   const K=seamPts.length;
@@ -1779,7 +1814,7 @@ function inspect(){
   const hiOver=!!(cvnJob&&hiMax!=null&&hiAct!=null&&hiAct>hiMax);
 
   const D=[];
-  if(hiOver) D.push({s:"major",t:fmt("def_hi_over",[hiAct,hiMax])});   // poza zakresem kwalifikacji — lico tego nie ratuje
+  if(hiOver) D.push({s:"major",reason:"accept_hi",t:fmt("def_hi_over",[hiAct,hiMax])});   // poza zakresem kwalifikacji — lico tego nie ratuje
   if(coverage<0.85) D.push({s:coverage<0.6?"major":"minor",t:fmt("def_pen",[Math.round((1-coverage)*100)])});
   if(narrow/baked.length>0.25) D.push({s:"minor",t:t("def_narrow")});
   if(wide/baked.length>0.2) D.push({s:"minor",t:t("def_wide")});
@@ -1801,14 +1836,16 @@ function inspect(){
   if(D.length===0) D.push({s:"ok",t:t("def_clean")});
 
   const major=D.some(d=>d.s==="major");
-  let iso,isoCol; if(major||score<50){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
+  const coupon=!isChallenge()&&COUPONS.find(c=>c.id===activeCoupon);
+  const verdict=inspectionVerdict(score,coverage,major,coupon?coupon.req:50);
+  let iso,isoCol; if(verdict.rejected){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
   const letter=score>=90?"A":score>=78?"B":score>=62?"C":score>=45?"D":"F";
   const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
 
   const diff=jobDiff();
-  const passed=coverage>=0.8&&score>=45;                                 // ukonczona laga, min. ocena D
+  const passed=isChallenge()?coverage>=0.8&&score>=45:verdict.passed; // konkurs: zachowaj dotychczasowy stan karty
   if(isChallenge()){ if(score>=(CHALLENGE.minScore||90)) burstConfetti(); }
-  else if(!jobSettled){ jobSettled=true; if(score>=90 && diff>=7) burstConfetti(); }   // MISTRZOWSKA na A
+  else if(!jobSettled){ jobSettled=true; if(passed && score>=90 && diff>=7) burstConfetti(); }   // MISTRZOWSKA na A
   lastReport={score,letter,iso,std:"ISO 5817",procLbl:proc,cut:false,proc,posKey,thick,coverage,spdAcc,evenness,avgV,diff,passed,material:MATERIAL[bead].name[lang]};
 
   const letEl=document.getElementById("rLetter"); letEl.textContent=letter; letEl.style.color=col;
@@ -1831,8 +1868,7 @@ function inspect(){
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
   const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+(isChallenge()?' · '+t("eco_free"):'')+'</small>';
   if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
-  else if(passed) rb.innerHTML=t("res_ok")+ecoTail;
-  else rb.innerHTML=t("rew_zero")+ecoTail;
+  else rb.innerHTML=acceptanceText(score,verdict,D)+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");
     li.innerHTML='<span class="sev '+d.s+'">'+(d.s==="ok"?t("sev_ok"):d.s==="major"?t("sev_major"):t("sev_minor"))+'</span><span>'+d.t+'</span>'; ul.appendChild(li); }
@@ -1841,7 +1877,7 @@ function inspect(){
   const worst = gaps.length?gaps[Math.floor(gaps.length/2)] : (out?baked.find(b=>b.off>grooveHalf+bevelW*0.7):seamPts[Math.floor(K/2)]);
   drawZoom(worst.x,worst.y, D.find(d=>d.s!=="ok"));
   openModal("repModal");
-  maybeCompleteCoupon(score);
+  maybeCompleteCoupon(score,coverage,major,D);
 }
 function drawZoom(cx,cy,worst){
   const zc=document.getElementById("zoom"),z=zc.getContext("2d"),zw=zc.width,zh=zc.height,sc=2.6;
@@ -1862,12 +1898,13 @@ function drawZoom(cx,cy,worst){
 }
 
 // ── Career ────────────────────────────────────────────────────────
-function maybeCompleteCoupon(score){
-  if(!activeCoupon) return; const c=COUPONS.find(x=>x.id===activeCoupon); if(!c) return;
-  if(score>=c.req && (!progress.done[c.id] || progress.done[c.id]<score)){
+function maybeCompleteCoupon(score,coverage,major,defects){
+  if(isChallenge()||!activeCoupon) return; const c=COUPONS.find(x=>x.id===activeCoupon); if(!c) return;
+  const verdict=inspectionVerdict(score,coverage,major,c.req);
+  if(verdict.passed && (!progress.done[c.id] || progress.done[c.id]<score)){
     const fresh=!progress.done[c.id]; progress.done[c.id]=score; if(fresh) progress.xp+=c.xp; saveProgress(); updateRank();
     setTimeout(()=>showToast(fmt("t_couponOk",[fresh?c.xp:0]),"#5fe08a"),300);
-  } else if(score<c.req){ setTimeout(()=>showToast(fmt("t_couponFail",[c.req]),"#ff9a3c"),300); }
+  } else if(!verdict.passed){ setTimeout(()=>showToast(acceptanceText(score,verdict,defects),"#ff9a3c"),300); }
 }
 function openCareer(){
   const grid=document.getElementById("cgrid"); grid.innerHTML="";
@@ -2367,11 +2404,12 @@ function cutInspect(){
   if(straight<0.6) D.push({s:straight<0.4?"major":"minor",t:t("cd_dev")});
   if(D.length===0) D.push({s:"ok",t:t("cd_clean")});
   const major=D.some(d=>d.s==="major");
-  let iso,isoCol; if(major||score<50){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
+  const verdict=inspectionVerdict(score,coverage,major);
+  let iso,isoCol; if(verdict.rejected){iso=t("iso_reject");isoCol="#ff5a4a";} else if(score>=88){iso=t("iso_B");isoCol="#5fe08a";} else if(score>=72){iso=t("iso_C");isoCol="#ffd23f";} else {iso=t("iso_D");isoCol="#ff9a3c";}
   const letter=score>=90?"A":score>=78?"B":score>=62?"C":score>=45?"D":"F";
   const col=score>=78?"#5fe08a":score>=62?"#ffd23f":score>=45?"#ff9a3c":"#ff5a4a";
   const diff=jobDiff();
-  const passed=coverage>=0.8&&score>=45;                                 // ten sam prog co przy spawaniu
+  const passed=isChallenge()?coverage>=0.8&&score>=45:verdict.passed; // konkurs bez zmiany reguł
   if(!isChallenge()) jobSettled=true;
   // ISO 9013 to norma dla CIECIA TERMICZNEGO; 5817 dotyczy spoin i na karcie z rzazu bylaby klamstwem
   lastReport={score,letter,iso,std:"ISO 9013",procLbl:(proc==="PLASMA"?"PLAZMA":"TLEN"),cut:true,proc,posKey,thick,coverage,spdAcc,evenness:straight,avgV,diff,passed,material:MATERIAL[bead].name[lang]};
@@ -2386,8 +2424,7 @@ function cutInspect(){
   const rb=document.getElementById("rReward"), tier=valueTier(diff);
   const ecoTail='<small><b style="color:'+tier.col+'">'+tier.name+'</b> ×'+diff.toFixed(1)+(isChallenge()?' · '+t("eco_free"):'')+'</small>';
   if(isChallenge()) rb.innerHTML=(score>=(CHALLENGE.minScore||90)?'🏁 '+t("chal_pass"):'🏁 '+t("chal_fail"))+ecoTail;
-  else if(passed) rb.innerHTML=t("res_ok")+ecoTail;
-  else rb.innerHTML=t("rew_zero")+ecoTail;
+  else rb.innerHTML=acceptanceText(score,verdict,D)+ecoTail;
   const ul=document.getElementById("rDefects"); ul.innerHTML="";
   for(const d of D){ const li=document.createElement("li");
     li.innerHTML='<span class="sev '+d.s+'">'+(d.s==="ok"?t("sev_ok"):d.s==="major"?t("sev_major"):t("sev_minor"))+'</span><span>'+d.t+'</span>'; ul.appendChild(li); }

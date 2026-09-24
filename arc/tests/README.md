@@ -13,6 +13,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node offaxis.js    # tor: odchyłka od grani karana zboczem, nie schodkiem; stałe zgodne w obu plikach
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
+    node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
 
 Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab
 nigdy nie wchodzi do nagrania (tak było w 3.3.0: guard spacji odrzucał zdarzenie, gdy fokus

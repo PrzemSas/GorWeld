@@ -8,7 +8,7 @@
     arc: {
       vid: "arc.mp4", still: "arc.jpg",
       line: "welding bay. mig, tig, mma. you don't watch — you hold the torch.",
-      href: "/arc/"
+      href: "https://gorweldarc.com/"
     },
     quote: {
       vid: "quote.mp4", still: "quote.jpg",

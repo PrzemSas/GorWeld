@@ -50,10 +50,10 @@
   }
 
   function getBattlePoints(score) {
-    if (!Number.isFinite(score) || score < 0 || score > 100) {
+    if (!Number.isInteger(score) || score < 0 || score > 100) {
       throw new RangeError("Invalid ARC score");
     }
-    return Math.round(Number((score * 10).toFixed(6)));
+    return score * 10;
   }
 
   function mappedFields(input, name) {
@@ -190,6 +190,9 @@
       throw new RangeError("coverage must be between 0 and 1");
     }
     for (const key of STAMP_FIELDS) nonEmptyString(result[key], key);
+    if (result.serverTimeMs !== undefined && !Number.isFinite(result.serverTimeMs)) {
+      throw new RangeError("serverTimeMs must be finite when provided");
+    }
     if (!Number.isInteger(result.attemptNumber) || result.attemptNumber < 1) {
       throw new RangeError("attemptNumber must be an integer greater than or equal to 1");
     }
@@ -260,7 +263,9 @@
     return { startAllowed: true, reason: null };
   }
 
-  function battleVerdict(player1, player2) {
+  function battleVerdict(player1, player2, options = {}) {
+    const mode = options.mode === undefined ? "link" : options.mode;
+    if (mode !== "link" && mode !== "sync") throw new TypeError("mode must be link or sync");
     validateBattleResult(player1);
     validateBattleResult(player2);
 
@@ -268,15 +273,19 @@
 
     const qualified1 = player1.taskCompleted && !player1.inspectionRejected;
     const qualified2 = player2.taskCompleted && !player2.inspectionRejected;
-    if (!qualified1 && !qualified2) {
-      return player1.inspectionRejected && player2.inspectionRejected
-        ? "BOTH_REJECTED" : "NO_WINNER";
-    }
+    if (!qualified1 && !qualified2) return "NO_QUALIFIED_RESULT";
     if (qualified1 !== qualified2) return qualified1 ? "P1_WINS" : "P2_WINS";
 
     const bp1 = getBattlePoints(player1.score);
     const bp2 = getBattlePoints(player2.score);
-    if (bp1 === bp2) return "DRAW";
+    if (bp1 === bp2) {
+      if (mode === "link") return "DRAW";
+      if (!Number.isFinite(player1.serverTimeMs) || !Number.isFinite(player2.serverTimeMs)) {
+        throw new TypeError("sync results require serverTimeMs");
+      }
+      if (player1.serverTimeMs === player2.serverTimeMs) return "DRAW";
+      return player1.serverTimeMs < player2.serverTimeMs ? "P1_WINS" : "P2_WINS";
+    }
     return bp1 > bp2 ? "P1_WINS" : "P2_WINS";
   }
 
@@ -285,16 +294,15 @@
       throw new TypeError("attempts must be a non-empty array");
     }
     attempts.forEach(validateBattleResult);
-    if (attempts.some(result => !sameStamp(attempts[0], result))) {
-      throw new RangeError("attempts have different Battle stamps");
-    }
-
     return attempts.slice().sort((a, b) => {
       const qualifiedA = a.taskCompleted && !a.inspectionRejected;
       const qualifiedB = b.taskCompleted && !b.inspectionRejected;
       if (qualifiedA !== qualifiedB) return qualifiedA ? -1 : 1;
       const pointDelta = getBattlePoints(b.score) - getBattlePoints(a.score);
-      return pointDelta || a.attemptNumber - b.attemptNumber;
+      if (pointDelta) return pointDelta;
+      if (Number.isFinite(a.serverTimeMs) && Number.isFinite(b.serverTimeMs) &&
+          a.serverTimeMs !== b.serverTimeMs) return a.serverTimeMs - b.serverTimeMs;
+      return a.attemptNumber - b.attemptNumber;
     })[0];
   }
 

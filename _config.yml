@@ -5,6 +5,18 @@
 # standardowe pozycje trzeba tu powtórzyć — inaczej zaczęłyby się publikować.
 
 exclude:
+  # Battle Weld backend source is local-only and must never be published by Pages.
+  - battle-server/
+
+  # handoff Battle Weld dla Codexu — specyfikacja robocza, nie strona publiczna.
+  - BATTLE_WELD_MASTER_SPEC.md
+
+  # Battle Weld: wzorzec UI z paczki projektowej (prototyp, tokeny) — materiał roboczy na fazę 6.
+  - battle-weld-ui/
+
+  # Battle Weld: backend (faza 1+) — kod serwera, uruchamiany lokalnie, nie strona.
+  - battle-server/
+
   # weryfikator zgłoszeń ARC CHALLENGE — narzędzie operatorskie, nie część strony.
   # Ma w środku progi wykrywania botów; publikowanie ich to instrukcja obejścia.
   - arc/verify-challenge.mjs

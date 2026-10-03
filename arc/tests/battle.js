@@ -69,12 +69,11 @@ test("BP derive only from ARC score; integer ARC results produce multiples of te
   }
 });
 
-test("known decimal and floating-point boundary examples follow the agreed rounding", () => {
-  assert.equal(Battle.getBattlePoints(97.3), 973);
-  assert.equal(Battle.getBattlePoints(94.7), 947);
-  assert.equal(Battle.getBattlePoints(92.1), 921);
-  assert.equal(Battle.getBattlePoints(94.65), 947);
-  assert.equal(Battle.getBattlePoints(94.6 + 0.05), 947);
+test("Battle score is an integer ARC value and BP is score times ten", () => {
+  assert.equal(Battle.getBattlePoints(94), 940);
+  assert.equal(Battle.getBattlePoints(0), 0);
+  assert.equal(Battle.getBattlePoints(100), 1000);
+  for (const score of [94.65, 94.7, 1.5]) assert.throws(() => Battle.getBattlePoints(score), RangeError);
 });
 
 test("invalid scores throw instead of being clamped", () => {
@@ -205,10 +204,10 @@ test("result validator requires separate statuses, coverage, stamps and valid at
   assert.throws(() => Battle.validateBattleResult(result({ attemptsStarted: 1.5 })), RangeError);
 });
 
-test("only comparable qualified results compete on BP; equal BP is a draw", () => {
+test("link verdict compares qualified results on BP; equal BP is a draw", () => {
   assert.equal(Battle.battleVerdict(result({ score: 94 }), result({ score: 92 })), "P1_WINS");
   assert.equal(Battle.battleVerdict(result({ score: 92 }), result({ score: 94 })), "P2_WINS");
-  assert.equal(Battle.battleVerdict(result({ score: 94 }), result({ score: 94 })), "DRAW");
+  assert.equal(Battle.battleVerdict(result({ score: 94 }), result({ score: 94 }), { mode: "link" }), "DRAW");
   assert.equal(
     Battle.battleVerdict(result({ score: 100, inspectionRejected: true }), result({ score: 50 })),
     "P2_WINS"
@@ -219,21 +218,35 @@ test("only comparable qualified results compete on BP; equal BP is a draw", () =
   );
 });
 
-test("two rejected results and other unqualified results have no winner", () => {
+test("all unqualified pairs have one canonical verdict", () => {
   assert.equal(
     Battle.battleVerdict(
       result({ inspectionRejected: true, score: 100 }),
       result({ inspectionRejected: true, score: 99 })
     ),
-    "BOTH_REJECTED"
+    "NO_QUALIFIED_RESULT"
   );
   assert.equal(
     Battle.battleVerdict(
       result({ taskCompleted: false }),
       result({ taskCompleted: false, attemptNumber: 2, attemptsStarted: 2 })
     ),
-    "NO_WINNER"
+    "NO_QUALIFIED_RESULT"
   );
+});
+
+test("sync equal BP uses earlier trusted server time and draws on equal time", () => {
+  assert.equal(Battle.battleVerdict(
+    result({ serverTimeMs: 100 }), result({ serverTimeMs: 101 }), { mode: "sync" }
+  ), "P1_WINS");
+  assert.equal(Battle.battleVerdict(
+    result({ serverTimeMs: 101 }), result({ serverTimeMs: 100 }), { mode: "sync" }
+  ), "P2_WINS");
+  assert.equal(Battle.battleVerdict(
+    result({ serverTimeMs: 100 }), result({ serverTimeMs: 100 }), { mode: "sync" }
+  ), "DRAW");
+  assert.throws(() => Battle.battleVerdict(result(), result(), { mode: "sync" }), /serverTimeMs/);
+  assert.throws(() => Battle.battleVerdict(result(), result(), { mode: "invalid" }), /mode/);
 });
 
 test("stamps are compared before qualification and client-supplied BP is ignored", () => {
@@ -283,10 +296,10 @@ test("best-attempt selection prioritizes qualification, then BP, then earlier at
     90
   );
   assert.throws(() => Battle.selectBestAttempt([]), TypeError);
-  assert.throws(
-    () => Battle.selectBestAttempt([result(), result({ engineVersion: "other-engine" })]),
-    RangeError
-  );
+  assert.equal(Battle.selectBestAttempt([
+    result({ score: 85, attemptNumber: 1, serverTimeMs: 200 }),
+    result({ score: 85, attemptNumber: 2, attemptsStarted: 2, serverTimeMs: 100, engineVersion: "new-engine" })
+  ]).attemptNumber, 2);
 });
 
 test("updated attemptsStarted preserves the chosen attemptNumber", () => {

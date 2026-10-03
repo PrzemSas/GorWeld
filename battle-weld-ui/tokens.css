@@ -1,0 +1,31 @@
+/* Battle Weld — tokeny projektowe. Jedyne źródło kolorów, fontów i ruchu.
+   Fonty: Big Shoulders Display (700/800/900), Archivo (400/500/600), Chivo Mono (400/500). */
+:root{
+  /* tło i stal */
+  --coal:#0e0f10;        /* tło areny */
+  --steel-1:#2c3034;     /* panel, góra gradientu */
+  --steel-2:#191b1d;     /* panel, dół gradientu */
+  --edge:#3d4246;        /* krawędź blachy */
+  --silver:#c3c9ce;      /* tekst podstawowy */
+  --dim:#7b838a;         /* tekst drugorzędny */
+  --white:#f3f5f6;       /* nicki, tytuły */
+
+  /* strony pojedynku */
+  --ember:#ff6a10;       /* P1 + akcja główna: żar */
+  --ember-hot:#ffb347;   /* jasny żar, zwycięstwo */
+  --arc:#9fd3ff;         /* P2: zimne światło łuku, skaner inspekcji */
+
+  /* stany */
+  --amber:#e8b44a;       /* OK / QUALIFIED — nigdy zieleń */
+  --reject:#b3302a;      /* błąd / REJECTED / INCOMPARABLE */
+  --reject-txt:#ff8a80;
+
+  /* typografia */
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"Chivo Mono",ui-monospace,Menlo,monospace;
+
+  /* ruch */
+  --t-slam:cubic-bezier(.2,1.5,.35,1);   /* wbicie: VS, pieczątki, wjazd paneli */
+  --t-door:cubic-bezier(.7,0,.2,1);      /* ciężkie skrzydła, taśma ostrzegawcza */
+}

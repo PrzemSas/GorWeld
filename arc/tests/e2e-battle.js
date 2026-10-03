@@ -57,6 +57,9 @@ const local = url => url.replace(/^https?:\/\/[^/]+/, BASE);
   console.log("== HOST");
   const host = await open(b, BASE + "/index.html");
   await host.click("#battleLaunch"); await host.waitForTimeout(300);
+  const friendlyTag = await host.evaluate(() => ({ hidden: document.getElementById("battleModeTag").hidden,
+    text: document.getElementById("battleModeTag").textContent }));
+  ok("friendly Battle is labelled unverified", !friendlyTag.hidden && friendlyTag.text === "FRIENDLY · UNVERIFIED", friendlyTag);
   const choices = await host.$$eval("#battleTaskChoices button", bs => bs.map(x => x.textContent));
   ok("lista zadań Battle", choices.length === 3, choices);
   await host.click("#battleTaskChoices button >> nth=0"); await host.waitForTimeout(800);
@@ -75,6 +78,9 @@ const local = url => url.replace(/^https?:\/\/[^/]+/, BASE);
   const inviteUrl = local(hostResult.shareUrl);
   await host.setViewportSize({ width: 375, height: 760 });
   await host.evaluate(() => buildBattleCard()); await host.waitForTimeout(300);
+  const friendlyCardTag = await host.evaluate(() => ({ hidden: document.getElementById("cardBattleModeTag").hidden,
+    text: document.getElementById("cardBattleModeTag").textContent }));
+  ok("friendly result card is labelled unverified", !friendlyCardTag.hidden && friendlyCardTag.text === "FRIENDLY · UNVERIFIED", friendlyCardTag);
   const cardFit = await host.evaluate(() => {
     const close=document.getElementById("cardClose").getBoundingClientRect();
     const buttons=[...document.querySelectorAll("#cardModal .card .act button")]

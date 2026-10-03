@@ -32,7 +32,8 @@ function fixture(options = {}) {
       classList: { add() {}, remove() {} }, appendChild() {} };
   }
   const ctx = {
-    lang: options.lang || 'pl', challenge: !!options.challenge,
+    lang: options.lang || 'pl', challenge: !!options.challenge, battleState: null,
+    battleTaskActive() { return !!(ctx.battleState && ctx.battleState.task && !ctx.battleState.blocked); },
     document: { getElementById(id) { if (!nodes.has(id)) nodes.set(id, element()); return nodes.get(id); }, createElement: element },
     window: {}, console: { log() {}, warn() {} },
     baked: Array.from({ length: 20 }, () => ({ x: 0, y: 0, off: 0 })),
@@ -95,6 +96,18 @@ test('Spawanie: wysoki wynik + poprawna inspekcja = raport zaliczenia i XP', () 
   assert.equal(g.celebrations, 1);
   g.inspect();
   assert.equal(g.progress.xp, 100); assert.equal(g.saved, 1); assert.equal(g.celebrations, 1);
+});
+
+test('Aktywny Battle otrzymuje raport inspekcji ARC bez zmiany reguł zaliczenia', () => {
+  const g = fixture({ hi: 2 });
+  g.battleState = { mode: 'guest', task: { seed: 1 }, blocked: false };
+  g.battleFinishInspection = (report, verdict) => { g.battleInspection = { report, verdict }; };
+  g.inspect();
+  assert.equal(g.battleInspection.report, g.lastReport);
+  assert.equal(g.battleInspection.verdict.rejected, true);
+  assert.equal(g.lastReport.score, 100);
+  assert.equal(g.progress.xp, 0);
+  assert.equal(g.saved, 0);
 });
 
 for (const [lang, text] of [

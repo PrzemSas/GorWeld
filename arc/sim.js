@@ -473,7 +473,8 @@
   //         ten sam ruch dawał od 0 do 98 pkt zależnie od sprzętu.
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, VERSION: "3.4.0" };
+  // Bump SCORING_VERSION when score, grade thresholds, or inspection rejection rules change.
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, VERSION: "3.4.0", SCORING_VERSION: "1.0.0" };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

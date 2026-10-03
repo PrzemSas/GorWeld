@@ -14,12 +14,13 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
     node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
+    node e2e-battle.js http://127.0.0.1:8898 # pełny Battle host → link → gość → VS; wymaga Playwright/Chromium i serwera HTTP
 
 Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab
 nigdy nie wchodzi do nagrania (tak było w 3.3.0: guard spacji odrzucał zdarzenie, gdy fokus
 siedział na przycisku wyboru metody). `filler.js` pilnuje więc guardu wprost w źródle gry, a
 pełny przebieg sprawdzają sterowniki `e2e-*.js` (`e2e-filler.js` — spoiwo spacją;
-`e2e-heatinput.js` — limit wkładu ciepła i parytet litery ISO) — przepis w nagłówku `e2e-filler.js`. W E2E NIE WOLNO robić
+`e2e-heatinput.js` — limit wkładu ciepła i parytet litery ISO; `e2e-battle.js` — pojedynki Battle i błędne linki) — przepis w nagłówku `e2e-filler.js`. W E2E NIE WOLNO robić
 `blur()` po kliknięciu w TIG: to właśnie maskowało błąd, bo żywy gracz blura nie robi.
 
 Testy wołają silnik przez `require("../sim.js")` — ścieżkę WZGLĘDNĄ. Nie wstawiaj tu ścieżki

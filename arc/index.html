@@ -148,6 +148,8 @@
   #zoom { display:block; border-radius:10px; border:1px solid #232b31; margin:10px auto 4px; box-shadow:0 4px 20px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.04); }
   .card .act { display:flex; gap:8px; margin-top:16px; }
   .card .act button { flex:1; padding:11px; }
+  #cardModal .card .act { flex-wrap:wrap; justify-content:center; }
+  #cardModal .card .act button { flex:1 1 130px; }
 
   /* O ARC / FAQ — statyczny HTML w DOM od początku (czyta go Google bez JS). Widać wersję wg <html lang>, RU → EN */
   .about-lang { display:none; font-size:13.5px; line-height:1.55; color:#b9c4cb; }
@@ -227,6 +229,17 @@
   .splash-bar > div { height:100%; width:40%; background:linear-gradient(90deg,var(--cyan),var(--amber)); animation:splashload 1.2s ease-in-out infinite; }
   @keyframes splashload { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
   .mob-only { display:none; }
+  #battleBadge { padding:5px 9px; border:1px solid rgba(255,174,60,.45); border-radius:7px; color:#ffae3c; font-size:10px; font-weight:800; letter-spacing:1px; white-space:nowrap; }
+  .battle-choice { display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%; margin:7px 0; text-align:left; }
+  .battle-note { color:#9aa6ad; line-height:1.55; margin:8px 0 14px; }
+  .battle-summary { margin:10px 0; padding:10px 12px; border:1px solid #303b42; border-left:3px solid var(--amber); background:#0d1318; color:#e1e8ec; text-align:left; line-height:1.5; }
+  .battle-summary.reject { border-left-color:#ff5a4a; color:#ffb1a9; }
+  .battle-vs { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .battle-vs > div { padding:12px; background:#0d1318; border:1px solid #273139; text-align:left; }
+  .battle-vs strong { display:block; color:#ffae3c; font-size:12px; }
+  #battleReportSummary { margin:8px 0 4px; padding:9px 10px; background:#111a20; border:1px solid #303b42; border-radius:8px; font-weight:800; letter-spacing:.4px; }
+  #battleReportSummary.reject { color:#ff7568; border-color:#8b3b35; }
+  @media(max-width:520px) { .battle-vs { grid-template-columns:1fr; } }
   .setup-backdrop { display:none; position:fixed; inset:0; z-index:7; background:rgba(0,0,0,.55); backdrop-filter:blur(2px); }
   .setup-sheet { display:none; }
   .mob-hud { display:none; position:fixed; left:8px; right:8px; top:52px; z-index:6; pointer-events:none;
@@ -307,6 +320,7 @@
 
   <div class="panel top">
     <div class="brand"><img src="/favicon.png" alt="GORWELD" style="height:30px;width:30px;border-radius:50%"><span><b>GORWELD</b>® ARC</span><span class="demo-badge">DEMO</span></div>
+    <span id="battleBadge" hidden>WELD BATTLE</span>
     <div class="wal" id="wal" hidden></div>
     <button id="setupBtn" class="mob-only on" type="button" title="Settings">⚙️</button>
     <button id="mobInspect" class="mob-only" type="button" title="Inspect">🔎</button>
@@ -368,6 +382,8 @@
     <button id="helmet" class="on" data-i18n="btn_helmet">🥽 HELMET</button>
     <button id="snd">🔊 ARC</button>
     <button id="inspect" data-i18n="btn_inspect">🔎 INSPECT</button>
+    <button id="battleLaunch">⚔ WELD BATTLE</button>
+    <button id="battleLaunchMobile" class="mob-actions" type="button" title="WELD BATTLE">⚔</button>
     <button id="career" data-i18n="btn_career">🎓 CAREER</button>
     <button id="help" data-i18n="btn_help">❔ HOW TO</button>
     <button id="methods" data-i18n="btn_methods">📖 METHODS</button>
@@ -378,6 +394,20 @@
     <button id="mobClear" class="mob-actions" type="button" title="Clear">✕</button>
     <button id="mobHelp" class="mob-actions" type="button" title="Help">❔</button>
     <button id="mobSetup2" class="mob-actions" type="button" title="Settings">⚙️</button>
+  </div>
+
+  <!-- WELD BATTLE -->
+  <div id="battleModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="battleTitle">
+    <div class="card" style="width:min(520px,92vw)">
+      <h2 id="battleTitle">WELD BATTLE</h2>
+      <p id="battleMessage" class="battle-note"></p>
+      <div id="battleTaskChoices"></div>
+      <div id="battleModalSummary" class="battle-summary" hidden></div>
+      <div class="act">
+        <button id="battlePrimary" class="on" type="button"></button>
+        <button id="battleSecondary" type="button"></button>
+      </div>
+    </div>
   </div>
 
   <!-- INSPECTION REPORT -->
@@ -391,6 +421,7 @@
       </div>
     </div>
     <div class="reward" id="rReward"></div>
+    <div id="battleReportSummary" hidden></div>
     <canvas id="zoom" width="380" height="120"></canvas>
     <ul class="defects" id="rDefects"></ul>
     <div class="row"><span data-i18n="row_cov">Groove coverage</span><b id="rCov">—</b></div>
@@ -399,6 +430,7 @@
     <div class="row"><span data-i18n="row_even">Bead evenness</span><b id="rEven">—</b></div>
     <div class="act">
       <button id="rCard" data-i18n="btn_cardx">📤 X CARD</button>
+      <button id="rBattleShare" hidden type="button">BEAT MY WELD</button>
       <button id="rClose" class="on" data-i18n="btn_weldon">KEEP WELDING</button>
     </div>
   </div></div>
@@ -413,11 +445,13 @@
 
   <!-- SHARE CARD -->
   <div id="cardModal" class="modal"><div class="card" style="text-align:center">
-    <h2 data-i18n="card_title">Score card</h2>
+    <h2 id="cardTitle" data-i18n="card_title">Score card</h2>
     <canvas id="shareCanvas" width="600" height="338" style="width:min(560px,86vw); border-radius:12px; border:1px solid #232b31"></canvas>
     <div class="act">
       <button id="cardDl" class="on" data-i18n="card_dl">💾 SAVE PNG</button>
       <button id="cardTxt" data-i18n="card_copy">📋 COPY TEXT</button>
+      <button id="cardBattleLink" hidden type="button">COPY BATTLE LINK</button>
+      <button id="cardBattleShare" hidden type="button">SHARE</button>
       <button id="cardProof" style="display:none">🔒 KOPIUJ PROOF</button>
       <button id="cardClose" data-i18n="card_close">CLOSE</button>
     </div>
@@ -506,8 +540,10 @@
   </div></div>
 
 <script src="sim.js"></script>
+<script src="battle.js"></script>
 <script>
 "use strict";
+const Battle=GorWeldBattle;
 const stage=document.getElementById("stage"), ctx=stage.getContext("2d");
 const flashEl=document.getElementById("flash"), toast=document.getElementById("toast");
 const plate=document.createElement("canvas"), pctx=plate.getContext("2d");
@@ -1202,11 +1238,14 @@ function snap(p){ p.x=Math.round(p.x*100)/100; p.y=Math.round(p.y*100)/100; retu
 function uiHit(e){ return !!(e.target&&e.target.closest&&e.target.closest(".panel,.modal,.covbar,.toolhud,.mob-hud,button")); }
 function unlockAudio(){ try{ if(actx&&actx.state==="suspended") actx.resume(); }catch(e){} const v=document.getElementById("pagebg"); if(v&&v.paused) v.play&&v.play().catch(()=>{}); }
 function start(e){ if(e.pointerType==="mouse"&&e.button!==0&&e.button!==2) return;
-  if(uiHit(e)) return; unlockAudio();
+  if(uiHit(e)) return;
+  unlockAudio();
   // drugi przycisk dociśnięty w trakcie ściegu to NIE nowe zajarzenie — nie płać znowu za płytę
   if(welding){ btnMask=e.buttons|0; e.preventDefault(); return; }
   if(document.body.classList.contains("setup-open")){ document.body.classList.remove("setup-open"); return; }
-  if(isCut())return cutStart(e); if(modalOpen())return; const p=snap(pos(e)); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
+  if(isCut())return cutStart(e); if(modalOpen())return;
+  if(!battleStartAllowed()){ e.preventDefault(); return; }
+  const p=snap(pos(e)); cursor.x=p.x; cursor.y=p.y; cursor.seen=true;
   if(!onPlate(p.x,p.y)){ showToast(t("t_strikeoff"),"#ff9a3c"); e.preventDefault(); return; } // can't strike off the plate
   if(isChallenge()&&!chalWidthOK()){ showToast(t("t_toosmall"),"#ff5a4a"); e.preventDefault(); return; } // równe warunki albo wcale
   if(isChallenge()&&!chalCfgOK){ showToast(t("t_cfgfail"),"#ff5a4a"); e.preventDefault(); return; }       // nie startuj na nieoficjalnym seedzie
@@ -1219,7 +1258,11 @@ function start(e){ if(e.pointerType==="mouse"&&e.button!==0&&e.button!==2) retur
   // przepisujemy parametry na żywo — dzięki temu przeoczenie w JAKIMKOLWIEK przełączniku panelu
   // (tak jak `.bead` do 3.4.0) nie może już po cichu rozjechać ekranu z `sim.js`. Po pierwszym
   // zdarzeniu nagranie jest nietykalne, więc kolejne pociągnięcia w tej samej rundzie nic nie kasują.
-  lastDab=t0; if(!rec||!rec.events.length)recStart(); recEv('down',p.x,p.y,t0,btnMask); arcOn(); updateToolHud();
+  lastDab=t0; if(!rec||!rec.events.length){
+    if(battleTaskActive()){battleAttemptStart();reseedRound(battleState.task.seed);}
+    recStart();
+  }
+  recEv('down',p.x,p.y,t0,btnMask); arcOn(); updateToolHud();
   if(e.pointerId!==undefined) try{ stage.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault(); }
 function move(e){ if(isCut())return cutMove(e);
@@ -1839,6 +1882,7 @@ function acceptanceText(score,verdict,defects){
   return fmt("accept_fail",[score,reason]);
 }
 function inspect(){
+  if(battleTaskActive()&&battleState.roundInspected){ showToast(bt("inspectAgain"),"#ffae3c"); return; }
   if(baked.length<10){ showToast(t("t_layfirst"),"#ff9a3c"); return; }
   const K=seamPts.length;
   const cur=passMetrics(), all=passLog.concat([cur]), n=all.length, avg=k=>all.reduce((a,m)=>a+m[k],0)/n;
@@ -1919,6 +1963,7 @@ function inspect(){
   if(isChallenge()){ if(score>=(CHALLENGE.minScore||90)) burstConfetti(); }
   else if(!jobSettled){ jobSettled=true; if(passed && score>=90 && diff>=7) burstConfetti(); }   // MISTRZOWSKA na A
   lastReport={score,letter,iso,std:"ISO 5817",procLbl:proc,cut:false,proc,posKey,thick,coverage,spdAcc,evenness,avgV,diff,passed,material:MATERIAL[bead].name[lang]};
+  if(battleTaskActive()) battleFinishInspection(lastReport,verdict);
 
   const letEl=document.getElementById("rLetter"); letEl.textContent=letter; letEl.style.color=col;
   letEl.classList.remove("pop"); void letEl.offsetWidth; letEl.classList.add("pop");
@@ -1985,7 +2030,7 @@ function openCareer(){
     const el=document.createElement("div"); el.className="coupon"+(done?" done":"")+(unlocked?"":" locked");
     el.innerHTML='<div class="ttl">'+c.name[lang]+'</div><div class="meta">'+c.proc+' · '+POSITIONS[c.pos].lbl+' · '+c.t+'mm · '+t("car_req")+' '+c.req+'%</div>'+
       '<div class="badge">'+(done?'⭐'+done+'%':(unlocked?'':'🔒'))+'</div>';
-    if(unlocked) el.onclick=()=>{ loadCoupon(c); closeModal("carModal"); showToast(fmt("t_couponSel",[c.name[lang]]),"#1fd6e3"); };
+    if(unlocked) el.onclick=()=>{ if(!loadCoupon(c)) return; closeModal("carModal"); showToast(fmt("t_couponSel",[c.name[lang]]),"#1fd6e3"); };
     grid.appendChild(el);
   });
   const r=rankFor(progress.xp), next=RANKS.find(x=>x[0]>progress.xp);
@@ -1994,22 +2039,29 @@ function openCareer(){
   openModal("carModal");
 }
 function loadCoupon(c){
+  if(battleTaskActive()){ showToast(bt("careerUnavailable"),"#ffae3c"); return false; }
   activeCoupon=c.id; proc=c.proc; joint=c.joint; posKey=c.pos; thick=c.t;
   document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
   document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
   document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
   refreshPositions();
+  return true;
 }
 function updateRank(){ const r=rankFor(progress.xp); document.getElementById("rankbar").innerHTML='<b>'+t(r[1])+'</b><br>'+progress.xp+' XP'; }
 function applyI18N(){
   document.documentElement.lang=lang;
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.getElementById("snd").textContent = soundOn? t("btn_arc") : t("btn_mute");
+  battleUpdateShareButtons();
   updateInfo(); updateToolHud(); updateRank(); fillTut(); fillQs(); updateWallet(); updateMobHud();
 }
 
 // ── Share card ────────────────────────────────────────────────────
 function buildCard(){
+  if(battleTaskActive()&&battleState.cardView){ buildBattleCard(); return; }
+  document.getElementById("cardTitle").textContent=t("card_title");
+  document.getElementById("cardBattleLink").hidden=true;
+  document.getElementById("cardBattleShare").hidden=true;
   if(!lastReport){ showToast("NAJPIERW INSPEKCJA","#ff9a3c"); return; }
   const r=lastReport,cv=document.getElementById("shareCanvas"),x=cv.getContext("2d"),Wc=cv.width,Hc=cv.height;
   const bg=x.createLinearGradient(0,0,Wc,Hc); bg.addColorStop(0,"#080c10"); bg.addColorStop(0.5,"#0e161c"); bg.addColorStop(1,"#0a1218");
@@ -2039,6 +2091,7 @@ function buildCard(){
   openModal("cardModal");
 }
 function cardText(){ const r=lastReport;
+  if(battleTaskActive()&&battleState.cardView) return battleResultSummary(battleState.cardView)+(battleState.shareUrl?"\n"+battleState.shareUrl:"");
   return fmt(r.cut?"cardtext_cut":"cardtext",
     [ (r.procLbl||r.proc)+" · "+r.material+" · "+POSITIONS[r.posKey].lbl+" ("+r.thick+"mm)",
       r.letter+" ("+r.score+"%)", r.iso ]); }
@@ -2198,12 +2251,12 @@ function copyProof(){
     ta.remove(); }
 }
 
-function clearWeld(){
+function clearWeld(seedOverride){
   // Najpierw ZGASIĆ łuk. Od 2.0.0 nie gaśnie sam od puszczenia przycisku, więc bez tego zmiana
   // grubości albo pozycji zostawiała `welding=true` przy świeżym, pustym nagraniu: gra odkładałaby
   // ścieg bez zdarzenia zajarzenia, a `sim.js` pomijałby te ruchy (`!last`) — czysty rozjazd.
   if(welding){ welding=false; last=null; speedFb=""; arcOff(); }
-  reseedRound(isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
+  reseedRound(seedOverride!==undefined?seedOverride:battleTaskActive()?battleState.task.seed:isChallenge()?CHALLENGE.seed:null); recStart(); sctx.clearRect(0,0,W,H); wbctx.clearRect(0,0,W,H); molten=[]; sparks=[]; smoke=[]; ambients=[]; baked=[]; speedSum=0; speedN=0; distAcc=0; vVarSum=0; spatterCount=0; vSumT=0; vTimeS=0; passWeldMs=0; depCarry=0; electrodeLeft=1; replacing=false; lastDab=0; trail=[];
   arcLive=false; arcLen=0; btnMask=0; stickCount=0; arcBroke=0; contactT=0; arcPenAcc=0; arcTime=0; arcVSum=0; arcPorAcc=0; arcRSum=0;
   angLive=false; waDeg=0; taDeg=0; keyMask=0; angPenAcc=0; angTime=0; angPorAcc=0; angWSum=0; angTSum=0;
   tigLive=false; filPend=false; filPenAcc=0; filCount=0; lastDabPos=null;
@@ -2246,7 +2299,7 @@ document.querySelectorAll(".bead").forEach(b=>b.onclick=()=>{ if(isChallenge()&&
   document.querySelectorAll(".bead").forEach(x=>x.classList.remove("on")); b.classList.add("on"); bead=b.dataset.bead; activeCoupon=null; selectPos(); });
 document.querySelectorAll(".lng").forEach(b=>{ b.classList.toggle("on", b.dataset.lng===lang);
   b.onclick=()=>{ document.querySelectorAll(".lng").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-    lang=b.dataset.lng; try{localStorage.setItem("gorweld_lang",lang);}catch(e){} applyI18N(); }; });
+    lang=b.dataset.lng; try{localStorage.setItem("gorweld_lang",lang);}catch(e){} applyI18N(); document.getElementById("battleLaunch").textContent=bt("launch"); document.getElementById("battleLaunchMobile").title=bt("launch"); }; });
 document.getElementById("helmet").onclick=e=>{ helmetOn=!helmetOn; e.target.classList.toggle("on",helmetOn); };
 document.getElementById("snd").onclick=e=>{ soundOn=!soundOn; e.target.textContent=soundOn?t("btn_arc"):t("btn_mute"); if(!soundOn)arcOff(); };
 document.getElementById("inspect").onclick=inspect;
@@ -2259,7 +2312,9 @@ document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveP
 document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
 document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
 document.getElementById("cardProof").onclick=copyProof;
-document.getElementById("cardTxt").onclick=()=>{ navigator.clipboard?.writeText(cardText()).then(()=>showToast(t("t_copied"),"#5fe08a"),()=>showToast(t("t_clipFail"),"#ff9a3c")); };
+document.getElementById("cardTxt").onclick=()=>{ const value=cardText(); if(battleTaskActive()&&battleState.cardView){battleCopy(value);return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(value).then(()=>showToast(t("t_copied"),"#5fe08a"),()=>showToast(t("t_clipFail"),"#ff9a3c"));
+  else showToast(t("t_clipFail"),"#ff9a3c"); };
 let toastTmr=0;
 function showToast(msg,c){ toast.textContent=msg; toast.style.color=c||"#fff"; toast.classList.add("show");
   clearTimeout(toastTmr); toastTmr=setTimeout(()=>toast.classList.remove("show"),1400); }
@@ -2279,10 +2334,10 @@ let qsProc="MMA";
 function fillQs(){ document.querySelectorAll(".qs-opt").forEach(b=>b.classList.toggle("on",b.dataset.qs===qsProc));
   const how=document.getElementById("qsHow"); if(!how) return;
   how.innerHTML=document.body.classList.contains("is-mobile")?t("qs_how_mob"):t(qsProc==="TIG"?"qs_how_tig":"qs_how"); }
-function openQs(){ fillQs(); openModal("qsModal"); }
+function openQs(){ if(BATTLE_LINK_PRESENT) return; fillQs(); openModal("qsModal"); }
 function doneQs(){ try{ localStorage.setItem("gorweld_tut","1"); }catch(e){} closeModal("qsModal"); }
 document.querySelectorAll(".qs-opt").forEach(b=>b.onclick=()=>{ qsProc=b.dataset.qs; fillQs(); });
-document.getElementById("qsGo").onclick=()=>{ const b=document.querySelector('.proc[data-proc="'+qsProc+'"]');
+document.getElementById("qsGo").onclick=()=>{ if(battleTaskActive()){showToast(bt("careerUnavailable"),"#ffae3c");return;} const b=document.querySelector('.proc[data-proc="'+qsProc+'"]');
   if(b&&proc!==qsProc) b.click(); doneQs(); };
 document.getElementById("qsSkip").onclick=doneQs;
 document.getElementById("qsGuide").onclick=()=>{ doneQs(); setTimeout(openTut,240); };
@@ -2560,11 +2615,489 @@ function fitStage(){
   stage.style.width=Math.max(1,Math.round(W*s))+"px"; stage.style.height=Math.max(1,Math.round(H*s))+"px";
 }
 addEventListener("resize",resize);
+
+// ── WELD BATTLE adapter — ARC pozostaje jedynym źródłem wyniku i WPS ──
+const BATTLE_TEXT={
+  pl:{launch:"⚔ WELD BATTLE",choose:"Wybierz zadanie Battle",chooseNote:"Obaj spawacze dostają te same ustawienia. Battle V1 używa tylko automatycznego prądu z WPS.",
+    start:"USTAW ZADANIE",ready:"ZADANIE GOTOWE",accept:"ZAŁADUJ ZADANIE",close:"ZAMKNIJ",newBattle:"NOWE ZADANIE",exitBattle:"WYJDŹ Z BATTLE",
+    inspectAgain:"Wyczyść płytę (CLEAR), aby zacząć nową próbę",careerUnavailable:"Kariera niedostępna w trakcie Battle",shareLink:"UDOSTĘPNIJ LINK",
+    linkTitle:"Zaproszenie WELD BATTLE",resultTitle:"Wynik WELD BATTLE",errorTitle:"Nie można uruchomić Battle",
+    badLink:"Link Battle jest uszkodzony lub ma nieobsługiwany format.",unsupported:"Tego zadania nie obsługuje ARC (brak WPS albo tryb inny niż AUTO).",
+    ampsMismatch:"Amperaż zadania nie zgadza się z zaleceniem ARC.",taskMismatch:"Wczytane zadanie różni się od zadania w linku.",
+    engineMismatch:"Inna wersja silnika ARC. Tego pojedynku nie można porównać.",scoreMismatch:"Inna wersja oceny ARC. Tego pojedynku nie można porównać.",
+    modeConflict:"Battle nie może działać równocześnie ze starym trybem challenge.",taskReady:"Zadanie przypięte. Uderz w blachę, aby rozpocząć próbę.",
+    rematch:"REWANŻ",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"NIEUKOŃCZONE",
+    beat:"BEAT MY WELD",share:"UDOSTĘPNIJ WYNIK",copyLink:"KOPIUJ LINK",copied:"LINK SKOPIOWANY",
+    wins1:"WELDER 01 WYGRYWA",wins2:"WELDER 02 WYGRYWA",draw:"REMIS",bothRejected:"OBIE PRÓBY ODRZUCONE",
+    noWinner:"BRAK ZWYCIĘZCY",incomparable:"WYNIKI NIEPORÓWNYWALNE",unsupportedReason:"TASK_UNSUPPORTED",
+    task:"Zadanie",bp:"BP",attempt:"Próba",started:"rozpoczęte"},
+  en:{launch:"⚔ WELD BATTLE",choose:"Choose a Battle task",chooseNote:"Both welders get the same settings. Battle V1 uses AUTO current from the WPS only.",
+    start:"SET TASK",ready:"TASK READY",accept:"LOAD TASK",close:"CLOSE",newBattle:"NEW TASK",exitBattle:"EXIT BATTLE",
+    inspectAgain:"Clear the plate to start a new attempt",careerUnavailable:"Career unavailable during Battle",shareLink:"SHARE LINK",
+    linkTitle:"WELD BATTLE invite",resultTitle:"WELD BATTLE result",errorTitle:"Battle cannot start",
+    badLink:"The Battle link is damaged or uses an unsupported format.",unsupported:"ARC does not support this task (no WPS value or non-AUTO mode).",
+    ampsMismatch:"Task amperage does not match the ARC recommendation.",taskMismatch:"Loaded task differs from the linked task.",
+    engineMismatch:"ARC engine version differs. These attempts cannot be compared.",scoreMismatch:"ARC scoring version differs. These attempts cannot be compared.",
+    modeConflict:"Battle cannot run together with the legacy challenge mode.",taskReady:"Task pinned. Strike the plate to begin your attempt.",
+    rematch:"REMATCH",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"INCOMPLETE",
+    beat:"BEAT MY WELD",share:"SHARE RESULT",copyLink:"COPY BATTLE LINK",copied:"LINK COPIED",
+    wins1:"WELDER 01 WINS",wins2:"WELDER 02 WINS",draw:"DRAW",bothRejected:"BOTH ATTEMPTS REJECTED",
+    noWinner:"NO WINNER",incomparable:"INCOMPARABLE",unsupportedReason:"TASK_UNSUPPORTED",
+    task:"Task",bp:"BP",attempt:"Attempt",started:"started"},
+  ru:{launch:"⚔ WELD BATTLE",choose:"Выберите задание Battle",chooseNote:"Оба сварщика получают одинаковые настройки. В V1 используется только AUTO-ток по WPS.",
+    start:"ЗАДАТЬ РЕЖИМ",ready:"ЗАДАНИЕ ГОТОВО",accept:"ЗАГРУЗИТЬ ЗАДАНИЕ",close:"ЗАКРЫТЬ",newBattle:"НОВОЕ ЗАДАНИЕ",exitBattle:"ВЫЙТИ ИЗ BATTLE",
+    inspectAgain:"Очистите пластину (CLEAR), чтобы начать новую попытку",careerUnavailable:"Карьера недоступна во время Battle",shareLink:"ПОДЕЛИТЬСЯ ССЫЛКОЙ",
+    linkTitle:"Приглашение WELD BATTLE",resultTitle:"Результат WELD BATTLE",errorTitle:"Нельзя запустить Battle",
+    badLink:"Ссылка Battle повреждена или имеет неподдерживаемый формат.",unsupported:"ARC не поддерживает задание (нет значения WPS или режим не AUTO).",
+    ampsMismatch:"Ток задания не совпадает с рекомендацией ARC.",taskMismatch:"Загруженное задание отличается от задания в ссылке.",
+    engineMismatch:"Версия движка ARC отличается. Результаты нельзя сравнить.",scoreMismatch:"Версия оценки ARC отличается. Результаты нельзя сравнить.",
+    modeConflict:"Battle нельзя запускать одновременно со старым режимом challenge.",taskReady:"Задание закреплено. Коснитесь пластины, чтобы начать попытку.",
+    rematch:"РЕВАНШ",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"НЕ ЗАВЕРШЕНО",
+    beat:"BEAT MY WELD",share:"ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ",copyLink:"КОПИРОВАТЬ ССЫЛКУ",copied:"ССЫЛКА СКОПИРОВАНА",
+    wins1:"ПОБЕДИЛ WELDER 01",wins2:"ПОБЕДИЛ WELDER 02",draw:"НИЧЬЯ",bothRejected:"ОБЕ ПОПЫТКИ ОТКЛОНЕНЫ",
+    noWinner:"НЕТ ПОБЕДИТЕЛЯ",incomparable:"НЕСРАВНИМЫ",unsupportedReason:"TASK_UNSUPPORTED",
+    task:"Задание",bp:"BP",attempt:"Попытка",started:"начато"}
+};
+function bt(key){ return (BATTLE_TEXT[lang]||BATTLE_TEXT.en)[key]||BATTLE_TEXT.en[key]||key; }
+const BATTLE_REQUIRED_COVERAGE=0.8, BATTLE_MAX_LINK=8000;
+let BATTLE_LINK_PRESENT=typeof location!=="undefined"&&location.hash.indexOf("#battle=")===0;
+let battleState=null, battlePrimaryAction=null, battleSecondaryAction=null, battleSnapshot=null, battlePendingSnapshot=null;
+function battleTaskActive(){ return !!(battleState&&battleState.task&&!battleState.blocked); }
+function battleCaptureSetup(){ return {proc,joint,pos:posKey,thick,bead,ampMode,ampMul,ampSet,activeCoupon,roundSeed}; }
+function battleModeConflict(){
+  if(!isChallenge()) return false;
+  battleState={blocked:true,reason:"BATTLE_MODE_CONFLICT"};
+  battleShow(bt("errorTitle"),battleReasonText("BATTLE_MODE_CONFLICT"),[],"",null,bt("close"),()=>closeModal("battleModal"));
+  return true;
+}
+function battleReasonText(reason,detail){
+  if(detail==="AMP_MODE_UNSUPPORTED"||detail==="AMP_TABLE_UNAVAILABLE"||reason==="TASK_UNSUPPORTED") return bt("unsupported");
+  if(detail==="AMP_MISMATCH") return bt("ampsMismatch");
+  return ({ENGINE_VERSION_MISMATCH:bt("engineMismatch"),SCORING_VERSION_MISMATCH:bt("scoreMismatch"),
+    TASK_MISMATCH:bt("taskMismatch"),TASK_UNSUPPORTED:bt("unsupported"),
+    BATTLE_MODE_CONFLICT:bt("modeConflict")})[reason]||bt("badLink");
+}
+function battleShow(title,message,choices,primaryText,primaryAction,secondaryText,secondaryAction,summary){
+  const titleEl=document.getElementById("battleTitle"), msg=document.getElementById("battleMessage");
+  const list=document.getElementById("battleTaskChoices"), sum=document.getElementById("battleModalSummary");
+  titleEl.textContent=title; msg.textContent=message||""; list.replaceChildren();
+  (choices||[]).forEach(choice=>{
+    const b=document.createElement("button"); b.type="button"; b.className="battle-choice";
+    b.textContent=choice.label; b.onclick=choice.action; list.appendChild(b);
+  });
+  sum.textContent=summary||""; sum.hidden=!summary;
+  const p=document.getElementById("battlePrimary"), q=document.getElementById("battleSecondary");
+  p.textContent=primaryText||""; p.hidden=!primaryText; p.onclick=primaryAction||null;
+  q.textContent=secondaryText||""; q.hidden=!secondaryText; q.onclick=secondaryAction||(()=>closeModal("battleModal"));
+  battlePrimaryAction=primaryAction||null; battleSecondaryAction=secondaryAction||null;
+  const modal=document.getElementById("battleModal");
+  if(openM==="battleModal"){modal.style.display="flex";modal.classList.add("open");}
+  else openModal("battleModal");
+}
+function battleWpsTasks(){
+  const defs=[
+    {seed:1296914737,proc:"MMA",joint:"butt",pos:"PA",thick:3,bead:"steel"},
+    {seed:1296914738,proc:"MMA",joint:"butt",pos:"PF",thick:3,bead:"steel"},
+    {seed:1296914739,proc:"MMA",joint:"butt",pos:"PA",thick:5,bead:"steel"}
+  ];
+  return defs.map(d=>{
+    const amps=ArcSim.recommendedAmps(d.proc,d.thick,d.pos);
+    if(amps==null) return null;
+    return Battle.validateBattleTaskForArc({...d,W:PLAY_W,H:PLAY_H,amps,ampMode:"auto",
+      requiredCoverage:BATTLE_REQUIRED_COVERAGE},ArcSim);
+  }).filter(x=>x&&x.supported);
+}
+function battleTaskLabel(task){
+  return task.proc+" · "+task.pos+" · "+task.thick+" mm · "+task.amps+" A · "+task.bead;
+}
+function battleTaskSupported(task){
+  let check;
+  try{ check=Battle.validateBattleTaskForArc(task,ArcSim); }
+  catch(e){ return {supported:false,reason:"TASK_UNSUPPORTED",detail:"TASK_UNSUPPORTED"}; }
+  if(!check.supported) return check;
+  const P=POSITIONS[check.task.pos], M=MATERIAL[check.task.bead];
+  if(!P||!P.joints||!P.joints.includes(check.task.joint)||!M||
+     !["butt","fillet","pipe"].includes(check.task.joint)) {
+    return {supported:false,reason:"TASK_UNSUPPORTED",detail:"TASK_UNSUPPORTED",task:check.task};
+  }
+  return check;
+}
+function battleCaptureTask(seed,coverage){
+  const amps=ArcSim.recommendedAmps(proc,thick,posKey);
+  if(amps==null) return null;
+  return Battle.normalizeBattleTask({seed,W:PLAY_W,H:PLAY_H,proc,joint,pos:posKey,thick,bead,
+    amps,ampMode,requiredCoverage:coverage==null?BATTLE_REQUIRED_COVERAGE:coverage});
+}
+function battleApplyTask(task){
+  if(!battleSnapshot){ battleSnapshot=battlePendingSnapshot||battleCaptureSetup(); battlePendingSnapshot=null; }
+  if(welding) end(null);
+  clearWeld();
+  proc=task.proc; joint=task.joint; posKey=task.pos; thick=task.thick; bead=task.bead;
+  ampMode=Battle.toArcAmpMode(task.ampMode); ampMul=1; ampSet=null; activeCoupon=null;
+  reseedRound(task.seed); recStart();
+  document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
+  document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
+  document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
+  document.querySelectorAll(".bead").forEach(b=>b.classList.toggle("on",b.dataset.bead===bead));
+  refreshPositions();
+  reseedRound(task.seed); recStart();
+  battleLockControls(true);
+  document.getElementById("battleBadge").hidden=false;
+  document.body.classList.add("battle-active");
+}
+function battleLockControls(locked){
+  document.querySelectorAll(".proc,.joint,.pos,.thk,.bead,.amp,.ampmode,#ampRange,#ampNum")
+    .forEach(el=>{el.disabled=!!locked;});
+}
+function battleMakeId(){
+  const raw=(globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID().replace(/-/g,"").slice(0,7):
+    Math.random().toString(36).slice(2,9);
+  return "GW-"+raw.toUpperCase();
+}
+function battleStorageKey(state){ return "gorweld_battle_"+state.battleId+"_"+state.taskHash; }
+function battleReadHistory(state){
+  try{
+    const h=JSON.parse(localStorage.getItem(battleStorageKey(state))||"null");
+    if(!h||!Number.isInteger(h.attemptsStarted)||h.attemptsStarted<0||!Array.isArray(h.attempts))
+      return {attemptsStarted:0,attempts:[]};
+    const attempts=h.attempts.filter(a=>{try{Battle.validateBattleResult(a);return true;}catch(e){return false;}});
+    return {attemptsStarted:h.attemptsStarted,attempts};
+  }catch(e){return {attemptsStarted:0,attempts:[]};}
+}
+function battleWriteHistory(state,history){
+  try{localStorage.setItem(battleStorageKey(state),JSON.stringify(history));}catch(e){}
+}
+function battleEncode(envelope){
+  const bytes=new TextEncoder().encode(JSON.stringify(envelope));
+  let binary=""; for(let i=0;i<bytes.length;i++) binary+=String.fromCharCode(bytes[i]);
+  const value=btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  const url=new URL(location.href); url.searchParams.delete("challenge"); url.hash="battle="+value;
+  const result=url.toString();
+  if(result.length>BATTLE_MAX_LINK) throw new RangeError("Battle link is too long");
+  return result;
+}
+function battleDecode(hash){
+  const payload=hash.slice("#battle=".length).replace(/-/g,"+").replace(/_/g,"/");
+  if(!payload||payload.length>BATTLE_MAX_LINK) throw new RangeError("Invalid Battle payload length");
+  const padded=payload+"=".repeat((4-payload.length%4)%4), binary=atob(padded);
+  const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+function battleLocalTask(seed,coverage){
+  const task=battleCaptureTask(seed,coverage);
+  if(!task) return {supported:false,reason:"TASK_UNSUPPORTED",detail:"AMP_TABLE_UNAVAILABLE"};
+  return battleTaskSupported(task);
+}
+function battleLocalStamps(task){
+  return {engineVersion:ArcSim.VERSION,scoringVersion:ArcSim.SCORING_VERSION,task};
+}
+function battleHashEqual(a,b){ return Battle.canonicalizeTask(a)===Battle.canonicalizeTask(b); }
+async function battleVerifyLocal(task,engineVersion,scoringVersion){
+  const supported=battleTaskSupported(task);
+  if(!supported.supported) return supported;
+  if(ArcSim.VERSION!==engineVersion) return {supported:false,reason:"ENGINE_VERSION_MISMATCH"};
+  if(ArcSim.SCORING_VERSION!==scoringVersion) return {supported:false,reason:"SCORING_VERSION_MISMATCH"};
+  const live=battleLocalTask(task.seed,task.requiredCoverage);
+  if(!live.supported) return live;
+  if(!battleHashEqual(live.task,task)) return {supported:false,reason:"TASK_MISMATCH"};
+  return {supported:true,task:live.task};
+}
+function battleStartAllowed(){
+  if(battleState&&battleState.blocked) return true;
+  if(!BATTLE_LINK_PRESENT&&!battleState) return true;
+  if(!battleState||!battleTaskActive()||!battleState.ready||battleState.done){
+    if(battleState&&battleState.done&&battleState.cardView) battleShowReturnedResult();
+    else if(battleState&&battleState.reason) battleShowProblem(battleState.reason,battleState.detail);
+    else if(battleState&&!battleState.ready){
+      if(battleState.mode==="guest") battleShowIncoming();
+      else if(battleState.mode==="host") battleShowHostReady();
+    }
+    return false;
+  }
+  const check=battleLocalTask(battleState.task.seed,battleState.task.requiredCoverage);
+  let reason=check.reason, detail=check.detail;
+  if(check.supported&&(ampMul!==1||ampSet!=null)) {reason="TASK_MISMATCH";detail="AMP_MISMATCH";}
+  else if(check.supported&&ArcSim.VERSION!==battleState.engineVersion) reason="ENGINE_VERSION_MISMATCH";
+  else if(check.supported&&ArcSim.SCORING_VERSION!==battleState.scoringVersion) reason="SCORING_VERSION_MISMATCH";
+  else if(check.supported&&!battleHashEqual(check.task,battleState.task)) reason="TASK_MISMATCH";
+  if(reason){ battleState.ready=false; battleState.blocked=true; battleState.reason=reason; battleState.detail=detail;
+    battleShowProblem(reason,detail); return false; }
+  return true;
+}
+function battleShowProblem(reason,detail){
+  battleReset(); battleState={blocked:true,reason,detail};
+  battleShow(bt("errorTitle"),battleReasonText(reason,detail),[],bt("newBattle"),()=>{
+    battleReset(); battleOpenTaskPicker();
+  },bt("close"),()=>closeModal("battleModal"));
+}
+function battleClearHash(){
+  if(BATTLE_LINK_PRESENT) history.replaceState(null,"",location.pathname+location.search);
+  BATTLE_LINK_PRESENT=false;
+  document.getElementById("cardBattleLink").hidden=true;
+  document.getElementById("cardBattleShare").hidden=true;
+}
+function battleReset(){
+  battleClearHash(); battleState=null; battlePendingSnapshot=null;
+  document.body.classList.remove("battle-active"); battleLockControls(false);
+  document.getElementById("battleBadge").hidden=true;
+  if(battleSnapshot){
+    const s=battleSnapshot; battleSnapshot=null;
+    proc=s.proc; joint=s.joint; posKey=s.pos; thick=s.thick; bead=s.bead;
+    ampMode=s.ampMode; ampMul=s.ampMul; ampSet=s.ampSet; activeCoupon=s.activeCoupon;
+    document.querySelectorAll(".proc").forEach(b=>b.classList.toggle("on",b.dataset.proc===proc));
+    document.querySelectorAll(".joint").forEach(b=>b.classList.toggle("on",b.dataset.joint===joint));
+    document.querySelectorAll(".thk").forEach(b=>b.classList.toggle("on",+b.dataset.t===thick));
+    document.querySelectorAll(".bead").forEach(b=>b.classList.toggle("on",b.dataset.bead===bead));
+    refreshPositions(); document.querySelectorAll(".pos").forEach(b=>b.classList.toggle("on",b.dataset.pos===posKey));
+    refreshAmps(); updateInfo(); clearWeld(s.roundSeed);
+  }
+}
+function battleOpenTaskPicker(){
+  if(battleModeConflict()) return;
+  if(welding){showToast(bt("taskReady"),"#ffae3c");return;}
+  if(!battleSnapshot) battlePendingSnapshot=battleCaptureSetup();
+  const tasks=battleWpsTasks();
+  const choices=tasks.map(item=>({label:battleTaskLabel(item.task),action:()=>battleStartHost(item.task)}));
+  battleShow(bt("choose"),bt("chooseNote"),choices,"",null,bt("close"),()=>{battlePendingSnapshot=null;closeModal("battleModal");});
+}
+async function battleStartHost(task){
+  if(battleModeConflict()) return;
+  try{
+    const check=battleTaskSupported(task);
+    if(!check.supported){battleShowProblem(check.reason,check.detail);return;}
+    battleState={mode:"host",task:check.task,taskHash:"",battleId:battleMakeId(),
+      engineVersion:ArcSim.VERSION,scoringVersion:ArcSim.SCORING_VERSION,ready:false,blocked:false,done:false,
+      history:{attemptsStarted:0,attempts:[]},attemptNumber:0,envelope:null,cardView:null,shareUrl:null};
+    battleApplyTask(check.task);
+    const live=battleLocalTask(check.task.seed,check.task.requiredCoverage);
+    if(!live.supported){battleState.blocked=true;battleState.reason=live.reason;battleState.detail=live.detail;
+      battleShowProblem(live.reason,live.detail);return;}
+    if(!battleHashEqual(live.task,check.task)){battleState.blocked=true;battleState.reason="TASK_MISMATCH";battleShowProblem("TASK_MISMATCH");return;}
+    if(!ArcSim.SCORING_VERSION){battleState.blocked=true;battleState.reason="SCORING_VERSION_MISMATCH";battleShowProblem("SCORING_VERSION_MISMATCH");return;}
+    battleState.taskHash=await Battle.computeTaskHash(check.task);
+    battleShowHostReady();
+  }catch(e){battleState={blocked:true,reason:"BATTLE_LINK_INVALID",detail:e.message};battleShowProblem("BATTLE_LINK_INVALID",e.message);}
+}
+function battleShowHostReady(){
+  battleShow(bt("ready"),bt("taskReady"),[{label:bt("exitBattle"),action:()=>{battleReset();closeModal("battleModal");}}],bt("start"),()=>{
+    if(!battleTaskActive()) return;
+    battleState.ready=true; battleState.history=battleReadHistory(battleState);
+    closeModal("battleModal"); showToast(bt("taskReady"),"#5fe08a");
+  },bt("close"));
+}
+function battleBuildLocalResult(score,letter,inspectionRejected,coverage){
+  const s=battleState;
+  const completed=coverage>=s.task.requiredCoverage;
+  const result={nickname:s.mode==="host"?bt("p1"):bt("p2"),score,grade:letter,
+    inspectionRejected:!!inspectionRejected,taskCompleted:completed,
+    challengePassed:completed&&score>=90,coverage,
+    taskHash:s.taskHash,scoringVersion:ArcSim.SCORING_VERSION,engineVersion:ArcSim.VERSION,
+    attemptNumber:s.attemptNumber,attemptsStarted:s.history.attemptsStarted};
+  return Battle.validateBattleResult(result);
+}
+function battleAttemptStart(){
+  if(!battleTaskActive()) return;
+  battleState.roundInspected=false;
+  const h=battleState.history||battleReadHistory(battleState);
+  h.attemptsStarted+=1; battleState.attemptNumber=h.attemptsStarted; battleState.history=h;
+  battleWriteHistory(battleState,h);
+  const summary=document.getElementById("battleReportSummary"),share=document.getElementById("rBattleShare");
+  summary.hidden=true; share.hidden=true;
+}
+function battleStatus(result){
+  if(result.inspectionRejected) return bt("reject");
+  if(!result.taskCompleted) return bt("incomplete");
+  return bt("accepted");
+}
+function battleLabelVerdict(verdict){
+  return ({P1_WINS:bt("wins1"),P2_WINS:bt("wins2"),DRAW:bt("draw"),
+    BOTH_REJECTED:bt("bothRejected"),NO_WINNER:bt("noWinner"),INCOMPARABLE:bt("incomparable")})[verdict]||bt("incomparable");
+}
+function battleMakeHostEnvelope(result){
+  const s=battleState;
+  return {schemaVersion:1,battleId:s.battleId,engineVersion:s.engineVersion,
+    scoringVersion:s.scoringVersion,task:s.task,taskHash:s.taskHash,
+    player1:result,player2:null};
+}
+function battleSetCardView(view,envelope){
+  battleState.cardView=view; battleState.envelope=envelope;
+  try{battleState.shareUrl=battleEncode(envelope);}
+  catch(e){battleState.shareUrl=null; battleState.shareError=e.message;}
+  document.getElementById("cardBattleLink").hidden=!battleState.shareUrl;
+  document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
+}
+function battleFinishInspection(report,verdict){
+  if(!battleTaskActive()||battleState.mode==="result"||battleState.roundInspected) return;
+  const result=battleBuildLocalResult(report.score,report.letter,verdict.rejected,report.coverage);
+  if(battleState.mode==="host"){
+    const envelope=battleMakeHostEnvelope(result);
+    battleSetCardView({kind:"invite",player1:result},envelope);
+    battleState.done=true;
+    battleState.ready=false;
+  }else{
+    const h=battleState.history; h.attempts.push(result);
+    const chosen=Battle.selectBestAttempt(h.attempts);
+    const best=Battle.carryAttemptCount(chosen,h.attemptsStarted);
+    battleState.history=h; battleWriteHistory(battleState,h);
+    const envelope={...battleState.envelope,player2:best};
+    const verdictCode=Battle.battleVerdict(envelope.player1,best);
+    battleSetCardView({kind:"vs",player1:envelope.player1,player2:best,verdict:verdictCode},envelope);
+  }
+  const view=battleState.cardView, summary=document.getElementById("battleReportSummary");
+  if(view.kind==="invite"){
+    summary.textContent=report.letter+" · "+battleStatus(result)+" · "+Battle.getBattlePoints(report.score)+" BP";
+  }else{
+    summary.textContent=battleLabelVerdict(view.verdict)+" · "+Battle.getBattlePoints(view.player1.score)+
+      " : "+Battle.getBattlePoints(view.player2.score)+" BP";
+  }
+  summary.classList.toggle("reject",!!result.inspectionRejected); summary.hidden=false;
+  const share=document.getElementById("rBattleShare");
+  share.textContent=view.kind==="invite"?bt("beat"):bt("share"); share.hidden=false;
+  battleState.roundInspected=true;
+}
+function battleResultSummary(view){
+  if(view.kind==="invite") return bt("p1")+" · "+view.player1.grade+" · "+battleStatus(view.player1)+" · "+
+    Battle.getBattlePoints(view.player1.score)+" BP";
+  return battleLabelVerdict(view.verdict)+" · "+Battle.getBattlePoints(view.player1.score)+" : "+
+    Battle.getBattlePoints(view.player2.score)+" BP";
+}
+function battleShowReturnedResult(){
+  const view=battleState.cardView;
+  battleShow(bt("resultTitle"),battleResultSummary(view),[
+    {label:bt("rematch"),action:()=>{
+      if(welding){showToast(bt("taskReady"),"#ffae3c");return;}
+      const task=battleState.task; battleReset(); battleStartHost(task);
+    }},
+    {label:bt("newBattle"),action:()=>{battleReset();battleOpenTaskPicker();}},
+    {label:bt("exitBattle"),action:()=>{battleReset();closeModal("battleModal");}}
+  ],bt("share"),()=>buildCard(),bt("close"));
+}
+function battleShowIncoming(){
+  const task=battleState.task, p1=battleState.envelope.player1;
+  const msg=bt("p1")+" · "+p1.grade+" · "+battleStatus(p1)+" · "+Battle.getBattlePoints(p1.score)+" BP";
+  battleShow(bt("linkTitle"),bt("taskReady")+" "+battleTaskLabel(task),[{label:bt("exitBattle"),action:()=>{battleReset();closeModal("battleModal");}}],bt("accept"),()=>{
+    battleState.ready=true; closeModal("battleModal"); showToast(bt("taskReady"),"#5fe08a");
+  },bt("close"));
+  document.getElementById("battleModalSummary").textContent=msg;
+  document.getElementById("battleModalSummary").hidden=false;
+}
+async function battleBootFromHash(){
+  if(!BATTLE_LINK_PRESENT) return;
+  if(isChallenge()){ battleModeConflict(); return; }
+  try{
+    if(location.hash.length>BATTLE_MAX_LINK) throw new RangeError("Battle link is too long");
+    const envelope=await Battle.validateBattleEnvelope(battleDecode(location.hash));
+    const supported=battleTaskSupported(envelope.task);
+    if(!supported.supported){battleState={blocked:true,reason:supported.reason,detail:supported.detail};battleShowProblem(supported.reason,supported.detail);return;}
+    battleApplyTask(supported.task);
+    const local=battleLocalTask(supported.task.seed,supported.task.requiredCoverage);
+    if(!local.supported){battleState={blocked:true,reason:local.reason,detail:local.detail};battleShowProblem(local.reason,local.detail);return;}
+    const preflight=await Battle.preflightBattleStart(envelope,
+      {engineVersion:ArcSim.VERSION,scoringVersion:ArcSim.SCORING_VERSION,task:local.task});
+    if(!preflight.startAllowed){battleState={blocked:true,reason:preflight.reason};battleShowProblem(preflight.reason);return;}
+    battleState={mode:envelope.player2?"result":"guest",task:supported.task,taskHash:envelope.taskHash,
+      battleId:envelope.battleId,engineVersion:ArcSim.VERSION,scoringVersion:ArcSim.SCORING_VERSION,
+      ready:false,blocked:false,done:!!envelope.player2,envelope,attemptNumber:0,cardView:null,shareUrl:null,
+      history:{attemptsStarted:0,attempts:[]}};
+    battleState.history=battleReadHistory(battleState);
+    if(envelope.player2){
+      battleState.cardView={kind:"vs",player1:envelope.player1,player2:envelope.player2,
+        verdict:Battle.battleVerdict(envelope.player1,envelope.player2)};
+      battleSetCardView(battleState.cardView,envelope);
+      battleShowReturnedResult();
+    }else battleShowIncoming();
+  }catch(e){
+    battleReset(); battleState={blocked:true,reason:"BATTLE_LINK_INVALID",detail:e.message};
+    battleShow(bt("errorTitle"),bt("badLink")+" "+String(e.message||""),[],
+      bt("newBattle"),()=>{battleReset();battleOpenTaskPicker();},
+      bt("close"),()=>closeModal("battleModal"));
+  }
+}
+function battleMakeLinkForCurrent(){ return battleState&&battleState.shareUrl; }
+function battleCopy(text){
+  const done=()=>showToast(bt("copied"),"#5fe08a");
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
+    try{if(!document.execCommand("copy"))throw new Error("copy failed");done();}
+    catch(e){showToast(bt("badLink"),"#ff5a4a");}ta.remove();};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,fallback);
+  else fallback();
+}
+function battleCopyLink(){
+  const link=battleMakeLinkForCurrent();
+  if(link) battleCopy(link);
+}
+function battleShare(){
+  const link=battleMakeLinkForCurrent();
+  if(!link)return;
+  if(navigator.share) navigator.share({title:"GORWELD WELD BATTLE",text:bt("beat"),url:link})
+    .catch(()=>battleCopy(link));
+  else battleCopy(link);
+}
+function battlePlayerCard(x,player,name,center){
+  const accepted=!player.inspectionRejected&&player.taskCompleted;
+  const color=player.inspectionRejected?"#ff5a4a":accepted?"#5fe08a":"#ffae3c";
+  x.textAlign=center?"center":"left"; x.fillStyle="#9aa6ad"; x.font="700 14px 'Segoe UI'"; x.fillText(name,center?450:42,center?113:116);
+  x.fillStyle=color; x.font="900 70px 'Segoe UI'"; x.fillText(player.grade,center?450:42,center?188:192);
+  x.fillStyle=color; x.font="800 16px 'Segoe UI'"; x.fillText(battleStatus(player),center?450:42,center?216:220);
+  x.fillStyle="#e9eef2"; x.font="900 34px 'Segoe UI'"; x.fillText(Battle.getBattlePoints(player.score)+" BP",center?450:42,center?265:270);
+  x.fillStyle="#8b97a0"; x.font="600 12px 'Segoe UI'"; x.fillText(bt("attempt")+" "+player.attemptNumber+" / "+player.attemptsStarted,center?450:42,center?288:293);
+}
+function battleUpdateShareButtons(){
+  const copy=document.getElementById("cardBattleLink"), share=document.getElementById("cardBattleShare");
+  if(copy) copy.textContent=bt("copyLink");
+  if(share) share.textContent=bt("shareLink");
+}
+function buildBattleCard(){
+  if(!battleTaskActive()||!battleState.cardView)return;
+  const view=battleState.cardView;
+  const cv=document.getElementById("shareCanvas"),x=cv.getContext("2d"),w=cv.width,h=cv.height;
+  const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#080c10");g.addColorStop(.55,"#0e161c");g.addColorStop(1,"#0a1218");
+  x.fillStyle=g;x.fillRect(0,0,w,h);x.strokeStyle="#1fd6e3";x.lineWidth=2;x.strokeRect(12,12,w-24,h-24);
+  x.strokeStyle="rgba(255,174,60,.4)";x.lineWidth=1;x.strokeRect(18,18,w-36,h-36);
+  x.textAlign="left";x.fillStyle="#1fd6e3";x.font="800 21px 'Segoe UI'";x.fillText("GORWELD ARC · WELD BATTLE",32,52);
+  const task=battleTaskLabel(battleState.task);x.fillStyle="#8b97a0";x.font="600 12px 'Segoe UI'";x.fillText(task.slice(0,70),32,76);
+  if(view.kind==="invite"){
+    battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
+    x.textAlign="right";x.fillStyle="#ffae3c";x.font="900 19px 'Segoe UI'";x.fillText(bt("beat"),w-36,310);
+  }else{
+    x.strokeStyle="#35424a";x.beginPath();x.moveTo(300,95);x.lineTo(300,295);x.stroke();
+    battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
+    battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true);
+    const code=view.verdict;
+    x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#5fe08a":code==="P2_WINS"?"#ffae3c":
+      code==="DRAW"?"#1fd6e3":"#ff7568";x.font="900 16px 'Segoe UI'";x.fillText(battleLabelVerdict(code),300,302);
+  }
+  x.textAlign="left";x.fillStyle="#76838b";x.font="600 10px 'Segoe UI'";x.fillText("gorweldarc.com",32,328);
+  document.getElementById("cardTitle").textContent="WELD BATTLE";
+  battleUpdateShareButtons();
+  document.getElementById("cardBattleLink").hidden=!battleState.shareUrl;
+  document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
+  openModal("cardModal");
+}
+function battleStartClick(){
+  if(battleModeConflict()) return;
+  if(battleTaskActive()&&battleState.mode==="guest"&&!battleState.ready){battleShowIncoming();return;}
+  if(battleState&&battleState.done){battleShowReturnedResult();return;}
+  battleOpenTaskPicker();
+}
+document.getElementById("battleLaunch").textContent=bt("launch");
+if(isChallenge()){
+  for(const id of ["battleLaunch","battleLaunchMobile"]){const el=document.getElementById(id);el.hidden=true;el.style.display="none";}
+}
+document.getElementById("battleLaunchMobile").onclick=battleStartClick;
+document.getElementById("battleLaunch").onclick=battleStartClick;
+document.getElementById("battlePrimary").onclick=()=>{if(battlePrimaryAction)battlePrimaryAction();};
+document.getElementById("battleSecondary").onclick=()=>{if(battleSecondaryAction)battleSecondaryAction();else closeModal("battleModal");};
+document.getElementById("rBattleShare").onclick=()=>{if(battleState&&battleState.shareUrl)buildCard();else showToast(battleState&&battleState.shareError||bt("badLink"),"#ff5a4a");};
+document.getElementById("cardBattleLink").onclick=battleCopyLink;
+document.getElementById("cardBattleShare").onclick=battleShare;
+
 resize(); refreshPositions(); updateRank(); applyI18N(); updateWallet(); requestAnimationFrame(frame);
 fitStage(); applyChallengePin(); loadChallengeConfig();   // pin od razu ze stałych, potem doprecyzuj z challenge-config.json
+if(BATTLE_LINK_PRESENT) setTimeout(battleBootFromHash,0);
 const _bgV=document.getElementById("pagebg"); if(_bgV){ _bgV.addEventListener("canplay",hideSplash,{once:true}); }
 setTimeout(hideSplash,900);
-try{ if(!localStorage.getItem("gorweld_tut")) setTimeout(isChallenge()?openTut:openQs,1100); }catch(e){}
+try{ if(!BATTLE_LINK_PRESENT&&!localStorage.getItem("gorweld_tut")) setTimeout(isChallenge()?openTut:openQs,1100); }catch(e){}
 </script>
 </body>
 </html>

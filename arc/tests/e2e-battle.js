@@ -97,13 +97,14 @@ const local = url => url.replace(/^https?:\/\/[^/]+/, BASE);
   const exitLabel = await exitGuest.evaluate(() => BATTLE_TEXT[lang].exitBattle);
   await exitGuest.getByRole("button", { name: exitLabel, exact: true }).click(); await exitGuest.waitForTimeout(300);
   const exitState = await exitGuest.evaluate(() => ({ url:location.href, battle:!!battleState, link:BATTLE_LINK_PRESENT,
-    ampDisabled:document.querySelector(".ampmode").disabled }));
+    ampDisabled:document.querySelector(".ampmode").disabled,rootHidden:document.getElementById("battleModal").hidden,
+    hudHidden:document.getElementById("bwHud").getAttribute("aria-hidden")==="true" }));
   await exitGuest.reload(); await exitGuest.waitForTimeout(1800);
   const afterExitReload = await exitGuest.evaluate(() => ({ url:location.href, battle:battleState,
     link:BATTLE_LINK_PRESENT, badgeHidden:document.getElementById("battleBadge").hidden,
     ampDisabled:document.querySelector(".ampmode").disabled }));
   ok("gość może wyjść z Battle; po F5 wraca zwykły ARC",!/#battle=/.test(exitState.url)&&!exitState.battle&&!exitState.link&&!exitState.ampDisabled&&
-    !/#battle=/.test(afterExitReload.url)&&!afterExitReload.battle&&!afterExitReload.link&&afterExitReload.badgeHidden&&!afterExitReload.ampDisabled,
+    exitState.rootHidden&&exitState.hudHidden&&!/#battle=/.test(afterExitReload.url)&&!afterExitReload.battle&&!afterExitReload.link&&afterExitReload.badgeHidden&&!afterExitReload.ampDisabled,
     {exitState,afterExitReload});
   await host.evaluate(() => battleStartClick()); await host.waitForTimeout(250);
   let resultChoices = await host.$$eval("#battleTaskChoices button", bs => bs.map(x => x.textContent));

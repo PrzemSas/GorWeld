@@ -14,7 +14,7 @@ const ArcSimNode = require("../sim.js");
 const BASE = process.argv[2];
 const API = process.argv[3];
 const EXE = process.env.ARC_CHROME || "/home/gorweld/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome";
-const SCREEN_DIR = process.env.BATTLE_SCREEN_DIR || path.resolve(__dirname, "../..", "battle-weld-ui", "screens-phase5");
+const SCREEN_DIR = process.env.BATTLE_SCREEN_DIR || path.resolve(__dirname, "../..", "battle-weld-ui", "screens-phase6");
 const results = [];
 if (!chromium) { console.error("brak playwrighta — użyj ścieżki z e2e-battle.js"); process.exit(2); }
 if (!BASE || !API) { console.error("użycie: node e2e-battle-server.js <arcURL> <apiURL>"); process.exit(2); }
@@ -24,9 +24,9 @@ const appUrl = api => BASE + "/index.html?battleApi=" + encodeURIComponent(api);
 async function open(browser, url, mobile = false) {
   const context = await browser.newContext({ viewport: mobile ? { width: 375, height: 812 } : { width: 1280, height: 800 },
     isMobile: mobile, hasTouch: mobile });
-  const page = await context.newPage(); page.errors = []; page.apiRequests = []; page.attemptRequests=[];
+  const page = await context.newPage(); page.errors = []; page.apiRequests = []; page.attemptRequests=[];page.requests=[];
   page.on("pageerror", error => page.errors.push(error.message));
-  page.on("request", request => { if (request.url().startsWith(API)) {page.apiRequests.push(request.url());if(request.url().endsWith("/attempts"))try{page.attemptRequests.push(request.postDataJSON());}catch(e){}} });
+  page.on("request", request => {page.requests.push(request.url());if (request.url().startsWith(API)) {page.apiRequests.push(request.url());if(request.url().endsWith("/attempts"))try{page.attemptRequests.push(request.postDataJSON());}catch(e){}} });
   await page.addInitScript(() => { try { localStorage.setItem("gorweld_tut", "1"); localStorage.setItem("gorweld_lang", "en"); } catch (e) {} window.confirm=()=>true; });
   await page.goto(url); await page.waitForTimeout(1100);
   await page.evaluate(() => { if (window.hideSplash) hideSplash(); if (window.openM && openM !== "battleModal") closeModal(openM); });
@@ -129,7 +129,7 @@ async function waitForReady(page) {
 }
 async function modalFit(page) {
   return page.evaluate(() => {
-    const modal=document.getElementById("battleModal"),card=modal.querySelector(".card"),r=card.getBoundingClientRect();
+    const modal=document.getElementById("battleModal"),card=modal.querySelector(".bw-shell"),r=card.getBoundingClientRect();
     const buttons=[...modal.querySelectorAll("button")].filter(b=>!b.hidden&&getComputedStyle(b).display!=="none");
     return {width:innerWidth,height:innerHeight,modalOpen:modal.classList.contains("open"),cardInside:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,
       buttonsReachable:buttons.every(b=>{const q=b.getBoundingClientRect();return q.left>=0&&q.right<=innerWidth&&q.top>=0&&q.bottom<=innerHeight;})};
@@ -162,6 +162,15 @@ async function modalFit(page) {
     ok("server rejection reasons are localized in PL/EN/RU, including profile mismatch",["pl","en","ru"].every(locale=>
       Object.values(localizedErrors[locale]).every(message=>message&& !/RENDER_WIDTH_UNSUPPORTED|INPUT_PROFILE_MISMATCH|ROUND_TOO_LONG|TASK_MISMATCH|EVENT_LIMIT|DUPLICATE_ATTEMPT|ATTEMPT_LIMIT|PLAYER_FINISHED|BATTLE_DECIDED|BATTLE_NOT_STARTED/.test(message))&&localizedErrors[locale].width.includes("400")&&localizedErrors[locale].mouse!==localizedErrors[locale].touch),localizedErrors);
     const created=await createBattle(host,"sync");
+    const visualGuards=await host.evaluate(()=>{
+      const stageRect=stage.getBoundingClientRect();
+      const fontSizes=[...document.fonts].filter(face=>face.family.startsWith("BW")).map(face=>({family:face.family,status:face.status}));
+      const requiredFonts=["BWDisplay","BWArchivo","BWMono"].every(family=>fontSizes.some(face=>face.family===family&&face.status==="loaded"));
+      const fontRequests=performance.getEntriesByType("resource").filter(entry=>/\/fonts\/.*\.woff2(?:\?|$)/.test(new URL(entry.name).pathname)).map(entry=>new URL(entry.name).pathname);
+      const widths=[...document.querySelectorAll("#battleModal button")].filter(button=>!button.hidden).map(button=>{const r=button.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;});
+      return {root:document.getElementById("battleModal").id,fonts:fontSizes,requiredFonts,fontRequests,buttonWidths:widths};
+    });
+    ok("Battle uses its isolated root and self-hosted fonts; controls stay in viewport",visualGuards.root==="battleModal"&&visualGuards.requiredFonts&&visualGuards.fontRequests.length>=3&&visualGuards.fontRequests.every(url=>url.startsWith("/fonts/"))&&visualGuards.buttonWidths.every(Boolean),visualGuards);
     ok("host consent precedes first server request",created.beforeConsent===0);
     ok("server battle saved credentials and invite link",await host.evaluate(id=>{
       const c=JSON.parse(localStorage.getItem("gorweld_bw_"+id));return !!(c&&c.playerSecret&&c.slot==="P1"&&battleState.inviteUrl.includes("#bw="+id+"."));
@@ -171,9 +180,9 @@ async function modalFit(page) {
     ok("guest consent precedes first server request",guestOpen.requestsBeforeConsent===0);
     await screenshot(guest,"join-mobile-375");
     await guest.setViewportSize({width:1280,height:800});await screenshot(guest,"join-desktop");
-    const preview=await guest.evaluate(()=>({message:document.getElementById("battleMessage").textContent,tag:document.getElementById("battleModeTag").hidden}));
+    const preview=await guest.evaluate(()=>({message:document.getElementById("battleMessage").textContent,tagHidden:document.getElementById("battleModeTag").hidden,tag:document.getElementById("battleModeTag").textContent}));
     const previewLines=await guest.evaluate(()=>getComputedStyle(document.getElementById("battleMessage")).whiteSpace);
-    ok("join preview shows task, replay profile, player 1, and separate warning line",preview.message.includes("Task:")&&preview.message.includes("full")&&preview.message.includes("Night Shift")&&preview.message.includes("\n")&&preview.tag&&previewLines==="pre-line",{...preview,whiteSpace:previewLines});
+    ok("join preview shows task, replay profile, player 1, separate warning, and verification mode",preview.message.includes("Task:")&&preview.message.includes("full")&&preview.message.includes("Night Shift")&&preview.message.includes("\n")&&!preview.tagHidden&&preview.tag==="SERVER · VERIFIED"&&previewLines==="pre-line",{...preview,whiteSpace:previewLines});
     await guest.setViewportSize({width:375,height:812});
     let fit=await modalFit(guest);ok("join screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
     await guest.click("#battlePrimary");
@@ -182,8 +191,8 @@ async function modalFit(page) {
     ok("join consumes invite and removes secret from URL",afterJoin.hash==="#bw="+created.id&&!afterJoin.secret,afterJoin);
 
     await host.waitForFunction(()=>battleState&&battleState.serverBattle&&battleState.serverBattle.players.P2);
-    await host.click("#battlePrimary");
-    await guest.click("#battlePrimary");
+    await host.check("#bwHelmetCheck");await host.check("#bwGlovesCheck");await host.click("#battlePrimary");
+    await guest.check("#bwHelmetCheck");await guest.check("#bwGlovesCheck");await guest.click("#battlePrimary");
     await host.waitForFunction(()=>document.getElementById("battleMessage").textContent.includes("Starting in 3"),null,{timeout:7000});
     await guest.waitForFunction(()=>document.getElementById("battleMessage").textContent.includes("Starting in 3"),null,{timeout:7000});
     await screenshot(host,"countdown-desktop");await screenshot(guest,"countdown-mobile-375");
@@ -229,6 +238,13 @@ async function modalFit(page) {
     fit=await modalFit(guest);ok("verdict screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
     await host.reload();await host.waitForFunction(()=>battleState&&battleState.serverMode&&battleState.serverBattle&&battleState.serverBattle.verdict);
     ok("host reload resumes from stored credentials and #bw id",await host.evaluate(id=>location.hash==="#bw="+id&&battleState.slot==="P1",created.id));
+    const stageGuard=await host.evaluate(()=>{
+      const before=stage.getBoundingClientRect().toJSON();battleState.hudActive=true;battleUiUpdateHud();
+      const on=stage.getBoundingClientRect().toJSON();battleState.hudActive=false;battleUiUpdateHud();const off=stage.getBoundingClientRect().toJSON();
+      return {same:JSON.stringify(before)===JSON.stringify(on)&&JSON.stringify(before)===JSON.stringify(off),hidden:document.getElementById("bwHud").getAttribute("aria-hidden")==="true",
+        share:[document.getElementById("battleShareCanvas").width,document.getElementById("battleShareCanvas").height]};
+    });
+    ok("Battle HUD does not resize the ARC stage; share canvas is 1200×675",stageGuard.same&&stageGuard.hidden&&stageGuard.share[0]===1200&&stageGuard.share[1]===675,stageGuard);
     ok("sync pages have no uncaught JS errors",host.errors.length===0&&guest.errors.length===0,{host:host.errors,guest:guest.errors});
 
     console.log("== link mode + authoritative score tamper");
@@ -272,6 +288,8 @@ async function modalFit(page) {
     const unavailable=await down.evaluate(()=>({message:document.getElementById("battleMessage").textContent,mode:battleState.mode,local:battleState.localMode}));
     ok("server outage is clear and never falls back to friendly",unavailable.message.includes("unavailable")&&unavailable.local!==true,unavailable);
     ok("server-down page has no uncaught JS errors",down.errors.length===0,down.errors);
+    const nonLocal=pages.flatMap(({page})=>page.requests).filter(url=>{try{const host=new URL(url).hostname;return !["localhost","127.0.0.1","::1"].includes(host);}catch(e){return false;}});
+    ok("full server Battle flow makes no non-localhost requests",nonLocal.length===0,nonLocal);
   }catch(error){
     console.error("E2E exception:",error&&error.stack||error);results.push(false);
   }finally{

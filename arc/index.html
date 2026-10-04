@@ -307,6 +307,7 @@
     body.is-mobile .mob-actions{ min-height:44px; padding:4px 8px; font-size:17px; }
   }
 </style>
+<link rel="stylesheet" href="battle-ui.css">
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png"><link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 </head>
@@ -326,7 +327,7 @@
 
   <div class="panel top">
     <div class="brand"><img src="/favicon.png" alt="GORWELD" style="height:30px;width:30px;border-radius:50%"><span><b>GORWELD</b>® ARC</span><span class="demo-badge">DEMO</span></div>
-    <span id="battleBadge" hidden>WELD BATTLE</span>
+    <span id="battleBadge" hidden>BATTLE WELD</span>
     <div class="wal" id="wal" hidden></div>
     <button id="setupBtn" class="mob-only on" type="button" title="Settings">⚙️</button>
     <button id="mobInspect" class="mob-only" type="button" title="Inspect">🔎</button>
@@ -388,8 +389,8 @@
     <button id="helmet" class="on" data-i18n="btn_helmet">🥽 HELMET</button>
     <button id="snd">🔊 ARC</button>
     <button id="inspect" data-i18n="btn_inspect">🔎 INSPECT</button>
-    <button id="battleLaunch">⚔ WELD BATTLE</button>
-    <button id="battleLaunchMobile" class="mob-actions" type="button" title="WELD BATTLE">⚔</button>
+    <button id="battleLaunch">⚔ BATTLE WELD</button>
+    <button id="battleLaunchMobile" class="mob-actions" type="button" title="BATTLE WELD">⚔</button>
     <button id="career" data-i18n="btn_career">🎓 CAREER</button>
     <button id="help" data-i18n="btn_help">❔ HOW TO</button>
     <button id="methods" data-i18n="btn_methods">📖 METHODS</button>
@@ -402,24 +403,46 @@
     <button id="mobSetup2" class="mob-actions" type="button" title="Settings">⚙️</button>
   </div>
 
-  <!-- WELD BATTLE -->
-  <div id="battleModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="battleTitle">
-    <div class="card" style="width:min(520px,92vw)">
-      <h2 id="battleTitle">WELD BATTLE</h2>
-      <div id="battleModeTag" class="battle-mode-tag" hidden></div>
-      <p id="battleMessage" class="battle-note"></p>
-      <div id="battleTaskChoices"></div>
-      <div id="battleServerFields" class="battle-fields" hidden>
-        <label><span id="battleNicknameLabel">Nickname (optional)</span><input id="battleNickname" maxlength="24" autocomplete="nickname"></label>
-        <label><span id="battleProfileLabel">Replay profile</span><select id="battleInputProfile"><option value="full">Full</option><option value="touch">Touch</option></select></label>
+  <!-- BATTLE WELD — isolated visual shell; the ARC stage remains untouched beneath it. -->
+  <div id="battleModal" class="modal bw-root" role="dialog" aria-modal="true" aria-labelledby="battleTitle" data-screen="enter">
+    <div class="bw-shell">
+      <header class="bw-header">
+        <div><span class="bw-wordmark">BATTLE <b>WELD</b></span><span class="bw-slogan">SAME TASK · SAME RULES · ONE VERDICT</span></div>
+        <div id="battleModeTag" class="bw-mode" hidden></div>
+      </header>
+      <div class="bw-match" aria-label="Battle Weld match">
+        <section class="bw-player bw-p1"><span id="bwPlayer1Slot">PLAYER 1</span><strong id="bwPlayer1Name">—</strong><small id="bwPlayer1State">STANDING BY</small></section>
+        <div class="bw-vs" aria-hidden="true">VS</div>
+        <section class="bw-player bw-p2"><span id="bwPlayer2Slot">PLAYER 2</span><strong id="bwPlayer2Name">—</strong><small id="bwPlayer2State">STANDING BY</small></section>
       </div>
-      <div id="battleModalSummary" class="battle-summary" hidden></div>
-      <div class="act">
-        <button id="battlePrimary" class="on" type="button"></button>
-        <button id="battleSecondary" type="button"></button>
-      </div>
+      <div class="bw-taskline"><span id="bwTaskValue">SAME TASK · SAME RULES</span><span id="bwCheckStamps" class="bw-stamps"><i data-check="taskHash">HASH · —</i><i data-check="engineVersion">ENGINE · —</i><i data-check="scoringVersion">SCORING · —</i></span><span id="bwVersionValue"></span></div>
+      <main class="bw-content">
+        <div class="bw-intro" aria-hidden="true"><span>GORWELD® ARC</span><b id="bwScoreboard">P1 0 · P2 0</b><span>SERVER JUDGED</span></div>
+        <h2 id="battleTitle">BATTLE WELD</h2>
+        <p id="battleMessage" class="battle-note" aria-live="polite"></p>
+        <div id="battleTaskChoices"></div>
+        <div id="battleServerFields" class="battle-fields" hidden>
+          <label><span id="battleNicknameLabel">Nickname (optional)</span><input id="battleNickname" maxlength="24" autocomplete="nickname"></label>
+          <label><span id="battleProfileLabel">Replay profile</span><select id="battleInputProfile"><option value="full">Full</option><option value="touch">Touch</option></select></label>
+        </div>
+        <fieldset id="bwGearCheck" class="bw-gear" hidden>
+          <legend id="bwGearLegend">GEAR CHECK · PLAYER CONFIRMATION</legend>
+          <label><input id="bwHelmetCheck" type="checkbox"><span id="bwHelmetText">Helmet on</span></label>
+          <label><input id="bwGlovesCheck" type="checkbox"><span id="bwGlovesText">Gloves on</span></label>
+          <small id="bwGearNote">Player confirmation only. This screen does not verify physical PPE.</small>
+        </fieldset>
+        <div id="battleModalSummary" class="battle-summary" hidden></div>
+        <div class="bw-actions">
+          <button id="battlePrimary" class="on" type="button"></button>
+          <button id="battleSecondary" type="button"></button>
+        </div>
+      </main>
+      <footer class="bw-footer"><span id="bwCeremonyLine" aria-live="polite">GEAR CHECK.</span><span>GORWELD® · ARC</span></footer>
     </div>
   </div>
+
+  <div id="bwHud" class="bw-hud" aria-hidden="true"><span class="bw-hud-brand">BATTLE WELD · LIVE</span><span id="bwHudMode"></span><span id="bwHudTask"></span><span id="bwHudAttempt"></span><span id="bwHudOpponent"></span></div>
+  <div id="bwInspection" class="bw-inspection" hidden role="status" aria-live="polite"><span id="bwInspectionMode" class="bw-inspection-mode"></span><span class="bw-scan" aria-hidden="true"></span><b id="bwInspectionTitle">INSPECTION</b><span id="bwInspectionText">VERIFYING…</span><small id="bwInspectionVelda"></small></div>
 
   <!-- INSPECTION REPORT -->
   <div id="repModal" class="modal"><div class="card" style="width:min(460px,90vw)">
@@ -459,6 +482,7 @@
     <h2 id="cardTitle" data-i18n="card_title">Score card</h2>
     <div id="cardBattleModeTag" class="battle-mode-tag" hidden></div>
     <canvas id="shareCanvas" width="600" height="338" style="width:min(560px,86vw); border-radius:12px; border:1px solid #232b31"></canvas>
+    <canvas id="battleShareCanvas" width="1200" height="675" hidden aria-label="Battle Weld result card"></canvas>
     <div class="act">
       <button id="cardDl" class="on" data-i18n="card_dl">💾 SAVE PNG</button>
       <button id="cardTxt" data-i18n="card_copy">📋 COPY TEXT</button>
@@ -2064,6 +2088,8 @@ function applyI18N(){
   document.documentElement.lang=lang;
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.getElementById("snd").textContent = soundOn? t("btn_arc") : t("btn_mute");
+  if(typeof battleState!=="undefined"&&battleState&&document.getElementById("battleModal").classList.contains("open"))
+    battleUiRefresh(document.getElementById("battleTitle").textContent,document.getElementById("battleMessage").textContent,document.getElementById("battlePrimary").textContent);
   battleUpdateShareButtons();
   updateInfo(); updateToolHud(); updateRank(); fillTut(); fillQs(); updateWallet(); updateMobHud();
 }
@@ -2071,6 +2097,9 @@ function applyI18N(){
 // ── Share card ────────────────────────────────────────────────────
 function buildCard(){
   if(battleTaskActive()&&battleState.cardView){ buildBattleCard(); return; }
+  document.getElementById("cardModal").classList.remove("bw-battle-ru");
+  document.getElementById("shareCanvas").hidden=false;document.getElementById("battleShareCanvas").hidden=true;
+  document.getElementById("cardBattleModeTag").hidden=true;
   document.getElementById("cardTitle").textContent=t("card_title");
   document.getElementById("cardBattleLink").hidden=true;
   document.getElementById("cardBattleShare").hidden=true;
@@ -2322,7 +2351,7 @@ document.getElementById("rCard").onclick=()=>{ closeModal("repModal"); buildCard
 document.getElementById("carClose").onclick=()=>closeModal("carModal");
 document.getElementById("carReset").onclick=()=>{ progress={done:{},xp:0}; saveProgress(); updateInfo(); updateRank(); openCareer(); };
 document.getElementById("cardClose").onclick=()=>closeModal("cardModal");
-document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"); a.download="gorweld-card-"+Date.now()+".png"; a.href=document.getElementById("shareCanvas").toDataURL("image/png"); a.click(); };
+document.getElementById("cardDl").onclick=()=>{ const a=document.createElement("a"),cv=document.getElementById("battleShareCanvas").hidden?document.getElementById("shareCanvas"):document.getElementById("battleShareCanvas"); a.download="gorweld-card-"+Date.now()+".png"; a.href=cv.toDataURL("image/png"); a.click(); };
 document.getElementById("cardProof").onclick=copyProof;
 document.getElementById("cardTxt").onclick=()=>{ const value=cardText(); if(battleTaskActive()&&battleState.cardView){battleCopy(value);return;}
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(value).then(()=>showToast(t("t_copied"),"#5fe08a"),()=>showToast(t("t_clipFail"),"#ff9a3c"));
@@ -2630,52 +2659,58 @@ addEventListener("resize",resize);
 
 // ── WELD BATTLE adapter — ARC pozostaje jedynym źródłem wyniku i WPS ──
 const BATTLE_TEXT={
-  pl:{launch:"⚔ WELD BATTLE",choose:"Wybierz zadanie Battle",chooseNote:"Obaj spawacze dostają te same ustawienia. Battle V1 używa tylko automatycznego prądu z WPS.",
+  pl:{launch:"⚔ BATTLE WELD",choose:"Wybierz zadanie Battle",chooseNote:"Obaj spawacze dostają te same ustawienia. Battle V1 używa tylko automatycznego prądu z WPS.",
     start:"USTAW ZADANIE",ready:"ZADANIE GOTOWE",accept:"ZAŁADUJ ZADANIE",close:"ZAMKNIJ",newBattle:"NOWE ZADANIE",exitBattle:"WYJDŹ Z BATTLE",
     inspectAgain:"Wyczyść płytę (CLEAR), aby zacząć nową próbę",careerUnavailable:"Kariera niedostępna w trakcie Battle",shareLink:"UDOSTĘPNIJ LINK",
-    linkTitle:"Zaproszenie WELD BATTLE",resultTitle:"Wynik WELD BATTLE",errorTitle:"Nie można uruchomić Battle",
+    linkTitle:"Zaproszenie BATTLE WELD",resultTitle:"WERDYKT",errorTitle:"Nie można uruchomić Battle",
     badLink:"Link Battle jest uszkodzony lub ma nieobsługiwany format.",unsupported:"Tego zadania nie obsługuje ARC (brak WPS albo tryb inny niż AUTO).",
     ampsMismatch:"Amperaż zadania nie zgadza się z zaleceniem ARC.",taskMismatch:"Wczytane zadanie różni się od zadania w linku.",
     engineMismatch:"Inna wersja silnika ARC. Tego pojedynku nie można porównać.",scoreMismatch:"Inna wersja oceny ARC. Tego pojedynku nie można porównać.",
     modeConflict:"Battle nie może działać równocześnie ze starym trybem challenge.",taskReady:"Zadanie przypięte. Uderz w blachę, aby rozpocząć próbę.",
     rematch:"REWANŻ",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"NIEUKOŃCZONE",
     beat:"BEAT MY WELD",share:"UDOSTĘPNIJ WYNIK",copyLink:"KOPIUJ LINK",copied:"LINK SKOPIOWANY",
-    wins1:"WELDER 01 WYGRYWA",wins2:"WELDER 02 WYGRYWA",draw:"REMIS",noQualified:"BRAK KWALIFIKOWANEGO WYNIKU",
+    wins1:"%1 WYGRYWA",wins2:"%1 WYGRYWA",draw:"REMIS",noQualified:"BRAK KWALIFIKOWANEGO WYNIKU",
     incomparable:"WYNIKI NIEPORÓWNYWALNE",unsupportedReason:"TASK_UNSUPPORTED",
-    task:"Zadanie",bp:"BP",attempt:"Próba",started:"rozpoczęte",
+    task:"Zadanie",bp:"BP",scoreUnit:"pkt",attempt:"Próba",started:"rozpoczęte",
     friendly:"TOWARZYSKI · NIEZWERYFIKOWANY",serverTag:"SERWER · WERYFIKOWANY",nickLabel:"Nick (opcjonalnie)",profileLabel:"Profil odtworzenia",fullProfile:"Pełny",touchProfile:"Dotykowy",syncMode:"Wspólny start",linkMode:"Przez link",
     consentTitle:"Dane pojedynku",consentBody:"Po zgodzie wyślemy nick, nagranie rundy i czasy do lokalnego serwera testowego Battle Weld. Serwer działa tylko na tym komputerze, a dane są przechowywane w pamięci do restartu serwera.",continueText:"KONTYNUUJ",cancelText:"ANULUJ",createText:"UTWÓRZ POJEDYNEK",joinText:"DOŁĄCZ DO POJEDYNKU",copyInvite:"KOPIUJ ZAPROSZENIE",waitingPlayer:"Oczekiwanie na drugiego gracza",waitingReady:"Oczekiwanie na gotowość przeciwnika",readyText:"GOTOWY",finishText:"ZAKOŃCZ POJEDYNEK",confirmFinish:"Zakończyć? Po potwierdzeniu nie można wysłać kolejnych prób.",exitText:"WYJDŹ Z BATTLE",spectator:"Podgląd tylko do odczytu",mouseWarning:"Ten pojedynek wymaga myszy.",versions:"Silnik %1 · ocena %2",serverDown:"Serwer Battle Weld jest niedostępny. Połącz się ponownie z serwerem testowym; tryb towarzyski nie został uruchomiony.",joinPreview:"Zadanie: %1 · tryb: %2 · profil: %3 · gracz 1: %4",incomparableServer:"INCOMPARABLE — wersja ARC nie pasuje. Nie dołączono do pojedynku.",countdown:"Start za %1",strikeNow:"START — możesz rozpocząć spawanie.",verifying:"WERYFIKOWANIE PRÓBY…",verified:"WYNIK SERWERA · %1 · %2 BP",opponentWelding:"Przeciwnik spawa",opponentIdle:"Przeciwnik oczekuje",serverWaiting:"Oczekiwanie na przeciwnika",serverResult:"Wynik serwera",serverAttemptError:"Próba nie została przyjęta: %1",duplicateAttempt:"To nagranie zostało już wysłane.",attemptLimit:"Wykorzystano limit 20 zaakceptowanych prób.",invalidAttempt:"Serwer odrzucił nieprawidłowe nagranie ARC.",unknownServerError:"Serwer odrzucił żądanie (%1).",noCredentials:"Brak zapisanej sesji. Ten ekran jest tylko do odczytu.",taskAndVersions:"%1 · %2 · %3",replayFull:"pełny",replayTouch:"dotykowy",finishedNotice:"Pojedynek zakończony",statusDisconnected:"Połączenie utracone. Trwa ponowne łączenie…",copyFailed:"Nie udało się skopiować zaproszenia."},
-  en:{launch:"⚔ WELD BATTLE",choose:"Choose a Battle task",chooseNote:"Both welders get the same settings. Battle V1 uses AUTO current from the WPS only.",
+  en:{launch:"⚔ BATTLE WELD",choose:"Choose a Battle task",chooseNote:"Both welders get the same settings. Battle V1 uses AUTO current from the WPS only.",
     start:"SET TASK",ready:"TASK READY",accept:"LOAD TASK",close:"CLOSE",newBattle:"NEW TASK",exitBattle:"EXIT BATTLE",
     inspectAgain:"Clear the plate to start a new attempt",careerUnavailable:"Career unavailable during Battle",shareLink:"SHARE LINK",
-    linkTitle:"WELD BATTLE invite",resultTitle:"WELD BATTLE result",errorTitle:"Battle cannot start",
+    linkTitle:"BATTLE WELD invite",resultTitle:"VERDICT",errorTitle:"Battle cannot start",
     badLink:"The Battle link is damaged or uses an unsupported format.",unsupported:"ARC does not support this task (no WPS value or non-AUTO mode).",
     ampsMismatch:"Task amperage does not match the ARC recommendation.",taskMismatch:"Loaded task differs from the linked task.",
     engineMismatch:"ARC engine version differs. These attempts cannot be compared.",scoreMismatch:"ARC scoring version differs. These attempts cannot be compared.",
     modeConflict:"Battle cannot run together with the legacy challenge mode.",taskReady:"Task pinned. Strike the plate to begin your attempt.",
     rematch:"REMATCH",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"INCOMPLETE",
     beat:"BEAT MY WELD",share:"SHARE RESULT",copyLink:"COPY BATTLE LINK",copied:"LINK COPIED",
-    wins1:"WELDER 01 WINS",wins2:"WELDER 02 WINS",draw:"DRAW",noQualified:"NO QUALIFIED RESULT",
+    wins1:"%1 WINS",wins2:"%1 WINS",draw:"DRAW",noQualified:"NO QUALIFIED RESULT",
     incomparable:"INCOMPARABLE",unsupportedReason:"TASK_UNSUPPORTED",
-    task:"Task",bp:"BP",attempt:"Attempt",started:"started",
+    task:"Task",bp:"BP",scoreUnit:"pts",attempt:"Attempt",started:"started",
     friendly:"FRIENDLY · UNVERIFIED",serverTag:"SERVER · VERIFIED",nickLabel:"Nickname (optional)",profileLabel:"Replay profile",fullProfile:"Full",touchProfile:"Touch",syncMode:"Synchronized start",linkMode:"Link battle",
     consentTitle:"Battle data",consentBody:"With your consent, your nickname, round recording and times will be sent to the local Battle Weld test server. It runs on this computer, and data stays in memory until the server restarts.",continueText:"CONTINUE",cancelText:"CANCEL",createText:"CREATE BATTLE",joinText:"JOIN BATTLE",copyInvite:"COPY INVITE",waitingPlayer:"Waiting for the second player",waitingReady:"Waiting for opponent readiness",readyText:"READY",finishText:"FINISH BATTLE",confirmFinish:"Finish this battle? You will not be able to submit more attempts.",exitText:"EXIT BATTLE",spectator:"Read-only spectator",mouseWarning:"This battle needs a mouse.",versions:"Engine %1 · scoring %2",serverDown:"The Battle Weld server is unavailable. Reconnect to the test server; friendly mode was not started.",joinPreview:"Task: %1 · mode: %2 · profile: %3 · player 1: %4",incomparableServer:"INCOMPARABLE — ARC version mismatch. You have not joined the battle.",countdown:"Starting in %1",strikeNow:"START — you can begin welding.",verifying:"VERIFYING ATTEMPT…",verified:"SERVER RESULT · %1 · %2 BP",opponentWelding:"Opponent welding",opponentIdle:"Opponent waiting",serverWaiting:"Waiting for opponent",serverResult:"Server result",serverAttemptError:"Attempt was not accepted: %1",duplicateAttempt:"This recording was already submitted.",attemptLimit:"The limit of 20 accepted attempts has been reached.",invalidAttempt:"The server rejected an invalid ARC recording.",unknownServerError:"The server rejected the request (%1).",noCredentials:"No saved session. This screen is read-only.",taskAndVersions:"%1 · %2 · %3",replayFull:"full",replayTouch:"touch",finishedNotice:"Battle finished",statusDisconnected:"Connection lost. Reconnecting…",copyFailed:"Could not copy the invite."},
-  ru:{launch:"⚔ WELD BATTLE",choose:"Выберите задание Battle",chooseNote:"Оба сварщика получают одинаковые настройки. В V1 используется только AUTO-ток по WPS.",
+  ru:{launch:"⚔ BATTLE WELD",choose:"Выберите задание Battle",chooseNote:"Оба сварщика получают одинаковые настройки. В V1 используется только AUTO-ток по WPS.",
     start:"ЗАДАТЬ РЕЖИМ",ready:"ЗАДАНИЕ ГОТОВО",accept:"ЗАГРУЗИТЬ ЗАДАНИЕ",close:"ЗАКРЫТЬ",newBattle:"НОВОЕ ЗАДАНИЕ",exitBattle:"ВЫЙТИ ИЗ BATTLE",
     inspectAgain:"Очистите пластину (CLEAR), чтобы начать новую попытку",careerUnavailable:"Карьера недоступна во время Battle",shareLink:"ПОДЕЛИТЬСЯ ССЫЛКОЙ",
-    linkTitle:"Приглашение WELD BATTLE",resultTitle:"Результат WELD BATTLE",errorTitle:"Нельзя запустить Battle",
+    linkTitle:"Приглашение BATTLE WELD",resultTitle:"ВЕРДИКТ",errorTitle:"Нельзя запустить Battle",
     badLink:"Ссылка Battle повреждена или имеет неподдерживаемый формат.",unsupported:"ARC не поддерживает задание (нет значения WPS или режим не AUTO).",
     ampsMismatch:"Ток задания не совпадает с рекомендацией ARC.",taskMismatch:"Загруженное задание отличается от задания в ссылке.",
     engineMismatch:"Версия движка ARC отличается. Результаты нельзя сравнить.",scoreMismatch:"Версия оценки ARC отличается. Результаты нельзя сравнить.",
     modeConflict:"Battle нельзя запускать одновременно со старым режимом challenge.",taskReady:"Задание закреплено. Коснитесь пластины, чтобы начать попытку.",
     rematch:"РЕВАНШ",p1:"Welder 01",p2:"Welder 02",accepted:"ACCEPTED",reject:"REJECT",incomplete:"НЕ ЗАВЕРШЕНО",
     beat:"BEAT MY WELD",share:"ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ",copyLink:"КОПИРОВАТЬ ССЫЛКУ",copied:"ССЫЛКА СКОПИРОВАНА",
-    wins1:"ПОБЕДИЛ WELDER 01",wins2:"ПОБЕДИЛ WELDER 02",draw:"НИЧЬЯ",noQualified:"НЕТ ЗАЧТЁННОГО РЕЗУЛЬТАТА",
+    wins1:"ПОБЕДА: %1",wins2:"ПОБЕДА: %1",draw:"НИЧЬЯ",noQualified:"НЕТ ЗАЧТЁННОГО РЕЗУЛЬТАТА",
     incomparable:"НЕСРАВНИМЫ",unsupportedReason:"TASK_UNSUPPORTED",
-    task:"Задание",bp:"BP",attempt:"Попытка",started:"начато",
+    task:"Задание",bp:"BP",scoreUnit:"очк.",attempt:"Попытка",started:"начато",
     friendly:"ДРУЖЕСКИЙ · НЕ ПРОВЕРЕН",serverTag:"СЕРВЕР · ПРОВЕРЕН",nickLabel:"Ник (необязательно)",profileLabel:"Профиль повтора",fullProfile:"Полный",touchProfile:"Сенсорный",syncMode:"Общий старт",linkMode:"По ссылке",
     consentTitle:"Данные поединка",consentBody:"После согласия мы отправим ваш ник, запись раунда и время на локальный тестовый сервер Battle Weld. Сервер работает на этом компьютере, данные хранятся в памяти до перезапуска сервера.",continueText:"ПРОДОЛЖИТЬ",cancelText:"ОТМЕНА",createText:"СОЗДАТЬ ПОЕДИНОК",joinText:"ПРИСОЕДИНИТЬСЯ",copyInvite:"КОПИРОВАТЬ ПРИГЛАШЕНИЕ",waitingPlayer:"Ожидание второго игрока",waitingReady:"Ожидание готовности соперника",readyText:"ГОТОВ",finishText:"ЗАВЕРШИТЬ ПОЕДИНОК",confirmFinish:"Завершить? После подтверждения новые попытки отправить нельзя.",exitText:"ВЫЙТИ ИЗ BATTLE",spectator:"Только просмотр",mouseWarning:"Для этого поединка нужна мышь.",versions:"Движок %1 · оценка %2",serverDown:"Сервер Battle Weld недоступен. Подключитесь к тестовому серверу повторно; дружеский режим не запускался.",joinPreview:"Задание: %1 · режим: %2 · профиль: %3 · игрок 1: %4",incomparableServer:"INCOMPARABLE — версия ARC не совпадает. Вы не присоединились к поединку.",countdown:"Старт через %1",strikeNow:"СТАРТ — можно начинать сварку.",verifying:"ПРОВЕРКА ПОПЫТКИ…",verified:"РЕЗУЛЬТАТ СЕРВЕРА · %1 · %2 BP",opponentWelding:"Соперник сваривает",opponentIdle:"Соперник ожидает",serverWaiting:"Ожидание соперника",serverResult:"Результат сервера",serverAttemptError:"Попытка не принята: %1",duplicateAttempt:"Эта запись уже отправлена.",attemptLimit:"Достигнут лимит 20 принятых попыток.",invalidAttempt:"Сервер отклонил некорректную запись ARC.",unknownServerError:"Сервер отклонил запрос (%1).",noCredentials:"Нет сохранённой сессии. Доступен только просмотр.",taskAndVersions:"%1 · %2 · %3",replayFull:"полный",replayTouch:"сенсорный",finishedNotice:"Поединок завершён",statusDisconnected:"Соединение потеряно. Повторное подключение…",copyFailed:"Не удалось скопировать приглашение."}
 };
+const BATTLE_UI_COPY={
+  pl:{p1:"GRACZ 1",p2:"GRACZ 2",standby:"W GOTOWOŚCI",attempt:"PRÓBA",slogan:"SAME TASK · SAME RULES · ONE VERDICT",introLeft:"GORWELD® ARC",introRight:"WERDYKT SERWERA",gearLegend:"KONTROLA SPRZĘTU · POTWIERDZA GRACZ",helmet:"Mam założoną przyłbicę",gloves:"Mam założone rękawice",gearNote:"To wyłącznie potwierdzenie gracza. Ekran nie sprawdza fizycznego wyposażenia.",gearMissing:"Potwierdź przyłbicę i rękawice przed gotowością.",live:"BATTLE WELD · NA ŻYWO",inspection:"INSPEKCJA",verifying:"WERYFIKOWANIE…",veldaGear:"Gear check.",veldaRules:"Same task. Same rules.",veldaStrike:"Strike the arc.",veldaInspect:"Inspection complete.",veldaVerdict:"Verdict locked.",serverPending:"SERWER · OCZEKUJE NA POJEDYNEK"},
+  en:{p1:"PLAYER 1",p2:"PLAYER 2",standby:"STANDING BY",attempt:"ATTEMPT",slogan:"SAME TASK · SAME RULES · ONE VERDICT",introLeft:"GORWELD® ARC",introRight:"SERVER JUDGED",gearLegend:"GEAR CHECK · PLAYER CONFIRMATION",helmet:"Helmet on",gloves:"Gloves on",gearNote:"Player confirmation only. This screen does not verify physical PPE.",gearMissing:"Confirm helmet and gloves before readying.",live:"BATTLE WELD · LIVE",inspection:"INSPECTION",verifying:"VERIFYING…",veldaGear:"Gear check.",veldaRules:"Same task. Same rules.",veldaStrike:"Strike the arc.",veldaInspect:"Inspection complete.",veldaVerdict:"Verdict locked.",serverPending:"SERVER · AWAITING BATTLE"},
+  ru:{p1:"ИГРОК 1",p2:"ИГРОК 2",standby:"ГОТОВИТСЯ",attempt:"ПОПЫТКА",slogan:"ОДНО ЗАДАНИЕ · ОДНИ ПРАВИЛА · ОДИН ВЕРДИКТ",introLeft:"GORWELD® ARC",introRight:"РЕШЕНИЕ СЕРВЕРА",gearLegend:"ПРОВЕРКА ЭКИПИРОВКИ · ПОДТВЕРЖДЕНИЕ ИГРОКА",helmet:"Шлем надет",gloves:"Перчатки надеты",gearNote:"Только подтверждение игрока. Экран не проверяет физическую экипировку.",gearMissing:"Подтвердите шлем и перчатки перед готовностью.",live:"BATTLE WELD · ИДЁТ БОЙ",inspection:"ИНСПЕКЦИЯ",verifying:"ПРОВЕРКА…",veldaGear:"Gear check.",veldaRules:"Same task. Same rules.",veldaStrike:"Strike the arc.",veldaInspect:"Inspection complete.",veldaVerdict:"Verdict locked.",serverPending:"СЕРВЕР · ОЖИДАНИЕ ПОЕДИНКА"}
+};
+function bwc(key){return (BATTLE_UI_COPY[lang]||BATTLE_UI_COPY.en)[key]||BATTLE_UI_COPY.en[key]||key;}
 function bt(key){ return (BATTLE_TEXT[lang]||BATTLE_TEXT.en)[key]||BATTLE_TEXT.en[key]||key; }
 function battleFmt(key,values){let value=bt(key);(values||[]).forEach((item,index)=>value=value.replace("%"+(index+1),String(item)));return value;}
 const BATTLE_SERVER_ERROR_TEXT={
@@ -2747,21 +2782,111 @@ function battleShow(title,message,choices,primaryText,primaryAction,secondaryTex
   const list=document.getElementById("battleTaskChoices"), sum=document.getElementById("battleModalSummary");
   const modeTag=document.getElementById("battleModeTag");
   document.getElementById("battleServerFields").hidden=true;
-  const serverTag=!!(battleState&&battleState.serverMode&&battleState.done);
-  modeTag.hidden=!serverTag&&!battleIsFriendlyScreen(); modeTag.textContent=bt(serverTag?"serverTag":"friendly");
+  const serverTag=!!(battleState&&battleState.serverMode),friendly=battleIsFriendlyScreen();
+  modeTag.hidden=false;modeTag.textContent=serverTag?bt("serverTag"):friendly?bt("friendly"):bwc("serverPending");
   titleEl.textContent=title; msg.textContent=message||""; list.replaceChildren();
   (choices||[]).forEach(choice=>{
     const b=document.createElement("button"); b.type="button"; b.className="battle-choice";
-    b.textContent=choice.label; b.onclick=choice.action; list.appendChild(b);
+    b.textContent=choice.label; b.onclick=()=>{battleUiSound("clamp");if(choice.action)choice.action();}; list.appendChild(b);
   });
   sum.textContent=summary||""; sum.hidden=!summary;
   const p=document.getElementById("battlePrimary"), q=document.getElementById("battleSecondary");
   p.textContent=primaryText||""; p.hidden=!primaryText; p.onclick=primaryAction||null;
   q.textContent=secondaryText||""; q.hidden=!secondaryText; q.onclick=secondaryAction||(()=>closeModal("battleModal"));
   battlePrimaryAction=primaryAction||null; battleSecondaryAction=secondaryAction||null;
-  const modal=document.getElementById("battleModal");
+  const modal=document.getElementById("battleModal");modal.hidden=false;
+  battleUiRefresh(title,message,primaryText);
   if(openM==="battleModal"){modal.style.display="flex";modal.classList.add("open");}
   else openModal("battleModal");
+}
+function battleUiStage(title,message){
+  const t=String(title||""),m=String(message||"");
+  if(/INCOMPARABLE|НЕСРАВНИМ|NIEPORÓWNYWAL/i.test(t+m))return "incomparable";
+  if(t===bt("errorTitle"))return "error";
+  if(battleState&&battleState.done)return "verdict";
+  if(t===bt("consentTitle"))return "setup";
+  if(!document.getElementById("battleServerFields").hidden)return "setup";
+  if(m.includes(bt("countdown").split("%1")[0])||t===bt("countdown"))return "countdown";
+  if(t===bt("choose"))return "enter";
+  if(t===bt("linkTitle")||t===bt("ready")||t===bt("createText"))return "ready";
+  if(t===bt("resultTitle"))return "verdict";
+  return battleState&&battleState.serverMode?"ready":"enter";
+}
+function battleUiRefresh(title,message,primaryText){
+  const root=document.getElementById("battleModal"),stageName=battleUiStage(title,message),battle=battleState&&battleState.serverBattle;
+  root.dataset.screen=stageName;
+  document.getElementById("bwPlayer1Slot").textContent=bwc("p1");document.getElementById("bwPlayer2Slot").textContent=bwc("p2");
+  document.getElementById("bwPlayer1Name").textContent=battle&&battle.players&&battle.players.P1&&battle.players.P1.nickname||battleState&&battleState.cardView&&battleState.cardView.player1&&battleState.cardView.player1.nickname||bt("p1");
+  document.getElementById("bwPlayer2Name").textContent=battle&&battle.players&&battle.players.P2&&battle.players.P2.nickname||battleState&&battleState.cardView&&battleState.cardView.player2&&battleState.cardView.player2.nickname||bt("p2");
+  const own=battle&&battleState&&battleState.slot&&battle.players&&battle.players[battleState.slot];
+  document.getElementById("bwPlayer1State").textContent=battle&&battle.players&&battle.players.P1?(battle.players.P1.ready?bt("readyText"):bwc("standby")):bwc("standby");
+  document.getElementById("bwPlayer2State").textContent=battle&&battle.players&&battle.players.P2?(battle.players.P2.ready?bt("readyText"):bwc("standby")):bwc("standby");
+  const task=battleState&&(battleState.task||battleState.serverTask)||battle&&battle.task;
+  document.getElementById("bwTaskValue").textContent=task?battleTaskLabel({...task,seed:task.seed===undefined?1:task.seed}):bwc("slogan");
+  const versions=battle&&battle.engineVersion?bt("versions").replace("%1",battle.engineVersion).replace("%2",battle.scoringVersion||""):
+    battleState&&battleState.engineVersion?bt("versions").replace("%1",battleState.engineVersion).replace("%2",battleState.scoringVersion||""):"";
+  document.getElementById("bwVersionValue").textContent=versions;
+  const serverHash=battle&&battle.taskHash,localHash=battleState&&battleState.taskHash;
+  const hashKnown=!!(serverHash||localHash),hashMismatch=!!(serverHash&&localHash&&serverHash!==localHash);
+  const expectedEngine=battle&&battle.engineVersion||battleState&&battleState.engineVersion||ArcSim.VERSION;
+  const expectedScoring=battle&&battle.scoringVersion||battleState&&battleState.scoringVersion||ArcSim.SCORING_VERSION;
+  const compatibleEngine=expectedEngine===ArcSim.VERSION,compatibleScoring=expectedScoring===ArcSim.SCORING_VERSION;
+  const stamps=[
+    ["taskHash","HASH",!hashKnown?"WAIT":hashMismatch?String(serverHash).slice(0,8)+" ≠ "+String(localHash).slice(0,8):"LOCKED",hashKnown&&!hashMismatch,hashKnown],
+    ["engineVersion","ENGINE",compatibleEngine?"MATCH":String(expectedEngine)+" ≠ "+String(ArcSim.VERSION),compatibleEngine,true],
+    ["scoringVersion","SCORING",compatibleScoring?"MATCH":String(expectedScoring)+" ≠ "+String(ArcSim.SCORING_VERSION),compatibleScoring,true]
+  ];
+  stamps.forEach(([key,label,value,ok,known])=>{
+    const stamp=document.querySelector('#bwCheckStamps [data-check="'+key+'"]');
+    stamp.textContent=label+" "+(known?(ok?"✓ ":"✕ "):"· ")+value;
+    stamp.classList.toggle("ok",!!known&&!!ok);stamp.classList.toggle("bad",!!known&&!ok);
+  });
+  document.querySelector("#battleModal .bw-slogan").textContent=bwc("slogan");
+  document.querySelector("#battleModal .bw-intro span:first-child").textContent=bwc("introLeft");
+  document.querySelector("#battleModal .bw-intro span:last-child").textContent=bwc("introRight");
+  document.getElementById("bwGearLegend").textContent=bwc("gearLegend");document.getElementById("bwHelmetText").textContent=bwc("helmet");
+  document.getElementById("bwGlovesText").textContent=bwc("gloves");document.getElementById("bwGearNote").textContent=bwc("gearNote");
+  const readyCheck=stageName==="ready"&&battleState&&battleState.serverMode&&battle&&own&&!own.ready&&battle.players.P2;
+  const gear=document.getElementById("bwGearCheck");gear.hidden=!readyCheck;
+  const readyButton=primaryText===bt("readyText"),confirmed=document.getElementById("bwHelmetCheck").checked&&document.getElementById("bwGlovesCheck").checked;
+  document.getElementById("battlePrimary").disabled=!!(readyCheck&&readyButton&&!confirmed);
+  const mode=battleState&&battleState.serverMode?bt("serverTag"):battleIsFriendlyScreen()?bt("friendly"):bwc("serverPending");
+  document.getElementById("battleModeTag").textContent=mode;
+  const view=battleState&&battleState.cardView;
+  const started=slot=>{
+    const player=battle&&battle.players&&battle.players[slot];
+    if(player)return Number(player.attemptsCount||player.best&&player.best.attemptNumber||0);
+    const result=view&&view[slot==="P1"?"player1":"player2"];
+    return Number(result&&result.attemptsStarted||0);
+  };
+  document.getElementById("bwScoreboard").textContent="P1 "+started("P1")+" · P2 "+started("P2");
+  const silent=stageName==="incomparable"||stageName==="error";
+  const line=silent?"":stageName==="verdict"?bwc("veldaVerdict"):stageName==="countdown"?bwc("veldaStrike"):stageName==="ready"?bwc("veldaRules"):bwc("veldaGear");
+  const veldaLine=document.getElementById("bwCeremonyLine");veldaLine.textContent=line;veldaLine.hidden=silent;
+  document.getElementById("battleModal").setAttribute("aria-label",title||"BATTLE WELD");
+  battleUiUpdateHud();
+}
+function battleUiUpdateHud(){
+  const active=!!(battleState&&battleTaskActive()&&(welding||battleState.hudActive)),hud=document.getElementById("bwHud");
+  battleUiPlaceHud();
+  document.body.classList.toggle("bw-welding",active);
+  if(!active){hud.setAttribute("aria-hidden","true");return;}
+  const task=battleState.task||{},own=battleState.serverBattle&&battleServerGetOwnPlayer(battleState.serverBattle),opponent=battleState.serverBattle&&battleServerOpponent(battleState.serverBattle);
+  document.getElementById("bwHudTask").textContent=battleTaskLabel(task);
+  document.getElementById("bwHudMode").textContent=battleState.serverMode?bt("serverTag"):bt("friendly");
+  document.getElementById("bwHudAttempt").textContent=bwc("attempt")+" "+((battleState.serverAttemptsStarted||battleState.attemptNumber||1))+" / 20";
+  document.getElementById("bwHudOpponent").textContent=battleState.serverMode?(opponent&&opponent.status==="welding"?bt("opponentWelding"):bt("opponentIdle")):bt("friendly");
+  hud.setAttribute("aria-hidden","false");
+}
+function battleUiSound(kind){
+  if(!soundOn)return;
+  try{if(!actx)initAudio();if(actx.state==="suspended")actx.resume();
+    const now=actx.currentTime,osc=actx.createOscillator(),gain=actx.createGain();osc.type="triangle";
+    osc.frequency.setValueAtTime(kind==="impact"?115:kind==="tick"?720:kind==="alarm"?260:420,now);
+    if(kind==="alarm")osc.frequency.linearRampToValueAtTime(170,now+.18);
+    gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(kind==="impact"?.10:.045,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+(kind==="impact"?.22:.11));
+    osc.connect(gain);gain.connect(actx.destination);osc.start(now);osc.stop(now+.24);
+  }catch(e){}
 }
 function battleWpsTasks(){
   const defs=[
@@ -2901,6 +3026,23 @@ async function battleServerRequest(battleId,route,method="GET",body,credentials)
     {code:payload.error||"HTTP_"+response.status,status:response.status,detail:payload.detail});
   return payload;
 }
+function battleUiPlaceHud(){
+  const hud=document.getElementById("bwHud");if(!hud)return;
+  const mobile=matchMedia("(max-width:680px),(max-height:520px)").matches;
+  const top=document.querySelector(".top"),mobHud=document.getElementById("mobHud");
+  const anchors=[top];
+  if(mobile){
+    if(top&&mobHud&&getComputedStyle(mobHud).display!=="none")mobHud.style.top=Math.max(52,Math.ceil(top.getBoundingClientRect().bottom+8))+"px";
+    anchors.push(document.getElementById("toolhud"),mobHud);
+  }
+  let bottom=0;
+  anchors.forEach(el=>{
+    if(!el||getComputedStyle(el).display==="none")return;
+    const r=el.getBoundingClientRect();if(r.width>0&&r.height>0)bottom=Math.max(bottom,r.bottom);
+  });
+  hud.style.top=Math.ceil(bottom+8)+"px";
+}
+addEventListener("resize",battleUiPlaceHud,{passive:true});
 function battleServerConsent(battleId,continueAction){
   if(battleServerConsentRemembered(battleId)){continueAction();return;}
   battleShow(bt("consentTitle"),bt("consentBody"),[],bt("continueText"),()=>{
@@ -2910,8 +3052,15 @@ function battleServerConsent(battleId,continueAction){
 function battleServerShowFailure(error,canRetry){
   const code=error&&error.code||"SERVER_UNAVAILABLE";
   battleState={...(battleState||{}),serverMode:true,localMode:false,blocked:true,reason:code};
-  const message=code==="SERVER_UNAVAILABLE"?bt("serverDown"):
+  let message=code==="SERVER_UNAVAILABLE"?bt("serverDown"):
     (code==="ENGINE_VERSION_MISMATCH"||code==="SCORING_VERSION_MISMATCH")?bt("incomparableServer"):battleServerFriendlyError(code,error&&error.detail);
+  const server=battleState.serverBattle||{},stamp=code==="ENGINE_VERSION_MISMATCH"?"engineVersion":
+    code==="SCORING_VERSION_MISMATCH"?"scoringVersion":code==="TASK_MISMATCH"?"taskHash":null;
+  if(stamp){
+    const expected=stamp==="engineVersion"?server.engineVersion:stamp==="scoringVersion"?server.scoringVersion:server.taskHash||server.task&&"LOCKED TASK";
+    const actual=stamp==="engineVersion"?ArcSim.VERSION:stamp==="scoringVersion"?ArcSim.SCORING_VERSION:"LOCAL TASK";
+    message+="\n"+stamp+": "+String(expected||"—")+" / "+String(actual||"—");
+  }
   battleShow(bt("errorTitle"),message,[],
     canRetry?bt("continueText"):"",canRetry?()=>battleServerBootFromHash():null,
     bt("exitText"),()=>battleReset());
@@ -2933,6 +3082,7 @@ function battleServerChooseTask(task){
     battleServerConsent("new",()=>battleServerCreate(task,battlePendingHostMode,nickname,inputProfile));
   },bt("cancelText"),()=>{battlePendingHostTask=null;document.getElementById("battleServerFields").hidden=true;closeModal("battleModal");});
   document.getElementById("battleServerFields").hidden=false;
+  battleUiRefresh(bt("createText"),battleTaskLabel(task),bt("createText"));
 }
 function battleServerSetHostMode(mode){
   const fields=document.getElementById("battleServerFields"),profile=fields.hidden?null:document.getElementById("battleInputProfile").value;
@@ -3027,7 +3177,12 @@ function battleServerRenderRoom(){
     if(battleState.serverRole==="host") {primary=bt("copyInvite");action=()=>battleCopy(battleState.inviteUrl);}
   }else if(battle.mode==="sync"&&["JOINED","READY"].includes(battle.state)){
     message+="\n"+(own&&own.ready?bt("waitingReady"):opponent?bt("readyText"):bt("waitingPlayer"));
-    if(own&&!own.ready&&opponent){primary=bt("readyText");action=()=>battleServerReady();}
+    if(own&&!own.ready&&opponent){primary=bt("readyText");action=()=>{
+      if(!(document.getElementById("bwHelmetCheck").checked&&document.getElementById("bwGlovesCheck").checked)){
+        showToast(bwc("gearMissing"),"#ffae3c");return;
+      }
+      battleUiSound("impact");battleServerReady();
+    };}
     else if(own&&own.ready) primary=bt("waitingReady");
   }else if(battle.state==="JOINED"&&battle.mode==="link"){
     message+="\n"+bt("strikeNow");
@@ -3062,11 +3217,20 @@ function battleServerStartCountdown(battle){
   if(!battleState||battleState.spectator){battleServerRenderRoom();return;}
   const startAt=Date.parse(battle.startAt); if(!Number.isFinite(startAt)){battleServerRenderRoom();return;}
   battleShow(bt("ready"),bt("countdown").replace("%1","…"),[],"",null,"",null);
+  let lastSecond=null;
   const tick=()=>{
     const remaining=startAt-(Date.now()+battleServerOffsetMs);
     if(remaining<=0){clearInterval(battleServerCountdownTimer);battleServerCountdownTimer=null;
-      battleServerActivateTask(battle.task).catch(error=>battleServerShowFailure(error,false));return false;}
+      document.getElementById("battleModal").dataset.screen="countdown";
+      document.getElementById("battleTitle").textContent="STRIKE ARC";
+      document.getElementById("battleMessage").textContent=bt("strikeNow");
+      document.getElementById("bwCeremonyLine").textContent=bwc("veldaStrike");battleUiSound("impact");
+      battleServerCountdownTimer=setTimeout(()=>{battleServerCountdownTimer=null;
+        battleServerActivateTask(battle.task).catch(error=>battleServerShowFailure(error,false));},300);return false;}
     const seconds=Math.ceil(remaining/1000);
+    if(seconds!==lastSecond){lastSecond=seconds;battleUiSound("tick");}
+    document.getElementById("battleModal").dataset.screen="countdown";
+    document.getElementById("battleTitle").textContent=String(Math.min(seconds,3));
     const message=seconds<=3?bt("countdown").replace("%1",String(seconds)):
       bt("versions").replace("%1",battle.engineVersion).replace("%2",battle.scoringVersion);
     document.getElementById("battleMessage").textContent=message;
@@ -3099,9 +3263,15 @@ function battleServerRenderVerdict(){
   battleState.done=true; battleState.ready=false; battleState.cardView={kind:"server",player1:p1,player2:p2,verdict:code};
   const line=(fallback,p)=>{
     const name=p&&p.nickname?p.nickname:fallback;
-    return name+": "+(p?`${p.score} · ${p.battlePoints} BP · ${battleStatus(p)}`:"—");
+    if(!p)return name+": —";
+    return name+": "+p.score+" "+bt("scoreUnit")+" · "+p.battlePoints+" BP · "+battleStatus(p)+" · "+bwc("attempt")+" "+p.attemptNumber+" / "+p.attemptsStarted+" · "+
+      (p.serverTime?new Date(p.serverTime).toISOString().replace("T"," ").replace(/\.\d{3}Z$/, " UTC"):"—");
   };
-  battleShow(bt("resultTitle"),battleLabelVerdict(code),[],battleState.spectator?"":bt("share"),()=>buildCard(),bt("exitText"),()=>battleReset(),
+  const previousBattle=battle;
+  const choices=battleState.spectator?[]:[{label:bt("rematch"),action:()=>{
+    const task=previousBattle.task; battleReset(); battleServerChooseTask(task);
+  }}];
+  battleShow(bt("resultTitle"),battleLabelVerdict(code),choices,battleState.spectator?"":bt("share"),()=>buildCard(),bt("exitText"),()=>battleReset(),
     line(bt("p1"),p1)+"\n"+line(bt("p2"),p2)+"\n"+"ID: "+battle.battleId);
 }
 async function battleServerApplyBattle(battle){
@@ -3207,12 +3377,17 @@ async function battleServerSubmitAttempt(report){
     battleState.serverLastAttempt=attempt;
     summary.textContent=bt("verified").replace("%1",attempt.score+" · "+battleStatus(attempt)).replace("%2",attempt.battlePoints);
     summary.classList.toggle("reject",attempt.inspectionRejected||!attempt.taskCompleted);
+    document.getElementById("bwInspectionTitle").textContent=bwc("inspection");
+    document.getElementById("bwInspectionText").textContent=bt("verified").replace("%1",attempt.score+" · "+battleStatus(attempt)).replace("%2",attempt.battlePoints);
+    setTimeout(()=>{document.getElementById("bwInspection").hidden=true;},550);
     if(attempt.score!==report.score){
       console.warn("[Battle] live/server score mismatch",{liveScore:report.score,serverScore:attempt.score,delta:attempt.score-report.score});
     }
   }catch(error){
     const message=error.code==="SERVER_UNAVAILABLE"?bt("serverDown"):battleServerFriendlyError(error.code,error.detail);
     summary.textContent=bt("serverAttemptError").replace("%1",message);summary.classList.add("reject");
+    document.getElementById("bwInspectionText").textContent=bt("serverAttemptError").replace("%1",message);
+    setTimeout(()=>{document.getElementById("bwInspection").hidden=true;},900);
     if(error.code==="SERVER_UNAVAILABLE") battleState.connection="reconnecting";
   }finally{
     try{await battleServerRequest(battleState.battleId,"/status","POST",{status:"idle"},battleState.credentials);}
@@ -3285,7 +3460,10 @@ function battleReset(){
   if(battleServerStream){battleServerStream.close();battleServerStream=null;}
   if(battleServerCountdownTimer){clearInterval(battleServerCountdownTimer);battleServerCountdownTimer=null;}
   battleClearHash(); battleState=null; battlePendingSnapshot=null;
-  document.body.classList.remove("battle-active"); battleLockControls(false);
+  document.body.classList.remove("battle-active","bw-welding"); battleLockControls(false);
+  document.getElementById("bwInspection").hidden=true;document.getElementById("battleModal").hidden=true;
+  document.getElementById("shareCanvas").hidden=false;document.getElementById("battleShareCanvas").hidden=true;
+  document.getElementById("bwHelmetCheck").checked=false;document.getElementById("bwGlovesCheck").checked=false;
   document.getElementById("battleBadge").hidden=true;
   if(battleSnapshot){
     const s=battleSnapshot; battleSnapshot=null;
@@ -3347,6 +3525,7 @@ function battleBuildLocalResult(score,letter,inspectionRejected,coverage){
 function battleAttemptStart(){
   if(!battleTaskActive()) return;
   battleState.roundInspected=false;
+  battleState.hudActive=true;battleUiUpdateHud();
   if(battleState.serverMode){
     battleState.serverAttemptsStarted=(battleState.serverAttemptsStarted||0)+1;
     battleServerRequest(battleState.battleId,"/status","POST",{status:"welding"},battleState.credentials)
@@ -3365,9 +3544,12 @@ function battleStatus(result){
   if(!result.taskCompleted) return bt("incomplete");
   return bt("accepted");
 }
-function battleLabelVerdict(verdict){
-  return ({P1_WINS:bt("wins1"),P2_WINS:bt("wins2"),DRAW:bt("draw"),
-    NO_QUALIFIED_RESULT:bt("noQualified"),INCOMPARABLE:bt("incomparable")})[verdict]||bt("incomparable");
+function battleLabelVerdict(verdict,view=battleState&&battleState.cardView){
+  if(verdict==="P1_WINS"||verdict==="P2_WINS"){
+    const player=verdict==="P1_WINS"?view&&view.player1:view&&view.player2;
+    return bt(verdict==="P1_WINS"?"wins1":"wins2").replace("%1",player&&player.nickname||bt(verdict==="P1_WINS"?"p1":"p2"));
+  }
+  return ({DRAW:bt("draw"),NO_QUALIFIED_RESULT:bt("noQualified"),INCOMPARABLE:bt("incomparable")})[verdict]||bt("incomparable");
 }
 function battleMakeHostEnvelope(result){
   const s=battleState;
@@ -3386,11 +3568,19 @@ function battleFinishInspection(report,verdict){
   if(!battleTaskActive()||battleState.mode==="result"||battleState.roundInspected) return;
   if(battleState.serverMode){
     battleState.roundInspected=true;
+    document.body.classList.remove("bw-welding");battleState.hudActive=false;
+    const overlay=document.getElementById("bwInspection");overlay.hidden=false;
+    document.getElementById("bwInspectionTitle").textContent=bwc("inspection");
+    document.getElementById("bwInspectionText").textContent=bwc("verifying");
+    document.getElementById("bwInspectionVelda").textContent=bwc("veldaInspect");
+    document.getElementById("bwInspectionMode").textContent=bt("serverTag");
+    battleUiSound("scan");
     const summary=document.getElementById("battleReportSummary"),share=document.getElementById("rBattleShare");
     summary.textContent=bt("verifying");summary.classList.remove("reject");summary.hidden=false;
     share.textContent=bt("serverResult");share.hidden=false;
     battleServerSubmitAttempt(report).catch(()=>{});return;
   }
+  document.body.classList.remove("bw-welding");battleState.hudActive=false;
   battleState.localMode=true;
   const result=battleBuildLocalResult(report.score,report.letter,verdict.rejected,report.coverage);
   if(battleState.mode==="host"){
@@ -3411,7 +3601,7 @@ function battleFinishInspection(report,verdict){
   if(view.kind==="invite"){
     summary.textContent=report.letter+" · "+battleStatus(result)+" · "+Battle.getBattlePoints(report.score)+" BP";
   }else{
-    summary.textContent=battleLabelVerdict(view.verdict)+" · "+Battle.getBattlePoints(view.player1.score)+
+    summary.textContent=battleLabelVerdict(view.verdict,view)+" · "+Battle.getBattlePoints(view.player1.score)+
       " : "+Battle.getBattlePoints(view.player2.score)+" BP";
   }
   summary.classList.toggle("reject",!!result.inspectionRejected); summary.hidden=false;
@@ -3420,10 +3610,10 @@ function battleFinishInspection(report,verdict){
   battleState.roundInspected=true;
 }
 function battleResultSummary(view){
-  if(view.kind==="invite") return bt("p1")+" · "+view.player1.grade+" · "+battleStatus(view.player1)+" · "+
-    Battle.getBattlePoints(view.player1.score)+" BP";
-  return battleLabelVerdict(view.verdict)+" · "+Battle.getBattlePoints(view.player1.score)+" : "+
-    Battle.getBattlePoints(view.player2.score)+" BP";
+  const row=(label,p)=>label+" · "+p.score+" "+bt("scoreUnit")+" · "+Battle.getBattlePoints(p.score)+" BP · "+battleStatus(p)+" · "+
+    bwc("attempt")+" "+p.attemptNumber+" / "+p.attemptsStarted;
+  if(view.kind==="invite") return row(bt("p1"),view.player1);
+  return battleLabelVerdict(view.verdict,view)+"\n"+row(bt("p1"),view.player1)+"\n"+row(bt("p2"),view.player2);
 }
 function battleShowReturnedResult(){
   const view=battleState.cardView;
@@ -3494,22 +3684,30 @@ function battleCopyLink(){
 function battleShare(){
   const link=battleMakeLinkForCurrent();
   if(!link)return;
-  if(navigator.share) navigator.share({title:"GORWELD WELD BATTLE",text:bt("beat"),url:link})
+  if(navigator.share) navigator.share({title:"GORWELD BATTLE WELD",text:bt("beat"),url:link})
     .catch(()=>battleCopy(link));
   else battleCopy(link);
 }
+function battleCanvasFont(face,weight,size){
+  const system='"Arial Narrow","Roboto Condensed",Arial,sans-serif';
+  const families=lang==="ru"?system:face==="display"?'BWDisplay,"Arial Narrow",Impact,sans-serif':face==="body"?'BWArchivo,"Helvetica Neue",Arial,sans-serif':'BWMono,ui-monospace,monospace';
+  return weight+" "+size+"px "+families;
+}
 function battlePlayerCard(x,player,name,center){
+  const px=center?1135:65,align=center?"right":"left";
   if(!player){
-    x.textAlign=center?"center":"left";x.fillStyle="#76838b";x.font="700 14px 'Segoe UI'";
-    x.fillText(name,center?450:42,center?150:150);x.font="600 12px 'Segoe UI'";x.fillText("NO RESULT",center?450:42,center?175:175);return;
+    x.textAlign=align;x.fillStyle="#8a9296";x.font=battleCanvasFont("mono",600,23);
+    x.fillText(name,px,300);x.font=battleCanvasFont("mono",500,18);x.fillText("NO RESULT",px,340);return;
   }
   const accepted=!player.inspectionRejected&&player.taskCompleted;
-  const color=player.inspectionRejected?"#ff5a4a":accepted?"#5fe08a":"#ffae3c";
-  x.textAlign=center?"center":"left"; x.fillStyle="#9aa6ad"; x.font="700 14px 'Segoe UI'"; x.fillText(name,center?450:42,center?113:116);
-  x.fillStyle=color; x.font="900 70px 'Segoe UI'"; x.fillText(player.grade,center?450:42,center?188:192);
-  x.fillStyle=color; x.font="800 16px 'Segoe UI'"; x.fillText(battleStatus(player),center?450:42,center?216:220);
-  x.fillStyle="#e9eef2"; x.font="900 34px 'Segoe UI'"; x.fillText(Battle.getBattlePoints(player.score)+" BP",center?450:42,center?265:270);
-  x.fillStyle="#8b97a0"; x.font="600 12px 'Segoe UI'"; x.fillText(bt("attempt")+" "+player.attemptNumber+" / "+player.attemptsStarted,center?450:42,center?288:293);
+  const color=player.inspectionRejected?"#ff8a80":accepted?"#ffd08a":"#e8b44a";
+  x.textAlign=align;x.fillStyle="#aeb5b9";x.font=battleCanvasFont("body",600,22);x.fillText(name,px,270);
+  x.fillStyle="#c3c9ce";x.font=battleCanvasFont("mono",500,18);x.fillText(player.score+" "+bt("scoreUnit"),px,307);
+  x.fillStyle=color;x.font=battleCanvasFont("display",800,102);x.fillText(player.grade||"—",px,390);
+  x.fillStyle=color;x.font=battleCanvasFont("mono",600,22);x.fillText(battleStatus(player),px,430);
+  x.fillStyle="#f3f5f6";x.font=battleCanvasFont("display",800,42);x.fillText(Battle.getBattlePoints(player.score)+" BP",px,490);
+  x.fillStyle="#a5adb1";x.font=battleCanvasFont("mono",500,17);x.fillText(bt("attempt")+" "+player.attemptNumber+" / "+player.attemptsStarted,px,525);
+  if(player.serverTime){x.fillStyle="#737c81";x.font=battleCanvasFont("mono",500,13);x.fillText(new Date(player.serverTime).toISOString().replace("T"," ").replace(/\.\d{3}Z$/, " UTC"),px,552);}
 }
 function battleUpdateShareButtons(){
   const copy=document.getElementById("cardBattleLink"), share=document.getElementById("cardBattleShare");
@@ -3518,29 +3716,37 @@ function battleUpdateShareButtons(){
 }
 function buildBattleCard(){
   if(!battleTaskActive()||!battleState.cardView)return;
+  document.getElementById("shareCanvas").hidden=true;document.getElementById("battleShareCanvas").hidden=false;
+  document.getElementById("cardModal").classList.toggle("bw-battle-ru",lang==="ru");
   const view=battleState.cardView;
   const modeTag=document.getElementById("cardBattleModeTag");
-  modeTag.hidden=!battleIsFriendlyScreen();modeTag.textContent=bt("friendly");
-  const cv=document.getElementById("shareCanvas"),x=cv.getContext("2d"),w=cv.width,h=cv.height;
-  const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#080c10");g.addColorStop(.55,"#0e161c");g.addColorStop(1,"#0a1218");
-  x.fillStyle=g;x.fillRect(0,0,w,h);x.strokeStyle="#1fd6e3";x.lineWidth=2;x.strokeRect(12,12,w-24,h-24);
-  x.strokeStyle="rgba(255,174,60,.4)";x.lineWidth=1;x.strokeRect(18,18,w-36,h-36);
-  x.textAlign="left";x.fillStyle="#1fd6e3";x.font="800 21px 'Segoe UI'";x.fillText("GORWELD ARC · WELD BATTLE",32,52);
-  if(battleIsFriendlyScreen()){x.fillStyle="#ffcf78";x.font="800 10px 'Segoe UI'";x.fillText(bt("friendly"),32,96);}
-  const task=battleTaskLabel(battleState.task);x.fillStyle="#8b97a0";x.font="600 12px 'Segoe UI'";x.fillText(task.slice(0,70),32,76);
+  const verified=!!battleState.serverMode;
+  modeTag.hidden=false;modeTag.textContent=bt(verified?"serverTag":"friendly");
+  const cv=document.getElementById("battleShareCanvas"),x=cv.getContext("2d"),w=cv.width,h=cv.height;
+  const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#0e0f10");g.addColorStop(.55,"#1c1e20");g.addColorStop(1,"#08090a");
+  x.fillStyle=g;x.fillRect(0,0,w,h);
+  for(let y=40;y<h;y+=44){x.fillStyle="rgba(255,255,255,.016)";x.fillRect(0,y,w,1);}
+  x.strokeStyle="#7b8185";x.lineWidth=3;x.strokeRect(22,22,w-44,h-44);x.strokeStyle="rgba(255,137,45,.55)";x.lineWidth=1;x.strokeRect(32,32,w-64,h-64);
+  x.textAlign="left";x.fillStyle="#eceeef";x.font=battleCanvasFont("display",800,58);x.fillText("GORWELD ARC · BATTLE WELD",60,100);
+  x.fillStyle=verified?"#ffd08a":"#ff8a80";x.font=battleCanvasFont("mono",500,22);x.fillText(bt(verified?"serverTag":"friendly"),60,145);
+  const task=battleState.task||battleState.serverTask||{};x.fillStyle="#b8bec2";x.font=battleCanvasFont("body",500,24);x.fillText(battleTaskLabel(task).slice(0,70),60,195);
   if(view.kind==="invite"){
     battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
-    x.textAlign="right";x.fillStyle="#ffae3c";x.font="900 19px 'Segoe UI'";x.fillText(bt("beat"),w-36,310);
+    x.textAlign="right";x.fillStyle="#ffae3c";x.font=battleCanvasFont("display",800,34);x.fillText(bt("beat"),w-65,585);
   }else{
-    x.strokeStyle="#35424a";x.beginPath();x.moveTo(300,95);x.lineTo(300,295);x.stroke();
+    x.strokeStyle="#555b5f";x.beginPath();x.moveTo(600,230);x.lineTo(600,545);x.stroke();
     battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
     battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true);
     const code=view.verdict;
-    x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#5fe08a":code==="P2_WINS"?"#ffae3c":
-      code==="DRAW"?"#1fd6e3":"#ff7568";x.font="900 16px 'Segoe UI'";x.fillText(battleLabelVerdict(code),300,302);
+    x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#ffd08a":code==="P2_WINS"?"#ffae3c":
+      code==="DRAW"?"#9fd3ff":"#ff8a80";x.font=battleCanvasFont("display",800,38);x.fillText(battleLabelVerdict(code,view),600,585);
   }
-  x.textAlign="left";x.fillStyle="#76838b";x.font="600 10px 'Segoe UI'";x.fillText("gorweldarc.com",32,328);
-  document.getElementById("cardTitle").textContent="WELD BATTLE";
+  const serverBattle=battleState.serverBattle||{};
+  x.textAlign="left";x.fillStyle="#858e93";x.font=battleCanvasFont("mono",500,17);
+  x.fillText("BATTLE ID  "+(serverBattle.battleId||battleState.battleId||"LOCAL"),60,635);
+  x.textAlign="right";x.fillText(String(battleState.modeType||battleState.mode||"link").toUpperCase()+" · "+
+    (battleState.engineVersion||serverBattle.engineVersion||"")+" / "+(battleState.scoringVersion||serverBattle.scoringVersion||""),w-60,635);
+  document.getElementById("cardTitle").textContent="BATTLE WELD";
   battleUpdateShareButtons();
   document.getElementById("cardBattleLink").hidden=!battleState.shareUrl;
   document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
@@ -3559,11 +3765,15 @@ if(isChallenge()){
 }
 document.getElementById("battleLaunchMobile").onclick=battleStartClick;
 document.getElementById("battleLaunch").onclick=battleStartClick;
-document.getElementById("battlePrimary").onclick=()=>{if(battlePrimaryAction)battlePrimaryAction();};
+document.getElementById("battlePrimary").onclick=()=>{if(battlePrimaryAction){battleUiSound("clamp");battlePrimaryAction();}};
 document.getElementById("battleSecondary").onclick=()=>{if(battleSecondaryAction)battleSecondaryAction();else closeModal("battleModal");};
 document.getElementById("rBattleShare").onclick=()=>{if(battleState&&battleState.shareUrl)buildCard();else showToast(battleState&&battleState.shareError||bt("badLink"),"#ff5a4a");};
 document.getElementById("cardBattleLink").onclick=battleCopyLink;
 document.getElementById("cardBattleShare").onclick=battleShare;
+for(const id of ["bwHelmetCheck","bwGlovesCheck"])document.getElementById(id).addEventListener("change",()=>{
+  const button=document.getElementById("battlePrimary");
+  button.disabled=!(document.getElementById("bwHelmetCheck").checked&&document.getElementById("bwGlovesCheck").checked);
+});
 
 resize(); refreshPositions(); updateRank(); applyI18N(); updateWallet(); requestAnimationFrame(frame);
 fitStage(); applyChallengePin(); loadChallengeConfig();   // pin od razu ze stałych, potem doprecyzuj z challenge-config.json

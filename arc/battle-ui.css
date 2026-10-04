@@ -19,7 +19,7 @@
 #battleModal,#battleModal *{box-sizing:border-box}
 /* Niski ekran (np. monitor dotykowy 1024x600): sekcje nie kurcza sie do zera — przewija sie cale okno */
 #battleModal .bw-shell>*,#battleModal .bw-content>*{flex-shrink:0}
-#battleModal .bw-content{flex:1 0 auto}
+#battleModal .bw-shell>.bw-content{flex:1 1 auto;min-height:0;overflow:auto}
 #battleModal[hidden]{display:none!important}
 #battleModal .bw-shell{position:relative;display:flex;flex-direction:column;gap:clamp(10px,1.8vh,18px);width:min(1100px,100%);min-height:min(740px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);padding:clamp(14px,2.4vw,30px);overflow:auto;border:1px solid #555b60;border-top:3px solid var(--bw-ember);border-radius:5px;
   background:radial-gradient(ellipse 60% 24% at 50% 100%,rgba(255,106,16,.13),transparent 70%),repeating-linear-gradient(0deg,transparent 0 52px,rgba(255,255,255,.012) 53px),linear-gradient(150deg,#232629 0%,#111315 45%,#08090a 100%);
@@ -80,6 +80,13 @@
 #battleModal[data-screen="verdict"] #battleTitle{font-size:clamp(33px,7vw,68px);color:#ffd08a}
 #battleModal[data-screen="verdict"] .battle-summary{font-size:clamp(12px,1.5vw,16px);line-height:1.7}
 #battleModal[data-screen="setup"] .bw-content{justify-content:flex-start}
+#battleModal[data-screen="ready"] .bw-content{justify-content:flex-start}
+#battleModal[data-screen="ready"] .bw-intro{display:none}
+#battleModal[data-screen="enter"] .bw-intro{display:none}
+#battleModal[data-screen="ready"] .battle-summary{display:none}
+#battleModal[data-screen="ready"] .battle-note{margin-bottom:6px}
+#battleModal[data-screen="ready"] .bw-gear{margin-top:4px;padding-block:7px}
+#battleModal[data-screen="ready"] .bw-actions{margin-top:8px}
 #battleModal[data-screen="setup"] .bw-gear{display:none}
 
 .bw-hud{position:fixed;z-index:6;top:110px;left:50%;display:none;align-items:center;gap:clamp(8px,1.6vw,20px);width:min(940px,calc(100vw - 24px));min-height:32px;padding:5px 12px;transform:translateX(-50%);border:1px solid #4c5053;border-top:2px solid #ed7622;background:rgba(12,14,15,.86);backdrop-filter:blur(5px);color:#d8dcde;font:10px BWMono,ui-monospace,monospace;pointer-events:none}
@@ -123,3 +130,62 @@ html[lang="ru"] #cardModal.bw-battle-ru,html[lang="ru"] #cardModal.bw-battle-ru 
 @media(prefers-reduced-motion:reduce){
   #battleModal *, .bw-hud *, .bw-inspection *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+/* Battle imagery is inert until the Battle root is opened by JavaScript. */
+#battleModal.bw-root{isolation:isolate;background:rgba(14,15,16,.58)}
+#battleModal .bw-arena-backdrop{position:fixed;z-index:0;inset:0;display:none;pointer-events:none;
+  background-image:url("battle-assets/arena-wide.webp");background-position:center;background-size:cover;background-repeat:no-repeat}
+#battleModal.bw-assets-active[data-screen="enter"] .bw-arena-backdrop,
+#battleModal.bw-assets-active[data-screen="setup"] .bw-arena-backdrop,
+#battleModal.bw-assets-active[data-screen="ready"] .bw-arena-backdrop,
+#battleModal.bw-assets-active[data-screen="verdict"] .bw-arena-backdrop{display:block}
+#battleModal .bw-arena-backdrop::after{content:"";position:absolute;inset:0;background:rgba(14,15,16,.28)}
+#battleModal .bw-gates{position:fixed;z-index:4;inset:0;display:none;overflow:hidden;pointer-events:none}
+#battleModal.bw-assets-active[data-screen="enter"] .bw-gates{display:block}
+#battleModal .bw-gates img{position:absolute;top:0;width:50.1%;height:100%;object-fit:cover;transition:transform .78s cubic-bezier(.7,0,.2,1)}
+#battleModal #bwGateLeft{left:0;object-position:left center}
+#battleModal #bwGateRight{right:0;object-position:right center}
+#battleModal.bw-gates-open #bwGateLeft{transform:translateX(-101%)}
+#battleModal.bw-gates-open #bwGateRight{transform:translateX(101%)}
+#battleModal .bw-shell{z-index:3;background:linear-gradient(155deg,rgba(35,38,41,.91),rgba(12,14,15,.95) 55%,rgba(8,9,10,.94))}
+#battleModal .bw-brand-block{min-width:0}
+#battleModal .bw-brand{position:relative;display:block;width:clamp(150px,29vw,330px);height:clamp(38px,7vw,82px);overflow:hidden}
+#battleModal[data-screen="enter"] .bw-brand{width:clamp(185px,34vw,390px);height:clamp(54px,10vw,112px)}
+#battleModal .bw-brand img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
+#battleModal .bw-wordmark-fallback{display:none;font-family:var(--bw-display);font-size:clamp(29px,5.8vw,58px);font-weight:800;line-height:.9;letter-spacing:.035em;color:#e2e5e7;text-shadow:0 2px 0 #34383b,0 5px 14px #000}
+#battleModal .bw-wordmark-fallback b{color:var(--bw-ember-hot);font-weight:800}
+#battleModal .bw-brand.logo-failed img{display:none}
+#battleModal .bw-brand.logo-failed .bw-wordmark-fallback{display:block}
+#battleModal .bw-slogan{margin-top:5px}
+#battleModal[data-screen="enter"] .bw-slogan{display:none}
+#battleModal .bw-player-name{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
+#battleModal .bw-p2 .bw-player-name{flex-direction:row-reverse}
+#battleModal .bw-avatar{display:block;flex:none;width:clamp(34px,5vw,52px);height:clamp(34px,5vw,52px);object-fit:cover;border:1px solid var(--bw-dim);border-radius:50%;background:var(--bw-coal)}
+#battleModal .bw-avatar[hidden]{display:none}
+#battleModal .bw-player-name strong{min-width:0}
+#battleModal .bw-velda{display:flex;align-items:center;gap:9px;min-width:0;color:#ffbf71}
+#battleModal .bw-velda[hidden],#battleModal .bw-velda-portrait[hidden]{display:none}
+#battleModal .bw-velda-portrait{display:block;flex:none;width:40px;height:44px;object-fit:cover;object-position:center 20%;
+  -webkit-mask-image:radial-gradient(ellipse 70% 78% at 50% 48%,#000 56%,transparent 100%);mask-image:radial-gradient(ellipse 70% 78% at 50% 48%,#000 56%,transparent 100%)}
+#battleModal .bw-velda-portrait[hidden]{display:none}
+#battleModal .bw-footer-mark{flex:none}
+.bw-inspection-velda{display:flex;align-items:center;gap:7px;min-height:36px}
+.bw-inspection-velda .bw-velda-portrait{width:34px;height:36px}
+#bwInspectionVelda:empty{display:none}
+@media(max-width:600px){
+  #battleModal .bw-arena-backdrop{background-image:url("battle-assets/arena-tall.webp")}
+  #battleModal .bw-footer{align-items:flex-start;flex-direction:column;gap:3px}
+  #battleModal .bw-velda{max-width:100%}
+  #battleModal .bw-velda .vline{white-space:normal}
+  #battleModal .bw-footer-mark{align-self:flex-end}
+  #battleModal .bw-player-name{gap:5px}
+  #battleModal .bw-avatar{width:32px;height:32px}
+}
+/* ENTER has no match yet; reclaim the scoreboard row and scale the gate wordmark on short screens. */
+@media(max-height:820px){#battleModal[data-screen="enter"] .bw-brand{width:clamp(185px,31vw,350px);height:clamp(48px,8vh,84px)}#battleModal[data-screen="enter"] .bw-shell{gap:8px;padding-block:14px}#battleModal[data-screen="enter"] .bw-content{justify-content:flex-start;padding-block:8px}#battleModal[data-screen="enter"] .battle-choice{min-height:36px;padding-block:7px}#battleModal[data-screen="enter"] .bw-actions{margin-top:8px}}
+@media(max-height:760px){#battleModal[data-screen="enter"] .bw-brand{height:clamp(44px,7vh,66px)}#battleModal[data-screen="enter"] .bw-shell{gap:clamp(7px,1.2vh,10px);padding-block:14px}#battleModal[data-screen="enter"] .bw-content{padding-block:12px}}
+@media(max-height:680px){#battleModal[data-screen="enter"] .bw-brand{height:48px;width:min(270px,52vw)}#battleModal[data-screen="enter"] .bw-match .bw-player{min-height:72px;padding-block:8px}#battleModal[data-screen="enter"] .bw-content{min-height:0;padding-block:8px}#battleModal[data-screen="enter"] .battle-note{margin-block:3px 7px;line-height:1.3}#battleModal[data-screen="enter"] #battleTaskChoices{max-height:20vh}#battleModal[data-screen="enter"] .battle-choice{min-height:36px;padding-block:6px}#battleModal[data-screen="enter"] .bw-actions{margin-top:6px}}
+@media(max-height:620px){#battleModal[data-screen="enter"] .bw-brand{height:40px;width:min(230px,48vw)}#battleModal[data-screen="enter"] .bw-match .bw-player{min-height:60px}#battleModal[data-screen="enter"] .bw-match .bw-player small{display:none}#battleModal[data-screen="enter"] .bw-content{padding-block:6px}#battleModal[data-screen="enter"] #battleTitle{font-size:clamp(22px,3.5vw,32px)}#battleModal[data-screen="enter"] .battle-note{font-size:12px;margin:2px auto 5px}#battleModal[data-screen="enter"] .battle-choice{min-height:32px;padding-block:4px}#battleModal[data-screen="enter"] .bw-actions button{min-height:38px;padding-block:6px}}
+@media(min-width:900px) and (min-height:700px){#battleModal .bw-velda-portrait{width:72px;height:92px}#battleModal .bw-footer{align-items:center}#battleModal .bw-velda{gap:10px}.bw-inspection-velda{min-height:92px}.bw-inspection-velda .bw-velda-portrait{width:72px;height:92px}}
+@media(max-height:399px){#battleModal .bw-velda-portrait{display:none!important}}
+@media(prefers-reduced-motion:reduce){#battleModal .bw-gates{display:none!important}}

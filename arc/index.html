@@ -405,15 +405,17 @@
 
   <!-- BATTLE WELD — isolated visual shell; the ARC stage remains untouched beneath it. -->
   <div id="battleModal" class="modal bw-root" role="dialog" aria-modal="true" aria-labelledby="battleTitle" data-screen="enter">
+    <div id="bwArenaBackdrop" class="bw-arena-backdrop" aria-hidden="true"></div>
+    <div id="bwGates" class="bw-gates" aria-hidden="true"><img id="bwGateLeft" alt=""><img id="bwGateRight" alt=""></div>
     <div class="bw-shell">
       <header class="bw-header">
-        <div><span class="bw-wordmark">BATTLE <b>WELD</b></span><span class="bw-slogan">SAME TASK · SAME RULES · ONE VERDICT</span></div>
+        <div class="bw-brand-block"><span id="bwBrand" class="bw-brand" role="img" aria-label="BATTLE WELD"><img id="bwBrandImage" alt="" aria-hidden="true"><span id="bwBrandFallback" class="bw-wordmark-fallback" aria-hidden="true">BATTLE <b>WELD</b></span></span><span class="bw-slogan">SAME TASK · SAME RULES · ONE VERDICT</span></div>
         <div id="battleModeTag" class="bw-mode" hidden></div>
       </header>
       <div class="bw-match" aria-label="Battle Weld match">
-        <section class="bw-player bw-p1"><span id="bwPlayer1Slot">PLAYER 1</span><strong id="bwPlayer1Name">—</strong><small id="bwPlayer1State">STANDING BY</small></section>
+        <section class="bw-player bw-p1"><span id="bwPlayer1Slot">PLAYER 1</span><div class="bw-player-name"><img class="bw-avatar" id="bwPlayer1Avatar" alt="" aria-hidden="true" hidden><strong id="bwPlayer1Name">—</strong></div><small id="bwPlayer1State">STANDING BY</small></section>
         <div class="bw-vs" aria-hidden="true">VS</div>
-        <section class="bw-player bw-p2"><span id="bwPlayer2Slot">PLAYER 2</span><strong id="bwPlayer2Name">—</strong><small id="bwPlayer2State">STANDING BY</small></section>
+        <section class="bw-player bw-p2"><span id="bwPlayer2Slot">PLAYER 2</span><div class="bw-player-name"><img class="bw-avatar" id="bwPlayer2Avatar" alt="" aria-hidden="true" hidden><strong id="bwPlayer2Name">—</strong></div><small id="bwPlayer2State">STANDING BY</small></section>
       </div>
       <div class="bw-taskline"><span id="bwTaskValue">SAME TASK · SAME RULES</span><span id="bwCheckStamps" class="bw-stamps"><i data-check="taskHash">HASH · —</i><i data-check="engineVersion">ENGINE · —</i><i data-check="scoringVersion">SCORING · —</i></span><span id="bwVersionValue"></span></div>
       <main class="bw-content">
@@ -437,12 +439,12 @@
           <button id="battleSecondary" type="button"></button>
         </div>
       </main>
-      <footer class="bw-footer"><span id="bwCeremonyLine" aria-live="polite">GEAR CHECK.</span><span>GORWELD® · ARC</span></footer>
+      <footer class="bw-footer"><span class="bw-velda"><img id="bwVeldaPortrait" class="bw-velda-portrait" alt="" hidden><span id="bwCeremonyLine" aria-live="polite">GEAR CHECK.</span></span><span class="bw-footer-mark">GORWELD® · ARC</span></footer>
     </div>
   </div>
 
   <div id="bwHud" class="bw-hud" aria-hidden="true"><span class="bw-hud-brand">BATTLE WELD · LIVE</span><span id="bwHudMode"></span><span id="bwHudTask"></span><span id="bwHudAttempt"></span><span id="bwHudOpponent"></span></div>
-  <div id="bwInspection" class="bw-inspection" hidden role="status" aria-live="polite"><span id="bwInspectionMode" class="bw-inspection-mode"></span><span class="bw-scan" aria-hidden="true"></span><b id="bwInspectionTitle">INSPECTION</b><span id="bwInspectionText">VERIFYING…</span><small id="bwInspectionVelda"></small></div>
+  <div id="bwInspection" class="bw-inspection" hidden role="status" aria-live="polite"><span id="bwInspectionMode" class="bw-inspection-mode"></span><span class="bw-scan" aria-hidden="true"></span><b id="bwInspectionTitle">INSPECTION</b><span id="bwInspectionText">VERIFYING…</span><span class="bw-inspection-velda"><img id="bwInspectionPortrait" class="bw-velda-portrait" alt="" hidden><small id="bwInspectionVelda"></small></span></div>
 
   <!-- INSPECTION REPORT -->
   <div id="repModal" class="modal"><div class="card" style="width:min(460px,90vw)">
@@ -2801,6 +2803,72 @@ function battleReasonText(reason,detail){
     TASK_MISMATCH:bt("taskMismatch"),TASK_UNSUPPORTED:bt("unsupported"),
     BATTLE_MODE_CONFLICT:bt("modeConflict")})[reason]||bt("badLink");
 }
+const BATTLE_ASSET_PATH="battle-assets/";
+const battleAssetImages=new Map();
+function battleAssetUrl(name){return new URL(BATTLE_ASSET_PATH+name,location.href).href;}
+function battleLoadAsset(name){
+  if(!battleAssetImages.has(name)){
+    const promise=new Promise(resolve=>{
+      const image=new Image();image.decoding="async";
+      image.onload=async()=>{try{if(image.decode)await image.decode();}catch(_){}resolve(image);};
+      image.onerror=()=>resolve(null);image.src=battleAssetUrl(name);
+    });
+    battleAssetImages.set(name,promise);
+  }
+  return battleAssetImages.get(name);
+}
+function battleSetAssetImage(element,name,onFailure){
+  if(!element)return;
+  if(!name){element.hidden=true;element.removeAttribute("src");delete element.dataset.asset;return;}
+  const url=battleAssetUrl(name);
+  if(element.dataset.asset===name&&element.getAttribute("src")===url){
+    if(element.complete&&element.naturalWidth>0)element.hidden=false;
+    return;
+  }
+  element.dataset.asset=name;element.hidden=false;
+  element.onload=()=>{element.hidden=false;if(onFailure)onFailure(false);};
+  element.onerror=()=>{element.hidden=true;if(onFailure)onFailure(true);};
+  element.src=url;
+}
+function battleAssetsActivate(stageName){
+  const root=document.getElementById("battleModal");if(!root)return;
+  root.classList.add("bw-assets-active");
+  if(stageName==="enter"&&!root.dataset.gatesPlayed){
+    root.dataset.gatesPlayed="1";
+    const gates=[document.getElementById("bwGateLeft"),document.getElementById("bwGateRight")];
+    battleSetAssetImage(gates[0],"gate-left.webp");battleSetAssetImage(gates[1],"gate-right.webp");
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches)root.classList.add("bw-gates-open");
+    else Promise.all(gates.map(image=>image.decode?image.decode().catch(()=>{}):Promise.resolve())).then(()=>
+      requestAnimationFrame(()=>setTimeout(()=>root.classList.add("bw-gates-open"),80)));
+  }
+}
+function battleAvatarAsset(battleId,slot){
+  let hash=2166136261;
+  for(const char of String(battleId)+":"+String(slot))hash=Math.imul(hash^char.charCodeAt(0),16777619)>>>0;
+  return "avatar-"+(hash%4+1)+".webp";
+}
+function battleUiAssignAvatars(){
+  const battle=battleState&&battleState.serverBattle,id=battle&&battle.battleId||battleState&&battleState.battleId;
+  for(const [slot,imageId] of [["P1","bwPlayer1Avatar"],["P2","bwPlayer2Avatar"]]){
+    const image=document.getElementById(imageId),player=battle&&battle.players&&battle.players[slot];
+    const stableId=id||((document.getElementById("battleModal").dataset.screen==="enter")?"battle-weld-enter":null);
+    if(!stableId){battleSetAssetImage(image,null);continue;}
+    let picture=player&&(player.picture||player.avatarUrl);
+    if(picture){try{if(new URL(picture,location.href).origin!==location.origin)picture=null;}catch(_){picture=null;}}
+    battleSetAssetImage(image,picture||battleAvatarAsset(stableId,slot));
+  }
+}
+function battleVeldaAsset(line){
+  if(line===bwc("veldaGear")||line===bwc("veldaRules"))return "velda-calm.webp";
+  if(line===bwc("veldaStrike")||line===bwc("veldaInspect"))return "velda-focus.webp";
+  if(line===bwc("veldaVerdict"))return "velda-verdict.webp";
+  return null;
+}
+function battleUiSetInspectionVelda(complete){
+  const line=document.getElementById("bwInspectionVelda");
+  line.textContent=complete?bwc("veldaInspect"):"";
+  battleSetAssetImage(document.getElementById("bwInspectionPortrait"),complete?battleVeldaAsset(line.textContent):null);
+}
 function battleShow(title,message,choices,primaryText,primaryAction,secondaryText,secondaryAction,summary){
   const titleEl=document.getElementById("battleTitle"), msg=document.getElementById("battleMessage");
   const list=document.getElementById("battleTaskChoices"), sum=document.getElementById("battleModalSummary");
@@ -2839,6 +2907,11 @@ function battleUiStage(title,message){
 function battleUiRefresh(title,message,primaryText){
   const root=document.getElementById("battleModal"),stageName=battleUiStage(title,message),battle=battleState&&battleState.serverBattle;
   root.dataset.screen=stageName;
+  battleAssetsActivate(stageName);
+  const brand=document.getElementById("bwBrand"),brandImage=document.getElementById("bwBrandImage");
+  const brandAsset="battle-weld-wordmark.svg";
+  if(brandImage.dataset.asset!==brandAsset){brand.classList.remove("logo-failed");
+    battleSetAssetImage(brandImage,brandAsset,failed=>brand.classList.toggle("logo-failed",failed));}
   document.getElementById("bwPlayer1Slot").textContent=bwc("p1");document.getElementById("bwPlayer2Slot").textContent=bwc("p2");
   document.getElementById("bwPlayer1Name").textContent=battle&&battle.players&&battle.players.P1&&battle.players.P1.nickname||battleState&&battleState.cardView&&battleState.cardView.player1&&battleState.cardView.player1.nickname||bt("p1");
   document.getElementById("bwPlayer2Name").textContent=battle&&battle.players&&battle.players.P2&&battle.players.P2.nickname||battleState&&battleState.cardView&&battleState.cardView.player2&&battleState.cardView.player2.nickname||bt("p2");
@@ -2887,6 +2960,8 @@ function battleUiRefresh(title,message,primaryText){
   const silent=stageName==="incomparable"||stageName==="error";
   const line=silent?"":stageName==="verdict"?bwc("veldaVerdict"):stageName==="countdown"?bwc("veldaStrike"):stageName==="ready"?bwc("veldaRules"):bwc("veldaGear");
   const veldaLine=document.getElementById("bwCeremonyLine");veldaLine.textContent=line;veldaLine.hidden=silent;
+  battleSetAssetImage(document.getElementById("bwVeldaPortrait"),!silent?battleVeldaAsset(line):null);
+  battleUiAssignAvatars();
   document.getElementById("battleModal").setAttribute("aria-label",title||"BATTLE WELD");
   battleUiUpdateHud();
 }
@@ -2894,6 +2969,7 @@ function battleUiUpdateHud(){
   const active=!!(battleState&&battleTaskActive()&&(welding||battleState.hudActive)),hud=document.getElementById("bwHud");
   battleUiPlaceHud();
   document.body.classList.toggle("bw-welding",active);
+  if(active)battleSetAssetImage(document.getElementById("bwVeldaPortrait"),null);
   if(!active){hud.setAttribute("aria-hidden","true");return;}
   const task=battleState.task||{},own=battleState.serverBattle&&battleServerGetOwnPlayer(battleState.serverBattle),opponent=battleState.serverBattle&&battleServerOpponent(battleState.serverBattle);
   document.getElementById("bwHudTask").textContent=battleTaskLabel(task);
@@ -3417,6 +3493,7 @@ async function battleServerSubmitAttempt(report){
     summary.classList.toggle("reject",attempt.inspectionRejected||!attempt.taskCompleted);
     document.getElementById("bwInspectionTitle").textContent=bwc("inspection");
     document.getElementById("bwInspectionText").textContent=bt("verified").replace("%1",attempt.score+" · "+battleStatus(attempt)).replace("%2",attempt.battlePoints);
+    battleUiSetInspectionVelda(true);
     setTimeout(()=>{document.getElementById("bwInspection").hidden=true;},550);
     if(attempt.score!==report.score){
       console.warn("[Battle] live/server score mismatch",{liveScore:report.score,serverScore:attempt.score,delta:attempt.score-report.score});
@@ -3425,6 +3502,7 @@ async function battleServerSubmitAttempt(report){
     const message=error.code==="SERVER_UNAVAILABLE"?bt("serverDown"):battleServerFriendlyError(error.code,error.detail);
     summary.textContent=bt("serverAttemptError").replace("%1",message);summary.classList.add("reject");
     document.getElementById("bwInspectionText").textContent=bt("serverAttemptError").replace("%1",message);
+    battleUiSetInspectionVelda(false);
     setTimeout(()=>{document.getElementById("bwInspection").hidden=true;},900);
     if(error.code==="SERVER_UNAVAILABLE") battleState.connection="reconnecting";
   }finally{
@@ -3615,7 +3693,7 @@ function battleFinishInspection(report,verdict){
     const overlay=document.getElementById("bwInspection");overlay.hidden=false;
     document.getElementById("bwInspectionTitle").textContent=bwc("inspection");
     document.getElementById("bwInspectionText").textContent=bwc("verifying");
-    document.getElementById("bwInspectionVelda").textContent=bwc("veldaInspect");
+    battleUiSetInspectionVelda(false);
     document.getElementById("bwInspectionMode").textContent=bt("serverTag");
     battleUiSound("scan");
     const summary=document.getElementById("battleReportSummary"),share=document.getElementById("rBattleShare");
@@ -3766,34 +3844,45 @@ function buildBattleCard(){
   const verified=!!battleState.serverMode;
   modeTag.hidden=false;modeTag.textContent=bt(verified?"serverTag":"friendly");
   const cv=document.getElementById("battleShareCanvas"),x=cv.getContext("2d"),w=cv.width,h=cv.height;
-  const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#0e0f10");g.addColorStop(.55,"#1c1e20");g.addColorStop(1,"#08090a");
-  x.fillStyle=g;x.fillRect(0,0,w,h);
-  for(let y=40;y<h;y+=44){x.fillStyle="rgba(255,255,255,.016)";x.fillRect(0,y,w,1);}
-  x.strokeStyle="#7b8185";x.lineWidth=3;x.strokeRect(22,22,w-44,h-44);x.strokeStyle="rgba(255,137,45,.55)";x.lineWidth=1;x.strokeRect(32,32,w-64,h-64);
-  x.textAlign="left";x.fillStyle="#eceeef";x.font=battleCanvasFont("display",800,58);x.fillText("GORWELD ARC · BATTLE WELD",60,100);
-  x.fillStyle=verified?"#ffd08a":"#ff8a80";x.font=battleCanvasFont("mono",500,22);x.fillText(bt(verified?"serverTag":"friendly"),60,145);
-  const task=battleState.task||battleState.serverTask||{};x.fillStyle="#b8bec2";x.font=battleCanvasFont("body",500,24);x.fillText(battleTaskLabel(task).slice(0,70),60,195);
-  if(view.kind==="invite"){
-    battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
-    x.textAlign="right";x.fillStyle="#ffae3c";x.font=battleCanvasFont("display",800,34);x.fillText(bt("beat"),w-65,585);
-  }else{
-    x.strokeStyle="#555b5f";x.beginPath();x.moveTo(600,230);x.lineTo(600,545);x.stroke();
-    battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
-    battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true);
-    const code=view.verdict;
-    x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#ffd08a":code==="P2_WINS"?"#ffae3c":
-      code==="DRAW"?"#9fd3ff":"#ff8a80";x.font=battleCanvasFont("display",800,38);x.fillText(battleLabelVerdict(code,view),600,585);
-  }
-  const serverBattle=battleState.serverBattle||{};
-  x.textAlign="left";x.fillStyle="#858e93";x.font=battleCanvasFont("mono",500,17);
-  x.fillText("BATTLE ID  "+(serverBattle.battleId||battleState.battleId||"LOCAL"),60,635);
-  x.textAlign="right";x.fillText(String(battleState.modeType||battleState.mode||"link").toUpperCase()+" · "+
-    (battleState.engineVersion||serverBattle.engineVersion||"")+" / "+(battleState.scoringVersion||serverBattle.scoringVersion||""),w-60,635);
   document.getElementById("cardTitle").textContent="BATTLE WELD";
   battleUpdateShareButtons();
   document.getElementById("cardBattleLink").hidden=!battleState.shareUrl;
   document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
   openModal("cardModal");
+  const render=(async()=>{
+    const [background,logo]=await Promise.all([battleLoadAsset("card-bg.webp"),battleLoadAsset("battle-weld-wordmark.svg")]);
+    cv.dataset.backgroundAsset=background?"card-bg.webp":"fallback";
+    cv.dataset.logoAsset=logo?"battle-weld-wordmark.svg":"fallback";
+    if(background)x.drawImage(background,0,0,w,h);
+    else{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#0e0f10");g.addColorStop(.55,"#1c1e20");g.addColorStop(1,"#08090a");x.fillStyle=g;x.fillRect(0,0,w,h);}
+    x.fillStyle="rgba(14,15,16,.60)";x.fillRect(0,0,w,h);
+    for(let y=40;y<h;y+=44){x.fillStyle="rgba(255,255,255,.025)";x.fillRect(0,y,w,1);}
+    x.strokeStyle="#7b8185";x.lineWidth=3;x.strokeRect(22,22,w-44,h-44);x.strokeStyle="rgba(255,137,45,.55)";x.lineWidth=1;x.strokeRect(32,32,w-64,h-64);
+    if(logo)x.drawImage(logo,58,30,390,92);
+    else{x.textAlign="left";x.fillStyle="#eceeef";x.font=battleCanvasFont("display",800,58);x.fillText("GORWELD ARC · BATTLE WELD",60,100);}
+    x.textAlign="left";x.fillStyle=verified?"#ffd08a":"#ff8a80";x.font=battleCanvasFont("mono",500,22);
+    const modeText=bt(verified?"serverTag":"friendly"),logoBottom=122,modeTop=160-x.measureText(modeText).actualBoundingBoxAscent;
+    cv.dataset.modeTagGapPx=String(Math.floor(modeTop-logoBottom));x.fillText(modeText,60,160);
+    const task=battleState.task||battleState.serverTask||{};x.fillStyle="#b8bec2";x.font=battleCanvasFont("body",500,24);x.fillText(battleTaskLabel(task).slice(0,70),60,207);
+    if(view.kind==="invite"){
+      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
+      x.textAlign="right";x.fillStyle="#ffae3c";x.font=battleCanvasFont("display",800,34);x.fillText(bt("beat"),w-65,585);
+    }else{
+      x.strokeStyle="#555b5f";x.beginPath();x.moveTo(600,230);x.lineTo(600,545);x.stroke();
+      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
+      battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true);
+      const code=view.verdict;
+      x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#ffd08a":code==="P2_WINS"?"#ffae3c":
+        code==="DRAW"?"#9fd3ff":"#ff8a80";x.font=battleCanvasFont("display",800,38);x.fillText(battleLabelVerdict(code,view),600,585);
+    }
+    const serverBattle=battleState.serverBattle||{};
+    x.textAlign="left";x.fillStyle="#858e93";x.font=battleCanvasFont("mono",500,17);
+    x.fillText("BATTLE ID  "+(serverBattle.battleId||battleState.battleId||"LOCAL"),60,635);
+    x.textAlign="right";x.fillText(String(battleState.modeType||battleState.mode||"link").toUpperCase()+" · "+
+      (battleState.engineVersion||serverBattle.engineVersion||"")+" / "+(battleState.scoringVersion||serverBattle.scoringVersion||""),w-60,635);
+  })();
+  window.__bwBattleCardReady=render;
+  return render;
 }
 function battleStartClick(){
   if(battleModeConflict()) return;

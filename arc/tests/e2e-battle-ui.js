@@ -19,10 +19,25 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
 (async()=>{
   const browser=await chromium.launch({executablePath:EXE,args:["--no-sandbox","--mute-audio"]});
   const context=await browser.newContext({viewport:{width:1280,height:800}}),page=await context.newPage();
-  const errors=[],requests=[];page.on("pageerror",e=>errors.push(e.message));page.on("request",r=>requests.push(r.url()));
+  const errors=[],requests=[],battleAssetRequests=[],battleAssetResponses=[];
+  page.on("pageerror",e=>errors.push(e.message));page.on("request",r=>{requests.push(r.url());if(new URL(r.url()).pathname.includes("/battle-assets/"))battleAssetRequests.push(r.url());});
+  page.on("response",r=>{if(new URL(r.url()).pathname.includes("/battle-assets/"))battleAssetResponses.push((async()=>({url:r.url(),status:r.status(),bytes:(await r.body()).byteLength}))().catch(()=>({url:r.url(),status:r.status(),bytes:0})));});
   await page.addInitScript(()=>{try{localStorage.setItem("gorweld_tut","1");localStorage.setItem("gorweld_lang","en");}catch(_){} });
   await page.goto(BASE+"/index.html");await page.waitForTimeout(1050);
   await page.evaluate(()=>{if(window.hideSplash)hideSplash();if(openM)closeModal(openM);});
+  const normalAssetRequests=battleAssetRequests.length;
+  ok("normal ARC load requests no Battle assets",normalAssetRequests===0,{battleAssetRequests:normalAssetRequests});
+  await page.locator("#battleLaunch").click({force:true});
+  await page.waitForSelector("#battleModal.open");
+  await page.waitForTimeout(900);
+  await page.evaluate(async()=>Promise.all([...document.querySelectorAll("#battleModal img[src*='/battle-assets/']")].map(img=>img.decode().catch(()=>null))));
+  const gateOpened=await page.evaluate(()=>({played:document.getElementById("battleModal").dataset.gatesPlayed,open:document.getElementById("battleModal").classList.contains("bw-gates-open"),images:["bwGateLeft","bwGateRight"].map(id=>document.getElementById(id).naturalWidth>0)}));
+  ok("ENTER gate halves load and slide apart once",gateOpened.played==="1"&&gateOpened.open&&gateOpened.images.every(Boolean),gateOpened);
+  const openingAssets=await Promise.all(battleAssetResponses);
+  const openingAssetBytes=openingAssets.reduce((sum,item)=>sum+item.bytes,0);
+  const openingAssetExternal=openingAssets.filter(item=>new URL(item.url).origin!==new URL(BASE).origin);
+  ok("opening Battle loads only successful same-origin assets",openingAssets.length>0&&openingAssets.every(item=>item.status===200)&&openingAssetExternal.length===0,{count:openingAssets.length,external:openingAssetExternal,transferredImageBytes:openingAssetBytes,assets:openingAssets.map(({url,status,bytes})=>({path:new URL(url).pathname,status,bytes}))});
+  ok("Battle logo has accessible name",await page.getByRole("img",{name:"BATTLE WELD"}).count()===1);
 
   async function render(name,locale){
     await page.evaluate(({name,locale,task})=>{
@@ -58,7 +73,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
         setTimeout(()=>{},230);
       }else if(name==="inspection"){
         document.getElementById("bwInspection").hidden=false;document.getElementById("bwInspectionTitle").textContent=bwc("inspection");
-        document.getElementById("bwInspectionText").textContent=bwc("verifying");document.getElementById("bwInspectionVelda").textContent=bwc("veldaInspect");
+        document.getElementById("bwInspectionText").textContent=bwc("verifying");battleUiSetInspectionVelda(true);
         document.getElementById("bwInspectionMode").textContent=bt("serverTag");
       }else if(name==="verdict"||name==="share-card"){
         battleState.serverBattle.state="VERDICT";battleState.serverBattle.verdict={code:"P1_WINS"};
@@ -72,6 +87,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       window.__battleScreen=name;
     },{name,locale,task:fixtureTask()});
     await page.evaluate(()=>document.fonts.ready);
+    if(name==="share-card")await page.evaluate(()=>window.__bwBattleCardReady);
     await page.waitForTimeout(name==="live"?260:330);
   }
   async function screenshot(name,locale,width,height){
@@ -80,14 +96,17 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     const metrics=await page.evaluate(()=>{
       const root=document.getElementById("battleModal"),shell=root.querySelector(".bw-shell"),r=shell&&shell.getBoundingClientRect();
       const buttons=[...root.querySelectorAll("button")].filter(b=>!b.hidden&&getComputedStyle(b).display!=="none");
+      const primary=document.getElementById("battlePrimary").getBoundingClientRect(),footer=root.querySelector(".bw-footer").getBoundingClientRect();
+      const readyActionsClear=root.dataset.screen!=="ready"||(!document.getElementById("battlePrimary").hidden&&primary.bottom<=footer.top+1);
       return {scrollWidth:document.documentElement.scrollWidth,innerWidth,rootHidden:root.hidden,screen:root.dataset.screen,
         box:r&&{left:r.left,right:r.right,top:r.top,bottom:r.bottom},buttonsInside:buttons.every(b=>{const q=b.getBoundingClientRect();return q.left>=0&&q.right<=innerWidth;}),
+        readyActionsClear,
         tag:document.getElementById("bwInspection").hidden?document.getElementById("battleModeTag").textContent:document.getElementById("bwInspectionMode").textContent};
     });
     const card=(name==="share-card"),live=(name==="live"),inspection=(name==="inspection");
     const target=card?"#cardModal":live?"#bwHud":inspection?"#bwInspection":"#battleModal";
     const visible=await page.locator(target).evaluate(el=>getComputedStyle(el).display!=="none"&&!el.hidden);
-    const fit=metrics.scrollWidth<=width&&metrics.buttonsInside&&visible&&(card||live||inspection||metrics.box.left>=-0.1&&metrics.box.right<=width+0.1);
+    const fit=metrics.scrollWidth<=width&&metrics.buttonsInside&&metrics.readyActionsClear&&visible&&(card||live||inspection||metrics.box.left>=-0.1&&metrics.box.right<=width+0.1);
     ok(`${name} ${locale} ${width}x${height} fits`,fit,metrics);
     if(name==="verdict"){
       const copy=await page.evaluate(()=>({title:document.getElementById("battleMessage").textContent,summary:document.getElementById("battleModalSummary").textContent,
@@ -96,8 +115,28 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       ok(`verdict uses nickname, point units and attempt counts ${locale} ${width}px`,copy.title.includes("Night Shift")&&copy.summary.includes("94 "+unit)&&!copy.summary.includes("94%")&&copy.scoreboard==="P1 1 · P2 1",copy);
     }
     if(name==="incomparable"){
-      const velda=await page.evaluate(()=>({text:document.getElementById("bwCeremonyLine").textContent,hidden:document.getElementById("bwCeremonyLine").hidden}));
-      ok(`Velda stays silent on INCOMPARABLE ${locale} ${width}px`,velda.hidden&&!velda.text,velda);
+      const velda=await page.evaluate(()=>({text:document.getElementById("bwCeremonyLine").textContent,hidden:document.getElementById("bwCeremonyLine").hidden,portraitHidden:document.getElementById("bwVeldaPortrait").hidden}));
+      ok(`Velda stays silent on INCOMPARABLE ${locale} ${width}px`,velda.hidden&&!velda.text&&velda.portraitHidden,velda);
+    }
+    const expectedPortrait=name==="inspection"?"velda-focus.webp":name==="countdown"?"velda-focus.webp":name==="verdict"||name==="share-card"?"velda-verdict.webp":["enter","create-profile","consent","join","ready"].includes(name)?"velda-calm.webp":null;
+    if(expectedPortrait){
+      const portrait=await page.evaluate(name=>{const el=document.getElementById(name==="inspection"?"bwInspectionPortrait":"bwVeldaPortrait");return {asset:el.dataset.asset||"",hidden:el.hidden,alt:el.alt};},name);
+      ok(`Velda portrait follows approved line mapping ${name} ${locale} ${width}px`,portrait.asset===expectedPortrait&&!portrait.hidden&&portrait.alt==="",portrait);
+      if(width>=900&&height>=700){
+        const size=await page.evaluate(name=>{const el=document.getElementById(name==="inspection"?"bwInspectionPortrait":"bwVeldaPortrait"),r=el.getBoundingClientRect();return {height:r.height,hidden:el.hidden};},name);
+        ok(`desktop Velda portrait is large enough ${name} ${locale}`,size.height>=88&&!size.hidden,size);
+      }
+    }
+    if(name==="share-card"){
+      const card=await page.locator("#battleShareCanvas").evaluate(el=>({background:el.dataset.backgroundAsset,logo:el.dataset.logoAsset}));
+      ok(`share card uses decoded background and SVG wordmark ${locale} ${width}px`,card.background==="card-bg.webp"&&card.logo==="battle-weld-wordmark.svg",card);
+      const gap=await page.locator("#battleShareCanvas").evaluate(el=>Number(el.dataset.modeTagGapPx));
+      ok(`share card mode tag clears logo by at least 16px ${locale} ${width}px`,gap>=16,{gap});
+    }
+    if(["enter","create-profile","consent","join","ready","verdict"].includes(name)){
+      const arena=await page.evaluate(()=>getComputedStyle(document.getElementById("bwArenaBackdrop")).backgroundImage);
+      const expected=width<=600?"arena-tall.webp":"arena-wide.webp";
+      ok(`arena uses ${expected} for ${width}px ${locale}`,arena.includes(expected),arena);
     }
     fs.mkdirSync(OUT,{recursive:true});
     await page.screenshot({path:path.join(OUT,`${name}-${locale}-${width}x${height}.png`)});
@@ -107,12 +146,39 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     for(const locale of ["pl","ru"])for(const [width,height] of [[1280,800],[375,812]])
       for(const screen of ["enter","create-profile","consent","join","ready","countdown","live","inspection","verdict","incomparable","share-card"])
         await screenshot(screen,locale,width,height);
-    for(const width of [360,390]){
-      await page.setViewportSize({width,height:812});await render("verdict","ru");
-      const fit=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
-        buttons:[...document.querySelectorAll("#battleModal .bw-actions button")].filter(button=>!button.hidden).map(button=>{const r=button.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;})}));
-      ok(`Russian verdict controls fit ${width}px`,fit.scrollWidth<=width&&fit.buttons.length>0&&fit.buttons.every(Boolean),fit);
+    async function enterClipping(width,height,locale){
+      await page.setViewportSize({width,height});await render("enter",locale);
+      const data=await page.evaluate(()=>{
+        const root=document.getElementById("battleModal"),shell=root.querySelector(".bw-shell");
+        const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return !el.hidden&&s.display!=="none"&&s.visibility!=="hidden"&&Number(s.opacity||1)>.01&&r.width>0&&r.height>0;};
+        const targets=[...shell.querySelectorAll("button,[aria-label],h1,h2,h3,p,small,strong,b,span,label")].filter(el=>visible(el)&&
+          (el.matches("button")||el.children.length===0&&el.textContent.trim()));
+        const clipped=[];
+        for(const el of targets){const r=el.getBoundingClientRect();for(let ancestor=el.parentElement;ancestor;ancestor=ancestor.parentElement){
+          const s=getComputedStyle(ancestor),clips=[s.overflowX,s.overflowY].some(v=>["hidden","auto","scroll","clip"].includes(v));
+          if(!clips)continue;const a=ancestor.getBoundingClientRect();
+          if(r.left<a.left-1||r.right>a.right+1||r.top<a.top-1||r.bottom>a.bottom+1)clipped.push({text:(el.innerText||el.getAttribute("aria-label")||el.tagName).trim().slice(0,70),ancestor:ancestor.id||ancestor.className||ancestor.tagName,rect:{x:r.x,y:r.y,w:r.width,h:r.height},clip:{x:a.x,y:a.y,w:a.width,h:a.height}});
+        }}
+        const close=document.getElementById("battleSecondary"),cr=close.getBoundingClientRect();
+        return {clipped,closeVisible:visible(close),closeInside:cr.top>=0&&cr.bottom<=innerHeight,screen:root.dataset.screen,intro:getComputedStyle(root.querySelector(".bw-intro")).display};
+      });
+      ok(`ENTER text and buttons are not clipped ${locale} ${width}x${height}`,data.clipped.length===0&&data.closeVisible&&data.closeInside&&data.screen==="enter"&&data.intro==="none",data);
+      fs.mkdirSync(OUT,{recursive:true});await page.screenshot({path:path.join(OUT,`enter-${locale}-${width}x${height}.png`)});
     }
+    for(const [width,height] of [[1280,800],[1366,768],[1280,720],[1024,600],[375,812]])
+      for(const locale of ["pl","ru"])await enterClipping(width,height,locale);
+    for(const width of [360,390]){
+      for(const locale of ["pl","ru"]){
+        await page.setViewportSize({width,height:812});await render("verdict",locale);
+        const fit=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
+          buttons:[...document.querySelectorAll("#battleModal .bw-actions button")].filter(button=>!button.hidden).map(button=>{const r=button.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;})}));
+        ok(`${locale.toUpperCase()} verdict controls fit ${width}px`,fit.scrollWidth<=width&&fit.buttons.length>0&&fit.buttons.every(Boolean),fit);
+      }
+    }
+    await page.setViewportSize({width:375,height:380});await render("ready","pl");
+    const shortVelda=await page.evaluate(()=>({hidden:document.getElementById("bwVeldaPortrait").hidden,display:getComputedStyle(document.getElementById("bwVeldaPortrait")).display,
+      scrollWidth:document.documentElement.scrollWidth,buttons:[...document.querySelectorAll("#battleModal .bw-actions button")].filter(b=>!b.hidden).every(b=>{const r=b.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;})}));
+    ok("Velda portrait hides on short view while buttons remain reachable",shortVelda.display==="none"&&shortVelda.scrollWidth<=375&&shortVelda.buttons,shortVelda);
     const checks=await page.evaluate(()=>{
       const durations=[...document.querySelectorAll("#battleModal *, .bw-inspection *, .bw-hud *")].map(el=>parseFloat(getComputedStyle(el).animationDuration)||0);
       const stageBefore=stage.getBoundingClientRect().toJSON();
@@ -148,6 +214,35 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     await page.emulateMedia({reducedMotion:"reduce"});
     const reduced=await page.evaluate(()=>({matches:matchMedia("(prefers-reduced-motion: reduce)").matches,duration:getComputedStyle(document.querySelector(".bw-scan")).animationDuration}));
     ok("reduced motion collapses Battle ceremony",reduced.matches&&parseFloat(reduced.duration)<.01,reduced);
+    const gatesReduced=await page.evaluate(()=>getComputedStyle(document.getElementById("bwGates")).display==="none");
+    ok("reduced motion hides the gate halves",gatesReduced);
+    const avatarNames=await page.evaluate(()=>["bwPlayer1Avatar","bwPlayer2Avatar"].map(id=>document.getElementById(id).dataset.asset));
+    const avatarPage=await context.newPage();await avatarPage.goto(BASE+"/index.html");
+    const secondAvatarNames=await avatarPage.evaluate(()=>{
+      const id="bw_phase6_visual01";battleState={battleId:id,serverBattle:{battleId:id,players:{P1:{},P2:{}}}};
+      document.getElementById("battleModal").classList.add("bw-assets-active");battleUiAssignAvatars();
+      return ["bwPlayer1Avatar","bwPlayer2Avatar"].map(name=>document.getElementById(name).dataset.asset);
+    });
+    ok("default avatars are deterministic across two pages",JSON.stringify(avatarNames)===JSON.stringify(secondAvatarNames),{avatarNames,secondAvatarNames});
+    await avatarPage.close();
+    const contrast=await page.evaluate(async()=>{
+      const shellStyle=getComputedStyle(document.querySelector("#battleModal .bw-shell"));
+      const alpha=Number(shellStyle.backgroundImage.match(/rgba\(35, 38, 41, ([\d.]+)\)/)?.[1]||0);
+      const foreground=[243,245,246],linear=v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;};
+      const lum=(r,g,b)=>.2126*linear(r)+.7152*linear(g)+.0722*linear(b);
+      const blend=(image,overlay,a)=>image*(1-a)+overlay*a;
+        const rows=[];
+      for(const name of ["arena-wide.webp","arena-tall.webp"]){const img=await battleLoadAsset(name);const c=document.createElement("canvas");c.width=160;c.height=90;
+        const ctx=c.getContext("2d");ctx.drawImage(img,0,0,c.width,c.height);const p=ctx.getImageData(0,0,c.width,c.height).data;let min=1,max=0,minRgb=[0,0,0],maxRgb=[0,0,0];
+        for(let i=0;i<p.length;i+=4){const rgb=[p[i],p[i+1],p[i+2]],l=lum(...rgb);if(l<min){min=l;minRgb=rgb;}if(l>max){max=l;maxRgb=rgb;}}
+        const overlay=[35,38,41],after=rgb=>lum(...rgb.map((v,i)=>blend(v,overlay[i],alpha)));
+        const light=lum(...foreground),darkest=after(minRgb),brightest=after(maxRgb);
+        rows.push({asset:name,minLuminance:min,maxLuminance:max,darkestContrast:(light+.05)/(darkest+.05),brightestContrast:(light+.05)/(brightest+.05),shellOverlayAlpha:alpha});}
+      return rows;
+    });
+    const insideShellContrast=await page.evaluate(()=>{const style=getComputedStyle(document.querySelector("#battleModal .bw-shell"));const content=getComputedStyle(document.querySelector("#battleModal .bw-content"));return {gradient:style.backgroundImage,content:content.backgroundImage,outerOverlay:getComputedStyle(document.querySelector("#bwArenaBackdrop"),"::after").backgroundColor};});
+    const outerAlpha=Number(insideShellContrast.outerOverlay.match(/,\s*([\d.]+)\)$/)?.[1]||0);
+    ok("arena overlay keeps light text at WCAG AA contrast inside the Battle shell",contrast.every(row=>row.darkestContrast>=4.5&&row.brightestContrast>=4.5)&&contrast[0].shellOverlayAlpha>=.9&&outerAlpha<.5&&insideShellContrast.content.includes("rgba(41, 44, 47, 0.92"),{contrast,insideShellContrast});
     const external=requests.filter(url=>{try{return new URL(url).origin!==new URL(BASE).origin;}catch(_){return false;}});
     ok("Battle visual flow uses only same-origin requests",external.length===0,external);
     ok("sound respects ARC mute switch",checks.mutedInitCalls===0,checks.mutedInitCalls);
@@ -170,7 +265,29 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     ok("Russian Battle UI uses one consistent system font stack",russianFont.root===russianFont.button&&russianFont.root===russianFont.hud&&russianFont.root.includes("Arial Narrow"),russianFont);
     await page.evaluate(()=>{battleServerShowFailure({code:"SERVER_UNAVAILABLE"},false);});
     const downVelda=await page.evaluate(()=>({text:document.getElementById("bwCeremonyLine").textContent,hidden:document.getElementById("bwCeremonyLine").hidden,screen:document.getElementById("battleModal").dataset.screen}));
-    ok("Velda stays silent on error and server-down screens",downVelda.hidden&&!downVelda.text&&downVelda.screen==="error",downVelda);
+    const downPortrait=await page.evaluate(()=>document.getElementById("bwVeldaPortrait").hidden);
+    ok("Velda stays silent on error and server-down screens",downVelda.hidden&&!downVelda.text&&downVelda.screen==="error"&&downPortrait,{...downVelda,portraitHidden:downPortrait});
+    const failurePage=await context.newPage();
+    await failurePage.route("**/battle-assets/battle-weld-logo.svg",route=>route.fulfill({status:404,body:"missing"}));
+    await failurePage.route("**/battle-assets/battle-weld-wordmark.svg",route=>route.fulfill({status:404,body:"missing"}));
+    await failurePage.route("**/battle-assets/card-bg.webp",route=>route.fulfill({status:404,body:"missing"}));
+    await failurePage.goto(BASE+"/index.html");await failurePage.evaluate(()=>{if(window.hideSplash)hideSplash();if(openM)closeModal(openM);});
+    await failurePage.locator("#battleLaunch").click({force:true});
+    await failurePage.waitForFunction(()=>document.getElementById("battleModal").classList.contains("open")&&document.getElementById("bwBrand").classList.contains("logo-failed"));
+    const logoFallback=await failurePage.evaluate(()=>({name:document.getElementById("bwBrand").getAttribute("aria-label"),text:getComputedStyle(document.getElementById("bwBrandFallback")).display,imageHidden:document.getElementById("bwBrandImage").hidden}));
+    ok("logo 404 shows the accessible text fallback",logoFallback.name==="BATTLE WELD"&&logoFallback.text!=="none"&&logoFallback.imageHidden,logoFallback);
+    await failurePage.evaluate(()=>{
+      const task={seed:1296914737,proc:"MMA",joint:"butt",pos:"PA",thick:3,bead:"steel",amps:60,ampMode:"auto",W:1280,H:720,requiredCoverage:.8};
+      const player=(nickname,score,bp)=>({nickname,score,grade:"A",inspectionRejected:false,taskCompleted:true,qualified:true,battlePoints:bp,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-03T12:00:00.000Z"});
+      battleState={serverMode:true,mode:"server",modeType:"sync",battleId:"bw_phase7_fallback01",task,serverBattle:{battleId:"bw_phase7_fallback01",engineVersion:ArcSim.VERSION,scoringVersion:ArcSim.SCORING_VERSION,players:{}},cardView:{kind:"server",player1:player("Night Shift",94,940),player2:player("Arc Runner",88,880),verdict:"P1_WINS"}};
+      buildBattleCard();
+    });
+    await failurePage.evaluate(()=>window.__bwBattleCardReady);
+    const fallbackCard=await failurePage.locator("#battleShareCanvas").evaluate(el=>({background:el.dataset.backgroundAsset,logo:el.dataset.logoAsset,painted:el.getContext("2d").getImageData(500,300,1,1).data[3]>0}));
+    ok("share card still renders with both background and logo unavailable",fallbackCard.background==="fallback"&&fallbackCard.logo==="fallback"&&fallbackCard.painted,fallbackCard);
+    await failurePage.close();
+    const finalAssets=await Promise.all(battleAssetResponses),finalAssetBytes=finalAssets.reduce((sum,item)=>sum+item.bytes,0);
+    ok("all requested Battle assets are same-origin and HTTP 200",finalAssets.every(item=>item.status===200&&new URL(item.url).origin===new URL(BASE).origin),{assetCount:finalAssets.length,transferredImageBytes:finalAssetBytes,failed:finalAssets.filter(item=>item.status!==200)});
     ok("no uncaught JavaScript errors",errors.length===0,errors);
   }finally{await context.close();await browser.close();}
   if(results.includes(false)){console.error(`FAIL ${results.filter(Boolean).length}/${results.length}`);process.exitCode=1;}

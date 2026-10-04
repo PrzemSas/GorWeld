@@ -87,6 +87,23 @@ async function holdNextAttempt(page) {
 async function releaseAttempt(page) {
   await page.evaluate(() => { window.__pauseAttempt=false;if(window.__releaseAttempt)window.__releaseAttempt(); });
 }
+async function checkAttemptClosed(page, expectedStarted) {
+  await page.setViewportSize({width:1280,height:800});
+  if (await page.locator("#repModal").evaluate(el => el.classList.contains("open"))) await page.click("#rClose");
+  await page.waitForTimeout(250);
+  const before=await page.evaluate(()=>({events:rec.events.length,started:battleState.serverAttemptsStarted,
+    rect:stage.getBoundingClientRect().toJSON(),point:seamPts[Math.floor(seamPts.length/2)],W,H}));
+  await page.mouse.click(before.rect.left+before.point.x*before.rect.width/before.W,before.rect.top+before.point.y*before.rect.height/before.H);
+  await page.waitForTimeout(100);
+  const blocked=await page.evaluate(()=>({events:rec.events.length,started:battleState.serverAttemptsStarted,hint:toast.textContent,expected:bt("attemptClosed")}));
+  ok("server Battle closes the inspected plate without recording another stroke",blocked.events===before.events&&blocked.started===expectedStarted&&blocked.hint===blocked.expected,{before,blocked});
+  await page.click("#clear");
+  const fresh=await page.evaluate(()=>({rect:stage.getBoundingClientRect().toJSON(),point:seamPts[Math.floor(seamPts.length/2)],W,H}));
+  await page.mouse.click(fresh.rect.left+fresh.point.x*fresh.rect.width/fresh.W,fresh.rect.top+fresh.point.y*fresh.rect.height/fresh.H);
+  await page.waitForTimeout(100);
+  const next=await page.evaluate(()=>({events:rec.events.length,started:battleState.serverAttemptsStarted,welding}));
+  ok("CLEAR opens attempt 2 and its first stroke is recorded",next.events>0&&next.started===expectedStarted+1&&next.welding,next);
+}
 async function inspectRound(page, tamper = false) {
   if(tamper) await page.evaluate(() => {
     const original=battleFinishInspection;
@@ -144,7 +161,7 @@ async function modalFit(page) {
     const hostOpen=await open(browser,appUrl(API));pages.push(hostOpen);const host=hostOpen.page;
     const guards=await host.evaluate(api=>({remote:battleResolveApi("example.com","?battleApi="+encodeURIComponent(api)),
       local:battleResolveApi("localhost","?battleApi="+encodeURIComponent(api))}),API);
-    ok("battleApi is ignored off localhost",guards.remote===null&&guards.local===API,guards);
+    ok("battleApi accepts private LAN page origins and rejects public page hosts",guards.remote===null&&guards.local===API,guards);
     const localizedErrors=await host.evaluate(()=>{
       const oldLang=lang,oldState=battleState,out={};
       for(const locale of ["pl","en","ru"]){
@@ -220,6 +237,7 @@ async function modalFit(page) {
     const parity=await Promise.all([host,guest].map(page=>page.evaluate(()=>({live:lastReport.score,server:battleState.serverLastAttempt.score,
       replay:ArcSim.simulate(window.__round).score,bp:battleState.serverLastAttempt.battlePoints}))));
     ok("server attempt score matches screen and sim.js",parity.every(x=>x.live===x.server&&x.replay===x.server&&x.bp===x.server*10),parity);
+    await checkAttemptClosed(host,1);await checkAttemptClosed(guest,1);
     await Promise.all([finishBattle(host),finishBattle(guest)]);
     await Promise.all([host.waitForFunction(()=>battleState&&battleState.serverBattle&&battleState.serverBattle.verdict),
       guest.waitForFunction(()=>battleState&&battleState.serverBattle&&battleState.serverBattle.verdict)]);
@@ -241,10 +259,15 @@ async function modalFit(page) {
     const stageGuard=await host.evaluate(()=>{
       const before=stage.getBoundingClientRect().toJSON();battleState.hudActive=true;battleUiUpdateHud();
       const on=stage.getBoundingClientRect().toJSON();battleState.hudActive=false;battleUiUpdateHud();const off=stage.getBoundingClientRect().toJSON();
+      document.body.classList.add("battle-active","bw-welding");
       return {same:JSON.stringify(before)===JSON.stringify(on)&&JSON.stringify(before)===JSON.stringify(off),hidden:document.getElementById("bwHud").getAttribute("aria-hidden")==="true",
         share:[document.getElementById("battleShareCanvas").width,document.getElementById("battleShareCanvas").height]};
     });
     ok("Battle HUD does not resize the ARC stage; share canvas is 1200×675",stageGuard.same&&stageGuard.hidden&&stageGuard.share[0]===1200&&stageGuard.share[1]===675,stageGuard);
+    await host.setViewportSize({width:1280,height:560});
+    const hudHidden=await host.evaluate(()=>({display:getComputedStyle(document.getElementById("bwHud")).display,classes:document.body.className}));
+    ok("LIVE strip is hidden at max-height 560 px",hudHidden.display==="none",hudHidden);
+    await host.evaluate(()=>document.body.classList.remove("battle-active","bw-welding"));await host.setViewportSize({width:1280,height:800});
     ok("sync pages have no uncaught JS errors",host.errors.length===0&&guest.errors.length===0,{host:host.errors,guest:guest.errors});
 
     console.log("== link mode + authoritative score tamper");
@@ -264,6 +287,7 @@ async function modalFit(page) {
     const tamper=await linkGuest.evaluate(()=>({shown:battleState.serverLastAttempt.score,replay:ArcSim.simulate(window.__round).score}));
     const claimed=linkGuest.attemptRequests.at(-1)&&linkGuest.attemptRequests.at(-1).clientScore;
     ok("tampered displayed score cannot override server replay",claimed===100&&tamper.shown===tamper.replay&&tamper.shown!==claimed,{...tamper,submittedClientScore:claimed});
+    await checkAttemptClosed(linkGuest,1);
     const task=await linkHost.evaluate(()=>battleState.task);
     const generated=qualifiedRounds(task);
     await submitGeneratedRound(linkHost,generated.winner.rec,generated.winner.score);
@@ -288,8 +312,10 @@ async function modalFit(page) {
     const unavailable=await down.evaluate(()=>({message:document.getElementById("battleMessage").textContent,mode:battleState.mode,local:battleState.localMode}));
     ok("server outage is clear and never falls back to friendly",unavailable.message.includes("unavailable")&&unavailable.local!==true,unavailable);
     ok("server-down page has no uncaught JS errors",down.errors.length===0,down.errors);
-    const nonLocal=pages.flatMap(({page})=>page.requests).filter(url=>{try{const host=new URL(url).hostname;return !["localhost","127.0.0.1","::1"].includes(host);}catch(e){return false;}});
-    ok("full server Battle flow makes no non-localhost requests",nonLocal.length===0,nonLocal);
+    const allowedOrigins=new Set([new URL(BASE).origin,new URL(API).origin,"http://localhost","http://127.0.0.1"]);
+    const nonLocal=pages.flatMap(({page})=>page.requests).filter(url=>{try{const parsed=new URL(url);
+      return !allowedOrigins.has(parsed.origin)&&!["localhost","127.0.0.1","[::1]"].includes(parsed.hostname);}catch(e){return false;}});
+    ok("full server Battle flow makes no off-origin requests (same-origin private LAN accepted)",nonLocal.length===0,{allowed:[...allowedOrigins],nonLocal});
   }catch(error){
     console.error("E2E exception:",error&&error.stack||error);results.push(false);
   }finally{

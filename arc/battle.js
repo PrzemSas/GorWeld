@@ -189,8 +189,9 @@
     const data = new Uint8Array(total);
     data.set(bytes); data[length] = 0x80;
     const view = new DataView(data.buffer);
-    view.setUint32(total - 8, Math.floor(length / 0x20000000));
-    view.setUint32(total - 4, (length * 8) >>> 0);
+    const bitLength = sha256BitLengthWords(length);
+    view.setUint32(total - 8, bitLength.high);
+    view.setUint32(total - 4, bitLength.low);
     const w = new Uint32Array(64), rotr = (x, n) => (x >>> n) | (x << (32 - n));
     for (let offset = 0; offset < total; offset += 64) {
       for (let i = 0; i < 16; i++) w[i] = view.getUint32(offset + i * 4);
@@ -209,6 +210,13 @@
       H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
     }
     return H.map(x => x.toString(16).padStart(8, "0")).join("");
+  }
+
+  function sha256BitLengthWords(byteLength) {
+    return {
+      high: Math.floor(byteLength / 0x20000000),
+      low: (byteLength * 8) >>> 0
+    };
   }
 
   async function computeTaskHash(task, defaults) {

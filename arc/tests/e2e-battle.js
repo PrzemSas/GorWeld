@@ -130,6 +130,14 @@ const local = url => url.replace(/^https?:\/\/[^/]+/, BASE);
   s = await state(guest);
   ok("gość: VS po 1. próbie", s.view && s.view.kind === "vs" && s.attemptsStarted === 1, { verdict: s.view && s.view.verdict, p1: s.view && s.view.p1, p2: s.view && s.view.p2, summary: s.summary });
   await guest.evaluate(() => inspect()); await guest.waitForTimeout(300);
+  if (await guest.locator("#repModal").evaluate(el => el.classList.contains("open"))) await guest.click("#rClose");
+  await guest.waitForTimeout(250);
+  const closedBefore=await guest.evaluate(()=>({events:rec.events.length,rect:stage.getBoundingClientRect().toJSON(),point:seamPts[Math.floor(seamPts.length/2)],W,H}));
+  await guest.mouse.click(closedBefore.rect.left+closedBefore.point.x*closedBefore.rect.width/closedBefore.W,closedBefore.rect.top+closedBefore.point.y*closedBefore.rect.height/closedBefore.H);
+  await guest.waitForTimeout(100);
+  const closedAfter=await guest.evaluate(()=>({events:rec.events.length,started:battleState.attemptNumber,hint:toast.textContent,expected:bt("attemptClosed")}));
+  ok("friendly Battle blocks another stroke on the inspected plate",closedAfter.events===closedBefore.events&&closedAfter.started===1&&closedAfter.hint===closedAfter.expected,{closedBefore,closedAfter});
+  await guest.evaluate(() => inspect()); await guest.waitForTimeout(300);
   s = await state(guest);
   ok("gość: podwójny INSPECT nie zapisuje drugi raz i podpowiada CLEAR", s.attemptsStarted === 1 && s.attemptsSaved === 1 && s.view.p2[3] === 1 && await guest.evaluate(() => document.getElementById("toast").textContent===bt("inspectAgain")), { attemptsStarted: s.attemptsStarted, attemptsSaved: s.attemptsSaved, p2: s.view && s.view.p2 });
   // druga próba: nowa runda

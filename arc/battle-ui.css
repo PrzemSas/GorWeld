@@ -17,6 +17,9 @@
   padding:clamp(8px,2vw,24px);overflow:auto;overscroll-behavior:contain;touch-action:pan-y
 }
 #battleModal,#battleModal *{box-sizing:border-box}
+/* Niski ekran (np. monitor dotykowy 1024x600): sekcje nie kurcza sie do zera — przewija sie cale okno */
+#battleModal .bw-shell>*,#battleModal .bw-content>*{flex-shrink:0}
+#battleModal .bw-content{flex:1 0 auto}
 #battleModal[hidden]{display:none!important}
 #battleModal .bw-shell{position:relative;display:flex;flex-direction:column;gap:clamp(10px,1.8vh,18px);width:min(1100px,100%);min-height:min(740px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);padding:clamp(14px,2.4vw,30px);overflow:auto;border:1px solid #555b60;border-top:3px solid var(--bw-ember);border-radius:5px;
   background:radial-gradient(ellipse 60% 24% at 50% 100%,rgba(255,106,16,.13),transparent 70%),repeating-linear-gradient(0deg,transparent 0 52px,rgba(255,255,255,.012) 53px),linear-gradient(150deg,#232629 0%,#111315 45%,#08090a 100%);
@@ -81,6 +84,8 @@
 
 .bw-hud{position:fixed;z-index:6;top:110px;left:50%;display:none;align-items:center;gap:clamp(8px,1.6vw,20px);width:min(940px,calc(100vw - 24px));min-height:32px;padding:5px 12px;transform:translateX(-50%);border:1px solid #4c5053;border-top:2px solid #ed7622;background:rgba(12,14,15,.86);backdrop-filter:blur(5px);color:#d8dcde;font:10px BWMono,ui-monospace,monospace;pointer-events:none}
 body.battle-active.bw-welding .bw-hud{display:flex}
+/* Telefon w poziomie (niski ekran): status Battle jest juz w gornym pasku ARC — pasek LIVE zabieralby blache */
+@media(max-height:560px){body.battle-active.bw-welding .bw-hud{display:none}}
 body.battle-active.bw-welding .top{z-index:7}
 .bw-hud>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bw-hud-brand{color:#ffc17a;font-weight:600}.bw-hud #bwHudOpponent{margin-left:auto;text-align:right;color:#a9d9fb;animation:bw-slow-pulse 2.8s ease-in-out infinite}
 @keyframes bw-slow-pulse{50%{opacity:.58}}

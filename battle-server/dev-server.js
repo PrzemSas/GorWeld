@@ -254,8 +254,9 @@ function createHttpServer(coreInstance = core, options = {}) {
 
 if (require.main === module) {
   const port = Number(process.env.PORT) || 8899;
-  createHttpServer().listen(port, "127.0.0.1", () => {
-    console.log(`Battle server listening at http://127.0.0.1:${port}`);
+  const host = process.env.HOST || "127.0.0.1";   // HOST=0.0.0.0 tylko do testu w sieci domowej
+  createHttpServer().listen(port, host, () => {
+    console.log(`Battle server listening at http://${host}:${port}`);
   });
 }
 

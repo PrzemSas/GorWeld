@@ -129,7 +129,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     }
     if(name==="share-card"){
       const card=await page.locator("#battleShareCanvas").evaluate(el=>({background:el.dataset.backgroundAsset,logo:el.dataset.logoAsset}));
-      ok(`share card uses decoded background and SVG wordmark ${locale} ${width}px`,card.background==="card-bg.webp"&&card.logo==="battle-weld-wordmark.svg",card);
+      ok(`share card uses decoded background and banner logo ${locale} ${width}px`,card.background==="card-bg.webp"&&card.logo==="battle-weld-wordmark-v2.svg",card);
       const gap=await page.locator("#battleShareCanvas").evaluate(el=>Number(el.dataset.modeTagGapPx));
       ok(`share card mode tag clears logo by at least 16px ${locale} ${width}px`,gap>=16,{gap});
     }
@@ -270,6 +270,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     const failurePage=await context.newPage();
     await failurePage.route("**/battle-assets/battle-weld-logo.svg",route=>route.fulfill({status:404,body:"missing"}));
     await failurePage.route("**/battle-assets/battle-weld-wordmark.svg",route=>route.fulfill({status:404,body:"missing"}));
+    await failurePage.route("**/battle-assets/battle-weld-wordmark-v2.svg",route=>route.fulfill({status:404,body:"missing"}));
     await failurePage.route("**/battle-assets/card-bg.webp",route=>route.fulfill({status:404,body:"missing"}));
     await failurePage.goto(BASE+"/index.html");await failurePage.evaluate(()=>{if(window.hideSplash)hideSplash();if(openM)closeModal(openM);});
     await failurePage.locator("#battleLaunch").click({force:true});

@@ -6,8 +6,10 @@ Oryginały zostają na pulpicie — tutaj tylko wersje do sieci (WebP).
 
 | Plik | Z czego | Rozmiar | Użycie |
 |---|---|---|---|
-| `battle-weld-logo.svg` | generator `battle-weld-ui/tools/make_logo.py` (Big Shoulders Display + Chivo Mono jako kształty) | wektor | brama, nagłówek, karta |
-| `battle-weld-wordmark.svg` | j.w., bez hasła | wektor | małe nagłówki, HUD |
+| `battle-weld-logo.svg` (zapas) | generator `battle-weld-ui/tools/make_logo.py` (Big Shoulders Display + Chivo Mono jako kształty) | wektor | brama, nagłówek, karta |
+| `battle-weld-wordmark.svg` | j.w., bez hasła | wektor | zapas (nieużywany od 05.10) |
+| `battle-weld-wordmark-v2.svg` | generator `battle-weld-ui/tools/make_logo_v2.py` (ten sam font co UI: chrom, wytłoczenie 3D, pochylenie jak VS, żarzące WELD, płyta z nitami, spoina z nalotem cieplnym, iskra) | wektor | **logo w grze**: nagłówek Battle i karta wyniku (wybór usera 05.10) |
+| `battle-weld-letters-600.webp` | 07 (baner Groka) przycięty do samych liter | 600×104 | zapas — odrzucone 05.10, bo inny krój niż reszta UI |
 | `velda-calm.webp` | 01 | 600×800 | pasek Veldy: „Gear check.”, „Same task. Same rules.” |
 | `velda-focus.webp` | 02 | 600×800 | „Strike the arc.”, „Inspection complete.” |
 | `velda-verdict.webp` | 03 | 600×800 | „Verdict locked.” (kadr z tłem, bez wycinania) |

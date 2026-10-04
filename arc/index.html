@@ -2909,7 +2909,7 @@ function battleUiRefresh(title,message,primaryText){
   root.dataset.screen=stageName;
   battleAssetsActivate(stageName);
   const brand=document.getElementById("bwBrand"),brandImage=document.getElementById("bwBrandImage");
-  const brandAsset="battle-weld-wordmark.svg";
+  const brandAsset="battle-weld-wordmark-v2.svg"; // logo v2 z fontu interfejsu (Big Shoulders) — pasuje do reszty tekstu; litery Groka: battle-weld-letters-600.webp (zapas)
   if(brandImage.dataset.asset!==brandAsset){brand.classList.remove("logo-failed");
     battleSetAssetImage(brandImage,brandAsset,failed=>brand.classList.toggle("logo-failed",failed));}
   document.getElementById("bwPlayer1Slot").textContent=bwc("p1");document.getElementById("bwPlayer2Slot").textContent=bwc("p2");
@@ -3850,15 +3850,18 @@ function buildBattleCard(){
   document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
   openModal("cardModal");
   const render=(async()=>{
-    const [background,logo]=await Promise.all([battleLoadAsset("card-bg.webp"),battleLoadAsset("battle-weld-wordmark.svg")]);
+    const [background,logo]=await Promise.all([battleLoadAsset("card-bg.webp"),battleLoadAsset("battle-weld-wordmark-v2.svg")]);
     cv.dataset.backgroundAsset=background?"card-bg.webp":"fallback";
-    cv.dataset.logoAsset=logo?"battle-weld-wordmark.svg":"fallback";
+    cv.dataset.logoAsset=logo?"battle-weld-wordmark-v2.svg":"fallback";
     if(background)x.drawImage(background,0,0,w,h);
     else{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,"#0e0f10");g.addColorStop(.55,"#1c1e20");g.addColorStop(1,"#08090a");x.fillStyle=g;x.fillRect(0,0,w,h);}
     x.fillStyle="rgba(14,15,16,.60)";x.fillRect(0,0,w,h);
+    // delikatny zar w kolorach logo: poswiata przy logo + luna od dolu (user 05.10)
+    {const g1=x.createRadialGradient(250,80,0,250,80,460);g1.addColorStop(0,"rgba(255,106,16,.20)");g1.addColorStop(1,"rgba(255,106,16,0)");x.fillStyle=g1;x.fillRect(0,0,w,h);
+     const g2=x.createRadialGradient(w/2,h+40,0,w/2,h+40,620);g2.addColorStop(0,"rgba(255,150,50,.16)");g2.addColorStop(1,"rgba(255,150,50,0)");x.fillStyle=g2;x.fillRect(0,0,w,h);}
     for(let y=40;y<h;y+=44){x.fillStyle="rgba(255,255,255,.025)";x.fillRect(0,y,w,1);}
     x.strokeStyle="#7b8185";x.lineWidth=3;x.strokeRect(22,22,w-44,h-44);x.strokeStyle="rgba(255,137,45,.55)";x.lineWidth=1;x.strokeRect(32,32,w-64,h-64);
-    if(logo)x.drawImage(logo,58,30,390,92);
+    if(logo){const lw=420,lh=Math.round(lw*(logo.naturalHeight||logo.height)/(logo.naturalWidth||logo.width));x.drawImage(logo,52,72-lh/2+8,lw,lh);} // zachowane proporcje
     else{x.textAlign="left";x.fillStyle="#eceeef";x.font=battleCanvasFont("display",800,58);x.fillText("GORWELD ARC · BATTLE WELD",60,100);}
     x.textAlign="left";x.fillStyle=verified?"#ffd08a":"#ff8a80";x.font=battleCanvasFont("mono",500,22);
     const modeText=bt(verified?"serverTag":"friendly"),logoBottom=122,modeTop=160-x.measureText(modeText).actualBoundingBoxAscent;

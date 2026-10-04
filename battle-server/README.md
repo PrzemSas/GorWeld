@@ -1,8 +1,9 @@
-# Battle Weld local server v0.3
+# Battle Weld server v0.4
 
-This local-only prototype creates battles, joins P2, locks battle state,
-streams realtime state over Server-Sent Events (SSE), and accepts
-replay-verified ARC attempts. It does not modify ARC.
+The shared HTTP layer serves the local development adapter and production
+entry point. Both expose the same routes and checks. Production persists battle
+records as one JSON file per battle and re-arms deadlines after restart. It does
+not modify ARC scoring or verdict rules.
 
 Run from the repository root:
 
@@ -14,8 +15,7 @@ node --test battle-server/tests/
 The dev server binds only to `127.0.0.1`; its port is `PORT` (default `8899`).
 For browser E2E runs with a non-default web origin, set
 `BATTLE_DEV_ORIGINS=http://127.0.0.1:<web-port>` so CORS admits that origin.
-Battle records live in memory
-and disappear when the process exits. `GET /battles/:id` returns public battle
+The dev adapter keeps records in memory. `GET /battles/:id` returns public battle
 data and each player's best attempt. Credentials, invite hashes, attempt
 payload hashes, client scores, bot signals and replay timings remain private.
 Send the player secret as `Authorization: Bearer <playerSessionId>.<playerSecret>`
@@ -38,9 +38,7 @@ Routes:
 
 Attempt submissions are limited to 4 MiB; other request bodies remain limited
 to 64 KiB. Sanitized recordings are retained privately with their authoritative
-attempt so they can be re-verified after a dispute or engine fix. A retention
-purge policy is still required before production. Records are held in memory
-for local development and disappear when the process exits. A sync battle starts five seconds after both players become ready and has a
+attempt. A sync battle starts five seconds after both players become ready and has a
 15-minute attempt window from `startAt`. A link battle starts when P2 joins and
 has a 24-hour attempt window. The adapter schedules the exact deadline and
 persists the resulting verdict; reads also apply overdue deadlines.
@@ -53,6 +51,38 @@ seconds, allow at most eight concurrent connections per battle, and are closed
 when the client disconnects. CORS is restricted to origins configured with
 `BATTLE_DEV_ORIGINS` (comma-separated); local defaults are
 `http://127.0.0.1:8898` and `http://localhost:8898`.
+
+## Production entry point
+
+Production startup requires `BATTLE_DATA_DIR` and `BATTLE_ORIGINS` (a
+comma-separated list of exact HTTP(S) origins, without `*`). `HOST` defaults to
+`127.0.0.1`; `PORT` defaults to `8899`. Retention defaults are 30 days for
+recordings, 180 days for completed/expired battles, and 7 days for battles that
+never started. `TRUST_PROXY=1` accepts the first `X-Forwarded-For` address only
+when the socket peer is loopback. Abuse limits can be configured with
+`BATTLE_CREATE_LIMIT_PER_HOUR`, `BATTLE_JOIN_LIMIT_PER_HOUR`,
+`BATTLE_SSE_LIMIT_PER_IP`, and `BATTLE_ACTIVE_CAPACITY`.
+
+```sh
+BATTLE_DATA_DIR=/var/lib/battleweld \
+BATTLE_ORIGINS=https://gorweldarc.com,https://www.gorweldarc.com \
+node battle-server/server.js
+```
+
+Production records live at `<BATTLE_DATA_DIR>/battles/<battleId>.json`;
+directories use mode `0700`, records `0600`, and writes use a synced temporary
+file followed by rename. `GET /health` contains only service status, ARC engine
+and scoring versions, and uptime. Request logs use route templates and omit
+battle IDs, names, secrets, recordings and client IPs. SIGTERM closes the
+listener and SSE streams, then flushes the store.
+
+`node battle-server/purge.js --dry-run` prints only the counts of recordings
+and battles matching retention rules. Systemd/Caddy templates, deployment
+dry-run, rollback and backup steps are in [deploy/SETUP.md](deploy/SETUP.md).
+The ARC constant `BATTLE_PROD_API` remains `null`.
+
+The battle lock queue and SSE hub are in memory. Run one API process only;
+multiple workers or replicas could conflict and do not share live events.
 
 ## Test on a phone in the home network
 

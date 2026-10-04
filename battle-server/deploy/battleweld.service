@@ -1,0 +1,24 @@
+[Unit]
+Description=GORWELD Battle Weld API
+After=network.target
+
+[Service]
+Type=simple
+User=battleweld
+Group=battleweld
+WorkingDirectory=/opt/battleweld/battle-server
+EnvironmentFile=/etc/battleweld.env
+ExecStart=/usr/bin/node /opt/battleweld/battle-server/server.js
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/battleweld
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

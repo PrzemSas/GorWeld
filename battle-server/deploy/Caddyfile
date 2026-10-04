@@ -1,0 +1,15 @@
+api.gorweldarc.com {
+	request_body {
+		max_size 4MB
+	}
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	reverse_proxy 127.0.0.1:8899 {
+		flush_interval -1
+	}
+}

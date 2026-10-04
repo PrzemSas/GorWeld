@@ -2776,7 +2776,10 @@ function battleResolveApi(hostname,search){
     url.hash=""; return url.href.replace(/\/+$/g,"");
   }catch(e){return null;}
 }
-const BATTLE_API=typeof location!=="undefined"?battleResolveApi(location.hostname,location.search):null;
+const BATTLE_PROD_API=null;
+const BATTLE_API=typeof location!=="undefined"?
+  ((location.hostname==="gorweldarc.com"||location.hostname==="www.gorweldarc.com")?
+    BATTLE_PROD_API:battleResolveApi(location.hostname,location.search)):null;
 const BATTLE_REQUIRED_COVERAGE=0.8, BATTLE_MAX_LINK=8000;
 let BATTLE_SERVER_LINK_PRESENT=typeof location!=="undefined"&&location.hash.indexOf("#bw=")===0;
 let BATTLE_LINK_PRESENT=typeof location!=="undefined"&&(location.hash.indexOf("#battle=")===0||BATTLE_SERVER_LINK_PRESENT);

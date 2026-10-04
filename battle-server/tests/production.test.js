@@ -308,6 +308,9 @@ test("deploy rsync permissions remove permissive source bits and keep delete dis
   const deploy = await fs.readFile(path.join(ROOT, "deploy", "deploy.sh"), "utf8");
   assert.match(deploy, /--chown=root:root/);
   assert.match(deploy, /--chmod=D755,F644/);
+  assert.match(deploy, /for attempt in 1 2 3 4 5 6 7 8 9 10/);
+  assert.match(deploy, /curl --fail --silent http:\/\/127\.0\.0\.1:8899\/health/);
+  assert.match(deploy, /sleep 1/);
   assert.doesNotMatch(deploy, /--delete/);
 });
 

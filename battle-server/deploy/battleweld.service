@@ -19,6 +19,31 @@ ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/var/lib/battleweld
 UMask=0077
+# Utwardzenie (audyt 32.4: systemd-analyze security = 8.3 EXPOSED).
+# Proces nie potrzebuje uprawnien, urzadzen ani wyjscia do sieci — slucha tylko na
+# 127.0.0.1, a ruch przychodzi od Caddy z tej samej maszyny. MemoryDenyWriteExecute
+# celowo POMINIETE: V8 (JIT Node.js) potrzebuje pamieci zapisywalnej i wykonywalnej.
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RemoveIPC=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+IPAddressDeny=any
+IPAddressAllow=localhost
 
 [Install]
 WantedBy=multi-user.target

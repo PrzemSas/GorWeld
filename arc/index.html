@@ -3814,21 +3814,53 @@ function battleCanvasFont(face,weight,size){
   const families=lang==="ru"?system:face==="display"?'BWDisplay,"Arial Narrow",Impact,sans-serif':face==="body"?'BWArchivo,"Helvetica Neue",Arial,sans-serif':'BWMono,ui-monospace,monospace';
   return weight+" "+size+"px "+families;
 }
-function battlePlayerCard(x,player,name,center){
-  const px=center?1135:65,align=center?"right":"left";
+function battleCardAvatar(x,image,cx,cy,r,ring){
+  x.save();x.beginPath();x.arc(cx,cy,r+4,0,Math.PI*2);x.fillStyle="#0c0e10";x.fill();
+  x.lineWidth=3;x.strokeStyle=ring;x.stroke();x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.clip();
+  if(image)x.drawImage(image,cx-r,cy-r,r*2,r*2);else{x.fillStyle="#23282c";x.fillRect(cx-r,cy-r,r*2,r*2);}
+  x.restore();
+}
+// uklad karty 05.10: awatar + nick u gory, duza litera z BP obok, bez nachodzenia na "pkt"; zwyciezca z zarem, przegrany przygaszony
+function battlePlayerCard(x,player,name,center,avatar,state){
+  const px=center?1135:65,align=center?"right":"left",dir=center?-1:1,ring=center?"#9fd3ff":"#ff892d";
+  battleCardAvatar(x,avatar,px+dir*44,286,40,ring);
+  const tx=px+dir*104;
+  x.save();
+  if(state==="lose")x.globalAlpha=.72;
+  x.textAlign=align;x.fillStyle="#eceeef";x.font=battleCanvasFont("body",600,26);x.fillText(String(name).slice(0,24),tx,280);
   if(!player){
-    x.textAlign=align;x.fillStyle="#8a9296";x.font=battleCanvasFont("mono",600,23);
-    x.fillText(name,px,300);x.font=battleCanvasFont("mono",500,18);x.fillText("NO RESULT",px,340);return;
+    x.fillStyle="#8a9296";x.font=battleCanvasFont("mono",500,18);x.fillText("NO RESULT",tx,312);x.restore();return;
   }
   const accepted=!player.inspectionRejected&&player.taskCompleted;
   const color=player.inspectionRejected?"#ff8a80":accepted?"#ffd08a":"#e8b44a";
-  x.textAlign=align;x.fillStyle="#aeb5b9";x.font=battleCanvasFont("body",600,22);x.fillText(name,px,270);
-  x.fillStyle="#c3c9ce";x.font=battleCanvasFont("mono",500,18);x.fillText(player.score+" "+bt("scoreUnit"),px,307);
-  x.fillStyle=color;x.font=battleCanvasFont("display",800,102);x.fillText(player.grade||"—",px,390);
-  x.fillStyle=color;x.font=battleCanvasFont("mono",600,22);x.fillText(battleStatus(player),px,430);
-  x.fillStyle="#f3f5f6";x.font=battleCanvasFont("display",800,42);x.fillText(Battle.getBattlePoints(player.score)+" BP",px,490);
-  x.fillStyle="#a5adb1";x.font=battleCanvasFont("mono",500,17);x.fillText(bt("attempt")+" "+player.attemptNumber+" / "+player.attemptsStarted,px,525);
-  if(player.serverTime){x.fillStyle="#737c81";x.font=battleCanvasFont("mono",500,13);x.fillText(new Date(player.serverTime).toISOString().replace("T"," ").replace(/\.\d{3}Z$/, " UTC"),px,552);}
+  x.fillStyle="#c3c9ce";x.font=battleCanvasFont("mono",500,18);x.fillText(player.score+" "+bt("scoreUnit"),tx,312);
+  if(state==="win"){
+    const gx=px+dir*48,g=x.createRadialGradient(gx,400,0,gx,400,150);
+    g.addColorStop(0,"rgba(255,137,45,.32)");g.addColorStop(1,"rgba(255,137,45,0)");x.fillStyle=g;x.fillRect(gx-150,250,300,300);
+    x.shadowColor="rgba(255,120,30,.75)";x.shadowBlur=26;
+  }
+  x.fillStyle=color;x.font=battleCanvasFont("display",800,118);x.fillText(player.grade||"—",px,452);
+  x.shadowBlur=0;
+  const gw=x.measureText(player.grade||"—").width,sx=px+dir*(gw+22);
+  x.fillStyle=color;x.font=battleCanvasFont("mono",600,20);x.fillText(battleStatus(player),sx,384);
+  x.fillStyle="#f3f5f6";x.font=battleCanvasFont("display",800,52);x.fillText(Battle.getBattlePoints(player.score)+" BP",sx,448);
+  x.shadowColor="rgba(0,0,0,.9)";x.shadowBlur=8;
+  x.fillStyle="#a5adb1";x.font=battleCanvasFont("mono",500,17);x.fillText(bt("attempt")+" "+player.attemptNumber+" / "+player.attemptsStarted,px,500);
+  if(player.serverTime){x.fillStyle="#737c81";x.font=battleCanvasFont("mono",500,13);x.fillText(new Date(player.serverTime).toISOString().replace("T"," ").replace(/\.\d{3}Z$/, " UTC"),px,526);}
+  x.restore();
+}
+function battleCardVs(x){
+  x.save();x.strokeStyle="rgba(123,129,133,.55)";x.lineWidth=1;
+  x.beginPath();x.moveTo(600,236);x.lineTo(600,340);x.moveTo(600,452);x.lineTo(600,540);x.stroke();
+  x.textAlign="center";x.font=battleCanvasFont("display",800,96);
+  const g=x.createLinearGradient(0,350,0,440);g.addColorStop(0,"#ffd08a");g.addColorStop(1,"#ff6a10");
+  x.shadowColor="rgba(255,106,16,.6)";x.shadowBlur=22;x.fillStyle=g;x.fillText("VS",600,432);x.restore();
+}
+function battleCardAvatarName(slot){
+  const battle=battleState.serverBattle||{},player=battle.players&&battle.players[slot];
+  let picture=player&&(player.picture||player.avatarUrl);
+  if(picture){try{if(new URL(picture,location.href).origin!==location.origin)picture=null;}catch(_){picture=null;}}
+  return picture||battleAvatarAsset(battle.battleId||battleState.battleId||"battle-weld-card",slot);
 }
 function battleUpdateShareButtons(){
   const copy=document.getElementById("cardBattleLink"), share=document.getElementById("cardBattleShare");
@@ -3850,7 +3882,8 @@ function buildBattleCard(){
   document.getElementById("cardBattleShare").hidden=!battleState.shareUrl;
   openModal("cardModal");
   const render=(async()=>{
-    const [background,logo]=await Promise.all([battleLoadAsset("card-bg.webp"),battleLoadAsset("battle-weld-wordmark-v2.svg")]);
+    const [background,logo,avatar1,avatar2]=await Promise.all([battleLoadAsset("card-bg.webp"),battleLoadAsset("battle-weld-wordmark-v2.svg"),
+      battleLoadAsset(battleCardAvatarName("P1")),battleLoadAsset(battleCardAvatarName("P2"))]);
     cv.dataset.backgroundAsset=background?"card-bg.webp":"fallback";
     cv.dataset.logoAsset=logo?"battle-weld-wordmark-v2.svg":"fallback";
     if(background)x.drawImage(background,0,0,w,h);
@@ -3868,15 +3901,16 @@ function buildBattleCard(){
     cv.dataset.modeTagGapPx=String(Math.floor(modeTop-logoBottom));x.fillText(modeText,60,160);
     const task=battleState.task||battleState.serverTask||{};x.fillStyle="#b8bec2";x.font=battleCanvasFont("body",500,24);x.fillText(battleTaskLabel(task).slice(0,70),60,207);
     if(view.kind==="invite"){
-      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
-      x.textAlign="right";x.fillStyle="#ffae3c";x.font=battleCanvasFont("display",800,34);x.fillText(bt("beat"),w-65,585);
+      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false,avatar1,"");
+      x.textAlign="right";x.fillStyle="#ffae3c";x.font=battleCanvasFont("display",800,40);x.fillText(bt("beat"),w-65,452);
     }else{
-      x.strokeStyle="#555b5f";x.beginPath();x.moveTo(600,230);x.lineTo(600,545);x.stroke();
-      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false);
-      battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true);
-      const code=view.verdict;
+      const code=view.verdict,st=slot=>code==="P1_WINS"?(slot==="P1"?"win":"lose"):code==="P2_WINS"?(slot==="P2"?"win":"lose"):"";
+      battleCardVs(x);
+      battlePlayerCard(x,view.player1,view.player1.nickname||bt("p1"),false,avatar1,st("P1"));
+      battlePlayerCard(x,view.player2,view.player2.nickname||bt("p2"),true,avatar2,st("P2"));
       x.textAlign="center";x.fillStyle=code==="P1_WINS"?"#ffd08a":code==="P2_WINS"?"#ffae3c":
-        code==="DRAW"?"#9fd3ff":"#ff8a80";x.font=battleCanvasFont("display",800,38);x.fillText(battleLabelVerdict(code,view),600,585);
+        code==="DRAW"?"#9fd3ff":"#ff8a80";x.font=battleCanvasFont("display",800,44);
+      x.save();x.shadowColor="rgba(0,0,0,.8)";x.shadowBlur=12;x.fillText(battleLabelVerdict(code,view),600,590);x.restore();
     }
     const serverBattle=battleState.serverBattle||{};
     x.textAlign="left";x.fillStyle="#858e93";x.font=battleCanvasFont("mono",500,17);

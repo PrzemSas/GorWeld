@@ -73,6 +73,12 @@
 #battleModal .bw-actions button:focus-visible,#battleModal input:focus-visible,#battleModal select:focus-visible{outline:3px solid #ffd08a;outline-offset:3px}
 #battleModal .bw-footer{padding-top:8px;border-top:1px solid #393d40;font-family:var(--bw-mono);font-size:9px;letter-spacing:.12em;color:#8b9296}
 #battleModal #bwCeremonyLine{color:#ffbf71}
+/* 05.10: kwestia Veldy jako dymek komentatorki (wczesniej 9 px mono, ginela w stopce) */
+#battleModal #bwCeremonyLine{position:relative;display:inline-block;padding:5px 11px 4px;margin-left:6px;font-family:var(--bw-display);font-weight:800;
+  font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:#ffd08a;background:linear-gradient(180deg,rgba(38,26,16,.92),rgba(18,13,9,.92));
+  border:1px solid rgba(255,137,45,.5);border-radius:3px;box-shadow:0 0 14px rgba(255,106,16,.18);text-shadow:0 0 8px rgba(255,106,16,.35)}
+#battleModal #bwCeremonyLine::before{content:"";position:absolute;left:-7px;top:50%;margin-top:-6px;border:6px solid transparent;border-left:0;border-right:7px solid rgba(255,137,45,.5)}
+#battleModal #bwCeremonyLine:empty,#battleModal #bwCeremonyLine[hidden]{display:none}
 #battleModal[data-screen="incomparable"] .bw-content{border-color:var(--bw-reject);background:repeating-linear-gradient(135deg,#200c0b 0 16px,#100b0b 16px 32px)}
 #battleModal[data-screen="incomparable"] #battleTitle{color:var(--bw-reject-text)}
 #battleModal[data-screen="countdown"] #battleTitle{font-size:clamp(70px,18vh,160px);color:#fff;text-shadow:0 0 38px #ff6a10}
@@ -87,6 +93,10 @@
 #battleModal[data-screen="ready"] .battle-note{margin-bottom:6px}
 #battleModal[data-screen="ready"] .bw-gear{margin-top:4px;padding-block:7px}
 #battleModal[data-screen="ready"] .bw-actions{margin-top:8px}
+/* 05.10: GOTOWY byl przyciety na 1280x800 — ciasniejszy ekran ready */
+#battleModal[data-screen="ready"] .bw-content{padding-block:10px 12px}
+#battleModal[data-screen="ready"] #battleTitle{margin-bottom:2px}
+#battleModal[data-screen="ready"] .battle-choice{min-height:36px;padding-block:6px}
 #battleModal[data-screen="setup"] .bw-gear{display:none}
 
 .bw-hud{position:fixed;z-index:6;top:110px;left:50%;display:none;align-items:center;gap:clamp(8px,1.6vw,20px);width:min(940px,calc(100vw - 24px));min-height:32px;padding:5px 12px;transform:translateX(-50%);border:1px solid #4c5053;border-top:2px solid #ed7622;background:rgba(12,14,15,.86);backdrop-filter:blur(5px);color:#d8dcde;font:10px BWMono,ui-monospace,monospace;pointer-events:none}
@@ -102,6 +112,10 @@ body.battle-active.bw-welding .top{z-index:7}
 .bw-inspection b{font:800 clamp(44px,10vw,100px)/.9 BWDisplay,"Arial Narrow",Impact,sans-serif;letter-spacing:.04em;color:#dfe3e5}
 .bw-inspection span:not(.bw-scan){font:500 clamp(13px,2vw,20px) BWMono,ui-monospace,monospace;color:#ffbd75;letter-spacing:.07em}
 .bw-inspection small{font:500 12px BWArchivo,"Helvetica Neue",Arial,sans-serif;color:#8e989d}
+/* 05.10: kwestia Veldy w inspekcji tez jako dymek */
+.bw-inspection #bwInspectionVelda{position:relative;padding:7px 14px 6px;margin-left:6px;font:800 16px/1 BWDisplay,"Arial Narrow",Impact,sans-serif;letter-spacing:.07em;text-transform:uppercase;
+  color:#ffd08a;background:linear-gradient(180deg,rgba(38,26,16,.92),rgba(18,13,9,.92));border:1px solid rgba(255,137,45,.5);border-radius:3px;box-shadow:0 0 14px rgba(255,106,16,.18)}
+.bw-inspection #bwInspectionVelda::before{content:"";position:absolute;left:-7px;top:50%;margin-top:-6px;border:6px solid transparent;border-left:0;border-right:7px solid rgba(255,137,45,.5)}
 .bw-scan{width:min(420px,78vw);height:3px;background:linear-gradient(90deg,transparent,#9fd3ff,transparent);box-shadow:0 0 25px #9fd3ff;animation:bw-scan 1.4s ease-in-out infinite alternate}
 @keyframes bw-scan{to{transform:translateX(24px);opacity:.45}}
 #cardModal #battleShareCanvas{display:block;width:min(900px,86vw);height:auto;aspect-ratio:1200/675;border:1px solid #555b60;border-radius:3px}
@@ -187,6 +201,27 @@ html[lang="ru"] #cardModal.bw-battle-ru,html[lang="ru"] #cardModal.bw-battle-ru 
 @media(max-height:760px){#battleModal[data-screen="enter"] .bw-brand{height:clamp(44px,7vh,66px)}#battleModal[data-screen="enter"] .bw-shell{gap:clamp(7px,1.2vh,10px);padding-block:14px}#battleModal[data-screen="enter"] .bw-content{padding-block:12px}}
 @media(max-height:680px){#battleModal[data-screen="enter"] .bw-brand{height:48px;width:min(270px,52vw)}#battleModal[data-screen="enter"] .bw-match .bw-player{min-height:72px;padding-block:8px}#battleModal[data-screen="enter"] .bw-content{min-height:0;padding-block:8px}#battleModal[data-screen="enter"] .battle-note{margin-block:3px 7px;line-height:1.3}#battleModal[data-screen="enter"] #battleTaskChoices{max-height:20vh}#battleModal[data-screen="enter"] .battle-choice{min-height:36px;padding-block:6px}#battleModal[data-screen="enter"] .bw-actions{margin-top:6px}}
 @media(max-height:620px){#battleModal[data-screen="enter"] .bw-brand{height:40px;width:min(230px,48vw)}#battleModal[data-screen="enter"] .bw-match .bw-player{min-height:60px}#battleModal[data-screen="enter"] .bw-match .bw-player small{display:none}#battleModal[data-screen="enter"] .bw-content{padding-block:6px}#battleModal[data-screen="enter"] #battleTitle{font-size:clamp(22px,3.5vw,32px)}#battleModal[data-screen="enter"] .battle-note{font-size:12px;margin:2px auto 5px}#battleModal[data-screen="enter"] .battle-choice{min-height:32px;padding-block:4px}#battleModal[data-screen="enter"] .bw-actions button{min-height:38px;padding-block:6px}}
-@media(min-width:900px) and (min-height:700px){#battleModal .bw-velda-portrait{width:72px;height:92px}#battleModal .bw-footer{align-items:center}#battleModal .bw-velda{gap:10px}.bw-inspection-velda{min-height:92px}.bw-inspection-velda .bw-velda-portrait{width:72px;height:92px}}
+@media(min-width:900px) and (min-height:700px){#battleModal .bw-velda-portrait{width:72px;height:92px}#battleModal #bwCeremonyLine{font-size:16px;padding:7px 14px 6px}#battleModal .bw-footer{align-items:center}#battleModal .bw-velda{gap:10px}.bw-inspection-velda{min-height:92px}.bw-inspection-velda .bw-velda-portrait{width:72px;height:92px}}
 @media(max-height:399px){#battleModal .bw-velda-portrait{display:none!important}}
 @media(prefers-reduced-motion:reduce){#battleModal .bw-gates{display:none!important}}
+/* 05.10 (przeglad Codexa): READY/VERDICT ucinaly sie na 1280x800, 1366x768, 1280x720.
+   safe center = przy przepelnieniu tresc zaczyna sie od gory (da sie przewinac), plus ciasniejsza glowa okna. */
+#battleModal .bw-content{justify-content:safe center}
+#battleModal[data-screen="ready"] .bw-content,#battleModal[data-screen="setup"] .bw-content{justify-content:flex-start}
+@media(min-width:601px) and (max-height:900px){
+  #battleModal:not([data-screen="enter"]) .bw-shell{gap:8px;padding-block:14px}
+  #battleModal:not([data-screen="enter"]) .bw-slogan{display:none}
+  #battleModal:not([data-screen="enter"]) .bw-brand{height:54px;width:clamp(150px,22vw,240px)}
+  #battleModal:not([data-screen="enter"]) .bw-match .bw-player{min-height:0;padding-block:8px}
+  #battleModal:not([data-screen="enter"]) .bw-content{padding-block:10px}
+  #battleModal[data-screen="verdict"] #battleTitle{font-size:clamp(30px,6vh,52px);margin-bottom:2px}
+  #battleModal[data-screen="verdict"] .battle-summary{width:min(960px,100%);line-height:1.45;padding-block:6px;margin-top:6px}
+  #battleModal[data-screen="verdict"] .bw-actions{margin-top:8px}
+  #battleModal[data-screen="verdict"] .battle-choice{min-height:36px;padding-block:6px}
+}
+@media(min-width:601px) and (max-height:760px){
+  #battleModal[data-screen="verdict"] .bw-intro{margin-bottom:4px}
+  #battleModal[data-screen="verdict"] #battleTitle{font-size:clamp(28px,5.4vh,40px)}
+  #battleModal[data-screen="verdict"] .battle-summary{font-size:13px;line-height:1.35}
+  #battleModal[data-screen="verdict"] .bw-actions button{min-height:38px;padding-block:6px}
+}

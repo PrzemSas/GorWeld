@@ -13,7 +13,7 @@ Oryginały zostają na pulpicie — tutaj tylko wersje do sieci (WebP).
 | `velda-calm.webp` | 01 | 600×800 | pasek Veldy: „Gear check.”, „Same task. Same rules.” |
 | `velda-focus.webp` | 02 | 600×800 | „Strike the arc.”, „Inspection complete.” |
 | `velda-verdict.webp` | 03 | 600×800 | „Verdict locked.” (kadr z tłem, bez wycinania) |
-| `arena-wide.webp` | 04 | 1280×720 | tło bramy / VS na komputerze (przyciemnić, lekko rozmyć) |
+| `arena-wide.webp` | 04b (05.10, łańcuchy) podbite Real-ESRGAN x4plus → 1920×1080, WebP q72 | 1920×1080 | tło bramy / VS na komputerze (przyciemnić, lekko rozmyć) |
 | `arena-tall.webp` | 05 | 720×1280 | tło na telefonie |
 | `gate-left.webp`, `gate-right.webp` | 09 przecięte w połowie | 640×720 | ceremonia ENTER BATTLE (skrzydła rozjeżdżają się) |
 | `card-bg.webp` | 10 | 1200×675 | tło karty do udostępniania |

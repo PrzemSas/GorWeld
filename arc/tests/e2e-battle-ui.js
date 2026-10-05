@@ -167,6 +167,27 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     }
     for(const [width,height] of [[1280,800],[1366,768],[1280,720],[1024,600],[375,812]])
       for(const locale of ["pl","ru"])await enterClipping(width,height,locale);
+    // 05.10 (po przegladzie Codexa): READY i VERDICT tez bez przyciec na niskich ekranach komputera
+    async function screenClipping(name,width,height,locale){
+      await page.setViewportSize({width,height});await render(name,locale);
+      const data=await page.evaluate(()=>{
+        const root=document.getElementById("battleModal"),shell=root.querySelector(".bw-shell");
+        const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return !el.hidden&&s.display!=="none"&&s.visibility!=="hidden"&&Number(s.opacity||1)>.01&&r.width>0&&r.height>0;};
+        const targets=[...shell.querySelectorAll("button,h1,h2,h3,p,small,strong,b,span,label")].filter(el=>visible(el)&&
+          (el.matches("button")||el.children.length===0&&el.textContent.trim()));
+        const clipped=[];
+        for(const el of targets){const r=el.getBoundingClientRect();for(let ancestor=el.parentElement;ancestor;ancestor=ancestor.parentElement){
+          const s=getComputedStyle(ancestor),clips=[s.overflowX,s.overflowY].some(v=>["hidden","auto","scroll","clip"].includes(v));
+          if(!clips)continue;const a=ancestor.getBoundingClientRect();
+          if(r.top<a.top-1||r.bottom>a.bottom+1)clipped.push({text:(el.innerText||el.tagName).trim().slice(0,50),ancestor:ancestor.id||ancestor.className||ancestor.tagName});
+        }}
+        return {clipped,screen:root.dataset.screen};
+      });
+      ok(`${name.toUpperCase()} text and buttons are not clipped ${locale} ${width}x${height}`,data.clipped.length===0&&data.screen===name,data);
+      fs.mkdirSync(OUT,{recursive:true});await page.screenshot({path:path.join(OUT,`${name}-clip-${locale}-${width}x${height}.png`)});
+    }
+    for(const name of ["ready","verdict"])for(const [width,height] of [[1280,800],[1366,768],[1280,720]])
+      for(const locale of ["pl","ru"])await screenClipping(name,width,height,locale);
     for(const width of [360,390]){
       for(const locale of ["pl","ru"]){
         await page.setViewportSize({width,height:812});await render("verdict",locale);

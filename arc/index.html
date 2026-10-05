@@ -396,8 +396,10 @@
     <button id="methods" data-i18n="btn_methods">📖 METHODS</button>
     <button id="about" data-i18n="btn_about">ℹ️ ABOUT</button>
     <button id="clear" data-i18n="btn_clear">✕ CLEAR</button>
+    <button id="music" type="button" aria-pressed="false" data-i18n="btn_music">🎵 MUSIC</button>
     <button id="mobHelmet" class="mob-actions on" type="button" title="Helmet">🥽</button>
     <button id="mobSnd" class="mob-actions" type="button" title="Sound">🔊</button>
+    <button id="mobMusic" class="mob-actions" type="button" aria-pressed="false" title="Music">🎵</button>
     <button id="mobClear" class="mob-actions" type="button" title="Clear">✕</button>
     <button id="mobHelp" class="mob-actions" type="button" title="Help">❔</button>
     <button id="mobSetup2" class="mob-actions" type="button" title="Settings">⚙️</button>
@@ -660,7 +662,7 @@ try{ const l=localStorage.getItem('gorweld_lang'); if(l) lang=l; }catch(e){}
 const I18N={
  pl:{ t_offplate:"⚡ ZJECHAŁEŚ Z BLACHY — łuk zgasł", t_arcstop:"✔ ŁUK ZGASZONY — LPM+PPM",t_tigstop:"✔ ŁUK ZGASZONY — PPM", t_stick:"⚡ PRZYWARŁA — odbij elektrodę i zajarz od nowa",t_arcbreak:"⚡ ŁUK ZERWANY — zajarz od nowa",fb_arclong:"ZA DŁUGI ŁUK — pęcherze i odpryski",fb_arcshort:"ZA KRÓTKI ŁUK — zaraz przywrze",def_arc_long:"Za długi łuk — utrata osłony, pęcherze i odpryski",def_arc_short:"Za krótki łuk — przywieranie, brak wtopienia",def_stick:"Przerwany łuk — %1 raz(y)",fb_angwork:"KRZYWY KĄT ROBOCZY — ścieg ucieka z rowka",fb_offaxis:"ZJECHAŁEŚ Z OSI — wracaj na grań",fb_filler:"DODAJ SPOIWO — SPACJA",def_filler:"Nierówny rytm spoiwa — faliste lico, miejscami nadlew, miejscami niedolew",def_hi_over:"Przekroczony wkład ciepła — %1 kJ/mm przy dopuszczalnych %2. Materiał badany udarnościowo: powyżej granicy z WPS kwalifikacja udarnościowa nie pokrywa złącza — odrzut niezależnie od wyglądu lica",hi_max:"max",hi_cvn:"max wg WPS (udarność)",fb_hi:"ZA DUŻY WKŁAD CIEPŁA — jedź szybciej albo zbij prąd",def_offaxis:"Ścieg poza osią złącza — podtopienie jednej krawędzi, brak wtopienia po drugiej",fb_angdrag:"ZA MOCNO CIĄGNIESZ — żużel wchodzi pod łuk",fb_angpush:"PCHASZ ELEKTRODĘ — brak wtopienia",def_ang_work:"Krzywy kąt roboczy — podtopienie jednej krawędzi, ścieg obok osi",def_ang_drag:"Za duży kąt ciągnięcia — wtrącenia żużla, wypukłe lico",def_ang_push:"Elektroda pchana — brak wtopienia, żużel przed jeziorkiem",ang_lbl:"Kąt:",ang_drag:"ciągn.",ang_push:"pchan.",ang_work:"rob.", method:"Metoda", joint:"Złącze", position:"Pozycja", thickness:"Grubość", material:"Materiał", amperage:"Prąd (A)", amp_auto:"AUTO", amp_man:"RĘCZNIE",
   jt_butt:"Doczołowe V", jt_fillet:"Pachwinowe T", jt_pipe:"Rura", mat_steel:"Stal", mat_ss:"Nierdz.", mat_alu:"Alu",
-  btn_helmet:"🥽 HEŁM", btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
+  btn_helmet:"🥽 HEŁM", btn_music:"🎵 MUZYKA",btn_arc:"🔊 ŁUK", btn_mute:"🔇 CISZA", btn_inspect:"🔎 INSPEKCJA", btn_career:"🎓 KARIERA", btn_clear:"✕ ZETRZYJ",
   grav:"grawitacja<br>jeziorka", vset:"v zadane:", forA:"za A ≈",
   tool_elec:"🔥 Elektroda: ", tool_used:"ZUŻYTA — klik = nowa", tool_mig:"🔫 <b>Drut z automatu</b> — jedna ręka, ciągłe podawanie", tool_tig:"👐 <b>Palnik + drut</b> — LPM zapala, SPACJA dokłada spoiwo, PPM gasi",
   fb_fast:"ZA SZYBKO — zimny zakład, brak wtopu", fb_slow:"ZA WOLNO — przepalenie / przelew", fb_good:"DOBRE TEMPO — pełny przetop",
@@ -697,7 +699,7 @@ const I18N={
   cardtext_cut:"Przeciąłem %1 — ocena %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — darmowy symulator\n#ciecie #spawanie #GorWeld" },
  en:{ t_offplate:"⚡ OFF THE PLATE — arc went out", t_arcstop:"✔ ARC STOPPED — LMB+RMB",t_tigstop:"✔ ARC STOPPED — RMB", t_stick:"⚡ STUCK — break the electrode free and re-strike",t_arcbreak:"⚡ ARC BROKEN — strike again",fb_arclong:"ARC TOO LONG — pores and spatter",fb_arcshort:"ARC TOO SHORT — about to stick",def_arc_long:"Arc too long — lost shielding, pores and spatter",def_arc_short:"Arc too short — sticking, lack of fusion",def_stick:"Arc interrupted — %1 time(s)",fb_angwork:"WORK ANGLE OFF — bead walking out of the joint",fb_offaxis:"OFF THE CENTRELINE — get back on the seam",fb_filler:"ADD FILLER — SPACE",def_filler:"Uneven filler rhythm — rippled face, excess in places, starved in others",def_hi_over:"Heat input exceeded — %1 kJ/mm against %2 allowed. Impact-tested material: above the WPS limit the CVN qualification no longer covers the joint — reject regardless of how the face looks",hi_max:"max",hi_cvn:"WPS max (impact-tested)",fb_hi:"HEAT INPUT TOO HIGH — travel faster or drop the current",def_offaxis:"Bead off the joint centreline — undercut on one edge, lack of fusion on the other",fb_angdrag:"DRAGGING TOO HARD — slag runs under the arc",fb_angpush:"PUSHING THE STICK — no penetration",def_ang_work:"Work angle off — undercut on one side, bead off the centreline",def_ang_drag:"Drag angle too steep — slag inclusions, ropey convex face",def_ang_push:"Electrode pushed — lack of fusion, slag ahead of the puddle",ang_lbl:"Angle:",ang_drag:"drag",ang_push:"push",ang_work:"work", method:"Method", joint:"Joint", position:"Position", thickness:"Thickness", material:"Material", amperage:"Current (A)", amp_auto:"AUTO", amp_man:"MANUAL",
   jt_butt:"Butt V", jt_fillet:"Fillet T", jt_pipe:"Pipe", mat_steel:"Steel", mat_ss:"Stainless", mat_alu:"Alu",
-  btn_helmet:"🥽 HELMET", btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
+  btn_helmet:"🥽 HELMET", btn_music:"🎵 MUSIC",btn_arc:"🔊 ARC", btn_mute:"🔇 MUTE", btn_inspect:"🔎 INSPECT", btn_career:"🎓 CAREER", btn_clear:"✕ CLEAR",
   grav:"puddle<br>gravity", vset:"set v:", forA:"for A ≈",
   tool_elec:"🔥 Electrode: ", tool_used:"SPENT — click for new", tool_mig:"🔫 <b>Auto-fed wire</b> — one hand, continuous", tool_tig:"👐 <b>Torch + rod</b> — LMB lights it, SPACE dabs filler, RMB puts it out",
   fb_fast:"TOO FAST — cold lap, no fusion", fb_slow:"TOO SLOW — burn-through / overflow", fb_good:"GOOD SPEED — full penetration",
@@ -734,7 +736,7 @@ const I18N={
   cardtext_cut:"Cut %1 — grade %2, ISO 9013 %3. 🔥⚡\n\nGORWELD® Arc Welder — free simulator\n#cutting #welding #GorWeld" },
  ru:{ t_offplate:"⚡ СОШЁЛ С ПЛАСТИНЫ — дуга погасла", t_arcstop:"✔ ДУГА ПОГАШЕНА — ЛКМ+ПКМ",t_tigstop:"✔ ДУГА ПОГАШЕНА — ПКМ", t_stick:"⚡ ПРИЛИПЛА — отломи электрод и зажги заново",t_arcbreak:"⚡ ДУГА ОБОРВАНА — зажги заново",fb_arclong:"ДУГА СЛИШКОМ ДЛИННАЯ — поры и брызги",fb_arcshort:"ДУГА СЛИШКОМ КОРОТКАЯ — вот-вот прилипнет",def_arc_long:"Слишком длинная дуга — потеря защиты, поры и брызги",def_arc_short:"Слишком короткая дуга — прилипание, непровар",def_stick:"Дуга прервана — %1 раз(а)",fb_angwork:"КРИВОЙ РАБОЧИЙ УГОЛ — шов уходит из разделки",fb_offaxis:"УШЁЛ С ОСИ — возвращайся на стык",fb_filler:"ДОБАВЬ ПРИСАДКУ — ПРОБЕЛ",def_filler:"Неровный ритм присадки — волнистый валик, местами наплыв, местами непровар",def_hi_over:"Превышен погонный тепловложение — %1 кДж/мм при допустимых %2. Материал с испытанием на удар: выше предела по WPS квалификация не покрывает соединение — брак независимо от вида валика",hi_max:"макс",hi_cvn:"макс по WPS (удар.)",fb_hi:"СЛИШКОМ БОЛЬШОЕ ТЕПЛОВЛОЖЕНИЕ — иди быстрее или убавь ток",def_offaxis:"Шов вне оси соединения — подрез с одной кромки, непровар с другой",fb_angdrag:"СЛИШКОМ БОЛЬШОЙ УГОЛ — шлак идёт под дугу",fb_angpush:"ТОЛКАЕШЬ ЭЛЕКТРОД — нет провара",def_ang_work:"Кривой рабочий угол — подрез с одной стороны, шов мимо оси",def_ang_drag:"Слишком большой угол волочения — шлаковые включения, выпуклый валик",def_ang_push:"Электрод толкается — непровар, шлак перед ванной",ang_lbl:"Угол:",ang_drag:"волоч.",ang_push:"толк.",ang_work:"раб.", method:"Метод", joint:"Соединение", position:"Позиция", thickness:"Толщина", material:"Материал", amperage:"Ток (А)", amp_auto:"АВТО", amp_man:"ВРУЧНУЮ",
   jt_butt:"Стыковое V", jt_fillet:"Тавровое T", jt_pipe:"Труба", mat_steel:"Сталь", mat_ss:"Нерж.", mat_alu:"Алюм.",
-  btn_helmet:"🥽 МАСКА", btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
+  btn_helmet:"🥽 МАСКА", btn_music:"🎵 МУЗЫКА",btn_arc:"🔊 ДУГА", btn_mute:"🔇 ТИШИНА", btn_inspect:"🔎 КОНТРОЛЬ", btn_career:"🎓 КАРЬЕРА", btn_clear:"✕ СТЕРЕТЬ",
   grav:"гравитация<br>ванны", vset:"задан. v:", forA:"за A ≈",
   tool_elec:"🔥 Электрод: ", tool_used:"ИЗРАСХОДОВАН — клик = новый", tool_mig:"🔫 <b>Автоподача</b> — одна рука, непрерывно", tool_tig:"👐 <b>Горелка + пруток</b> — присадка макая, веди медленно",
   fb_fast:"СЛИШКОМ БЫСТРО — непровар", fb_slow:"СЛИШКОМ МЕДЛЕННО — прожог / натёк", fb_good:"ХОРОШИЙ ТЕМП — полный провар",
@@ -1162,7 +1164,12 @@ let eyeBurn=0, lastFrameT=0, eyeWarned=false;
 function gVec(){ return POSITIONS[posKey].g; }
 function nearestSeam(x,y){ let d=1e18,px=x,py=y; for(const p of seamPts){ const dd=(p.x-x)**2+(p.y-y)**2; if(dd<d){d=dd;px=p.x;py=p.y;} } return {d:Math.sqrt(d),x:px,y:py}; }
 function plateHalf(){ return grooveHalf+bevelW+75; }                 // half width of the coupon plate
-function onPlate(x,y){ return nearestSeam(x,y).d <= plateHalf(); }
+// 3.5.0 (1:1 z sim.js): za koncem szwu prostego nie ma blachy — luk gasnie na krawedzi, nie ~90 px dalej.
+function pastSeamEnd(x,y){ if(isCut()||POSITIONS[posKey].pipe||seamPts.length<2) return false;
+  const a=seamPts[0],b=seamPts[seamPts.length-1],dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy;
+  if(!L2) return false; const t=((x-a.x)*dx+(y-a.y)*dy)/L2,tol=1.5/Math.sqrt(L2);
+  return t<-tol||t>1+tol; }
+function onPlate(x,y){ return nearestSeam(x,y).d <= plateHalf() && !pastSeamEnd(x,y); }
 function coverageNow(){ if(!seamPts.length||!baked.length) return 0; let c=0;
   for(const pt of seamPts){ let d=1e18; for(const b of baked){ const dd=(b.x-pt.x)**2+(b.y-pt.y)**2; if(dd<d)d=dd; } if(Math.sqrt(d)<grooveHalf*1.6) c++; }
   return c/seamPts.length; }
@@ -2161,7 +2168,7 @@ function initAudio(){ if(actx)return;
   const lp=actx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=600; buzzOsc.connect(lp); lp.connect(bg); bg.connect(master);
   noiseSrc.start(); buzzOsc.start();
 }
-function arcOn(){ if(!soundOn)return; initAudio(); if(actx.state==="suspended")actx.resume();
+function arcOn(){ if(!soundOn)return; initAudio(); if(actx.state==="suspended")actx.resume(); if(typeof amDuck==="function")amDuck(true);
   const P=PROCESS[proc]; bpFilter.frequency.value=P.hiss; buzzOsc.frequency.value=P.buzz;
   master.gain.cancelScheduledValues(actx.currentTime); master.gain.setTargetAtTime(0.22,actx.currentTime,0.02);
   clearInterval(crackleTimer); crackleTimer=setInterval(()=>{ if(!master)return;
@@ -2169,7 +2176,7 @@ function arcOn(){ if(!soundOn)return; initAudio(); if(actx.state==="suspended")a
     buzzOsc.frequency.setTargetAtTime(P.buzz*(0.85+Math.random()*0.3),actx.currentTime,0.02); },P.crackInt);
 }
 function arcIntensity(v){ if(master&&soundOn) master.gain.setTargetAtTime(0.12+v*0.18,actx.currentTime,0.03); }
-function arcOff(){ clearInterval(crackleTimer); if(master) master.gain.setTargetAtTime(0,actx.currentTime,0.05); }
+function arcOff(){ clearInterval(crackleTimer); if(master) master.gain.setTargetAtTime(0,actx.currentTime,0.05); if(typeof amDuck==="function")amDuck(false); }
 
 // ── UI ────────────────────────────────────────────────────────────
 function refreshPositions(){
@@ -2992,6 +2999,88 @@ function battleUiUpdateHud(){
   document.getElementById("bwHudOpponent").textContent=battleState.serverMode?(opponent&&opponent.status==="welding"?bt("opponentWelding"):bt("opponentIdle")):bt("friendly");
   hud.setAttribute("aria-hidden","false");
 }
+// ── Muzyka ARC (05.10, wariant A „Warsztat”, lo-fi 78 BPM) — synteza Web Audio, zero plikow.
+// Domyslnie WYL. (szkoly, sale komputerowe); przycisk 🎵 pamieta wybor. Gra tylko poza Battle (tam gra
+// muzyka Battle), po pierwszym kliknieciu (wymog przegladarek), przy spawaniu sciszona do 20%.
+const arcMusic={on:false,gesture:false,out:null,duck:null,bus:null,delay:null,noise:null,timer:null,next:0,step:0,drone:[],playing:false};
+try{arcMusic.on=localStorage.getItem("gorweld_music")==="1";}catch(e){}
+function amInit(){
+  if(arcMusic.out)return true; if(!soundOn)return false;
+  try{if(!actx)initAudio();
+    const comp=actx.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=3;comp.attack.value=.006;comp.release.value=.25;
+    arcMusic.out=actx.createGain();arcMusic.out.gain.value=.28;arcMusic.out.connect(comp);comp.connect(actx.destination);
+    arcMusic.duck=actx.createGain();arcMusic.duck.connect(arcMusic.out);
+    const d=actx.createDelay(1.5),fb=actx.createGain(),lp=actx.createBiquadFilter(),wet=actx.createGain();
+    d.delayTime.value=60/78*.75;fb.gain.value=.38;lp.type="lowpass";lp.frequency.value=2200;wet.gain.value=.32;
+    arcMusic.bus=actx.createGain();arcMusic.bus.connect(arcMusic.duck);arcMusic.bus.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(wet);wet.connect(arcMusic.duck);
+    arcMusic.noise=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate);const nd=arcMusic.noise.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+    return true;}catch(e){return false;}
+}
+function amEnv(g,t,a,peak,dec){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec);}
+function amNoise(t,dur){const n=actx.createBufferSource();n.buffer=arcMusic.noise;n.start(t,Math.random()*1.5);n.stop(t+dur);return n;}
+function amKick(t,peak){const o=actx.createOscillator(),g=actx.createGain();o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(40,t+.16);
+  amEnv(g,t,.004,peak,.42);o.connect(g);g.connect(arcMusic.bus);o.start(t);o.stop(t+.5);}
+function amSnare(t,peak){const n=amNoise(t,.2),bp=actx.createBiquadFilter(),g=actx.createGain();bp.type="bandpass";bp.frequency.value=1700;bp.Q.value=.8;
+  amEnv(g,t,.003,peak,.16);n.connect(bp);bp.connect(g);g.connect(arcMusic.bus);}
+function amHat(t,peak){const n=amNoise(t,.06),hp=actx.createBiquadFilter(),g=actx.createGain();hp.type="highpass";hp.frequency.value=7000;
+  amEnv(g,t,.001,peak,.035);n.connect(hp);hp.connect(g);g.connect(arcMusic.bus);}
+function amTick(t,f,peak){[[1,1],[2.76,.5],[5.4,.25]].forEach(([m,a])=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f*m;
+  amEnv(g,t,.001,peak*a,.18/m**.4);o.connect(g);g.connect(arcMusic.bus);o.start(t);o.stop(t+.3);});}
+function amPluck(t,f,peak){const o=actx.createOscillator(),o2=actx.createOscillator(),lp=actx.createBiquadFilter(),g=actx.createGain(),g2=actx.createGain();
+  o.type="triangle";o.frequency.value=f;o2.frequency.value=f*2;g2.gain.value=.25;lp.type="lowpass";lp.frequency.setValueAtTime(3200,t);lp.frequency.exponentialRampToValueAtTime(500,t+.5);
+  o2.connect(g2);g2.connect(lp);o.connect(lp);amEnv(g,t,.004,peak,.5);lp.connect(g);g.connect(arcMusic.bus);o.start(t);o2.start(t);o.stop(t+.6);o2.stop(t+.6);}
+function amPad(t,freqs,dur,peak){freqs.forEach(f=>[["sine",0],["triangle",7]].forEach(([type,cents])=>{const o=actx.createOscillator(),g=actx.createGain(),lp=actx.createBiquadFilter();
+  o.type=type;o.frequency.value=f;o.detune.value=cents;lp.type="lowpass";lp.frequency.value=1400;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+.6);g.gain.setValueAtTime(peak,t+dur-.6);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(lp);lp.connect(g);g.connect(arcMusic.bus);o.start(t);o.stop(t+dur+.05);}));}
+function amBass(t,f,dur,peak){const o=actx.createOscillator(),lp=actx.createBiquadFilter(),g=actx.createGain();o.type="sawtooth";o.frequency.value=f;
+  lp.type="lowpass";lp.frequency.value=220;lp.Q.value=2;amEnv(g,t,.01,peak,dur);o.connect(lp);lp.connect(g);g.connect(arcMusic.bus);o.start(t);o.stop(t+dur+.05);}
+const amN=m=>440*Math.pow(2,(m-69)/12);
+const AM_CHORDS=[[57,60,64,67],[53,57,60,64],[48,55,59,64],[55,59,62,64]],AM_ROOTS=[45,41,36,43],AM_PENTA=[69,72,74,76,79,81,84];
+const AM_MEL=[[0,4],[3,2],[6,3],[10,1],[14,0],[16,4],[19,5],[22,3],[26,2],[30,1]];
+function amStart(){
+  if(arcMusic.playing||!amInit())return;
+  try{if(actx.state==="suspended")actx.resume();
+    const t=actx.currentTime,lp=actx.createBiquadFilter(),g=actx.createGain(),lfo=actx.createOscillator(),lg=actx.createGain();
+    lp.type="lowpass";lp.frequency.value=320;lfo.frequency.value=.05;lg.gain.value=140;lfo.connect(lg);lg.connect(lp.frequency);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05,t+3);lp.connect(g);g.connect(arcMusic.duck);
+    const os=[amN(33),amN(33)*1.005].map(f=>{const o=actx.createOscillator();o.type="sawtooth";o.frequency.value=f;o.connect(lp);o.start(t);return o;});
+    lfo.start(t);arcMusic.drone=[...os,lfo,g];
+    arcMusic.step=0;arcMusic.next=t+.08;const sd=60/78/4;
+    arcMusic.timer=setInterval(()=>{
+      while(arcMusic.next<actx.currentTime+.15){const st=arcMusic.step%16,bar=Math.floor(arcMusic.step/16);let t2=arcMusic.next;
+        if(st%2===1)t2+=sd*.18;                                   // swing jak lo-fi
+        if(st===0||st===10)amKick(t2,.55); if(st===7&&bar%2===1)amKick(t2,.35);
+        if(st===4||st===12)amSnare(t2,.12);
+        if(st%2===0)amHat(t2,st%4===2?.03:.018);
+        if(st===0)amPad(t2,AM_CHORDS[bar%4].map(amN),60/78*4,.018);
+        if(st===0||st===8)amBass(t2,amN(AM_ROOTS[bar%4]),.9,.09);
+        const ph=(bar%2)*16+st,shift=bar%4<2?0:2;for(const [at,ni] of AM_MEL)if(at===ph)amPluck(t2,amN(AM_PENTA[(ni+shift)%AM_PENTA.length]),.07);
+        if(st===14&&bar%4===3)amTick(t2,1250,.05);
+        arcMusic.step++;arcMusic.next+=sd;}
+    },25);
+    arcMusic.playing=true;
+  }catch(e){}
+}
+function amStop(){
+  if(arcMusic.timer){clearInterval(arcMusic.timer);arcMusic.timer=null;}
+  if(arcMusic.drone.length&&actx){const t=actx.currentTime,g=arcMusic.drone[arcMusic.drone.length-1];
+    try{g.gain.cancelScheduledValues(t);g.gain.setTargetAtTime(.0001,t,.3);arcMusic.drone.slice(0,-1).forEach(o=>o.stop(t+1.6));}catch(e){}}
+  arcMusic.drone=[];arcMusic.playing=false;
+}
+function amDuck(on){if(arcMusic.duck&&actx){const t=actx.currentTime;arcMusic.duck.gain.cancelScheduledValues(t);arcMusic.duck.gain.setTargetAtTime(on?.2:1,t,on?.08:.35);}}
+function amWanted(){const bm=document.getElementById("battleModal");
+  return arcMusic.on&&soundOn&&arcMusic.gesture&&!document.hidden&&!(bm&&bm.classList.contains("open"))&&!document.body.classList.contains("battle-active");}
+function amRefresh(){if(amWanted())amStart();else amStop();}
+function amSyncButtons(){for(const id of ["music","mobMusic"]){const b=document.getElementById(id);if(!b)continue;b.classList.toggle("on",arcMusic.on);b.setAttribute("aria-pressed",String(arcMusic.on));}}
+function amToggle(){arcMusic.on=!arcMusic.on;arcMusic.gesture=true;try{localStorage.setItem("gorweld_music",arcMusic.on?"1":"0");}catch(e){}amSyncButtons();amRefresh();}
+document.addEventListener("pointerdown",()=>{if(!arcMusic.gesture){arcMusic.gesture=true;amRefresh();}},true);
+document.addEventListener("keydown",()=>{if(!arcMusic.gesture){arcMusic.gesture=true;amRefresh();}},true);
+document.addEventListener("visibilitychange",amRefresh);
+document.getElementById("music").onclick=()=>amToggle();
+document.getElementById("mobMusic").onclick=()=>amToggle();
+amSyncButtons();
+setInterval(amRefresh,500);   // Battle otwarte/zamkniete, mute ARC, karta w tle — jeden prosty straznik zamiast haczykow wszedzie
 // ── Muzyka Battle (05.10, wariant A „Hala” 92 BPM) — synteza Web Audio, zero plikow.
 // Gra tylko w oknie Battle (enter/setup/ready), milknie przy odliczaniu, spawaniu, inspekcji; mute ARC = cisza.
 const bwMusic={out:null,noise:null,timer:null,next:0,step:0,drone:[],playing:false,cueKey:"",log:[]};
@@ -3026,6 +3115,7 @@ function bwPad(t,freqs,dur,peak,bright){freqs.forEach(f=>[-6,6].forEach(cents=>{
   lp.frequency.exponentialRampToValueAtTime(400,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+.08);
   g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(lp);lp.connect(g);g.connect(bwMusic.out);o.start(t);o.stop(t+dur+.05);}));}
 function bwMusicStart(){
+  if(typeof amStop==="function")amStop();
   if(bwMusic.playing||!bwMusicInit())return;
   try{if(actx.state==="suspended")actx.resume();
     const t=actx.currentTime,lp=actx.createBiquadFilter(),g=actx.createGain(),lfo=actx.createOscillator(),lg=actx.createGain();

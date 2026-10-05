@@ -219,6 +219,13 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       return {reduced:matchMedia("(prefers-reduced-motion: reduce)").matches,stageStable:JSON.stringify(stageBefore)===JSON.stringify(stageHud)&&JSON.stringify(stageBefore)===JSON.stringify(stageNoHud),mutedInitCalls:initCalls};
     });
     ok("HUD leaves ARC stage geometry unchanged",checks.stageStable,checks);
+    // 05.10 (zgloszenie z live): karta z jednym graczem (P2 bez proby) rysuje sie do konca — z werdyktem i "BRAK WYNIKU"
+    const soloCard=await page.evaluate(async()=>{
+      const saved=battleState;battleState={...saved,serverMode:true,slot:"P1",battleId:"bw_solo",serverBattle:{...(saved&&saved.serverBattle||{}),battleId:"bw_solo",players:{P1:{nickname:"GorWeld"},P2:{nickname:""}}},
+        cardView:{kind:"server",verdict:"NO_QUALIFIED_RESULT",player1:{nickname:"GorWeld",score:24,grade:"F",inspectionRejected:true,taskCompleted:true,qualified:false,battlePoints:240,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-05T18:39:09.000Z"},player2:null}};
+      buildBattleCard();try{await window.__bwBattleCardReady;}catch(e){}
+      const rendered=document.getElementById("battleShareCanvas").dataset.rendered;closeModal("cardModal");battleState=saved;await new Promise(r=>setTimeout(r,320));return rendered;});
+    ok("result card with only one player renders to the end (no-result side + verdict)",soloCard==="1",soloCard);
     // 05.10 muzyka Battle (wariant A): petla tylko w lobby, cisza w odliczaniu/spawaniu, akcent werdyktu z perspektywy gracza, mute ARC
     const music=await page.evaluate(async()=>{
       const saved={soundOn,battleState},oldInit=initAudio;let initCalls=0;

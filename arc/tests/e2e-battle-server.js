@@ -202,8 +202,14 @@ async function modalFit(page) {
     ok("join preview shows task, replay profile, player 1, separate warning, and verification mode",preview.message.includes("Task:")&&preview.message.includes("full")&&preview.message.includes("Night Shift")&&preview.message.includes("\n")&&!preview.tagHidden&&preview.tag==="SERVER · VERIFIED"&&previewLines==="pre-line",{...preview,whiteSpace:previewLines});
     await guest.setViewportSize({width:375,height:812});
     let fit=await modalFit(guest);ok("join screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
+    // 05.10 (zgloszenie z live): gracz 2 wpisuje nick przy dolaczaniu; profil odtworzenia ukryty (ustala go gracz 1)
+    const joinFields=await guest.evaluate(()=>({nick:getComputedStyle(document.getElementById("battleNickname")).display!=="none"&&!document.getElementById("battleServerFields").hidden,
+      profileHidden:getComputedStyle(document.getElementById("battleInputProfile").closest("label")).display==="none",label:document.getElementById("battleNicknameLabel").textContent}));
+    await guest.fill("#battleNickname","Arc Runner");
     await guest.click("#battlePrimary");
     await guest.waitForFunction(()=>battleState&&battleState.slot==="P2"&&battleState.serverBattle&&battleState.serverBattle.state==="JOINED");
+    const p2Nick=await guest.evaluate(()=>battleState.serverBattle.players.P2&&battleState.serverBattle.players.P2.nickname);
+    ok("player 2 can type a nickname on the join screen and the server stores it",joinFields.nick&&joinFields.profileHidden&&p2Nick==="Arc Runner",{joinFields,p2Nick});
     const afterJoin=await guest.evaluate(()=>({hash:location.hash,secret:location.hash.includes("."),taskSeed:battleState.task&&battleState.task.seed}));
     ok("join consumes invite and removes secret from URL",afterJoin.hash==="#bw="+created.id&&!afterJoin.secret,afterJoin);
 

@@ -237,6 +237,12 @@ async function modalFit(page) {
     const parity=await Promise.all([host,guest].map(page=>page.evaluate(()=>({live:lastReport.score,server:battleState.serverLastAttempt.score,
       replay:ArcSim.simulate(window.__round).score,bp:battleState.serverLastAttempt.battlePoints}))));
     ok("server attempt score matches screen and sim.js",parity.every(x=>x.live===x.server&&x.replay===x.server&&x.bp===x.server*10),parity);
+    // 05.10 (zgloszenie z live): przycisk „WYNIK SERWERA” w raporcie otwiera pokoj pojedynku, a nie blad „Link Battle jest uszkodzony”
+    { const btn=await host.evaluate(()=>{const b=document.getElementById("rBattleShare");return {shown:!b.hidden&&document.getElementById("repModal").classList.contains("open"),text:b.textContent};});
+      await host.evaluate(()=>{toast.textContent="";document.getElementById("rBattleShare").click();});await host.waitForTimeout(300);
+      const after=await host.evaluate(()=>({room:document.getElementById("battleModal").classList.contains("open"),rep:document.getElementById("repModal").classList.contains("open"),toast:toast.textContent,badLink:bt("badLink"),title:document.getElementById("battleTitle").textContent}));
+      ok("SERVER RESULT button opens the battle room instead of a broken-link error",btn.shown&&after.room&&!after.rep&&after.toast!==after.badLink,{btn,after});
+      await host.evaluate(()=>closeModal("battleModal"));await host.waitForTimeout(300); }
     await checkAttemptClosed(host,1);await checkAttemptClosed(guest,1);
     await Promise.all([finishBattle(host),finishBattle(guest)]);
     await Promise.all([host.waitForFunction(()=>battleState&&battleState.serverBattle&&battleState.serverBattle.verdict),

@@ -38,6 +38,8 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
   const openingAssetExternal=openingAssets.filter(item=>new URL(item.url).origin!==new URL(BASE).origin);
   ok("opening Battle loads only successful same-origin assets",openingAssets.length>0&&openingAssets.every(item=>item.status===200)&&openingAssetExternal.length===0,{count:openingAssets.length,external:openingAssetExternal,transferredImageBytes:openingAssetBytes,assets:openingAssets.map(({url,status,bytes})=>({path:new URL(url).pathname,status,bytes}))});
   ok("Battle logo has accessible name",await page.getByRole("img",{name:"BATTLE WELD"}).count()===1);
+  const battleTasks=await page.evaluate(()=>battleWpsTasks().map(item=>({label:battleTaskLabel(item.task),thick:item.task.thick})));
+  ok("every Battle task is a single pass (thick <= 3 mm, no root+cap)",battleTasks.length===3&&battleTasks.every(task=>task.thick<=3),battleTasks);
 
   async function render(name,locale){
     await page.evaluate(({name,locale,task})=>{

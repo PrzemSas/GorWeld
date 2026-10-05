@@ -2992,7 +2992,7 @@ function battleWpsTasks(){
   const defs=[
     {seed:1296914737,proc:"MMA",joint:"butt",pos:"PA",thick:3,bead:"steel"},
     {seed:1296914738,proc:"MMA",joint:"butt",pos:"PF",thick:3,bead:"steel"},
-    {seed:1296914739,proc:"MMA",joint:"butt",pos:"PA",thick:5,bead:"steel"}
+    {seed:1296914739,proc:"MMA",joint:"butt",pos:"PC",thick:3,bead:"steel"} // 05.10: bylo PA 5 mm = 2 warstwy (gran+lico) i mylilo; Battle = jedno przejscie
   ];
   return defs.map(d=>{
     const amps=ArcSim.recommendedAmps(d.proc,d.thick,d.pos);

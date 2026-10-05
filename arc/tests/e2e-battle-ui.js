@@ -170,8 +170,8 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     for(const [width,height] of [[1280,800],[1366,768],[1280,720],[1024,600],[375,812]])
       for(const locale of ["pl","ru"])await enterClipping(width,height,locale);
     // 05.10 (po przegladzie Codexa): READY i VERDICT tez bez przyciec na niskich ekranach komputera
-    async function screenClipping(name,width,height,locale){
-      await page.setViewportSize({width,height});await render(name,locale);
+    async function screenClipping(name,width,height,locale,renderName){
+      await page.setViewportSize({width,height});await render(renderName||name,locale);
       const data=await page.evaluate(()=>{
         const root=document.getElementById("battleModal"),shell=root.querySelector(".bw-shell");
         const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return !el.hidden&&s.display!=="none"&&s.visibility!=="hidden"&&Number(s.opacity||1)>.01&&r.width>0&&r.height>0;};
@@ -186,10 +186,18 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
         return {clipped,screen:root.dataset.screen};
       });
       ok(`${name.toUpperCase()} text and buttons are not clipped ${locale} ${width}x${height}`,data.clipped.length===0&&data.screen===name,data);
-      fs.mkdirSync(OUT,{recursive:true});await page.screenshot({path:path.join(OUT,`${name}-clip-${locale}-${width}x${height}.png`)});
+      fs.mkdirSync(OUT,{recursive:true});await page.screenshot({path:path.join(OUT,`${renderName||name}-clip-${locale}-${width}x${height}.png`)});
     }
     for(const name of ["ready","verdict"])for(const [width,height] of [[1280,800],[1366,768],[1280,720]])
       for(const locale of ["pl","ru"])await screenClipping(name,width,height,locale);
+    // 05.10: produkcyjny tekst zgody (serwer w Niemczech, retencja) — dluzszy, musi sie zmiescic bez przyciec
+    await page.evaluate(()=>{window.__bwForceProdCopy=true;});
+    for(const [width,height] of [[1280,800],[1366,768],[1280,720],[375,812]])for(const locale of ["pl","ru"]){
+      await screenClipping("setup",width,height,locale,"consent");
+      const copy=await page.evaluate(()=>document.getElementById("battleMessage").textContent);
+      ok(`production consent copy shown ${locale} ${width}x${height}`,/Hetzner/.test(copy)&&/30/.test(copy)&&/180/.test(copy)&&!/lokaln|local|локальн/i.test(copy.split(/ARC/)[0]),copy.slice(0,90));
+    }
+    await page.evaluate(()=>{window.__bwForceProdCopy=false;});
     for(const width of [360,390]){
       for(const locale of ["pl","ru"]){
         await page.setViewportSize({width,height:812});await render("verdict",locale);

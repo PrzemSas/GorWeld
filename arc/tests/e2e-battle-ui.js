@@ -211,6 +211,21 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       return {reduced:matchMedia("(prefers-reduced-motion: reduce)").matches,stageStable:JSON.stringify(stageBefore)===JSON.stringify(stageHud)&&JSON.stringify(stageBefore)===JSON.stringify(stageNoHud),mutedInitCalls:initCalls};
     });
     ok("HUD leaves ARC stage geometry unchanged",checks.stageStable,checks);
+    // 05.10 muzyka Battle (wariant A): petla tylko w lobby, cisza w odliczaniu/spawaniu, akcent werdyktu z perspektywy gracza, mute ARC
+    const music=await page.evaluate(async()=>{
+      const saved={soundOn,battleState},oldInit=initAudio;let initCalls=0;
+      soundOn=false;initAudio=()=>{initCalls++;};bwMusicSync("enter");const mutedPlaying=bwMusic.playing;initAudio=oldInit;
+      soundOn=true;bwMusic.log.length=0;bwMusic.cueKey="";
+      bwMusicSync("enter");const lobby=bwMusic.playing;bwMusicSync("ready");const keeps=bwMusic.playing&&bwMusic.log.filter(x=>x==="loop").length===1;
+      bwMusicSync("countdown");const countdownSilent=!bwMusic.playing;
+      battleState={serverMode:true,slot:"P2",battleId:"bw_music",cardView:{verdict:"P1_WINS",player1:{inspectionRejected:false},player2:{inspectionRejected:false}}};
+      bwMusicSync("verdict");const verdictCue=bwMusic.log[bwMusic.log.length-1];bwMusicSync("verdict");const once=bwMusic.log.filter(x=>x==="lose").length===1;
+      bwMusicSync("enter");document.getElementById("snd").click();const muteStops=!bwMusic.playing&&!soundOn;document.getElementById("snd").click();
+      bwMusicStop();soundOn=saved.soundOn;battleState=saved.battleState;
+      return {mutedPlaying,mutedInitCalls:initCalls,lobby,keeps,countdownSilent,verdictCue,once,muteStops};
+    });
+    ok("Battle music: lobby loop, silent countdown, P2 hears lose cue once, ARC mute stops it, muted = no audio init",
+      !music.mutedPlaying&&music.mutedInitCalls===0&&music.lobby&&music.keeps&&music.countdownSilent&&music.verdictCue==="lose"&&music.once&&music.muteStops,music);
     async function hudClearance(width,height){
       await page.setViewportSize({width,height});await render("live","en");
       return page.evaluate(()=>{

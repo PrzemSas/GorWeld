@@ -21,12 +21,14 @@ if (!BASE || !API) { console.error("użycie: node e2e-battle-server.js <arcURL> 
 const ok = (name, cond, info) => { results.push(!!cond); console.log((cond ? "  ✓ " : "  ✗ ") + name + (info !== undefined ? "  " + JSON.stringify(info) : "")); };
 const appUrl = api => BASE + "/index.html?battleApi=" + encodeURIComponent(api);
 
-async function open(browser, url, mobile = false) {
+async function open(browser, url, mobile = false, finePointer = false) {
   const context = await browser.newContext({ viewport: mobile ? { width: 375, height: 812 } : { width: 1280, height: 800 },
     isMobile: mobile, hasTouch: mobile });
   const page = await context.newPage(); page.errors = []; page.apiRequests = []; page.attemptRequests=[];page.requests=[];
   page.on("pageerror", error => page.errors.push(error.message));
   page.on("request", request => {page.requests.push(request.url());if (request.url().startsWith(API)) {page.apiRequests.push(request.url());if(request.url().endsWith("/attempts"))try{page.attemptRequests.push(request.postDataJSON());}catch(e){}} });
+  // finePointer: urzadzenie dotykowe Z mysza (tablet + mysz) — blokada profilu Pelnego go nie dotyczy
+  if (finePointer) await page.addInitScript(() => { const mm=window.matchMedia.bind(window); window.matchMedia=q=>q==="(pointer: fine)"?{matches:true,media:q,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}:mm(q); });
   await page.addInitScript(() => { try { localStorage.setItem("gorweld_tut", "1"); localStorage.setItem("gorweld_lang", "en"); } catch (e) {} window.confirm=()=>true; });
   await page.goto(url); await page.waitForTimeout(1100);
   await page.evaluate(() => { if (window.hideSplash) hideSplash(); if (window.openM && openM !== "battleModal") closeModal(openM); });
@@ -36,11 +38,11 @@ async function screenshot(page, name) {
   fs.mkdirSync(SCREEN_DIR, { recursive: true });
   await page.screenshot({ path: path.join(SCREEN_DIR, name + ".png"), fullPage: true });
 }
-async function createBattle(page, mode) {
+async function createBattle(page, mode, profile = "full") {
   await page.click("#battleLaunch");
   await page.locator("#battleTaskChoices button").nth(0).click();
   await page.locator("#battleNickname").fill("Night Shift");
-  await page.locator("#battleInputProfile").selectOption("full");
+  await page.locator("#battleInputProfile").selectOption(profile);
   if (mode === "link") await page.locator("#battleTaskChoices button").nth(1).click();
   await page.click("#battlePrimary");
   if (await page.locator("#battleTitle").textContent() !== "Battle data") {
@@ -52,12 +54,12 @@ async function createBattle(page, mode) {
   catch (error) { console.error("create debug:", await page.evaluate(() => ({title:document.getElementById("battleTitle").textContent,message:document.getElementById("battleMessage").textContent,state:battleState,requests:performance.getEntriesByType("resource").filter(x=>x.name.includes(":8899")).map(x=>x.name)}))); throw error; }
   return { id: await page.evaluate(() => battleState.battleId), invite: await page.evaluate(() => battleState.inviteUrl), beforeConsent };
 }
-async function joinBattle(browser, invite, mobile = false) {
-  const opened = await open(browser, invite, mobile); const page = opened.page;
+async function joinBattle(browser, invite, mobile = false, finePointer = false) {
+  const opened = await open(browser, invite, mobile, finePointer); const page = opened.page;
   await page.waitForFunction(() => document.getElementById("battleTitle").textContent === "Battle data");
   const requestsBeforeConsent = page.apiRequests.length;
   await page.click("#battlePrimary");
-  await page.waitForFunction(() => battleState && battleState.serverRole === "joinPreview");
+  await page.waitForFunction(() => battleState && (battleState.serverRole === "joinPreview" || battleState.reason === "MOUSE_REQUIRED"));
   return { ...opened, requestsBeforeConsent };
 }
 async function drawRound(page, strokes = 3) {
@@ -193,16 +195,22 @@ async function modalFit(page) {
       const c=JSON.parse(localStorage.getItem("gorweld_bw_"+id));return !!(c&&c.playerSecret&&c.slot==="P1"&&battleState.inviteUrl.includes("#bw="+id+"."));
     },created.id));
 
-    const guestOpen=await joinBattle(browser,created.invite,true);pages.push(guestOpen);const guest=guestOpen.page;
-    ok("guest consent precedes first server request",guestOpen.requestsBeforeConsent===0);
-    await screenshot(guest,"join-mobile-375");
-    await guest.setViewportSize({width:1280,height:800});await screenshot(guest,"join-desktop");
+    // 05.10 (zgloszenie z live): telefon w pojedynku z profilem Pelnym dostaje blokade dolaczenia zamiast cichego ostrzezenia —
+    // inaczej spawal, a serwer odrzucal kazda probe (INPUT_PROFILE_MISMATCH) i gracz mial 0 prob.
+    const phoneOpen=await joinBattle(browser,created.invite,true);pages.push(phoneOpen);const phone=phoneOpen.page;
+    ok("guest consent precedes first server request",phoneOpen.requestsBeforeConsent===0);
+    await screenshot(phone,"join-mobile-375");
+    const blocked=await phone.evaluate(()=>({message:document.getElementById("battleMessage").textContent,primaryHidden:document.getElementById("battlePrimary").hidden,
+      exit:!document.getElementById("battleSecondary").hidden,blocked:!!(battleState&&battleState.blocked&&battleState.reason==="MOUSE_REQUIRED"),joined:!!(battleState&&battleState.slot)}));
+    ok("phone cannot join a Full-profile battle and is told why (no wasted attempts)",blocked.blocked&&blocked.primaryHidden&&blocked.exit&&!blocked.joined&&blocked.message.includes("Touch profile"),blocked);
+    let fit=await modalFit(phone);ok("join screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
+    const guestOpen=await joinBattle(browser,created.invite,false);pages.push(guestOpen);const guest=guestOpen.page;
+    await screenshot(guest,"join-desktop");
+    ok("join screen is actually visible on a desktop guest (modal open AND displayed)",await guest.evaluate(()=>{const m=document.getElementById("battleModal");return m.classList.contains("open")&&getComputedStyle(m).display!=="none";}));
     const preview=await guest.evaluate(()=>({message:document.getElementById("battleMessage").textContent,tagHidden:document.getElementById("battleModeTag").hidden,tag:document.getElementById("battleModeTag").textContent}));
     const previewLines=await guest.evaluate(()=>getComputedStyle(document.getElementById("battleMessage")).whiteSpace);
-    ok("join preview shows task, replay profile, player 1, separate warning, and verification mode",preview.message.includes("Task:")&&preview.message.includes("full")&&preview.message.includes("Night Shift")&&preview.message.includes("\n")&&!preview.tagHidden&&preview.tag==="SERVER · VERIFIED"&&previewLines==="pre-line",{...preview,whiteSpace:previewLines});
-    await guest.setViewportSize({width:375,height:812});
-    let fit=await modalFit(guest);ok("join screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
-    // 05.10 (zgloszenie z live): gracz 2 wpisuje nick przy dolaczaniu; profil odtworzenia ukryty (ustala go gracz 1)
+    ok("join preview shows task, replay profile, player 1 and verification mode",preview.message.includes("Task:")&&preview.message.includes("full")&&preview.message.includes("Night Shift")&&!preview.tagHidden&&preview.tag==="SERVER · VERIFIED"&&previewLines==="pre-line",{...preview,previewLines});
+    // gracz 2 wpisuje nick przy dolaczaniu; profil odtworzenia ukryty (ustala go gracz 1)
     const joinFields=await guest.evaluate(()=>({nick:getComputedStyle(document.getElementById("battleNickname")).display!=="none"&&!document.getElementById("battleServerFields").hidden,
       profileHidden:getComputedStyle(document.getElementById("battleInputProfile").closest("label")).display==="none",label:document.getElementById("battleNicknameLabel").textContent}));
     await guest.fill("#battleNickname","Arc Runner");
@@ -218,6 +226,7 @@ async function modalFit(page) {
     await guest.check("#bwHelmetCheck");await guest.check("#bwGlovesCheck");await guest.click("#battlePrimary");
     await host.waitForFunction(()=>document.getElementById("battleMessage").textContent.includes("Starting in 3"),null,{timeout:7000});
     await guest.waitForFunction(()=>document.getElementById("battleMessage").textContent.includes("Starting in 3"),null,{timeout:7000});
+    await guest.setViewportSize({width:375,height:812});
     await screenshot(host,"countdown-desktop");await screenshot(guest,"countdown-mobile-375");
     fit=await modalFit(guest);ok("countdown screen fits 375 px",fit.cardInside&&fit.buttonsReachable,fit);
     await guest.setViewportSize({width:1280,height:800});
@@ -285,7 +294,7 @@ async function modalFit(page) {
     console.log("== link mode + authoritative score tamper");
     const linkHostOpen=await open(browser,appUrl(API));pages.push(linkHostOpen);const linkHost=linkHostOpen.page;
     const linkBattle=await createBattle(linkHost,"link");
-    const linkGuestOpen=await joinBattle(browser,linkBattle.invite,true);pages.push(linkGuestOpen);const linkGuest=linkGuestOpen.page;
+    const linkGuestOpen=await joinBattle(browser,linkBattle.invite,true,true);pages.push(linkGuestOpen);const linkGuest=linkGuestOpen.page;
     await linkGuest.evaluate(()=>document.getElementById("battlePrimary").click());
     await linkGuest.waitForFunction(()=>battleState&&battleState.slot==="P2"&&battleState.serverBattle&&battleState.serverBattle.state==="JOINED");
     await linkGuest.setViewportSize({width:1280,height:800});
@@ -315,6 +324,21 @@ async function modalFit(page) {
     const qualifiedVerdicts=await Promise.all([linkHost,linkGuest].map(page=>page.evaluate(()=>({code:battleState.serverBattle.verdict.code,
       summary:document.getElementById("battleModalSummary").textContent}))));
     ok("both verdict screens show the same qualified P1_WINS with server scores and nicknames",qualifiedVerdicts.every(v=>v.code==="P1_WINS"&&v.summary.includes("Night Shift")&&v.summary.includes(String(generated.winner.score))&&v.summary.includes(String(generated.guest.score))),qualifiedVerdicts);
+
+    console.log("== touch profile: computer (mouse) vs computer");
+    // 05.10 (zgloszenie z live: GorWeld na komputerze mial 0 prob w pojedynku z profilem Dotykowym) —
+    // mysz w pojedynku Dotykowym spawa jak palec, wiec serwer przyjmuje probe (rec.arc/ang = 0).
+    { const tHostOpen=await open(browser,appUrl(API));pages.push(tHostOpen);const tHost=tHostOpen.page;
+      const tBattle=await createBattle(tHost,"link","touch");
+      const tGuestOpen=await joinBattle(browser,tBattle.invite,false);pages.push(tGuestOpen);const tGuest=tGuestOpen.page;
+      await tGuest.evaluate(()=>document.getElementById("battlePrimary").click());
+      await tGuest.waitForFunction(()=>battleState&&battleState.slot==="P2"&&battleState.ready&&battleState.task,null,{timeout:15000});
+      await tGuest.waitForTimeout(200);await drawRound(tGuest);
+      await tGuest.evaluate(()=>{if(!battleState.roundInspected)inspect();});
+      await tGuest.waitForFunction(()=>battleState.serverLastAttempt,null,{timeout:15000}).catch(()=>{});
+      const sent=tGuest.attemptRequests.at(-1)&&tGuest.attemptRequests.at(-1).rec;
+      const res=await tGuest.evaluate(()=>({accepted:!!battleState.serverLastAttempt,profile:battleState.serverBattle.inputProfile,count:battleState.serverBattle.players.P2.attemptsCount}));
+      ok("Touch-profile battle: a mouse attempt from a computer is recorded as touch and accepted by the server",sent&&sent.arc!==1&&sent.ang!==1&&res.accepted&&res.profile==="touch",{arc:sent&&sent.arc,ang:sent&&sent.ang,...res}); }
 
     console.log("== unavailable server");
     const downOpen=await open(browser,appUrl("http://127.0.0.1:1"));pages.push(downOpen);const down=downOpen.page;

@@ -290,6 +290,14 @@ async function modalFit(page) {
     ok("LIVE strip is hidden at max-height 560 px",hudHidden.display==="none",hudHidden);
     await host.evaluate(()=>document.body.classList.remove("battle-active","bw-welding"));await host.setViewportSize({width:1280,height:800});
     ok("sync pages have no uncaught JS errors",host.errors.length===0&&guest.errors.length===0,{host:host.errors,guest:guest.errors});
+    // 06.10 (zgloszenie z live): po werdykcie zamkniecie okna wyniku (✕/Esc) wychodzi z Battle — metody odblokowane, bez #bw=
+    await host.evaluate(()=>{if(openM!=="battleModal")battleServerRenderVerdict();});
+    await host.waitForFunction(()=>openM==="battleModal");
+    await host.keyboard.press("Escape");
+    await host.waitForFunction(()=>battleState===null,null,{timeout:5000}).catch(()=>{});
+    const exited=await host.evaluate(()=>({state:battleState,hash:location.hash,locked:[...document.querySelectorAll(".proc,.thk,.pos")].some(b=>b.disabled),
+      badge:document.getElementById("battleBadge").hidden}));
+    ok("closing the verdict window leaves Battle: methods unlocked, no #bw= link, badge hidden",exited.state===null&&exited.hash===""&&!exited.locked&&exited.badge,exited);
 
     console.log("== link mode + authoritative score tamper");
     const linkHostOpen=await open(browser,appUrl(API));pages.push(linkHostOpen);const linkHost=linkHostOpen.page;

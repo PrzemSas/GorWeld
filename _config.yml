@@ -4,6 +4,9 @@
 # Uwaga: ustawienie tej listy nadpisuje domyślną listę Jekylla, więc jej
 # standardowe pozycje trzeba tu powtórzyć — inaczej zaczęłyby się publikować.
 
+include:
+  - .well-known
+
 exclude:
   # Battle Weld backend source is local-only and must never be published by Pages.
   - battle-server/

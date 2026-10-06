@@ -192,7 +192,7 @@ async function modalFit(page) {
     ok("Battle uses its isolated root and self-hosted fonts; controls stay in viewport",visualGuards.root==="battleModal"&&visualGuards.requiredFonts&&visualGuards.fontRequests.length>=3&&visualGuards.fontRequests.every(url=>url.startsWith("/fonts/"))&&visualGuards.buttonWidths.every(Boolean),visualGuards);
     ok("host consent precedes first server request",created.beforeConsent===0);
     ok("server battle saved credentials and invite link",await host.evaluate(id=>{
-      const c=JSON.parse(localStorage.getItem("gorweld_bw_"+id));return !!(c&&c.playerSecret&&c.slot==="P1"&&battleState.inviteUrl.includes("#bw="+id+"."));
+      const c=JSON.parse(sessionStorage.getItem("gorweld_bw_"+id));return !!(c&&c.playerSecret&&c.slot==="P1"&&battleState.inviteUrl.includes("#bw="+id+"."));
     },created.id));
 
     // 05.10 (zgloszenie z live): telefon w pojedynku z profilem Pelnym dostaje blokade dolaczenia zamiast cichego ostrzezenia —

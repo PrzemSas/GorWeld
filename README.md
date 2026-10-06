@@ -11,7 +11,7 @@ Polish SVM builder stack by [@PrzemSas](https://x.com/PrzemSas) — welder by tr
 | App | Path | Description |
 |-----|------|-------------|
 | **Main site** | `/` | Ecosystem hub — tokens, NFTs, dual-chain overview |
-| **Arc Welder** | `/arc` | Browser welding simulator (MIG/TIG/MMA), ISO 6947 positions, ISO 5817 inspection |
+| **Arc Welder** | `/arc` | Browser welding simulator (MIG/TIG/MMA), ISO 6947 positions, inspection modelled on ISO 5817 |
 | **ArcQuote** | `/arcquote` | Live welding job pricing calculator — scrapes 5 Polish suppliers weekly |
 | **Scrap Scavenger** | `/demo` | Playable web prototype — idle scrapyard tycoon |
 | **Burn Relics** | `/relics` | Genesis NFT collection gallery (10 pieces) |

@@ -90,7 +90,7 @@ test('Granice 45/49/50 pkt i pokrycia 80% — dokładnie ten werdykt, którego u
 test('Spawanie: wysoki wynik + poprawna inspekcja = raport zaliczenia i XP', () => {
   const g = fixture(); g.inspect();
   assert.equal(g.lastReport.score, 100); assert.equal(g.lastReport.passed, true);
-  assert.equal(g.node('rIso').textContent, 'ISO 5817 · ' + g.t('iso_B'));
+  assert.equal(g.node('rIso').textContent, '≈ ISO 5817 · ' + g.t('iso_B'));
   assert.match(g.node('rReward').innerHTML, /^100 pkt — ZALICZONE/);
   assert.equal(g.progress.done.c1, 100); assert.equal(g.progress.xp, 100); assert.equal(g.saved, 1);
   assert.equal(g.celebrations, 1);
@@ -118,7 +118,7 @@ for (const [lang, text] of [
   test(`Spawanie ${lang}: wysoki wynik + odrzut HI = przyczyna w raporcie, brak XP i celebracji`, () => {
     const g = fixture({ lang, hi: 2 }); g.inspect();
     assert.equal(g.lastReport.score, 100); assert.equal(g.lastReport.passed, false);
-    assert.equal(g.node('rIso').textContent, 'ISO 5817 · ' + g.t('iso_reject'));
+    assert.equal(g.node('rIso').textContent, '≈ ISO 5817 · ' + g.t('iso_reject'));
     assert.ok(g.node('rReward').innerHTML.startsWith(text));
     assert.equal(g.toasts[0], text);
     assert.equal(g.progress.xp, 0); assert.equal(Object.keys(g.progress.done).length, 0);
@@ -148,7 +148,7 @@ test('Kariera: poprawny lepszy wynik aktualizuje rekord bez dodatkowego XP', () 
 test('Pokrycie poniżej 80% blokuje kupon nawet przy wysokim wyniku i braku odrzutu ISO', () => {
   const g = fixture(); g.metrics.coverage = 0.79; g.inspect();
   assert.equal(g.lastReport.score, 90); assert.equal(g.lastReport.passed, false);
-  assert.equal(g.node('rIso').textContent, 'ISO 5817 · ' + g.t('iso_B'));
+  assert.equal(g.node('rIso').textContent, '≈ ISO 5817 · ' + g.t('iso_B'));
   assert.match(g.node('rReward').innerHTML, /^90 pkt — NIEZALICZONE: pokrycie poniżej 80%/);
   assert.equal(g.progress.xp, 0); assert.equal(g.saved, 0); assert.equal(g.celebrations, 0);
 });
@@ -164,7 +164,7 @@ test('Niski wynik bez major: odrzut ISO i brak zaliczenia kariery', () => {
   const g = fixture();
   Object.assign(g.metrics, { coverage: 0.8, spdAcc: 0, evenness: 0.5, porosity: 3 }); g.inspect();
   assert.equal(g.lastReport.score, 48); assert.equal(g.lastReport.passed, false);
-  assert.equal(g.node('rIso').textContent, 'ISO 5817 · ' + g.t('iso_reject'));
+  assert.equal(g.node('rIso').textContent, '≈ ISO 5817 · ' + g.t('iso_reject'));
   assert.match(g.node('rReward').innerHTML, /^48 pkt — NIEZALICZONE: wynik poniżej 50 pkt/);
   assert.equal(g.progress.xp, 0); assert.equal(g.saved, 0);
 });
@@ -173,11 +173,11 @@ for (const proc of ['CUT', 'PLASMA']) {
   test(`${proc}: wspólny werdykt ISO 9013 akceptuje poprawny wynik i odrzuca wadę major`, () => {
     const g = fixture({ coupon: null }); g.proc = proc; g.cutInspect();
     assert.equal(g.lastReport.score, 100); assert.equal(g.lastReport.passed, true);
-    assert.equal(g.node('rIso').textContent, 'ISO 9013 · ' + g.t('iso_B'));
+    assert.equal(g.node('rIso').textContent, '≈ ISO 9013 · ' + g.t('iso_B'));
     assert.match(g.node('rReward').innerHTML, /^100 pkt — ZALICZONE/);
     g.cutDevSum = 1.54; g.cutInspect();
     assert.equal(g.lastReport.score, 86); assert.equal(g.lastReport.passed, false);
-    assert.equal(g.node('rIso').textContent, 'ISO 9013 · ' + g.t('iso_reject'));
+    assert.equal(g.node('rIso').textContent, '≈ ISO 9013 · ' + g.t('iso_reject'));
     assert.ok(g.node('rReward').innerHTML.startsWith('86 pkt — NIEZALICZONE: ' + g.t('cd_dev')));
     assert.equal(g.progress.xp, 0);
   });
@@ -186,7 +186,7 @@ for (const proc of ['CUT', 'PLASMA']) {
 test('Konkurs: odrzut inspekcji nie zmienia punktowego warunku sukcesu ani celebracji', () => {
   const g = fixture({ challenge: true, hi: 2, coupon: null }); g.inspect();
   assert.equal(g.lastReport.score, 100);
-  assert.equal(g.node('rIso').textContent, 'ISO 5817 · ' + g.t('iso_reject'));
+  assert.equal(g.node('rIso').textContent, '≈ ISO 5817 · ' + g.t('iso_reject'));
   assert.ok(g.node('rReward').innerHTML.startsWith('🏁 ' + g.t('chal_pass')));
   assert.equal(g.lastReport.passed, true); assert.equal(g.celebrations, 1);
   assert.equal(g.progress.xp, 0);

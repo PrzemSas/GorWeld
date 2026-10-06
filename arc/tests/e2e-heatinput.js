@@ -56,7 +56,7 @@ if (!BASE) { console.error("użycie: node e2e-heatinput.js <baseURL> [wolno|wps]
     return { cvnWNagraniu: rec.cvn, ekranPkt: parseInt(document.getElementById("rPct")?.textContent || "", 10),
              // Litera na ekranie jest PRZETŁUMACZONA (`iso_reject`, `iso_B`…) — porównujemy przez ten
              // sam słownik, którego używa gra, a nie przez surowy tekst.
-             ekranIso: (document.getElementById("rIso")?.textContent || "").replace("ISO 5817 · ", "").trim(),
+             ekranIso: (document.getElementById("rIso")?.textContent || "").replace("≈ ISO 5817 · ", "").trim(),
              isoOczek: (l => t(l === "REJECT" ? "iso_reject" : "iso_" + l))(window.ArcSim.simulate(JSON.parse(JSON.stringify(rec))).iso),
              ekranHi: (document.getElementById("rHi")?.textContent || "").trim(),
              wady: [...document.querySelectorAll("#rDefects li")].map(li => li.textContent.slice(0, 70)),

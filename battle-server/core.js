@@ -7,6 +7,7 @@ const DEFAULT_SYNC_WINDOW_MS = 15 * 60 * 1000;
 const STATUS_RATE_LIMIT_MS = 500;
 const MAX_ATTEMPTS_PER_PLAYER = 20;
 const MAX_EVENTS_PER_ATTEMPT = 60_000;
+const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "score"]);
 const REC_FIELDS = new Set([
   "seed", "W", "H", "proc", "joint", "pos", "thick", "bead", "amps",
   "arc", "ang", "tig", "cvn", "rw", "events", "liveScore"
@@ -179,6 +180,12 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     };
   }
 
+  // Przyczyny odrzutu z sim.js — tylko znane kody, bez duplikatów; stare próby (sprzed pola) dają [].
+  function sanitizeRejectReasons(value) {
+    if (!Array.isArray(value)) return [];
+    return [...new Set(value.filter(code => REJECT_REASON_CODES.has(code)))];
+  }
+
   function publicAttempt(attempt) {
     if (!attempt) return null;
     return {
@@ -189,6 +196,7 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
       qualified: attempt.qualified,
       taskCompleted: attempt.taskCompleted,
       inspectionRejected: attempt.inspectionRejected,
+      rejectReasons: sanitizeRejectReasons(attempt.rejectReasons),
       serverTime: attempt.serverTime
     };
   }
@@ -615,6 +623,7 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
       const score = sim.score;
       const bp = battleRules.getBattlePoints(score);
       const inspectionRejected = sim.iso === "REJECT";
+      const rejectReasons = inspectionRejected ? sanitizeRejectReasons(sim.rejectReasons) : [];
       const taskCompleted = sim.coverage >= record.task.requiredCoverage;
       const qualified = taskCompleted && !inspectionRejected;
       const acceptedAtMs = nowMs();
@@ -631,6 +640,7 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
         qualified,
         taskCompleted,
         inspectionRejected,
+        rejectReasons,
         serverTime: isoTime(acceptedAtMs),
         serverTimeMs: acceptedAtMs,
         engineVersion: replayEngineVersion,
@@ -685,6 +695,7 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
       score: attempt.score,
       grade: attempt.letter,
       inspectionRejected: attempt.inspectionRejected,
+      rejectReasons: sanitizeRejectReasons(attempt.rejectReasons),
       taskCompleted: attempt.taskCompleted,
       challengePassed: false,
       coverage: attempt.coverage,

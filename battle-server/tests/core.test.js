@@ -532,8 +532,9 @@ test("sync attempt replays server-side and public GET exposes only the best resu
   assert.equal(result.attempt.qualified, result.attempt.taskCompleted && !result.attempt.inspectionRejected);
   assert.equal(result.attempt.attemptNumber, 1);
   assert.deepEqual(Object.keys(result.attempt).sort(), [
-    "attemptNumber", "bp", "inspectionRejected", "letter", "qualified", "score", "serverTime", "taskCompleted"
+    "attemptNumber", "bp", "inspectionRejected", "letter", "qualified", "rejectReasons", "score", "serverTime", "taskCompleted"
   ]);
+  assert.deepEqual(result.attempt.rejectReasons, expected.iso === "REJECT" ? expected.rejectReasons : []);
   assert.equal(result.attempt.serverTime,
     new Date(Date.UTC(2026, 9, 3, 12, 0, 0) + 5000 + roundSpan(rec) + 1).toISOString());
   assert.deepEqual(result.best, result.attempt);
@@ -1208,4 +1209,25 @@ test("HTTP SSE snapshots first, streams sync state, enforces limits, closes clea
     }
     await closeHttpServer(server);
   }
+});
+
+test("rejected attempt carries known reject reasons from the replay; unknown codes are dropped", async () => {
+  const h = harness();
+  const opened = await openBattle(h.core, "sync");
+  const rec = roundFor(opened.battle.task, "full", { vFac: 3 });
+  const expected = ArcSim.simulate(structuredClone(rec));
+  assert.equal(expected.iso, "REJECT", "fixture must be a rejected round");
+  assert.ok(expected.rejectReasons.length > 0);
+  const result = await submitAtWindow(h, opened, opened.created, rec, { clientScore: expected.score });
+  assert.equal(result.attempt.inspectionRejected, true);
+  assert.deepEqual(result.attempt.rejectReasons, expected.rejectReasons);
+  const publicView = await h.core.getBattle(opened.created.battleId);
+  assert.deepEqual(publicView.players.P1.best.rejectReasons, expected.rejectReasons);
+
+  const fakeSim = { ...ArcSim, simulate: input => ({ ...ArcSim.simulate(input), iso: "REJECT",
+    rejectReasons: ["coverage", "<img src=x>", "coverage", 7] }) };
+  const h2 = harness(createMemoryStore(), fakeSim);
+  const opened2 = await openBattle(h2.core, "sync");
+  const result2 = await submitAtWindow(h2, opened2, opened2.created, roundFor(opened2.battle.task));
+  assert.deepEqual(result2.attempt.rejectReasons, ["coverage"]);
 });

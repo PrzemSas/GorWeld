@@ -14,6 +14,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
     node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
+    node reject-reasons.js # przyczyny odrzutu: REJECT ma co najmniej jedną znaną przyczynę, zaliczenie pustą listę
     node e2e-battle.js http://127.0.0.1:8898 # pełny Battle host → link → gość → VS; wymaga Playwright/Chromium i serwera HTTP
 
 Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab

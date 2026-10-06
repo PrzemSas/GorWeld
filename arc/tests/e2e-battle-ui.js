@@ -226,6 +226,12 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       buildBattleCard();try{await window.__bwBattleCardReady;}catch(e){}
       const rendered=document.getElementById("battleShareCanvas").dataset.rendered;closeModal("cardModal");battleState=saved;await new Promise(r=>setTimeout(r,320));return rendered;});
     ok("result card with only one player renders to the end (no-result side + verdict)",soloCard==="1",soloCard);
+    // 06.10 (test z live: B 87 i REJECT bez wyjasnienia): karta pokazuje glowna przyczyne odrzutu z serwera
+    const why=await page.evaluate(()=>({withReason:battleStatus({inspectionRejected:true,taskCompleted:true,rejectReasons:["ends","arc"]}),
+      noReason:battleStatus({inspectionRejected:true,taskCompleted:true}),unknown:battleStatus({inspectionRejected:true,taskCompleted:true,rejectReasons:["<b>x</b>"]}),
+      accepted:battleStatus({inspectionRejected:false,taskCompleted:true,rejectReasons:["ends"]}),expected:bt("reject")+" · "+bt("rejectWhy").ends}));
+    ok("REJECT shows the main reject reason; old results and unknown codes fall back to plain REJECT",
+      why.withReason===why.expected&&why.noReason==="REJECT"&&why.unknown==="REJECT"&&!why.accepted.includes("·"),why);
     // 05.10 muzyka Battle (wariant A): petla tylko w lobby, cisza w odliczaniu/spawaniu, akcent werdyktu z perspektywy gracza, mute ARC
     const music=await page.evaluate(async()=>{
       const saved={soundOn,battleState},oldInit=initAudio;let initCalls=0;

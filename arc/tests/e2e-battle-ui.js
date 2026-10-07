@@ -311,8 +311,8 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     }));
     await page.evaluate(()=>{lang="en";applyI18N();battleState.serverBattle.engineVersion="0.0.0";battleState.serverBattle.scoringVersion="old-score";battleState.serverBattle.taskHash="f".repeat(64);battleState.taskHash="e".repeat(64);battleUiRefresh(bt("ready"),"",bt("readyText"));});
     const mismatchStamps=await page.evaluate(()=>[...document.querySelectorAll("#bwCheckStamps [data-check]")].map(el=>({text:el.textContent,bad:el.classList.contains("bad")})));
-    const engineNow=await page.evaluate(()=>ArcSim.VERSION);
-    ok("system stamps group labels and show both mismatched values in red",mismatchStamps[0].text==="HASH ✕ ffffffff ≠ eeeeeeee"&&mismatchStamps[0].bad&&mismatchStamps[1].text.includes("ENGINE ✕ 0.0.0 ≠ "+engineNow)&&mismatchStamps[1].bad&&mismatchStamps[2].text.includes("SCORING ✕ old-score ≠ 1.0.0")&&mismatchStamps[2].bad,mismatchStamps);
+    const engineNow=await page.evaluate(()=>ArcSim.VERSION), scoringNow=await page.evaluate(()=>ArcSim.SCORING_VERSION);
+    ok("system stamps group labels and show both mismatched values in red",mismatchStamps[0].text==="HASH ✕ ffffffff ≠ eeeeeeee"&&mismatchStamps[0].bad&&mismatchStamps[1].text.includes("ENGINE ✕ 0.0.0 ≠ "+engineNow)&&mismatchStamps[1].bad&&mismatchStamps[2].text.includes("SCORING ✕ old-score ≠ "+scoringNow)&&mismatchStamps[2].bad,mismatchStamps);
     const fontRequests=requests.filter(url=>url.includes("/fonts/")).map(url=>new URL(url).pathname);
     const polishFonts=await page.evaluate(async()=>{
       const [display,mono]=await Promise.all([document.fonts.load("800 20px BWDisplay","ŻŹŁÓĆ"),document.fonts.load("500 12px BWMono","ŻŹŁÓĆ")]);

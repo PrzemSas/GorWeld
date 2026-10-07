@@ -44,7 +44,7 @@ function fixture(options = {}) {
     angTime: 0, angPenAcc: 0, angWSum: 0, angTSum: 0, arcPorAcc: 0, angPorAcc: 0,
     filCount: 0, filPenAcc: 0, FIL_PEN_CAP: 20, FIL_MAJOR: 17, OFF_MAJOR: 15,
     SPATTER_PEN_CAP: 20, ampF: { pen: 0, sev: null }, rec: null,
-    WELD_EFF: { MMA: 0.8 }, PX_PER_MM: 16, HI_MAX_R: 1.25, CVN_BEADS: { steel: 1 },
+    WELD_EFF: { MMA: 0.8 }, PX_PER_MM: 16, HI_MAX_R: 1.25, FAST_TOL: 0.5, CVN_BEADS: { steel: 1 },
     hi: options.hi ?? 0.5, arcVSum: 0, proc: 'MMA', posKey: 'PA', thick: 5, bead: 'steel',
     MATERIAL: { steel: { tol: 1, name: { pl: 'Stal', en: 'Steel', ru: 'Сталь' } } },
     POSITIONS: { PA: { lbl: 'PA' } }, grooveHalf: 5, bevelW: 5,
@@ -125,6 +125,15 @@ for (const [lang, text] of [
     assert.equal(g.saved, 0); assert.equal(g.celebrations, 0);
   });
 }
+
+test('Za szybki przejazd (3.6.0) blokuje zaliczenie z przyczyną „niewypełniony rowek”, próg 1,5× zostaje zaliczony', () => {
+  const g = fixture(); g.metrics.avgV = 68.8 * 2; g.inspect();
+  assert.equal(g.lastReport.passed, false);
+  assert.ok(g.node('rReward').innerHTML.includes(g.fmt('def_fast', ['8.6', '4.3'])));
+  assert.equal(g.progress.xp, 0); assert.equal(g.celebrations, 0);
+  const edge = fixture(); edge.metrics.avgV = 68.8 * 1.5; edge.inspect();
+  assert.equal(edge.lastReport.passed, true);
+});
 
 test('Inna wada major również blokuje zaliczenie i podaje swoją przyczynę', () => {
   const g = fixture(); g.metrics.endGap = 2; g.inspect();

@@ -103,6 +103,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
   rec.ang = full ? 1 : 0;
   rec.tig = full && task.proc === "TIG" ? 1 : 0;
   rec.cvn = task.bead === "steel" ? 1 : 0;
+  rec.uf = 1;
   rec.rw = options.rw === undefined ? 1280 : options.rw;
   return rec;
 }
@@ -710,6 +711,11 @@ test("rejects every task-stamped rec field when tampered", async () => {
   const wrongCvn = structuredClone(base);
   wrongCvn.cvn = 0;
   await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: wrongCvn }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  for (const uf of [undefined, 0]) {   // 3.6.0: bez `uf` silnik pomija próg za szybkiego przejazdu
+    const noUf = structuredClone(base);
+    if (uf === undefined) delete noUf.uf; else noUf.uf = uf;
+    await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noUf }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  }
   assert.equal((await h.core.getBattle(opened.created.battleId)).players.P1.attemptsCount, 0);
 });
 

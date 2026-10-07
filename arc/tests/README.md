@@ -13,6 +13,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node offaxis.js    # tor: odchyłka od grani karana zboczem, nie schodkiem; stałe zgodne w obu plikach
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
+    node fast.js       # za szybki przejazd (3.6.0): >1,5× tempa WPS = REJECT „underfill"; w tempie bit-w-bit jak 3.5.0
     node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
     node reject-reasons.js # przyczyny odrzutu: REJECT ma co najmniej jedną znaną przyczynę, zaliczenie pustą listę
     node e2e-battle.js http://127.0.0.1:8898 # pełny Battle host → link → gość → VS; wymaga Playwright/Chromium i serwera HTTP
@@ -29,7 +30,7 @@ bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i —
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
 i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
 
-`sim-3.3.0.js` to zamrożony silnik sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
+`sim-3.5.0.js` to zamrożony silnik sprzed progu za szybkiego przejazdu (punkt odniesienia dla `fast.js`); `sim-3.3.0.js` — sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
 `sim-3.1.0.js` (sprzed kary za odchyłkę toru), `sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js`
 (sprzed kąta) leżą obok jako starsze punkty.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.

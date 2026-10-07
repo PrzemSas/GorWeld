@@ -7,7 +7,7 @@
 // znaną przyczynę, przy zaliczeniu pustą listę. Pole jest tylko opisem: wynik się nie zmienia.
 const SIM=require("../sim.js");
 const {build}=require("./gen.js");
-const KNOWN=new Set(["coverage","root","ends","heatInput","overflow","porosity","offAxis","amps","arc","angle","filler","score"]);
+const KNOWN=new Set(["coverage","root","ends","heatInput","underfill","overflow","porosity","offAxis","amps","arc","angle","filler","score"]);
 const t=[]; const ok=(n,c,extra)=>{t.push(!!c);console.log((c?"  ✓ ":"  ✗ ")+n+(extra?"  "+extra:""));};
 const clone=r=>JSON.parse(JSON.stringify(r));
 const cut=(r,f)=>{const ev=r.events,k=Math.max(3,Math.floor(ev.length*f));const last=ev[k-1];r.events=ev.slice(0,k).concat([{type:"up",t:last.t+20,x:last.x,y:last.y}]);return r;};

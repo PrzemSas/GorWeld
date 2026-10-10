@@ -45,8 +45,8 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
     await page.evaluate(({name,locale,task})=>{
       if(openM)closeModal(openM);battleReset();
       lang=locale;applyI18N();soundOn=false;
-      const p1={nickname:"Night Shift",score:94,grade:"A",inspectionRejected:false,taskCompleted:true,qualified:true,bp:940,battlePoints:940,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-03T12:00:00.000Z"};
-      const p2={nickname:"Arc Runner",score:88,grade:"B",inspectionRejected:false,taskCompleted:true,qualified:true,bp:880,battlePoints:880,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-03T12:00:01.000Z"};
+      const p1={nickname:"Night Shift",score:94,grade:"A",letter:"A",inspectionRejected:false,taskCompleted:true,qualified:true,bp:940,battlePoints:940,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-03T12:00:00.000Z"};
+      const p2={nickname:"Arc Runner",score:88,grade:"B",letter:"B",inspectionRejected:false,taskCompleted:true,qualified:true,bp:880,battlePoints:880,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-03T12:00:01.000Z"};
       const battle={battleId:"bw_phase6_visual01",mode:"sync",state:"JOINED",task,taskHash:"f".repeat(64),engineVersion:ArcSim.VERSION,
         scoringVersion:ArcSim.SCORING_VERSION,serverTime:"2026-10-03T12:00:02.000Z",startAt:new Date(Date.now()+2600).toISOString(),
         players:{P1:{nickname:"Night Shift",ready:false,attemptsCount:1,best:p1,status:"idle",finished:false},
@@ -114,7 +114,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       const copy=await page.evaluate(()=>({title:document.getElementById("battleMessage").textContent,summary:document.getElementById("battleModalSummary").textContent,
         scoreboard:document.getElementById("bwScoreboard").textContent}));
       const unit=locale==="pl"?"pkt":locale==="ru"?"очк.":"pts";
-      ok(`verdict uses nickname, point units and attempt counts ${locale} ${width}px`,copy.title.includes("Night Shift")&&copy.summary.includes("94 "+unit)&&!copy.summary.includes("94%")&&copy.scoreboard==="P1 1 · P2 1",copy);
+      ok(`verdict uses nickname, point units and attempt counts ${locale} ${width}px`,copy.summary.includes("Night Shift")&&copy.summary.includes("94 "+unit)&&!copy.summary.includes("94%")&&copy.scoreboard==="P1 1 · P2 1",copy);
     }
     if(name==="incomparable"){
       const velda=await page.evaluate(()=>({text:document.getElementById("bwCeremonyLine").textContent,hidden:document.getElementById("bwCeremonyLine").hidden,portraitHidden:document.getElementById("bwVeldaPortrait").hidden}));
@@ -224,6 +224,7 @@ function fixtureAttempt(nickname,score,bp,at){return {nickname,score,grade:score
       const saved=battleState;battleState={...saved,serverMode:true,slot:"P1",battleId:"bw_solo",serverBattle:{...(saved&&saved.serverBattle||{}),battleId:"bw_solo",players:{P1:{nickname:"GorWeld"},P2:{nickname:""}}},
         cardView:{kind:"server",verdict:"NO_QUALIFIED_RESULT",player1:{nickname:"GorWeld",score:24,grade:"F",inspectionRejected:true,taskCompleted:true,qualified:false,battlePoints:240,attemptNumber:1,attemptsStarted:1,serverTime:"2026-10-05T18:39:09.000Z"},player2:null}};
       buildBattleCard();try{await window.__bwBattleCardReady;}catch(e){}
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); // 10.10: closeModal przed klatka z klasa "open" zostawial karte na ekranie (wyscig w tescie HUD)
       const rendered=document.getElementById("battleShareCanvas").dataset.rendered;closeModal("cardModal");battleState=saved;await new Promise(r=>setTimeout(r,320));return rendered;});
     ok("result card with only one player renders to the end (no-result side + verdict)",soloCard==="1",soloCard);
     // 06.10 (test z live: B 87 i REJECT bez wyjasnienia): karta pokazuje glowna przyczyne odrzutu z serwera

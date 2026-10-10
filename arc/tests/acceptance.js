@@ -29,7 +29,7 @@ function fixture(options = {}) {
   const nodes = new Map();
   function element() {
     return { textContent: '', innerHTML: '', style: {}, offsetWidth: 10,
-      classList: { add() {}, remove() {} }, appendChild() {} };
+      classList: { add() {}, remove() {}, toggle() {} }, appendChild() {} };
   }
   const ctx = {
     lang: options.lang || 'pl', challenge: !!options.challenge, battleState: null,

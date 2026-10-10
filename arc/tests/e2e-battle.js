@@ -91,7 +91,7 @@ const local = url => url.replace(/^https?:\/\/[^/]+/, BASE);
       buttonsInside:buttons.length===5&&buttons.every(Boolean),ru,en };
   });
   ok("karta Battle: przyciski mieszczą się przy 375 px, etykiety linków zmieniają język",
-    cardFit.closeInside&&cardFit.buttonsInside&&cardFit.ru[0]==="КОПИРОВАТЬ ССЫЛКУ"&&cardFit.ru[1]==="ПОДЕЛИТЬСЯ ССЫЛКОЙ"&&cardFit.en[0]==="COPY BATTLE LINK"&&cardFit.en[1]==="SHARE LINK",cardFit);
+    cardFit.closeInside&&cardFit.buttonsInside&&cardFit.ru[0]==="КОПИРОВАТЬ ССЫЛКУ"&&cardFit.ru[1]==="ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ"&&cardFit.en[0]==="COPY BATTLE LINK"&&cardFit.en[1]==="SHARE RESULT",cardFit);
   await host.click("#cardClose"); await host.setViewportSize({ width: 1100, height: 760 });
   const exitGuest = await open(b, inviteUrl);
   const exitLabel = await exitGuest.evaluate(() => BATTLE_TEXT[lang].exitBattle);

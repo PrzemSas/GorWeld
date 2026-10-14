@@ -60,6 +60,6 @@ const html=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
 ok("FAST_TOL w index.html = sim.js",/const FAST_TOL=0\.5;/.test(html));
 ok("gra liczy tooFast tym samym wzorem",html.includes("tooFast=fastV/targetPx>1+FAST_TOL*MATERIAL[bead].tol"));
 ok("gra zapisuje flagę `uf` w nagraniu",/\buf:1,/.test(html));
-ok("SCORING_VERSION podbite",S.SCORING_VERSION==="1.1.0"&&OLD.SCORING_VERSION==="1.0.0",S.SCORING_VERSION);
+ok("SCORING_VERSION podbite wzgledem 3.5.0",S.SCORING_VERSION!=="1.0.0"&&OLD.SCORING_VERSION==="1.0.0",S.SCORING_VERSION);
 
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

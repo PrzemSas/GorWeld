@@ -96,7 +96,8 @@ function roundFor(task, inputProfile = "full", options = {}) {
     pos: task.pos, thick: task.thick, bead: task.bead, amps: task.amps,
     arc: full, ang: full, vFac: options.vFac === undefined ? 1 : options.vFac,
     dtMs: options.dtMs === undefined ? 8 : options.dtMs,
-    passes: options.passes
+    passes: options.passes,
+    kb: options.passes === undefined   // 3.7.0: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
   });
   rec.amps = task.amps;
   rec.arc = full ? 1 : 0;
@@ -104,6 +105,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
   rec.tig = full && task.proc === "TIG" ? 1 : 0;
   rec.cvn = task.bead === "steel" ? 1 : 0;
   rec.uf = 1;
+  rec.kb = 1;
   rec.rw = options.rw === undefined ? 1280 : options.rw;
   return rec;
 }
@@ -715,6 +717,11 @@ test("rejects every task-stamped rec field when tampered", async () => {
     const noUf = structuredClone(base);
     if (uf === undefined) delete noUf.uf; else noUf.uf = uf;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noUf }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  }
+  for (const kb of [undefined, 0]) {   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
+    const noKb = structuredClone(base);
+    if (kb === undefined) delete noKb.kb; else noKb.kb = kb;
+    await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noKb }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   }
   assert.equal((await h.core.getBattle(opened.created.battleId)).players.P1.attemptsCount, 0);
 });

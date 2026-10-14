@@ -33,15 +33,23 @@ function seam(posKey){
 const q=v=>Math.round(v*100)/100;
 
 // vFac = krotność tempa docelowego; arc = emuluj przyciski; keyPlan(tSec) -> maska klawiszy
+// kb (3.7.0): ściegi wg weldPlan z sim.js, każdy po SWOIM torze (laneFac=1) albo wszystkie bliżej osi
+// (laneFac<1 — test: lico nie przykrywa fazy / ściegi się nie zlewają); chip=false pomija młotek w MMA.
+const PASS_W={root:0.72,fill:0.92,cap:1.00};
+function lanePath(pts,off){ if(!off) return pts; return pts.map((p,i)=>{ const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];
+  const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1; return {x:p.x-dy/l*off,y:p.y+dx/l*off}; }); }
 function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
-                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null}={}){
-  const pts=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
+                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true}={}){
+  const base=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
   const L0=ELEC_DIA[thick]||2.5;
-  const nPass = passes!=null?passes:(thick<=3?1:thick<=5?2:3);
-  const ev=[]; let t=0, elec=1;   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
+  const plan=kb?require("../sim.js").weldPlan(joint,thick,pos,proc):null, gh=3+thick*0.7;
+  const nPass = kb?plan.length:passes!=null?passes:(thick<=3?1:thick<=5?2:3);
+  const ev=[]; let t=0, elec=1, guard=1e9, rtick=0;   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
   for(let pi=0;pi<nPass;pi++){
     if(pi) ev.push({type:"bank",t:Math.round(t),x:0,y:0});
-    let arcLen=0, i=0, acc=0;
+    if(pi&&kb&&chip&&proc==="MMA"){ t+=400; ev.push({type:"chip",t:Math.round(t),x:0,y:0}); }
+    let pts=base; if(kb){ const b=plan[pi], Wl=gh*1.25*PASS_W[b.k]; pts=lanePath(base,b.lane*(Wl-Wl*b.wm)*laneFac); }
+    let arcLen=0, i=0, acc=0; const tBead=t;
     const push=(type,p,b,k)=>{const e={type,t:Math.round(t),x:q(p.x),y:q(p.y)};
       if(b!==undefined)e.b=b|0; if(k!==undefined)e.k=k|0; ev.push(e);};
     push("down",pts[0],arc?0:undefined);
@@ -56,9 +64,16 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
       // Próg 0,13 jest NIŻSZY od silnikowego ELEC_STUB=0,16 CELOWO: świeżą elektrodę silnik podaje
       // wyłącznie na `down` i wyłącznie gdy sam już zdążył ustawić `replacing`. Generator musi więc
       // spóźnić się za nim, a nie go wyprzedzić — inaczej `down` nic nie resetuje i ścieg umiera.
-      if(proc==="MMA"){
+      if(proc==="MMA"&&!kb){
         elec-=v*dtS/(arc?1000:650); if(arc) elec-=dtS/55;
         if(elec<=0.13){ push("up",cur); t+=20; push("down",cur,arc?0:undefined); arcLen=0; elec=1; } }
+      // kb: przy 4–13 ściegach szacunek zużycia rozjeżdża się z silnikiem i wymiana „za wcześnie" zabija
+      // resztę ściegu (silnik daje nową elektrodę tylko na `down` PO swoim `replacing`). Dlatego koło końca
+      // elektrody (i chwilę po wymianie) zajarzamy co 12 px — silnik przyjmie wymianę dokładnie wtedy, gdy trzeba.
+      if(proc==="MMA"&&kb){
+        elec-=v*dtS/(arc?1000:650); if(arc) elec-=dtS/55; guard+=v*dtS;
+        if(elec<=0.13){ elec=1; guard=0; }
+        if(elec<=0.28||guard<90){ rtick+=v*dtS; if(rtick>=12){ rtick=0; push("up",cur); t+=20; push("down",cur,arc?0:undefined); arcLen=0; } } }
       const k=ang?(keyPlan?keyPlan(t/1000):0):undefined;
       acc+=v*dtS;
       while(i<pts.length-1&&acc>=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y)){
@@ -67,13 +82,13 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
       const seg=Math.hypot(c.x-a.x,c.y-a.y)||1,f=Math.min(1,acc/seg);
       cur={x:a.x+(c.x-a.x)*f,y:a.y+(c.y-a.y)*f};
       push("move",cur,arc?b:undefined,k);
-      if(t>60000) break;
+      if(kb?t-tBead>120000:t>60000) break;   // kb: limit na ścieg (12 mm: 6–13 ściegów, ścieg TIG na rurze ~76 s)
     }
     t+=20; push("up",pts[pts.length-1]);
     t+=250;
   }
   const r={seed,W,H,proc,joint,pos,thick,bead,amps,events:ev};
-  if(arc) r.arc=1; if(ang) r.ang=1;
+  if(arc) r.arc=1; if(ang) r.ang=1; if(kb) r.kb=1;
   return r;
 }
 module.exports={build,POSITIONS,SPEED};

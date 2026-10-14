@@ -7,13 +7,13 @@ const DEFAULT_SYNC_WINDOW_MS = 15 * 60 * 1000;
 const STATUS_RATE_LIMIT_MS = 500;
 const MAX_ATTEMPTS_PER_PLAYER = 20;
 const MAX_EVENTS_PER_ATTEMPT = 60_000;
-const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "underfill", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "score"]);
+const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "underfill", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "edges", "interbead", "slag", "score"]);
 const REC_FIELDS = new Set([
   "seed", "W", "H", "proc", "joint", "pos", "thick", "bead", "amps",
-  "arc", "ang", "tig", "cvn", "uf", "rw", "events", "liveScore"
+  "arc", "ang", "tig", "cvn", "uf", "kb", "rw", "events", "liveScore"
 ]);
 const EVENT_FIELDS = new Set(["type", "t", "x", "y", "b", "k"]);
-const EVENT_TYPES = new Set(["down", "move", "up", "bank"]);
+const EVENT_TYPES = new Set(["down", "move", "up", "bank", "chip"]);
 
 class BattleServerError extends Error {
   constructor(status, code, message, detail) {
@@ -265,6 +265,8 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     if (rec.cvn !== expectedCvn) invalidAttempt("CVN_MISMATCH", "recording cvn flag does not match the task");
     // 3.6.0: bez `uf` silnik pomija próg za szybkiego przejazdu — wycięcie flagi nie może go obejść
     if (rec.uf !== 1) invalidAttempt("UF_MISMATCH", "recording uf flag is required");
+    // 3.7.0: bez `kb` silnik liczy dawną ścieżkę (bez torów, krawędzi fazy, 401 i żużla) — wycięcie flagi nie może tego obejść
+    if (rec.kb !== 1) invalidAttempt("KB_MISMATCH", "recording kb flag is required");
     const expectedArc = record.inputProfile === "full" ? 1 : 0;
     const expectedAng = record.inputProfile === "full" ? 1 : 0;
     const expectedTig = record.inputProfile === "full" && record.task.proc === "TIG" ? 1 : 0;

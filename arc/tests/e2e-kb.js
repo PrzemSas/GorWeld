@@ -5,7 +5,7 @@
  * Oprogramowanie zastrzeżone, NIE open source — warunki w pliku /LICENSE.
  */
 // KOMBAJN 3.7.0 E2E: prawdziwa mysz spawa KAŻDY ścieg po SWOIM torze (lanePts), z bankowaniem jak gracz.
-// Sprawdza: nagranie ma kb=1, ekran == sim.js (punkty, ISO, przyczyny), MMA: młotek (C) → bez 301,
+// Sprawdza: nagranie ma kb=2 (3.8.0), ekran == sim.js (punkty, ISO, przyczyny), MMA: młotek (C) → bez 301,
 // bez młotka → REJECT „slag" na ekranie i w weryfikatorze.
 // Użycie: node e2e-kb.js http://localhost:8765/arc [tryb]   tryb: mig-pc | mma-chip | mma-noslag (domyślnie wszystkie)
 let chromium;
@@ -73,14 +73,16 @@ async function run(b, { name, proc, pos, thick, chip }) {
     { name: "mig-pc", proc: "MIG", pos: "PC", thick: 8 },
     { name: "mma-chip", proc: "MMA", pos: "PA", thick: 8, chip: true },
     { name: "mma-noslag", proc: "MMA", pos: "PA", thick: 8, chip: false },
+    { name: "mma-pc12", proc: "MMA", pos: "PC", thick: 12, chip: true },   // 3.8.0: 3 ściegi (było 10)
   ].filter(c => !ONLY || c.name === ONLY);
   for (const c of cases) {
     const { out, errs } = await run(b, c);
     console.log(c.name, JSON.stringify(out));
-    ok(`${c.name}: nagranie ma kb=1 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 1 && out.banks === out.beads - 1);
+    ok(`${c.name}: nagranie ma kb=2 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 2 && out.banks === out.beads - 1);
     ok(`${c.name}: ekran == sim.js (punkty i ISO)`, out.live === out.sim && out.isoOk, { live: out.live, sim: out.sim, iso: out.ekranIso, simIso: out.simIso });
     ok(`${c.name}: zero błędów JS`, errs.length === 0, errs.slice(0, 2));
     if (c.name === "mig-pc") ok("mig-pc: po torach — lico przykrywa fazę, ściegi zlane", !(out.reasons || []).some(r => ["edges", "interbead"].includes(r)) && out.ib === 0, { edge: out.edge, ib: out.ib, reasons: out.reasons });
+    if (c.name === "mma-pc12") ok("mma-pc12: 3 ściegi, bez nowych odrzutów", out.beads === 3 && !(out.reasons || []).some(r => ["edges", "interbead", "slag"].includes(r)), { beads: out.beads, reasons: out.reasons, edge: out.edge });
     if (c.name === "mma-chip") ok("mma-chip: młotek w nagraniu, brak 301", out.chips === out.beads - 1 && !out.slag, { chips: out.chips, slag: out.slag });
     if (c.name === "mma-noslag") ok("mma-noslag: bez młotka REJECT slag (ekran i weryfikator)", out.slag > 0 && (out.reasons || []).includes("slag") && out.defects.some(d => /żużl/.test(d)), { slag: out.slag, reasons: out.reasons });
   }

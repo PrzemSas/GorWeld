@@ -266,7 +266,8 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     // 3.6.0: bez `uf` silnik pomija próg za szybkiego przejazdu — wycięcie flagi nie może go obejść
     if (rec.uf !== 1) invalidAttempt("UF_MISMATCH", "recording uf flag is required");
     // 3.7.0: bez `kb` silnik liczy dawną ścieżkę (bez torów, krawędzi fazy, 401 i żużla) — wycięcie flagi nie może tego obejść
-    if (rec.kb !== 1) invalidAttempt("KB_MISMATCH", "recording kb flag is required");
+    // 3.8.0: kb=2 = plan ściegów wg praktyki; kb=1 (plan 3.7.0) przestał być bieżącym zadaniem
+    if (rec.kb !== 2) invalidAttempt("KB_MISMATCH", "recording kb flag 2 is required");
     const expectedArc = record.inputProfile === "full" ? 1 : 0;
     const expectedAng = record.inputProfile === "full" ? 1 : 0;
     const expectedTig = record.inputProfile === "full" && record.task.proc === "TIG" ? 1 : 0;

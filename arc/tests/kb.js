@@ -49,5 +49,5 @@ ok("MMA bez czyszczenia żużla: REJECT slag",na.iso==="REJECT"&&na.rejectReason
 const mg={...build({proc:"MIG",pos:"PA",joint:"butt",thick:8,kb:true,chip:false}),uf:1,cvn:1}, ma=S.simulate(J(mg));
 ok("MAG bez żużla nie dostaje 301",!(ma.rejectReasons||[]).includes("slag")&&!ma.slag,{slag:ma.slag});
 
-ok("wersja 3.7.0 / ocena 1.2.0",S.VERSION==="3.7.0"&&S.SCORING_VERSION==="1.2.0"&&OLD.VERSION==="3.6.0");
+ok("silnik ≥3.7.0 (tu plan kb=1), zamrożony 3.6.0",S.VERSION>="3.7.0"&&OLD.VERSION==="3.6.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

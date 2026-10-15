@@ -34,12 +34,13 @@ async function run(b, { name, proc, pos, thick, chip }) {
     // dobry spawacz: dogrywa elektrodę, gdy łuk urósł ponad nominał; po zgaśnięciu (wymiana) zajarza od nowa
     let down = false;
     await pg.mouse.move(g.pts[0][0], g.pts[0][1]); await pg.mouse.down(); down = true;
-    for (let i = 1; i < g.pts.length; i++) {
+    pass: for (let i = 1; i < g.pts.length; i++) {
       const d = Math.hypot(g.pts[i][0] - g.pts[i - 1][0], g.pts[i][1] - g.pts[i - 1][1]);
       const sub = Math.max(1, Math.round(d / 2));
       for (let s = 1; s <= sub; s++) {
         const x = g.pts[i - 1][0] + (g.pts[i][0] - g.pts[i - 1][0]) * s / sub, y = g.pts[i - 1][1] + (g.pts[i][1] - g.pts[i - 1][1]) * s / sub;
-        const st = await pg.evaluate(() => ({ welding, al: arcLen, L0: arcL0(), live: arcLive }));
+        const st = await pg.evaluate(() => ({ welding, al: arcLen, L0: arcL0(), live: arcLive, pi: passIndex }));
+        if (st.pi !== bi) break pass;   // gra zamknęła ścieg (np. łuk zgasł przy pełnym pokryciu) — nie zajarzać na starym torze
         if (!st.welding) { if (down) { await pg.mouse.up(); down = false; } await pg.mouse.move(x, y); await pg.mouse.down(); down = true; continue; }
         if (st.live) { const want = st.al > st.L0; if (want && !down) { await pg.mouse.down(); down = true; } if (!want && down) { await pg.mouse.up(); down = false; } }
         await pg.mouse.move(x, y);
@@ -48,11 +49,19 @@ async function run(b, { name, proc, pos, thick, chip }) {
     }
     // koniec ściegu: LPM+PPM gasi łuk (świadomie, bez kary)
     const L = g.pts[g.pts.length - 1];
+    const open = await pg.evaluate(b => passIndex === b, bi);
+    if (!open) { if (down) { await pg.mouse.up(); down = false; } }
+    else {
     if (!down) { await pg.mouse.down(); down = true; }
     await pg.mouse.down({ button: "right" }); await pg.mouse.move(L[0] + 0.5, L[1]); await pg.waitForTimeout(120);
     await pg.mouse.up({ button: "right" }); await pg.mouse.up(); down = false;
+    }
     await pg.waitForTimeout(450);
-    if (bi < nBeads - 1 && proc === "MMA" && chip) { await pg.keyboard.press("c"); await pg.waitForTimeout(150); }
+    // młotek dopiero, gdy gra go przyjmie (ścieg zamknięty, żużel do zbicia) — jak gracz, który widzi przycisk
+    if (bi < nBeads - 1 && proc === "MMA" && chip) {
+      await pg.waitForFunction(() => needChip && !welding, null, { timeout: 5000 }).catch(() => {});
+      await pg.keyboard.press("c"); await pg.waitForTimeout(150);
+    }
   }
   await pg.waitForTimeout(800);
   const out = await pg.evaluate(() => {
@@ -82,7 +91,7 @@ async function run(b, { name, proc, pos, thick, chip }) {
     ok(`${c.name}: ekran == sim.js (punkty i ISO)`, out.live === out.sim && out.isoOk, { live: out.live, sim: out.sim, iso: out.ekranIso, simIso: out.simIso });
     ok(`${c.name}: zero błędów JS`, errs.length === 0, errs.slice(0, 2));
     if (c.name === "mig-pc") ok("mig-pc: po torach — lico przykrywa fazę, ściegi zlane", !(out.reasons || []).some(r => ["edges", "interbead"].includes(r)) && out.ib === 0, { edge: out.edge, ib: out.ib, reasons: out.reasons });
-    if (c.name === "mma-pc12") ok("mma-pc12: 3 ściegi, bez nowych odrzutów", out.beads === 3 && !(out.reasons || []).some(r => ["edges", "interbead", "slag"].includes(r)), { beads: out.beads, reasons: out.reasons, edge: out.edge });
+    if (c.name === "mma-pc12") ok("mma-pc12: 3 ściegi, bez nowych odrzutów", out.beads === 3 && !(out.reasons || []).some(r => ["edges", "interbead", "slag"].includes(r)), { beads: out.beads, reasons: out.reasons, edge: out.edge, chips: out.chips, banks: out.banks, slag: out.slag });
     if (c.name === "mma-chip") ok("mma-chip: młotek w nagraniu, brak 301", out.chips === out.beads - 1 && !out.slag, { chips: out.chips, slag: out.slag });
     if (c.name === "mma-noslag") ok("mma-noslag: bez młotka REJECT slag (ekran i weryfikator)", out.slag > 0 && (out.reasons || []).includes("slag") && out.defects.some(d => /żużl/.test(d)), { slag: out.slag, reasons: out.reasons });
   }

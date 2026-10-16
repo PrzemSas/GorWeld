@@ -46,5 +46,5 @@ ok("12 mm MMA PC: kb=1 → 10 ściegów, kb=2 → 3",a1.beads===10&&a2.beads===3
 const ns=S.simulate(J({...build({proc:"MMA",pos:"PA",joint:"butt",thick:8,kb:2,chip:false}),uf:1,cvn:1}));
 ok("kb=2 MMA bez młotka dalej REJECT slag",ns.iso==="REJECT"&&ns.rejectReasons.includes("slag"),{reasons:ns.rejectReasons});
 
-ok("wersja 3.8.0 / ocena 1.3.0, zamrożony 3.7.0",S.VERSION==="3.8.0"&&S.SCORING_VERSION==="1.3.0"&&OLD.VERSION==="3.7.0");
+ok("zamrożony 3.7.0 (bieżąca wersja: kb3.js)",OLD.VERSION==="3.7.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

@@ -14,6 +14,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
     node fast.js       # za szybki przejazd (3.6.0): >1,5× tempa WPS = REJECT „underfill"; w tempie bit-w-bit jak 3.5.0
+    node kb3.js        # skala fizyczna (3.9.0, kb=3): jedna skala px/mm dla każdej grubości; kb=2/1/bez kb bit-w-bit jak 3.8.0
     node kb.js         # kombajn (3.7.0): realna sekwencja ściegów, tory, lico vs faza, 401, żużel; bez `kb` bit-w-bit jak 3.6.0
     node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
     node reject-reasons.js # przyczyny odrzutu: REJECT ma co najmniej jedną znaną przyczynę, zaliczenie pustą listę
@@ -31,7 +32,7 @@ bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i —
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
 i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
 
-`sim-3.6.0.js` to zamrożony silnik sprzed kombajnu (punkt odniesienia dla `kb.js`; E2E z prawdziwą myszą: `e2e-kb.js <baseURL>`); `sim-3.5.0.js` to zamrożony silnik sprzed progu za szybkiego przejazdu (punkt odniesienia dla `fast.js`); `sim-3.3.0.js` — sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
+`sim-3.8.0.js` to zamrożony silnik sprzed fizycznej skali blachy (punkt odniesienia dla `kb3.js`); `sim-3.7.0.js` — sprzed planu 3.8.0 (`kb2.js`); `sim-3.6.0.js` to zamrożony silnik sprzed kombajnu (punkt odniesienia dla `kb.js`; E2E z prawdziwą myszą: `e2e-kb.js <baseURL>`); `sim-3.5.0.js` to zamrożony silnik sprzed progu za szybkiego przejazdu (punkt odniesienia dla `fast.js`); `sim-3.3.0.js` — sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
 `sim-3.1.0.js` (sprzed kary za odchyłkę toru), `sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js`
 (sprzed kąta) leżą obok jako starsze punkty.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.

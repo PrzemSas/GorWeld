@@ -42,7 +42,7 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
                 vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true}={}){
   const base=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
   const L0=ELEC_DIA[thick]||2.5;
-  const kbv=kb===2?2:kb?1:0, plan=kb?require("../sim.js").weldPlan(joint,thick,pos,proc,kbv):null, gh=3+thick*0.7;
+  const Sim=require("../sim.js"), kbv=kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv===3).gh;
   const nPass = kb?plan.length:passes!=null?passes:(thick<=3?1:thick<=5?2:3);
   const ev=[]; let t=0, elec=1, guard=1e9, rtick=0;   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
   for(let pi=0;pi<nPass;pi++){
@@ -88,7 +88,7 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
     t+=250;
   }
   const r={seed,W,H,proc,joint,pos,thick,bead,amps,events:ev};
-  if(arc) r.arc=1; if(ang) r.ang=1; if(kb) r.kb=kbv;   // kb:true = plan 3.7.0 (kb=1), kb:2 = plan 3.8.0
+  if(arc) r.arc=1; if(ang) r.ang=1; if(kb) r.kb=kbv;   // kb:true = plan 3.7.0 (kb=1), kb:2 = plan 3.8.0, kb:3 = plan 3.8.0 + skala fizyczna 3.9.0
   return r;
 }
 module.exports={build,POSITIONS,SPEED};

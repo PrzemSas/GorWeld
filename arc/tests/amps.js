@@ -10,11 +10,11 @@ function slice(from,to,label){
   return SRC.slice(a,b+to.length);
 }
 const tables=slice("const POSITIONS = {","function recommendedVolts(p, t){ return tableLookup(VOLT_TABLES[p], t); }","tablice WPS");
-const knob  =slice("// 3.1.0 — DWA TRYBY POKRĘTŁA.","por: ar<0.85 ? Math.round((0.85-ar)*6) : 0}; }","blok pokrętła");
+const knob  =slice("// 3.1.0 — DWA TRYBY POKRĘTŁA.","  const ar=(r&&a)?a/r:1; ampF=ampFOf(ar); }","blok pokrętła");   // 3.10.0: z elektrodami MMA (Ø → prąd)
 
 const ctx={localStorage:{getItem:()=>null,setItem:()=>{}},console};
 vm.createContext(ctx);
-vm.runInContext("let proc='MMA', thick=3, posKey='PA';\n"+tables+"\n"+knob,ctx);
+vm.runInContext("let proc='MMA', thick=3, posKey='PA', joint='butt', beadPlan=null, passIndex=0, welding=false, bN=0, lang='pl';\n"+tables+"\n"+knob,ctx);
 const S=(k,v)=>vm.runInContext(`${k}=${JSON.stringify(v)}`,ctx);
 const G=e=>vm.runInContext(e,ctx);
 
@@ -38,7 +38,9 @@ for(const p of PROCS) for(const t of THICKS) for(const k of POS){
   S("proc",p); S("thick",t); S("posKey",k);
   const r=G("recommendedAmps(proc,thick,posKey)"); if(r==null) continue;
   for(const mode of ["auto","man"]){
-    S("ampMode",mode); S("ampMul",1); S("ampSet",mode==="man"?r:null);
+    // 3.10.0: MMA — punkt zerowy RĘCZNIE to prąd Ø ściegu (diaAmps), nie stara tabela grubości
+    const z=p==="MMA"?G("diaAmps(curDia(),posKey)"):r;
+    S("ampMode",mode); S("ampMul",1); S("ampSet",mode==="man"?z:null);
     G("updateAmpF()"); const f=G("ampF"); n2++;
     const zero = f.ar===1 && f.w===1 && f.pen===0 && f.sev===null && f.spatAdd===0 && f.por===0;
     if(!zero){ f2++; console.log(`  ✗ ${mode} ${p} ${t}mm ${k}: ${JSON.stringify(f)}`); }
@@ -60,7 +62,7 @@ console.log(t3?"TEST 3: ✓ tryby robią to, co obiecują":"TEST 3: ✗ TRYBY SI
 
 // ── 4. Ręczne zejście/podbicie prądu boli monotonicznie ─────────────────────
 S("proc","MMA"); S("thick",5); S("posKey","PA"); S("ampMode","man");
-const rec=G("recommendedAmps(proc,thick,posKey)");
+const rec=G("diaAmps(curDia(),posKey)");   // 3.10.0: MMA — WPS = prąd Ø ściegu
 const row=a=>{ S("ampSet",a); G("updateAmpF()"); return G("ampF"); };
 console.log(`\nTEST 4 (MMA PA 5 mm, WPS ${rec} A) — co robi pokrętło:`);
 console.log("  prąd   ar     pen   odprysk  pory  waga");
@@ -85,6 +87,15 @@ for(const p of PROCS) for(const t of THICKS) for(const k of POS){
 }
 console.log(`\nTEST 5 (skala suwaka obejmuje WPS z zapasem w obie strony): ${n5-f5}/${n5}`);
 
-const bad=fail+f2+f5;
+// ── 6. (3.10.0) MMA AUTO: każda Ø zero kosztu PRĄDU (prąd idzie za elektrodą), Ø ocenia diaFit ──
+let n6=0,f6=0;
+S("proc","MMA"); S("ampMode","auto"); S("ampSet",null); S("ampMul",1);
+for(const t of THICKS) for(const k of POS) for(const d of [20,25,32,40]){
+  S("thick",t); S("posKey",k); S("diaPick",d); G("updateAmpF()"); const f=G("ampF"); n6++;
+  if(!(f.ar===1&&f.pen===0&&G("beadAmps")===G(`diaAmps(${d},posKey)`))){ f6++; console.log(`  ✗ AUTO Ø${d} ${t}mm ${k}: ${JSON.stringify(f)}`); } }
+S("diaPick",0);
+console.log(`\nTEST 6 (MMA AUTO: prąd z Ø, ar=1 dla każdej Ø): ${n6-f6}/${n6}`);
+
+const bad=fail+f2+f5+f6;
 console.log(bad?`\n✗ ${bad} NIEZGODNOŚCI`:"\n✓ wszystko przeszło");
 process.exit(bad?1:0);

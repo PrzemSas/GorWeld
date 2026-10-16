@@ -96,8 +96,8 @@ function roundFor(task, inputProfile = "full", options = {}) {
     pos: task.pos, thick: task.thick, bead: task.bead, amps: task.amps,
     arc: full, ang: full, vFac: options.vFac === undefined ? 1 : options.vFac,
     dtMs: options.dtMs === undefined ? 8 : options.dtMs,
-    passes: options.passes,
-    kb: options.passes === undefined ? 3 : false   // 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
+    passes: options.passes, dia: options.dia,
+    kb: options.passes === undefined ? 4 : false,   // 3.10.0: kb=4 (elektrody MMA); 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
   });
   rec.amps = task.amps;
   rec.arc = full ? 1 : 0;
@@ -105,7 +105,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
   rec.tig = full && task.proc === "TIG" ? 1 : 0;
   rec.cvn = task.bead === "steel" ? 1 : 0;
   rec.uf = 1;
-  rec.kb = 3;
+  rec.kb = 4;
   rec.rw = options.rw === undefined ? 1280 : options.rw;
   return rec;
 }
@@ -718,11 +718,20 @@ test("rejects every task-stamped rec field when tampered", async () => {
     if (uf === undefined) delete noUf.uf; else noUf.uf = uf;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noUf }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   }
-  for (const kb of [undefined, 0, 1, 2]) {   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
+  for (const kb of [undefined, 0, 1, 2, 3]) {   // 3.10.0: kb=3 (jedna Ø z grubości) — też odrzucony   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
     const noKb = structuredClone(base);
     if (kb === undefined) delete noKb.kb; else noKb.kb = kb;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noKb }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   }
+  // 3.10.0: `dia` — tylko Ø z listy, tylko na zdarzeniu `dia`, tylko MMA; RĘCZNY prąd (`am`/`amp`) w Battle nie istnieje
+  const badDia = structuredClone(base); badDia.events.unshift({ type: "dia", t: 0, x: 0, y: 0, d: 33 });
+  await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: badDia }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  const dOnMove = structuredClone(base); dOnMove.events.find(e => e.type === "move").d = 32;
+  await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: dOnMove }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  const manAmp = structuredClone(base); manAmp.am = 1;
+  await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: manAmp }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  const ampEv = structuredClone(base); ampEv.events.unshift({ type: "amp", t: 0, x: 0, y: 0 });
+  await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: ampEv }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   assert.equal((await h.core.getBattle(opened.created.battleId)).players.P1.attemptsCount, 0);
 });
 

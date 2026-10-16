@@ -45,5 +45,5 @@ const ns=S.simulate(J({...build({proc:"MMA",pos:"PA",joint:"butt",thick:8,kb:3,c
 ok("kb=3 MMA bez młotka dalej REJECT slag",ns.iso==="REJECT"&&ns.rejectReasons.includes("slag"),{reasons:ns.rejectReasons});
 ok("kb=3 = plan ściegów 3.8.0",["MMA","MIG","TIG"].every(pr=>TH.every(t=>S.simulate(J({...build({proc:pr,pos:"PA",joint:"butt",thick:t,kb:3}),uf:1,cvn:1})).beads===S.weldPlan("butt",t,"PA",pr,2).length)));
 
-ok("wersja 3.9.0 / ocena 1.4.0, zamrożony 3.8.0",S.VERSION==="3.9.0"&&S.SCORING_VERSION==="1.4.0"&&OLD.VERSION==="3.8.0");
+ok("silnik ≥3.9.0 (tu kb≤3), zamrożony 3.8.0",S.VERSION.localeCompare("3.9.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.8.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

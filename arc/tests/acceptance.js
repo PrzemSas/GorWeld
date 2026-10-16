@@ -38,6 +38,7 @@ function fixture(options = {}) {
     window: {}, console: { log() {}, warn() {} },
     baked: Array.from({ length: 20 }, () => ({ x: 0, y: 0, off: 0 })),
     seamPts: [{ x: 0, y: 0 }, { x: 10, y: 0 }], passLog: [], passPlanArr: ['cap'],
+    elecOn() { return false; },     // 3.10.0: atrapa bez elektrod per ścieg (HI/prąd jak dotąd) — reguły zaliczenia bez zmian
     beadPlan: null, slagCount: 0,   // 3.7.0: atrapa bez planu ściegów = ścieżka sprzed kombajnu (reguły zaliczenia bez zmian)
     metrics: { coverage: 1, spdAcc: 1, evenness: 1, overflow: 0, porosity: 0, spatter: 0,
       narrow: 0, wide: 0, gaps: [], out: 0, avgV: 68.8, endGap: 0, offPen: 0 },

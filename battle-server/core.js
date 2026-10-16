@@ -7,13 +7,14 @@ const DEFAULT_SYNC_WINDOW_MS = 15 * 60 * 1000;
 const STATUS_RATE_LIMIT_MS = 500;
 const MAX_ATTEMPTS_PER_PLAYER = 20;
 const MAX_EVENTS_PER_ATTEMPT = 60_000;
-const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "underfill", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "edges", "interbead", "slag", "score"]);
+const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "underfill", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "edges", "interbead", "slag", "electrode", "score"]);
 const REC_FIELDS = new Set([
   "seed", "W", "H", "proc", "joint", "pos", "thick", "bead", "amps",
   "arc", "ang", "tig", "cvn", "uf", "kb", "rw", "events", "liveScore"
 ]);
-const EVENT_FIELDS = new Set(["type", "t", "x", "y", "b", "k"]);
-const EVENT_TYPES = new Set(["down", "move", "up", "bank", "chip"]);
+const EVENT_FIELDS = new Set(["type", "t", "x", "y", "b", "k", "d"]);
+const EVENT_TYPES = new Set(["down", "move", "up", "bank", "chip", "dia"]);   // 3.10.0: `dia` = wybór Ø elektrody MMA (RĘCZNY prąd `amp` w Battle nie istnieje — tylko AUTO)
+const DIA_VALUES = new Set([20, 25, 32, 40]);
 
 class BattleServerError extends Error {
   constructor(status, code, message, detail) {
@@ -268,7 +269,8 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     // 3.7.0: bez `kb` silnik liczy dawną ścieżkę (bez torów, krawędzi fazy, 401 i żużla) — wycięcie flagi nie może tego obejść
     // 3.8.0: kb=2 = plan ściegów wg praktyki; kb=1 (plan 3.7.0) przestał być bieżącym zadaniem
     // 3.9.0: kb=3 = fizyczna skala blachy (VIS_K); kb=2 liczy się w px sprzed 3.9.0
-    if (rec.kb !== 3) invalidAttempt("KB_MISMATCH", "recording kb flag 3 is required");
+    // 3.10.0: kb=4 = elektrody MMA (Ø per ścieg, prąd z Ø); kb=3 liczy MMA na jednej Ø z grubości
+    if (rec.kb !== 4) invalidAttempt("KB_MISMATCH", "recording kb flag 4 is required");
     const expectedArc = record.inputProfile === "full" ? 1 : 0;
     const expectedAng = record.inputProfile === "full" ? 1 : 0;
     const expectedTig = record.inputProfile === "full" && record.task.proc === "TIG" ? 1 : 0;
@@ -292,6 +294,8 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
           event.y < -record.task.H || event.y > 2 * record.task.H) {
         invalidAttempt("EVENT_COORDINATE_INVALID");
       }
+      if (event.d !== undefined && (event.type !== "dia" || !DIA_VALUES.has(event.d))) invalidAttempt("EVENT_DIA_INVALID");
+      if (event.type === "dia" && (record.task.proc !== "MMA" || event.d === undefined)) invalidAttempt("EVENT_DIA_INVALID");
       for (const key of ["b", "k"]) {
         if (event[key] !== undefined && (!Number.isInteger(event[key]) || event[key] < 0 || event[key] > 255)) {
           invalidAttempt("EVENT_MASK_INVALID");

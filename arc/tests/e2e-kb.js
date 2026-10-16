@@ -16,7 +16,7 @@ const EXE = process.env.ARC_CHROME || "/home/gorweld/.cache/ms-playwright/chromi
 if (!BASE) { console.error("użycie: node e2e-kb.js <baseURL> [tryb]"); process.exit(2); }
 let fail = 0; const ok = (n, c, i) => { console.log((c ? "  ✓ " : "  ✗ ") + n + (i !== undefined ? "  " + JSON.stringify(i) : "")); if (!c) fail++; };
 
-async function run(b, { name, proc, pos, thick, chip }) {
+async function run(b, { name, proc, pos, thick, chip, dia, man }) {
   const pg = await b.newPage({ viewport: { width: 1280, height: 800 } });
   const errs = []; pg.on("pageerror", e => errs.push(e.message));
   await pg.addInitScript(() => { try { localStorage.setItem("gorweld_tut", "1"); localStorage.setItem("gorweld_lang", "pl"); } catch (e) {} });
@@ -26,11 +26,15 @@ async function run(b, { name, proc, pos, thick, chip }) {
   await pg.click(`.thk[data-t="${thick}"]`); await pg.waitForTimeout(200);
   await pg.evaluate(p => { const b = [...document.querySelectorAll(".pos")].find(x => x.dataset.pos === p); b && b.click(); }, pos);
   await pg.waitForTimeout(300);
+  if (man) { await pg.click('.ampmode[data-m="man"]'); await pg.waitForTimeout(200); }
   const nBeads = await pg.evaluate(() => passPlanArr.length);
   for (let bi = 0; bi < nBeads; bi++) {
     const g = await pg.evaluate(() => { const r = stage.getBoundingClientRect(), k = r.width / W;
       return { pts: lanePts.map(p => [r.left + p.x * k, r.top + p.y * k]), v: targetPx * k, idx: passIndex }; });
     if (g.idx !== bi) { ok(`${name}: ścieg ${bi + 1} wystartował`, false, { passIndex: g.idx }); break; }
+    // 3.10.0: Ø wybierana klikiem w HUD przed zajarzeniem; RĘCZNIE — pokrętło na prąd Ø ściegu (jak gracz między ściegami)
+    if (dia && dia[bi]) { await pg.click(`#toolhud [data-dia="${dia[bi]}"]`); await pg.waitForTimeout(100); }
+    if (man) { await pg.evaluate(() => setAmpSet(diaAmps(curDia(), posKey))); await pg.waitForTimeout(100); }
     // dobry spawacz: dogrywa elektrodę, gdy łuk urósł ponad nominał; po zgaśnięciu (wymiana) zajarza od nowa
     let down = false;
     await pg.mouse.move(g.pts[0][0], g.pts[0][1]); await pg.mouse.down(); down = true;
@@ -68,7 +72,8 @@ async function run(b, { name, proc, pos, thick, chip }) {
     if (!document.getElementById("repModal").classList.contains("open")) inspect();
     const s = ArcSim.simulate(JSON.parse(JSON.stringify(rec)));
     const iso = (document.getElementById("rIso").textContent || "").replace("≈ ISO 5817 · ", "").trim();
-    return { kb: rec.kb, chips: rec.events.filter(e => e.type === "chip").length, banks: rec.events.filter(e => e.type === "bank").length,
+    return { kb: rec.kb, am: rec.am || 0, dias: rec.events.filter(e => e.type === "dia").map(e => e.d), amps: rec.events.filter(e => e.type === "amp").map(e => e.a),
+      elec: s.elec, ampPen: s.ampPen, chips: rec.events.filter(e => e.type === "chip").length, banks: rec.events.filter(e => e.type === "bank").length,
       beads: passPlanArr.length, live: rec.liveScore, sim: s.score, simIso: s.iso, ekranIso: iso,
       isoOk: iso === t(s.iso === "REJECT" ? "iso_reject" : "iso_" + s.iso), reasons: s.rejectReasons, edge: s.edgeCov, ib: s.ibMax, slag: s.slag,
       defects: [...document.querySelectorAll("#rDefects li")].map(l => l.textContent.slice(0, 60)) };
@@ -83,15 +88,19 @@ async function run(b, { name, proc, pos, thick, chip }) {
     { name: "mma-chip", proc: "MMA", pos: "PA", thick: 8, chip: true },
     { name: "mma-noslag", proc: "MMA", pos: "PA", thick: 8, chip: false },
     { name: "mma-pc12", proc: "MMA", pos: "PC", thick: 12, chip: true },   // 3.8.0: 3 ściegi (było 10)
+    { name: "mma-dia", proc: "MMA", pos: "PA", thick: 8, chip: true, dia: { 0: 32, 2: 25 } },   // 3.10.0: +1 na grani (REJECT electrode), −1 na licu
+    { name: "mma-man", proc: "MMA", pos: "PA", thick: 12, chip: true, man: true },             // 3.10.0: RĘCZNIE, prąd przestawiany między ściegami
   ].filter(c => !ONLY || c.name === ONLY);
   for (const c of cases) {
     const { out, errs } = await run(b, c);
     console.log(c.name, JSON.stringify(out));
-    ok(`${c.name}: nagranie ma kb=3 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 3 && out.banks === out.beads - 1);
+    ok(`${c.name}: nagranie ma kb=4 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 4 && out.banks === out.beads - 1);
     ok(`${c.name}: ekran == sim.js (punkty i ISO)`, out.live === out.sim && out.isoOk, { live: out.live, sim: out.sim, iso: out.ekranIso, simIso: out.simIso });
     ok(`${c.name}: zero błędów JS`, errs.length === 0, errs.slice(0, 2));
     if (c.name === "mig-pc") ok("mig-pc: po torach — lico przykrywa fazę, ściegi zlane", !(out.reasons || []).some(r => ["edges", "interbead"].includes(r)) && out.ib === 0, { edge: out.edge, ib: out.ib, reasons: out.reasons });
     if (c.name === "mma-pc12") ok("mma-pc12: 3 ściegi, bez nowych odrzutów", out.beads === 3 && !(out.reasons || []).some(r => ["edges", "interbead", "slag"].includes(r)), { beads: out.beads, reasons: out.reasons, edge: out.edge, chips: out.chips, banks: out.banks, slag: out.slag });
+    if (c.name === "mma-dia") ok("mma-dia: dia w nagraniu, Ø per ścieg, REJECT electrode na ekranie i w weryfikatorze", JSON.stringify(out.dias) === "[32,25]" && JSON.stringify((out.elec || []).map(e => e.d)) === "[32,32,25]" && (out.reasons || []).includes("electrode") && out.defects.some(d => /elektroda/.test(d)), { dias: out.dias, elec: out.elec, reasons: out.reasons, defects: out.defects });
+    if (c.name === "mma-man") ok("mma-man: am=1, `amp` między ściegami (160/115), bez kary prądu", out.am === 1 && JSON.stringify(out.amps) === "[160,115]" && out.ampPen === 0 && !(out.reasons || []).includes("amps"), { am: out.am, amps: out.amps, ampPen: out.ampPen, elec: out.elec, reasons: out.reasons });
     if (c.name === "mma-chip") ok("mma-chip: młotek w nagraniu, brak 301", out.chips === out.beads - 1 && !out.slag, { chips: out.chips, slag: out.slag });
     if (c.name === "mma-noslag") ok("mma-noslag: bez młotka REJECT slag (ekran i weryfikator)", out.slag > 0 && (out.reasons || []).includes("slag") && out.defects.some(d => /żużl/.test(d)), { slag: out.slag, reasons: out.reasons });
   }

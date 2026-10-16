@@ -39,10 +39,10 @@ const PASS_W={root:0.72,fill:0.92,cap:1.00};
 function lanePath(pts,off){ if(!off) return pts; return pts.map((p,i)=>{ const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];
   const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1; return {x:p.x-dy/l*off,y:p.y+dx/l*off}; }); }
 function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
-                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true}={}){
+                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true,dia=null,am=false}={}){
   const base=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
-  const L0=ELEC_DIA[thick]||2.5;
-  const Sim=require("../sim.js"), kbv=kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv===3).gh;
+  let L0=ELEC_DIA[thick]||2.5;
+  const Sim=require("../sim.js"), kbv=kb===4?4:kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv>=3).gh;
   const nPass = kb?plan.length:passes!=null?passes:(thick<=3?1:thick<=5?2:3);
   const ev=[]; let t=0, elec=1, guard=1e9, rtick=0;   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
   for(let pi=0;pi<nPass;pi++){
@@ -50,6 +50,9 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
     if(pi&&kb&&chip&&proc==="MMA"){ t+=400; ev.push({type:"chip",t:Math.round(t),x:0,y:0}); }
     let pts=base; if(kb){ const b=plan[pi], Wl=gh*1.25*PASS_W[b.k]; pts=lanePath(base,b.lane*(Wl-Wl*b.wm)*laneFac); }
     let arcLen=0, i=0, acc=0; const tBead=t;
+    // 3.10.0 (kb:4, MMA): dia(pi, ścieg, typowa) → Ø×10 albo null (= typowa, bez zdarzenia); L0 łuku = Ø
+    if(kbv>=4&&proc==="MMA"){ const typ=Sim.elecTyp(plan[pi].k,thick), d=dia?dia(pi,plan[pi],typ):null;
+      if(d!=null){ ev.push({type:"dia",t:Math.round(t),x:0,y:0,d}); elec=1; } L0=(d!=null?d:typ)/10; }
     const push=(type,p,b,k)=>{const e={type,t:Math.round(t),x:q(p.x),y:q(p.y)};
       if(b!==undefined)e.b=b|0; if(k!==undefined)e.k=k|0; ev.push(e);};
     push("down",pts[0],arc?0:undefined);
@@ -88,7 +91,7 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
     t+=250;
   }
   const r={seed,W,H,proc,joint,pos,thick,bead,amps,events:ev};
-  if(arc) r.arc=1; if(ang) r.ang=1; if(kb) r.kb=kbv;   // kb:true = plan 3.7.0 (kb=1), kb:2 = plan 3.8.0, kb:3 = plan 3.8.0 + skala fizyczna 3.9.0
+  if(arc) r.arc=1; if(ang) r.ang=1; if(kb) r.kb=kbv; if(am) r.am=1;   // kb:true = plan 3.7.0 (kb=1), kb:2 = plan 3.8.0, kb:3 = plan 3.8.0 + skala fizyczna 3.9.0
   return r;
 }
 module.exports={build,POSITIONS,SPEED};

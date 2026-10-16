@@ -97,7 +97,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
     arc: full, ang: full, vFac: options.vFac === undefined ? 1 : options.vFac,
     dtMs: options.dtMs === undefined ? 8 : options.dtMs,
     passes: options.passes, dia: options.dia,
-    kb: options.passes === undefined ? 4 : false,   // 3.10.0: kb=4 (elektrody MMA); 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
+    kb: options.passes === undefined ? 5 : false,   // 3.11.0: kb=5 (łuk w rowku); 3.10.0: kb=4 (elektrody MMA); 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
   });
   rec.amps = task.amps;
   rec.arc = full ? 1 : 0;
@@ -105,7 +105,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
   rec.tig = full && task.proc === "TIG" ? 1 : 0;
   rec.cvn = task.bead === "steel" ? 1 : 0;
   rec.uf = 1;
-  rec.kb = 4;
+  rec.kb = 5;
   rec.rw = options.rw === undefined ? 1280 : options.rw;
   return rec;
 }
@@ -718,7 +718,7 @@ test("rejects every task-stamped rec field when tampered", async () => {
     if (uf === undefined) delete noUf.uf; else noUf.uf = uf;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noUf }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   }
-  for (const kb of [undefined, 0, 1, 2, 3]) {   // 3.10.0: kb=3 (jedna Ø z grubości) — też odrzucony   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
+  for (const kb of [undefined, 0, 1, 2, 3, 4]) {   // 3.11.0: kb=4 (metal po całej blasze) — też odrzucony   // 3.10.0: kb=3 (jedna Ø z grubości) — też odrzucony   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
     const noKb = structuredClone(base);
     if (kb === undefined) delete noKb.kb; else noKb.kb = kb;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noKb }, authFor(opened.created)), "INVALID_ATTEMPT", 400);

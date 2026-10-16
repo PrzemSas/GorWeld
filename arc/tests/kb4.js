@@ -89,5 +89,5 @@ ok("`amp` w AUTO = bez skutku",JSON.stringify(S.simulate(J(autoAmp)))===JSON.str
 const autoMul=run({pos:"PA",joint:"butt",thick:5,amps:Math.round(S.recommendedAmps("MMA",5,"PA")*1.1),bead:"ss"});
 ok("AUTO ×1,1: każdy ścieg +10% swojej Ø (drobna wada prądu)",autoMul.elec.every(e=>Math.abs(e.amps/S.diaAmps(e.d,"PA")-1.1)<0.02)&&autoMul.ampPen>0,autoMul.elec.map(e=>e.amps));
 
-ok("wersja 3.10.0 / ocena 1.5.0, zamrożony 3.9.0",S.VERSION==="3.10.0"&&S.SCORING_VERSION==="1.5.0"&&OLD.VERSION==="3.9.0");
+ok("silnik ≥3.10.0 (tu kb=4), zamrożony 3.9.0",S.VERSION.localeCompare("3.10.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.9.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

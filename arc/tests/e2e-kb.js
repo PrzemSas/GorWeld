@@ -94,7 +94,7 @@ async function run(b, { name, proc, pos, thick, chip, dia, man }) {
   for (const c of cases) {
     const { out, errs } = await run(b, c);
     console.log(c.name, JSON.stringify(out));
-    ok(`${c.name}: nagranie ma kb=4 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 4 && out.banks === out.beads - 1);
+    ok(`${c.name}: nagranie ma kb=5 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 5 && out.banks === out.beads - 1);
     ok(`${c.name}: ekran == sim.js (punkty i ISO)`, out.live === out.sim && out.isoOk, { live: out.live, sim: out.sim, iso: out.ekranIso, simIso: out.simIso });
     ok(`${c.name}: zero błędów JS`, errs.length === 0, errs.slice(0, 2));
     if (c.name === "mig-pc") ok("mig-pc: po torach — lico przykrywa fazę, ściegi zlane", !(out.reasons || []).some(r => ["edges", "interbead"].includes(r)) && out.ib === 0, { edge: out.edge, ib: out.ib, reasons: out.reasons });

@@ -270,7 +270,8 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     // 3.8.0: kb=2 = plan ściegów wg praktyki; kb=1 (plan 3.7.0) przestał być bieżącym zadaniem
     // 3.9.0: kb=3 = fizyczna skala blachy (VIS_K); kb=2 liczy się w px sprzed 3.9.0
     // 3.10.0: kb=4 = elektrody MMA (Ø per ścieg, prąd z Ø); kb=3 liczy MMA na jednej Ø z grubości
-    if (rec.kb !== 4) invalidAttempt("KB_MISMATCH", "recording kb flag 4 is required");
+    // 3.11.0: kb=5 = łuk tylko w strefie rowka; kb=4 kładzie metal po całej blasze
+    if (rec.kb !== 5) invalidAttempt("KB_MISMATCH", "recording kb flag 5 is required");
     const expectedArc = record.inputProfile === "full" ? 1 : 0;
     const expectedAng = record.inputProfile === "full" ? 1 : 0;
     const expectedTig = record.inputProfile === "full" && record.task.proc === "TIG" ? 1 : 0;

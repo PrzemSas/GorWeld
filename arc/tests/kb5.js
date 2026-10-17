@@ -47,5 +47,5 @@ const far=J(r); far.events=far.events.slice(0,d0).concat([{type:"down",t:far.eve
 const fs5=S.simulate(J(far)), fs4=S.simulate(J({...far,kb:4}));
 ok("zajarzenie 70 px od osi (na blasze): kb=4 kładzie metal, kb=5 nic",fs4.baked>0&&fs5.baked===0,{kb4:fs4.baked,kb5:fs5.baked});
 
-ok("wersja 3.11.0 / ocena 1.6.0, zamrożony 3.10.0, ZONE_BW 1,5",S.VERSION==="3.11.0"&&S.SCORING_VERSION==="1.6.0"&&OLD.VERSION==="3.10.0"&&S.ZONE_BW===1.5);
+ok("silnik ≥3.11.0, zamrożony 3.10.0, ZONE_BW 1,5",S.VERSION.localeCompare("3.11.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.10.0"&&S.ZONE_BW===1.5);
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

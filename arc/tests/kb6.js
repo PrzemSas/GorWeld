@@ -38,5 +38,5 @@ ok("dla porównania kb=5: bez zdarzeń Ø wracała do typowej (2,5 → 3,2 → 3
 const keep32=S.simulate(J({...build({proc:"MMA",pos:"PA",joint:"butt",thick:8,kb:6,lazy:true,dia:(pi)=>pi===1?32:null}),uf:1,cvn:1}));
 ok("zmiana na 3,2 przed wypełnieniem zostaje też na licu",JSON.stringify(keep32.elec.map(e=>e.d))==="[25,32,32]"&&keep32.diaPen===0,keep32.elec.map(e=>e.d));
 
-ok("wersja 3.12.0 / ocena 1.7.0, zamrożony 3.11.0",S.VERSION==="3.12.0"&&S.SCORING_VERSION==="1.7.0"&&OLD.VERSION==="3.11.0");
+ok("silnik ≥3.12.0, zamrożony 3.11.0",S.VERSION.localeCompare("3.12.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.11.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

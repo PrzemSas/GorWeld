@@ -14,6 +14,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node filler.js     # spoiwo TIG: bez spacji stary automat bit-w-bit, z spacją rytm oceniany doliną
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
     node fast.js       # za szybki przejazd (3.6.0): >1,5× tempa WPS = REJECT „underfill"; w tempie bit-w-bit jak 3.5.0
+    node kb7.js        # kierunek na ścianie pionowej (3.13.0, kb=7): PF z dołu do góry, PG z góry na dół, zły kierunek = REJECT direction; kb≤6 bit-w-bit jak 3.12.0
     node kb6.js        # elektroda zostaje w uchwycie (3.12.0, kb=6, MMA): Ø nie wraca sama do typowej; kb≤5 bit-w-bit jak 3.11.0
     node kb5.js        # łuk tylko w rowku (3.11.0, kb=5): poza strefą rowka nie zajarzy i nie kładzie metalu; kb≤4 bit-w-bit jak 3.10.0, robota w rowku kb=5 == kb=4
     node kb4.js        # elektrody (3.10.0, kb=4, MMA): Ø per ścieg, prąd z Ø, L0 = Ø, zła Ø = wada, HI per ścieg; kb≤3 i MIG/TIG bit-w-bit jak 3.9.0
@@ -35,7 +36,7 @@ bezwzględnej: u autora działa, a każdy inny dostaje `MODULE_NOT_FOUND`, i —
 autora test przechodzi, tylko czyta nie ten silnik, co trzeba. Sprawdzian: skopiuj `arc/sim.js`
 i `arc/tests/` do katalogu POZA repo, podmień tam `VERSION` na znacznik i zobacz, czy test go wypisze.
 
-`sim-3.11.0.js` to zamrożony silnik sprzed „elektrody w uchwycie” (punkt odniesienia dla `kb6.js`); `sim-3.10.0.js` — sprzed strefy łuku (punkt odniesienia dla `kb5.js`); `sim-3.9.0.js` — sprzed elektrod per ścieg (punkt odniesienia dla `kb4.js`); `sim-3.8.0.js` — sprzed fizycznej skali blachy (punkt odniesienia dla `kb3.js`); `sim-3.7.0.js` — sprzed planu 3.8.0 (`kb2.js`); `sim-3.6.0.js` to zamrożony silnik sprzed kombajnu (punkt odniesienia dla `kb.js`; E2E z prawdziwą myszą: `e2e-kb.js <baseURL>`); `sim-3.5.0.js` to zamrożony silnik sprzed progu za szybkiego przejazdu (punkt odniesienia dla `fast.js`); `sim-3.3.0.js` — sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
+`sim-3.12.0.js` to zamrożony silnik sprzed „kierunku PF/PG” (punkt odniesienia dla `kb7.js`); `sim-3.11.0.js` — zamrożony silnik sprzed „elektrody w uchwycie” (punkt odniesienia dla `kb6.js`); `sim-3.10.0.js` — sprzed strefy łuku (punkt odniesienia dla `kb5.js`); `sim-3.9.0.js` — sprzed elektrod per ścieg (punkt odniesienia dla `kb4.js`); `sim-3.8.0.js` — sprzed fizycznej skali blachy (punkt odniesienia dla `kb3.js`); `sim-3.7.0.js` — sprzed planu 3.8.0 (`kb2.js`); `sim-3.6.0.js` to zamrożony silnik sprzed kombajnu (punkt odniesienia dla `kb.js`; E2E z prawdziwą myszą: `e2e-kb.js <baseURL>`); `sim-3.5.0.js` to zamrożony silnik sprzed progu za szybkiego przejazdu (punkt odniesienia dla `fast.js`); `sim-3.3.0.js` — sprzed limitu heat input; `sim-3.2.0.js` sprzed spoiwa TIG — punkt odniesienia dla `parity.js` i `filler.js`.
 `sim-3.1.0.js` (sprzed kary za odchyłkę toru), `sim-3.0.0.js` (sprzed gestu gaszenia) i `sim-2.0.0.js`
 (sprzed kąta) leżą obok jako starsze punkty.
 Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `require`.

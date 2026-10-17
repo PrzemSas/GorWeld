@@ -33,6 +33,7 @@ function fixture(options = {}) {
   }
   const ctx = {
     lang: options.lang || 'pl', challenge: !!options.challenge, battleState: null,
+    dirOnNow() { return false; }, dirLog: [], dirUp: 0, dirDn: 0, DIR_MIN: 40, DIR_BAD: 0.5,   // 3.13.0: kierunek PF/PG (poza PF/PG reguła milczy)
     battleTaskActive() { return !!(ctx.battleState && ctx.battleState.task && !ctx.battleState.blocked); },
     document: { getElementById(id) { if (!nodes.has(id)) nodes.set(id, element()); return nodes.get(id); }, createElement: element },
     window: {}, console: { log() {}, warn() {} },

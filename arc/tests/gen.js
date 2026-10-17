@@ -39,16 +39,18 @@ const PASS_W={root:0.72,fill:0.92,cap:1.00};
 function lanePath(pts,off){ if(!off) return pts; return pts.map((p,i)=>{ const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];
   const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1; return {x:p.x-dy/l*off,y:p.y+dx/l*off}; }); }
 function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
-                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true,dia=null,am=false,lazy=false}={}){
+                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true,dia=null,am=false,lazy=false,wrongDir=false}={}){
   const base=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
   let L0=ELEC_DIA[thick]||2.5;
-  const Sim=require("../sim.js"), kbv=kb===6?6:kb===5?5:kb===4?4:kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv>=3).gh;
+  const Sim=require("../sim.js"), kbv=kb===7?7:kb===6?6:kb===5?5:kb===4?4:kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv>=3).gh;
   const nPass = kb?plan.length:passes!=null?passes:(thick<=3?1:thick<=5?2:3);
   const ev=[]; let t=0, elec=1, guard=1e9, rtick=0, curD=null;   // curD: Ø w uchwycie (kb≥6 nie wraca sama do typowej)   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
   for(let pi=0;pi<nPass;pi++){
     if(pi) ev.push({type:"bank",t:Math.round(t),x:0,y:0});
     if(pi&&kb&&chip&&proc==="MMA"){ t+=400; ev.push({type:"chip",t:Math.round(t),x:0,y:0}); }
     let pts=base; if(kb){ const b=plan[pi], Wl=gh*1.25*PASS_W[b.k]; pts=lanePath(base,b.lane*(Wl-Wl*b.wm)*laneFac); }
+    // 3.13.0 (kb≥7): dobry spawacz jedzie PF z dołu do góry, PG z góry na dół; `wrongDir` = odwrotnie
+    if(kbv>=7&&(pos==="PF"||pos==="PG")){ const down=pts[pts.length-1].y>pts[0].y, wantDown=(pos==="PG")!==!!wrongDir; if(down!==wantDown) pts=pts.slice().reverse(); }
     let arcLen=0, i=0, acc=0; const tBead=t;
     // 3.10.0 (kb:4, MMA): dia(pi, ścieg, typowa) → Ø×10 albo null (= typowa, bez zdarzenia); L0 łuku = Ø
     if(kbv>=4&&proc==="MMA"){ const typ=Sim.elecTyp(plan[pi].k,thick), d=dia?dia(pi,plan[pi],typ):null;

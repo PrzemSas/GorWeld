@@ -16,7 +16,7 @@ const EXE = process.env.ARC_CHROME || "/home/gorweld/.cache/ms-playwright/chromi
 if (!BASE) { console.error("użycie: node e2e-kb.js <baseURL> [tryb]"); process.exit(2); }
 let fail = 0; const ok = (n, c, i) => { console.log((c ? "  ✓ " : "  ✗ ") + n + (i !== undefined ? "  " + JSON.stringify(i) : "")); if (!c) fail++; };
 
-async function run(b, { name, proc, pos, thick, chip, dia, man, keep }) {
+async function run(b, { name, proc, pos, thick, chip, dia, man, keep, dir }) {
   const pg = await b.newPage({ viewport: { width: 1280, height: 800 } });
   const errs = []; pg.on("pageerror", e => errs.push(e.message));
   await pg.addInitScript(() => { try { localStorage.setItem("gorweld_tut", "1"); localStorage.setItem("gorweld_lang", "pl"); } catch (e) {} });
@@ -31,6 +31,8 @@ async function run(b, { name, proc, pos, thick, chip, dia, man, keep }) {
   for (let bi = 0; bi < nBeads; bi++) {
     const g = await pg.evaluate(() => { const r = stage.getBoundingClientRect(), k = r.width / W;
       return { pts: lanePts.map(p => [r.left + p.x * k, r.top + p.y * k]), v: targetPx * k, idx: passIndex }; });
+    // 3.13.0: dir "up"/"down" — mysz jedzie tor w górę albo w dół ekranu (PF poprawnie = w górę)
+    if (dir && ((dir === "up") === (g.pts[g.pts.length - 1][1] > g.pts[0][1]))) g.pts.reverse();
     if (g.idx !== bi) { ok(`${name}: ścieg ${bi + 1} wystartował`, false, { passIndex: g.idx }); break; }
     // 3.10.0: Ø wybierana klikiem w HUD przed zajarzeniem; RĘCZNIE — pokrętło na prąd Ø ściegu (jak gracz między ściegami)
     // 3.12.0: elektroda zostaje w uchwycie — dobry spawacz bierze typową (★), chyba że przypadek mówi inaczej
@@ -78,7 +80,7 @@ async function run(b, { name, proc, pos, thick, chip, dia, man, keep }) {
     return { kb: rec.kb, am: rec.am || 0, dias: rec.events.filter(e => e.type === "dia").map(e => e.d), amps: rec.events.filter(e => e.type === "amp").map(e => e.a),
       elec: s.elec, diaPen: s.diaPen, ampPen: s.ampPen, chips: rec.events.filter(e => e.type === "chip").length, banks: rec.events.filter(e => e.type === "bank").length,
       beads: passPlanArr.length, live: rec.liveScore, sim: s.score, simIso: s.iso, ekranIso: iso,
-      isoOk: iso === t(s.iso === "REJECT" ? "iso_reject" : "iso_" + s.iso), reasons: s.rejectReasons, edge: s.edgeCov, ib: s.ibMax, slag: s.slag,
+      isoOk: iso === t(s.iso === "REJECT" ? "iso_reject" : "iso_" + s.iso), reasons: s.rejectReasons, dirWrong: s.dirWrong, edge: s.edgeCov, ib: s.ibMax, slag: s.slag,
       defects: [...document.querySelectorAll("#rDefects li")].map(l => l.textContent.slice(0, 60)) };
   });
   await pg.close();
@@ -94,11 +96,13 @@ async function run(b, { name, proc, pos, thick, chip, dia, man, keep }) {
     { name: "mma-dia", proc: "MMA", pos: "PA", thick: 8, chip: true, dia: { 0: 32, 2: 25 } },   // 3.10.0: +1 na grani (REJECT electrode), −1 na licu
     { name: "mma-keep", proc: "MMA", pos: "PA", thick: 8, chip: true, keep: true },          // 3.12.0: gracz nie zmienia Ø — 2,5 zostaje na wszystkich ściegach
     { name: "mma-man", proc: "MMA", pos: "PA", thick: 12, chip: true, man: true },             // 3.10.0: RĘCZNIE, prąd przestawiany między ściegami
+    { name: "mma-pf-up", proc: "MMA", pos: "PF", thick: 8, chip: true, dir: "up" },             // 3.13.0: PF z dołu do góry — bez odrzutu za kierunek
+    { name: "mma-pf-down", proc: "MMA", pos: "PF", thick: 8, chip: true, dir: "down" },         // 3.13.0: PF z góry na dół — REJECT direction
   ].filter(c => !ONLY || c.name === ONLY);
   for (const c of cases) {
     const { out, errs } = await run(b, c);
     console.log(c.name, JSON.stringify(out));
-    ok(`${c.name}: nagranie ma kb=6 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 6 && out.banks === out.beads - 1);
+    ok(`${c.name}: nagranie ma kb=7 i ${out.beads} ściegów (${out.banks} bank)`, out.kb === 7 && out.banks === out.beads - 1);
     ok(`${c.name}: ekran == sim.js (punkty i ISO)`, out.live === out.sim && out.isoOk, { live: out.live, sim: out.sim, iso: out.ekranIso, simIso: out.simIso });
     ok(`${c.name}: zero błędów JS`, errs.length === 0, errs.slice(0, 2));
     if (c.name === "mig-pc") ok("mig-pc: po torach — lico przykrywa fazę, ściegi zlane", !(out.reasons || []).some(r => ["edges", "interbead"].includes(r)) && out.ib === 0, { edge: out.edge, ib: out.ib, reasons: out.reasons });
@@ -106,6 +110,8 @@ async function run(b, { name, proc, pos, thick, chip, dia, man, keep }) {
     if (c.name === "mma-dia") ok("mma-dia: dia w nagraniu, Ø per ścieg, REJECT electrode na ekranie i w weryfikatorze", JSON.stringify(out.dias) === "[32,25]" && JSON.stringify((out.elec || []).map(e => e.d)) === "[32,32,25]" && (out.reasons || []).includes("electrode") && out.defects.some(d => /elektroda/.test(d)), { dias: out.dias, elec: out.elec, reasons: out.reasons, defects: out.defects });
     if (c.name === "mma-keep") ok("mma-keep: Ø2,5 zostaje w uchwycie (25/25/25), kara Ø, podpowiedź o typowej", JSON.stringify((out.elec || []).map(e => e.d)) === "[25,25,25]" && out.diaPen > 0 && /Ø3,2/.test(out.hint || ""), { elec: (out.elec || []).map(e => [e.d, e.typ]), diaPen: out.diaPen, hint: out.hint });
     if (c.name === "mma-man") ok("mma-man: am=1, `amp` między ściegami (160/115), bez kary prądu", out.am === 1 && JSON.stringify(out.amps) === "[160,115]" && out.ampPen === 0 && !(out.reasons || []).includes("amps"), { am: out.am, amps: out.amps, ampPen: out.ampPen, elec: out.elec, reasons: out.reasons });
+    if (c.name === "mma-pf-up") ok("mma-pf-up: PF z dołu — brak „direction” (ekran i weryfikator), dirWrong 0", !(out.reasons || []).includes("direction") && !out.defects.some(d => /PF jechany/.test(d)) && (out.dirWrong || []).every(w => w === 0), { reasons: out.reasons, dirWrong: out.dirWrong });
+    if (c.name === "mma-pf-down") ok("mma-pf-down: PF z góry — REJECT direction na ekranie i w weryfikatorze", (out.reasons || []).includes("direction") && out.defects.some(d => /PF jechany/.test(d)) && out.simIso === "REJECT" && out.isoOk, { reasons: out.reasons, dirWrong: out.dirWrong, iso: out.ekranIso });
     if (c.name === "mma-chip") ok("mma-chip: młotek w nagraniu, brak 301", out.chips === out.beads - 1 && !out.slag, { chips: out.chips, slag: out.slag });
     if (c.name === "mma-noslag") ok("mma-noslag: bez młotka REJECT slag (ekran i weryfikator)", out.slag > 0 && (out.reasons || []).includes("slag") && out.defects.some(d => /żużl/.test(d)), { slag: out.slag, reasons: out.reasons });
   }

@@ -67,3 +67,6 @@ GORWELD-CZYTAJ-DESKTOP.txt
 # ze sterownikiem demo, który sam zaspawuje ścieg — świetny do oceny grafiki, ale pod
 # publicznym URL-em byłby drugą, nieaktualną wersją /arc/ obok prawdziwej. Zostaje lokalnie.
 arc/proto/
+
+# ciągłość pracy z Claude — lokalna notatka, nie do repo
+claude-progress.txt

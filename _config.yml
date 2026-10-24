@@ -35,6 +35,9 @@ exclude:
   # nie część strony. Na serwerze byłby to gotowy przepis, jak podszyć się pod jej głos.
   - velda/
 
+  # instrukcje dla Claude (praca nad repo) — zostają w repo, nie na stronie.
+  - CLAUDE.md
+
   # domyślne wykluczenia Jekylla (odtworzone, bo `exclude` je nadpisuje)
   - .sass-cache/
   - .jekyll-cache/

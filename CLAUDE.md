@@ -19,3 +19,8 @@ Statyczny HTML/JS serwowany przez GitHub Pages wprost z tego repo (repo jest PUB
   co przetestowane i działa, co nie działa, następny krok. Max ~30 linijek, najstarsze wpisy skracaj.
 - Po każdej działającej zmianie przygotuj commit z krótkim opisem po polsku (opis + komenda);
   commit i push robi właściciel z terminala (GORWELD LOCK), Claude nie commituje.
+
+## Weryfikacja i lekcje
+- Zanim powiesz "gotowe", użyj skilla /sprawdz: testy z arc/tests + podgląd telefon/desktop + konsola. Bez dowodu nie ma "działa".
+- Większe zmiany w arc/ (nowa mechanika, punktacja, nagrody) zaczynaj w plan mode i czekaj na akceptację planu.
+- Gdy poprawiam cię drugi raz w tej samej sprawie — zaproponuj zasadę do CLAUDE.md (/lekcja).

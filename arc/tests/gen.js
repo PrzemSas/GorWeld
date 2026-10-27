@@ -39,10 +39,10 @@ const PASS_W={root:0.72,fill:0.92,cap:1.00};
 function lanePath(pts,off){ if(!off) return pts; return pts.map((p,i)=>{ const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];
   const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1; return {x:p.x-dy/l*off,y:p.y+dx/l*off}; }); }
 function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
-                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true,dia=null,am=false,lazy=false,wrongDir=false}={}){
+                vFac=1,arc=false,ang=false,keyPlan=null,seed=12345,dtMs=8,passes=null,kb=false,laneFac=1,chip=true,dia=null,am=false,lazy=false,wrongDir=false,arcT=1}={}){
   const base=seam(pos), v=SPEED[thick]*PX*PROCESS[proc].vMul*vFac;
   let L0=ELEC_DIA[thick]||2.5;
-  const Sim=require("../sim.js"), kbv=kb===7?7:kb===6?6:kb===5?5:kb===4?4:kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv>=3).gh;
+  const Sim=require("../sim.js"), kbv=kb===8?8:kb===7?7:kb===6?6:kb===5?5:kb===4?4:kb===3?3:kb===2?2:kb?1:0, plan=kb?Sim.weldPlan(joint,thick,pos,proc,kbv>=2?2:1):null, gh=Sim.grooveGeom(thick,kbv>=3).gh;
   const nPass = kb?plan.length:passes!=null?passes:(thick<=3?1:thick<=5?2:3);
   const ev=[]; let t=0, elec=1, guard=1e9, rtick=0, curD=null;   // curD: Ø w uchwycie (kb≥6 nie wraca sama do typowej)   // elektroda przechodzi MIĘDZY warstwami — silnik jej nie zeruje na `bank`
   for(let pi=0;pi<nPass;pi++){
@@ -65,7 +65,7 @@ function build({proc="MMA",pos="PA",thick=5,bead="steel",joint="butt",amps=null,
       t+=dtMs; const dtS=dtMs/1000;
       // przyciski: „dobry spawacz" — dogrywa, gdy łuk urósł ponad nominał
       let b=0;
-      if(arc){ b=(arcLen>L0)?1:0;
+      if(arc){ b=(arcLen>L0*arcT)?1:0;   // 3.14.0: arcT = trzymana krotność Ø (domyślnie 1 = nominał)
         arcLen=Math.max(0,arcLen+(ARC_RISE+((b&2)?ARC_LIFT:0)-((b&1)?ARC_PUSH:0))*dtS); }
       // MMA wypala elektrodę — bez wymiany silnik ucina resztę ściegu (`replacing` → koniec odkładania).
       // Próg 0,13 jest NIŻSZY od silnikowego ELEC_STUB=0,16 CELOWO: świeżą elektrodę silnik podaje

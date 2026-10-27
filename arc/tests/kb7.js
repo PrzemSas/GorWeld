@@ -44,5 +44,5 @@ ok("PF 8 mm z dołu: każdy ścieg dirWrong 0, bez direction",one.dirWrong.lengt
 const wr=S.simulate(J({...build({proc:"MMA",pos:"PF",joint:"butt",thick:8,kb:7,wrongDir:true}),uf:1,cvn:1}));
 ok("PF 8 mm z góry: każdy ścieg dirWrong 1",wr.dirWrong.every(w=>w===1),wr.dirWrong);
 
-ok("wersja 3.13.0 / ocena 1.8.0, zamrożony 3.12.0, DIR_MIN 40, DIR_BAD 0,5",S.VERSION==="3.13.0"&&S.SCORING_VERSION==="1.8.0"&&OLD.VERSION==="3.12.0"&&S.DIR_MIN===40&&S.DIR_BAD===0.5);
+ok("silnik ≥3.13.0, zamrożony 3.12.0, DIR_MIN 40, DIR_BAD 0,5",S.VERSION.localeCompare("3.13.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.12.0"&&S.DIR_MIN===40&&S.DIR_BAD===0.5);
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

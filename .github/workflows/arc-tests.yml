@@ -1,0 +1,98 @@
+name: ARC — testy
+
+# Automat testów ARC (poprawka 03, 2026-10-31).
+# Odpala się przy każdym pushu i PR, który zmienia arc/ albo battle-server/.
+# Czerwony = coś się rozjechało (ocena gra ↔ powtórka, sterowanie, Battle). Wtedy NIE kopiować do gorweldarc.
+# Nic nie publikuje i nie commituje — tylko czyta repo i odpala testy.
+on:
+  push:
+    paths: ['arc/**', 'battle-server/**', '.github/workflows/arc-tests.yml']
+  pull_request:
+    paths: ['arc/**', 'battle-server/**', '.github/workflows/arc-tests.yml']
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arc-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1) Silnik oceny (sam sim.js, Node, bez przeglądarki). Każdy plik osobno, równolegle.
+  sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [parity, angle, amps, arcstop, offaxis, filler, heatinput, fast, kb, kb2, kb3, kb4, kb5, kb6, kb7, kb8, acceptance, reject-reasons, battle, plate-end]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: node ${{ matrix.test }}.js
+        working-directory: arc/tests
+        run: node ${{ matrix.test }}.js
+
+  # 2) Serwer Battle (testy jednostkowe Node).
+  battle-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --test battle-server/tests/
+
+  # 3) Gra w prawdziwej przeglądarce (Chromium) — sterowanie, parytet werdyktu, Battle.
+  #    Serwery jak w lokalnym przepisie: static-dev.py (bez cache) + dev-server.js (API Battle).
+  #    Testy E2E zależą od tempa maszyny, więc każdy ma JEDNO powtórzenie; dwa razy czerwony = błąd.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - 'e2e-angle-focus.js'
+          - 'e2e-input-lock.js'
+          - 'e2e-verdict-parity.js'
+          - 'e2e-filler.js dabs'
+          - 'e2e-filler.js nic'
+          - 'e2e-heatinput.js'
+          - 'e2e-hi-hint.js'
+          - 'e2e-kb.js mig-pc'
+          - 'e2e-kb.js mma-chip'
+          - 'e2e-kb.js mma-noslag'
+          - 'e2e-battle.js'
+          - 'e2e-battle-ui.js'
+          - 'e2e-battle-layout.js'
+          - 'e2e-battle-server.js'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Playwright + Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.63.0
+          npx playwright install --with-deps chromium
+          echo "ARC_CHROME=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+      - name: Serwery (ARC statycznie + API Battle)
+        run: |
+          PORT=18899 BATTLE_DEV_ORIGINS=http://127.0.0.1:18898 nohup node battle-server/dev-server.js > devserver.log 2>&1 &
+          nohup python3 battle-server/static-dev.py --port 18898 > static.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:18898/index.html > /dev/null && [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18899/health)" != "000" ] && exit 0; sleep 1; done   # dev-server nie ma /health (404) — liczy się, że odpowiada
+          echo "serwery nie wstały"; cat devserver.log static.log; exit 1
+      - name: ${{ matrix.test }}
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
+        run: |
+          set -- ${{ matrix.test }}
+          f="$1"; shift
+          args="http://127.0.0.1:18898"
+          [ "$f" = "e2e-battle-server.js" ] && args="$args http://127.0.0.1:18899"
+          node "arc/tests/$f" $args "$@" || { echo "::warning::$f — pierwsza próba czerwona, powtarzam raz"; node "arc/tests/$f" $args "$@"; }

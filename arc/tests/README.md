@@ -52,6 +52,29 @@ Przy następnej zmianie zamroź obok niego bieżącą wersję i podmień `requir
 
 ## Przeglądarka — gra vs `sim.js` (testy, które sprawdzają `index.html`)
 
+**Od poprawki 03 (2026-10-31): parytet PODSTAWOWYCH pól werdyktu.** Po inspekcji gra zapisuje
+`window.__parity = {live, sim, diff[]}` — punkty, litera, odrzut, klasa ISO (ten sam kod, który idzie na
+ekran), pokrycie (liczba 0..1, ±1e-6; NaN/brak = rozjazd), próg pokrycia 0,8 i wada major (po stronie
+`sim.js` = `rejectReasons` bez samego `score`). Listy przyczyn odrzutu NIE porównujemy — gra ma teksty wad,
+nie kody. Rozjazd = `console.warn('[PARITY] ROZJAZD WERDYKTU …')`. Nic nie zmienia oceny.
+
+    node e2e-verdict-parity.js http://127.0.0.1:8898 [przypadek]   # 8 rund z oczekiwanym wynikiem + 4 kontrole
+    node e2e-angle-focus.js    http://127.0.0.1:8898               # klawisze kąta a fokus kontrolek (poprawka 01)
+    node e2e-input-lock.js     http://127.0.0.1:8898               # blokada mysz↔dotyk, też przy palącym się łuku (poprawka 02)
+
+Każda runda ma oczekiwany wynik (przyjęta / REJECT z daną przyczyną), sprawdzaną pozycję, liczbę ściegów
+i tryb sterowania; wymagana jest co najmniej jedna runda przyjęta — inaczej zły bot i same zgodne odrzuty
+dałyby zielony test. Kontrole psują wynik powtórki (`kontrola` = odwrócony werdykt przy tych samych
+punktach, `kontrola-nan` / `-brak` / `-delta` = pokrycie) — test MUSI je wykryć.
+
+⚠ Bot sterowany „krok + sleep" jedzie 2–3× za wolno (każdy odczyt stanu kosztuje ms), więc każda
+runda wpada w REJECT za wkład ciepła i test widzi same odrzuty. `e2e-verdict-parity.js` prowadzi
+rękę ZEGAREM (droga = v·t) — tak trzeba pisać nowe sterowniki.
+
+Automat: `.github/workflows/arc-tests.yml` odpala przy każdym pushu/PR w `arc/` lub `battle-server/`
+wszystkie testy Node, `node --test battle-server/tests/` i E2E w Chromium (serwery jak wyżej:
+`static-dev.py` + `dev-server.js`). E2E mają jedno powtórzenie, bo zależą od tempa maszyny.
+
 `parity-driver-3.0.0.js` = `../parity-driver.js` + klawisze kąta (`?k=KeyD&kn=40`).
 Przepis uruchomieniowy w nagłówku `../parity-driver.js`. Trzeba czasu wirtualnego:
 bez `--virtual-time-budget` `--dump-dom` zrzuca stronę, zanim runda się skończy.

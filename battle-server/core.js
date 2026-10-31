@@ -7,13 +7,17 @@ const DEFAULT_SYNC_WINDOW_MS = 15 * 60 * 1000;
 const STATUS_RATE_LIMIT_MS = 500;
 const MAX_ATTEMPTS_PER_PLAYER = 20;
 const MAX_EVENTS_PER_ATTEMPT = 60_000;
+// 3.15.0: czas liczony także przy postoju — powtórka dzieli każdą przerwę na kroki 50 ms (strażnik 2,5 s na odcinek łuku).
+// Limit całej próby zamyka koszt powtórki: ≤ 30 min ⇒ ≤ 36 000 pełnych kroków. Nowe pojedynki wymagają kb=9 (ocena 1.10.0).
+const MAX_ATTEMPT_SPAN_MS = 30 * 60 * 1000;
+const KB_FOR_SCORING = { "1.10.0": 9 };
 const REJECT_REASON_CODES = new Set(["coverage", "root", "ends", "heatInput", "underfill", "overflow", "porosity", "offAxis", "amps", "arc", "angle", "filler", "edges", "interbead", "slag", "electrode", "score"]);
 const REC_FIELDS = new Set([
   "seed", "W", "H", "proc", "joint", "pos", "thick", "bead", "amps",
   "arc", "ang", "tig", "cvn", "uf", "kb", "rw", "events", "liveScore"
 ]);
 const EVENT_FIELDS = new Set(["type", "t", "x", "y", "b", "k", "d"]);
-const EVENT_TYPES = new Set(["down", "move", "up", "bank", "chip", "dia"]);   // 3.10.0: `dia` = wybór Ø elektrody MMA (RĘCZNY prąd `amp` w Battle nie istnieje — tylko AUTO)
+const EVENT_TYPES = new Set(["down", "move", "up", "bank", "chip", "dia", "inp"]);   // 3.15.0: `inp` = zmiana przycisków/klawiszy/spoiwa TIG bez ruchu (tylko profil full)   // 3.10.0: `dia` = wybór Ø elektrody MMA (RĘCZNY prąd `amp` w Battle nie istnieje — tylko AUTO)
 const DIA_VALUES = new Set([20, 25, 32, 40]);
 
 class BattleServerError extends Error {
@@ -274,7 +278,12 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
     // 3.12.0: kb=6 = elektroda zostaje w uchwycie na następny ścieg; kb=5 wracała do typowej Ø
     // 3.13.0: kb=7 = kierunek PF ↑ / PG ↓ w ocenie; kb=6 nie liczy kierunku
     // 3.14.0: kb=8 = krótszy łuk MMA (0,5–1,1×Ø); kb=7 liczy MMA na paśmie 0,6–1,6×Ø
-    if (rec.kb !== 8) invalidAttempt("KB_MISMATCH", "recording kb flag 8 is required");
+    // 3.15.0: kb=9 = czas przy postoju + zdarzenia `inp`. Wymagana flaga wynika z oceny silnika, który LICZY powtórkę
+    // (bieżący arcSim) — obniżona albo nieznana flaga = odrzut. Pojedynek założony na starszej wersji nie liczy się starym
+    // silnikiem: próby dostają nowe engineVersion/scoringVersion, a werdykt z mieszanych wersji to INCOMPARABLE (istniejąca reguła).
+    const requiredKb = KB_FOR_SCORING[arcSim.SCORING_VERSION];
+    if (requiredKb === undefined) invalidAttempt("SCORING_VERSION_UNSUPPORTED");
+    if (rec.kb !== requiredKb) invalidAttempt("KB_MISMATCH", "recording kb flag " + requiredKb + " is required");
     const expectedArc = record.inputProfile === "full" ? 1 : 0;
     const expectedAng = record.inputProfile === "full" ? 1 : 0;
     const expectedTig = record.inputProfile === "full" && record.task.proc === "TIG" ? 1 : 0;
@@ -289,8 +298,13 @@ function createBattleCore({ clock, randomBytes, store, battleRules, arcSim, even
       if (!event || typeof event !== "object" || Array.isArray(event)) invalidAttempt("EVENT_NOT_OBJECT");
       for (const key of Object.keys(event)) if (!EVENT_FIELDS.has(key)) invalidAttempt("UNKNOWN_EVENT_FIELD");
       if (!EVENT_TYPES.has(event.type)) invalidAttempt("EVENT_TYPE_INVALID");
-      if (!Number.isFinite(event.t) || !Number.isInteger(event.t) || event.t < 0 || event.t < previousTime) {
+      if (!Number.isFinite(event.t) || !Number.isInteger(event.t) || event.t < 0 || event.t > Number.MAX_SAFE_INTEGER || event.t < previousTime) {
         invalidAttempt("EVENT_TIME_INVALID");
+      }
+      if (index > 0 && event.t - rec.events[0].t > MAX_ATTEMPT_SPAN_MS) invalidAttempt("EVENT_TIME_RANGE", "attempt longer than 30 minutes");
+      if (event.type === "inp") {   // 3.15.0: tylko mysz (dotyk nie ma przycisków ani kąta), b i k wymagane
+        if (record.inputProfile !== "full") invalidAttempt("EVENT_INP_PROFILE");
+        if (event.b === undefined || event.k === undefined) invalidAttempt("EVENT_INP_MASK");
       }
       previousTime = event.t;
       if (!Number.isFinite(event.x) || !Number.isFinite(event.y) ||

@@ -41,6 +41,6 @@ ok("MMA kb=8: bez nowych przywarć i zerwań (ARC_MAX_MUL i ARC_STICK_T bez zmia
 const H=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8"), num=k=>{ const m=H.match(new RegExp(k+"=([0-9.]+)")); return m?+m[1]:NaN; };
 ok("index.html: ARC_LO_MMA/ARC_HI_MMA == sim.js",num("ARC_LO_MMA")===S.ARC_LO_MMA&&num("ARC_HI_MMA")===S.ARC_HI_MMA&&S.ARC_LO_MMA===0.5&&S.ARC_HI_MMA===1.1);
 ok("index.html: komunikat MMA 0,4 / 1,3×Ø",num("ARC_FB_LO_MMA")===0.4&&num("ARC_FB_HI_MMA")===1.3);
-ok("index.html: nagrywa kb:8 i ładuje sim.js?v="+S.VERSION,/\n\s*kb:8,/.test(H)&&H.includes(`sim.js?v=${S.VERSION}"`));
-ok("wersja 3.14.0 / ocena 1.9.0, zamrożony 3.13.0",S.VERSION==="3.14.0"&&S.SCORING_VERSION==="1.9.0"&&OLD.VERSION==="3.13.0");
+ok("index.html: nagrywa kb≥8 i ładuje sim.js?v="+S.VERSION,(()=>{const m=H.match(/\n\s*kb:(\d+),/); return !!m&&+m[1]>=8;})()&&H.includes(`sim.js?v=${S.VERSION}"`));
+ok("silnik ≥3.14.0, zamrożony 3.13.0",S.VERSION.localeCompare("3.14.0",undefined,{numeric:true})>=0&&OLD.VERSION==="3.13.0");
 console.log(fail?`\n✗ ${fail} nie przeszło`:"\n✓ wszystko przeszło"); process.exit(fail?1:0);

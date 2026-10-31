@@ -97,7 +97,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
     arc: full, ang: full, vFac: options.vFac === undefined ? 1 : options.vFac,
     dtMs: options.dtMs === undefined ? 8 : options.dtMs,
     passes: options.passes, dia: options.dia,
-    kb: options.passes === undefined ? 8 : false,   // 3.14.0: kb=8 (krótszy łuk MMA);   // 3.13.0: kb=7 (kierunek PF/PG);   // 3.12.0: kb=6 (Ø zostaje w uchwycie);   // 3.11.0: kb=5 (łuk w rowku); 3.10.0: kb=4 (elektrody MMA); 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
+    kb: options.passes === undefined ? 9 : false,   // 3.15.0: kb=9 (czas przy postoju)   // 3.14.0: kb=8 (krótszy łuk MMA);   // 3.13.0: kb=7 (kierunek PF/PG);   // 3.12.0: kb=6 (Ø zostaje w uchwycie);   // 3.11.0: kb=5 (łuk w rowku); 3.10.0: kb=4 (elektrody MMA); 3.9.0: kb=3 (skala fizyczna); 3.8.0: plan v2;: ściegi wg weldPlan (tory, młotek w MMA); jawne `passes` = stary generator
   });
   rec.amps = task.amps;
   rec.arc = full ? 1 : 0;
@@ -105,7 +105,7 @@ function roundFor(task, inputProfile = "full", options = {}) {
   rec.tig = full && task.proc === "TIG" ? 1 : 0;
   rec.cvn = task.bead === "steel" ? 1 : 0;
   rec.uf = 1;
-  rec.kb = 8;
+  rec.kb = 9;
   rec.rw = options.rw === undefined ? 1280 : options.rw;
   return rec;
 }
@@ -718,7 +718,7 @@ test("rejects every task-stamped rec field when tampered", async () => {
     if (uf === undefined) delete noUf.uf; else noUf.uf = uf;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noUf }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
   }
-  for (const kb of [undefined, 0, 1, 2, 3, 4, 5, 6, 7]) {   // 3.14.0: kb=7 też odrzucony   // 3.13.0: kb=6 też odrzucony   // 3.12.0: kb=5 też odrzucony   // 3.11.0: kb=4 (metal po całej blasze) — też odrzucony   // 3.10.0: kb=3 (jedna Ø z grubości) — też odrzucony   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
+  for (const kb of [undefined, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10]) {   // 3.15.0: kb=8 (obniżenie) i nieznane kb=10 też odrzucone   // 3.14.0: kb=7 też odrzucony   // 3.13.0: kb=6 też odrzucony   // 3.12.0: kb=5 też odrzucony   // 3.11.0: kb=4 (metal po całej blasze) — też odrzucony   // 3.10.0: kb=3 (jedna Ø z grubości) — też odrzucony   // 3.9.0: kb=2 (skala px sprzed 3.9.0) — też odrzucony   // 3.8.0: kb=1 = stary plan 3.7.0 — też odrzucony   // 3.7.0: bez `kb` silnik pomija tory, krawędzie fazy, 401 i żużel
     const noKb = structuredClone(base);
     if (kb === undefined) delete noKb.kb; else noKb.kb = kb;
     await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: noKb }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
@@ -805,6 +805,50 @@ test("rejects malformed event arrays, timestamps, coordinates, types and masks",
   const tooMany = structuredClone(base);
   tooMany.events = Array.from({ length: 60_001 }, () => ({ type: "move", t: 0, x: 10, y: 10 }));
   await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec: tooMany }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+});
+
+test("3.15.0: kb=9 — `inp` przyjęte w profilu full, odrzucone w touch i bez masek; czas ≤ 30 min i ≤ MAX_SAFE_INTEGER", async () => {
+  const h = harness();
+  const opened = await openBattle(h.core);
+  const base = roundFor(opened.battle.task);
+  const mid = base.events.findIndex((e, i) => i > 5 && e.type === "move");
+  const q = base.events[mid];
+  // poprawne: postój z wciśniętym LPM zapisany jako `inp` (bez ruchu)
+  const withInp = structuredClone(base);
+  withInp.events.splice(mid + 1, 0, { type: "inp", t: q.t, x: q.x, y: q.y, b: 0, k: 0 });
+  const accepted = await submitAtWindow(h, opened, opened.created, withInp);
+  assert.ok(accepted.attempt);
+  for (const mutate of [
+    rec => { rec.events.splice(mid + 1, 0, { type: "inp", t: q.t, x: q.x, y: q.y, k: 0 }); },              // brak b
+    rec => { rec.events.splice(mid + 1, 0, { type: "inp", t: q.t, x: q.x, y: q.y, b: 0 }); },              // brak k
+    rec => { rec.events.splice(mid + 1, 0, { type: "inp", t: q.t, b: 0, k: 0 }); },                        // brak x/y
+    rec => { rec.events[rec.events.length - 1].t = rec.events[0].t + 30 * 60 * 1000 + 1; },                 // > 30 min
+    rec => { rec.events[rec.events.length - 1].t = Number.MAX_SAFE_INTEGER + 2; },                          // ogromny czas
+  ]) {
+    const rec = structuredClone(base); rec.events[0].x += 0.001; mutate(rec);
+    await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+  }
+});
+
+test("3.15.0: `inp` w profilu touch odrzucone", async () => {
+  const h = harness();
+  const opened = await openBattle(h.core, "sync", "touch");
+  const rec = roundFor(opened.battle.task, "touch");
+  const q = rec.events.find((e, i) => i > 5 && e.type === "move");
+  rec.events.splice(rec.events.indexOf(q) + 1, 0, { type: "inp", t: q.t, x: q.x, y: q.y, b: 0, k: 0 });
+  await moveToAttemptWindow(h, opened);
+  await rejectsCode(h.core.submitAttempt(opened.created.battleId, { rec }, authFor(opened.created)), "INVALID_ATTEMPT", 400);
+});
+
+test("3.15.0: wycięte zdarzenia nie omijają czasu — przerwa w nagraniu liczy się w powtórce", () => {
+  const rec = roundFor(TASK);
+  const d = rec.events.findIndex(e => e.type === "down"); let end = d + 1;
+  while (end < rec.events.length && rec.events[end].type === "move") end++;
+  const h2 = d + 1 + Math.floor((end - d - 1) / 2);
+  const gap = structuredClone(rec); gap.events = gap.events.map((e, i) => i >= h2 ? { ...e, t: e.t + 2000 } : e);
+  const a = ArcSim.simulate(structuredClone(rec)), b = ArcSim.simulate(structuredClone(gap));
+  assert.notEqual(JSON.stringify(a), JSON.stringify(b));
+  assert.ok(b.spdAcc < a.spdAcc, "postój 2 s obniża dokładność tempa");
 });
 
 test("accepts legitimate pointer-capture overshoot but rejects extreme coordinates", async () => {

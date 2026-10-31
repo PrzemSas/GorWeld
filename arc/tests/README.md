@@ -15,6 +15,7 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node heatinput.js  # wkład ciepła: limit Kodu na materiale badanym udarnościowo — REJECT, nie kara
     node fast.js       # za szybki przejazd (3.6.0): >1,5× tempa WPS = REJECT „underfill"; w tempie bit-w-bit jak 3.5.0
     node kb8.js        # krótszy łuk MMA (3.14.0, kb=8): pasmo bez kary 0,5–1,1×Ø, komunikat 0,4/1,3×Ø; MIG/TIG i kb≤7 bit-w-bit jak 3.13.0
+    node kb9.js        # czas przy postoju (3.15.0, kb=9): stare nagrania (kb≤8) bit w bit jak 3.14.0 (7128 rund + postoje, kontrola mutacją), kb=9: krok 50 ms, `inp`, strażnik 2,5 s, zerowy przejazd
     node kb7.js        # kierunek na ścianie pionowej (3.13.0, kb=7): PF z dołu do góry, PG z góry na dół, zły kierunek = REJECT direction; kb≤6 bit-w-bit jak 3.12.0
     node kb6.js        # elektroda zostaje w uchwycie (3.12.0, kb=6, MMA): Ø nie wraca sama do typowej; kb≤5 bit-w-bit jak 3.11.0
     node kb5.js        # łuk tylko w rowku (3.11.0, kb=5): poza strefą rowka nie zajarzy i nie kładzie metalu; kb≤4 bit-w-bit jak 3.10.0, robota w rowku kb=5 == kb=4
@@ -61,6 +62,7 @@ nie kody. Rozjazd = `console.warn('[PARITY] ROZJAZD WERDYKTU …')`. Nic nie zmi
     node e2e-verdict-parity.js http://127.0.0.1:8898 [przypadek]   # 8 rund z oczekiwanym wynikiem + 4 kontrole
     node e2e-angle-focus.js    http://127.0.0.1:8898               # klawisze kąta a fokus kontrolek (poprawka 01)
     node e2e-input-lock.js     http://127.0.0.1:8898               # blokada mysz↔dotyk, też przy palącym się łuku (poprawka 02)
+    node e2e-idle.js           http://127.0.0.1:8898               # postój ręki (3.15.0): przywarcie, łuk rośnie, kąt i spoiwo TIG bez ruchu, zablokowany timer, blur — gra == powtórka
 
 Każda runda ma oczekiwany wynik (przyjęta / REJECT z daną przyczyną), sprawdzaną pozycję, liczbę ściegów
 i tryb sterowania; wymagana jest co najmniej jedna runda przyjęta — inaczej zły bot i same zgodne odrzuty

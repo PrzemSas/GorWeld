@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [parity, angle, amps, arcstop, offaxis, filler, heatinput, fast, kb, kb2, kb3, kb4, kb5, kb6, kb7, kb8, acceptance, reject-reasons, battle, plate-end]
+        test: [parity, angle, amps, arcstop, offaxis, filler, heatinput, fast, kb, kb2, kb3, kb4, kb5, kb6, kb7, kb8, kb9, acceptance, reject-reasons, battle, plate-end]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,6 +60,7 @@ jobs:
           - 'e2e-angle-focus.js'
           - 'e2e-input-lock.js'
           - 'e2e-verdict-parity.js'
+          - 'e2e-idle.js'
           - 'e2e-filler.js dabs'
           - 'e2e-filler.js nic'
           - 'e2e-heatinput.js'

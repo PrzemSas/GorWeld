@@ -121,8 +121,8 @@ async function finishBattle(page) {
 function qualifiedRounds(task) {
   const candidates=[];
   for(const vFac of [.75,.8,.85,.9,.95,1,1.05,1.1,1.15,1.2,1.3]){
-    const rec=Gen.build({...task,vFac,arc:true,ang:true,kb:8});   // 3.10.0: elektrody MMA, serwer wymaga kb=4 (3.9.0: skala fizyczna + plan v2)
-    rec.rw=1280;rec.cvn=rec.bead==="steel"?1:0;rec.uf=1;rec.kb=8;rec.tig=rec.proc==="TIG"?1:0;
+    const rec=Gen.build({...task,vFac,arc:true,ang:true,kb:9});   // 3.15.0: serwer wymaga kb=9 (czas przy postoju); 3.10.0: elektrody MMA
+    rec.rw=1280;rec.cvn=rec.bead==="steel"?1:0;rec.uf=1;rec.kb=9;rec.tig=rec.proc==="TIG"?1:0;
     const result=ArcSimNode.simulate(rec);
     if(result.coverage>=task.requiredCoverage&&result.iso!=="REJECT")candidates.push({rec,score:result.score});
   }

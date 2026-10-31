@@ -90,7 +90,8 @@ const spaceBlk=(game.match(/if\(e\.code==="Space"\)\{[\s\S]*?return; \}/)||[""])
 const spaceCode=spaceBlk.replace(/\/\/[^\n]*/g,"");
 t.push(["guard spacji nie odrzuca BUTTON ani SELECT", !!spaceBlk && !/\bBUTTON\b/.test(spaceCode) && !/\bSELECT\b/.test(spaceCode)]);
 t.push(["pole tekstowe dalej zabiera spację", /INPUT\|TEXTAREA/.test(spaceBlk) && /isContentEditable/.test(spaceBlk)]);
-t.push(["dab to ZBOCZE — trzymana spacja nie leje spoiwa", /if\(!e\.repeat\)\s*filPend=true;/.test(spaceBlk)]);
+// 3.15.0: zbocze od razu idzie do nagrania jako `inp` z bitem 16 (liveInput(..., true)) — dalej TYLKO bez auto-repeat
+t.push(["dab to ZBOCZE — trzymana spacja nie leje spoiwa", /if\(!e\.repeat\)\s*(filPend=true|liveInput\([^)]*,\s*true\));/.test(spaceBlk)]);
 t.push(["spacja odbiera fokus kontrolce, nie wciska jej", /\.blur\(\)/.test(spaceBlk)]);
 
 let bad=same?0:1; console.log("");

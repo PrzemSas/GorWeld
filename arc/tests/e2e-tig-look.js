@@ -1,11 +1,12 @@
 /**
- * GORWELD™ ARC — E2E: WYGLĄD ŚCIEGU TIG (poprawka 07). Tylko rysunek — ocena, sim.js i nagranie bez zmian.
+ * GORWELD™ ARC — E2E: WYGLĄD ŚCIEGU TIG (poprawki 07 i 08). Tylko rysunek — ocena, sim.js i nagranie bez zmian.
  * © 2026 Przemysław Sąsiadek (gorweld.com). Wszelkie prawa zastrzeżone / All rights reserved.
  *
  * Prawdziwe rundy myszą (spoiwo spacją w równym rytmie). Kolor blachy mierzony przed i po rundzie w pasie tuż za brzegiem lica.
  *  - TIG nierdzewka, dobre tempo: delikatna słomka (ciepły odcień),
  *  - TIG nierdzewka, za wolno (przegrzanie): wyraźnie więcej nalotu — kolor zależy od ciepła, nie jest „nagrodą”,
- *  - TIG aluminium: bez nalotu (czyszczenia katodowego gra nie modeluje); MIG (dotykiem) — pokrycie i parytet,
+ *  - TIG aluminium: bez nalotu, ani ciepłego, ani białego (czyszczenia katodowego gra nie modeluje); MIG (dotykiem) — pokrycie i parytet,
+ *  - (08) TIG nierdzewka: lico srebrno-słomkowe przy dobrym tempie, złotsze dopiero przy przegrzaniu,
  *  - badane punkty naprawdę pokryte ściegiem (inaczej porównanie nic nie mówi — uwaga Codexa),
  *  - ocena na ekranie = powtórka sim.js, zero błędów JS.
  *   node e2e-tig-look.js http://127.0.0.1:8898
@@ -16,8 +17,10 @@ if (!chromium) { console.error("brak playwrighta"); process.exit(2); }
 const BASE = process.argv[2]; if (!BASE) { console.error("użycie: node e2e-tig-look.js <baseURL>"); process.exit(2); }
 const EXE = process.env.ARC_CHROME;
 // Progi z pomiarów (2 przebiegi, ciepło = przyrost R−B blachy): 06 → TIG dobre tempo 10–11, za wolno 22–26; 07 → 18–19 i 53–66; alu ~1,5 w obu.
+// 08: alu jasność (średni przyrost RGB blachy) ~−3 w 07 i 08 — biała strefa z 07 v1 dawała ~29 (ciepło 4,8 — przeszłoby sam próg ciepła, uwaga Codexa); złotość lica nierdzewki (R−B w osi):
+// 07 → 67–68 przy dobrym tempie i 70–73 przy przegrzaniu; 08 → 15–17 i 57–61.
 // MIG ma własny ciepły nalot przy stopkach (~20 w 06 i 07 — kod MIG bez zmian), więc MIG służy tu tylko do pokrycia i parytetu.
-const LIM = { tig: 14, hot: 40, alu: 5 };
+const LIM = { tig: 14, hot: 40, alu: 5, aluLum: 5, beadOk: 35, beadHot: 25 };
 let fail = 0; const ok = (n, c, i) => { console.log((c ? "  ✓ " : "  ✗ ") + n + (i !== undefined ? "  " + JSON.stringify(i) : "")); if (!c) fail++; };
 
 async function run(b, proc, mat, spd, touch) {   // touch: MIG prowadzony dotykiem (gra sama trzyma łuk; mysz z wciśniętym LPM = dosuwanie drutu → przywarcie)
@@ -48,17 +51,23 @@ async function run(b, proc, mat, spd, touch) {   // touch: MIG prowadzony dotyki
   const after = await probe();
   const cov = await pg.evaluate(() => { let n = 0, c = 0; for (let i = 4; i < seamPts.length * 0.4; i += 3) { n++; if (vb && vb.hi[i] >= vb.lo[i]) c++; } return +(c / Math.max(1, n)).toFixed(2); });
   const par = await pg.evaluate(() => { try { if (!document.getElementById("repModal").classList.contains("open")) inspect(); } catch (e) {} const p = window.__parity; return p ? { live: p.live && p.live.score, sim: p.sim && p.sim.score } : null; });
-  let dsum = 0, warm = 0; before.forEach((c, i) => { const a = after[i]; dsum += Math.abs(a[0] - c[0]) + Math.abs(a[1] - c[1]) + Math.abs(a[2] - c[2]); warm += (a[0] - a[2]) - (c[0] - c[2]); });
-  await ctx.close(); return { dRGB: +(dsum / before.length).toFixed(1), warm: +(warm / before.length).toFixed(1), cov, par, errs };
+  let dsum = 0, warm = 0, lum = 0; before.forEach((c, i) => { const a = after[i]; dsum += Math.abs(a[0] - c[0]) + Math.abs(a[1] - c[1]) + Math.abs(a[2] - c[2]); warm += (a[0] - a[2]) - (c[0] - c[2]); lum += ((a[0] + a[1] + a[2]) - (c[0] + c[1] + c[2])) / 3; });
+  // 08: kolor lica (warstwa ściegu sctx) w osi szwu — „złotość” = średnie (R−B) nieprzezroczystych pikseli
+  const bead = await pg.evaluate(() => { const c = sctx.canvas, d = sctx.getImageData(0, 0, c.width, c.height).data, k = c.width / W; let n = 0, rb = 0;
+    for (let i = 4; i < seamPts.length * 0.4; i += 2) { if (!(vb.hi[i] >= vb.lo[i])) continue; const p = seamPts[i], q = seamNrm[i], m = (vb.lo[i] + vb.hi[i]) / 2;
+      for (const f of [-0.25, 0, 0.25]) { const v = m + f * (vb.hi[i] - vb.lo[i]), x = Math.round((p.x + q.x * v) * k), y = Math.round((p.y + q.y * v) * k), o = (y * c.width + x) * 4; if (d[o + 3] > 200) { n++; rb += d[o] - d[o + 2]; } } }
+    return n ? +(rb / n).toFixed(1) : null; });
+  await ctx.close(); return { dRGB: +(dsum / before.length).toFixed(1), warm: +(warm / before.length).toFixed(1), lum: +(lum / before.length).toFixed(1), bead, cov, par, errs };
 }
 (async () => {
   const b = await chromium.launch(Object.assign({ args: ["--no-sandbox", "--mute-audio"] }, EXE ? { executablePath: EXE } : {}));
   const t = await run(b, "TIG", "ss", 1), hot = await run(b, "TIG", "ss", 0.35), m = await run(b, "MIG", "ss", 1, true), al = await run(b, "TIG", "alu", 1);
-  console.log("  pomiary [dRGB, ciepło, pokrycie]:", JSON.stringify({ TIG: [t.dRGB, t.warm, t.cov], TIG_wolno: [hot.dRGB, hot.warm, hot.cov], MIG: [m.dRGB, m.warm, m.cov], ALU: [al.dRGB, al.warm, al.cov] }));
+  console.log("  pomiary [dRGB, ciepło, jasność, złotość lica, pokrycie]:", JSON.stringify({ TIG: [t.dRGB, t.warm, t.lum, t.bead, t.cov], TIG_wolno: [hot.dRGB, hot.warm, hot.lum, hot.bead, hot.cov], MIG: [m.dRGB, m.warm, m.lum, m.bead, m.cov], ALU: [al.dRGB, al.warm, al.lum, al.bead, al.cov] }));
   ok("badane punkty pokryte ściegiem (≥ 80%)", [t, hot, m, al].every(x => x.cov >= 0.8), [t.cov, hot.cov, m.cov, al.cov]);
   ok("TIG nierdzewka, dobre tempo: słomka na blasze (ciepło ≥ " + LIM.tig + ")", t.warm >= LIM.tig, t.warm);
   ok("TIG nierdzewka, za wolno: nalot od ciepła (ciepło ≥ " + LIM.hot + " i ≥ 2× dobre tempo)", hot.warm >= LIM.hot && hot.warm >= t.warm * 2, { dobre: t.warm, wolno: hot.warm });
-    ok("TIG aluminium: bez nalotu (ciepło < " + LIM.alu + ")", al.warm < LIM.alu, al.warm);
+    ok("TIG aluminium: bez nalotu — ani ciepłego (ciepło < " + LIM.alu + "), ani białego (jasność < " + LIM.aluLum + ")", al.warm < LIM.alu && al.lum < LIM.aluLum, { ciepło: al.warm, jasność: al.lum });
+  ok("TIG nierdzewka: lico przy dobrym tempie srebrno-słomkowe (złotość < " + LIM.beadOk + "), przy przegrzaniu złotsze (o ≥ " + LIM.beadHot + ")", t.bead !== null && hot.bead !== null && t.bead < LIM.beadOk && hot.bead - t.bead >= LIM.beadHot, { dobre: t.bead, wolno: hot.bead });
   ok("ocena na ekranie = powtórka sim.js", [t, hot, m].every(x => x.par && x.par.live === x.par.sim), [t.par, hot.par, m.par]);
   ok("zero błędów JS", [t, hot, m, al].every(x => !x.errs.length), [].concat(t.errs, hot.errs, m.errs, al.errs).slice(0, 2));
   await b.close(); console.log(fail ? `\n✗ ${fail} nie przeszło` : "\n✓ przeszło"); process.exit(fail ? 1 : 0);

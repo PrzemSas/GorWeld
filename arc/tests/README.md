@@ -65,6 +65,7 @@ nie kody. Rozjazd = `console.warn('[PARITY] ROZJAZD WERDYKTU …')`. Nic nie zmi
     node e2e-input-lock.js     http://127.0.0.1:8898               # blokada mysz↔dotyk, też przy palącym się łuku (poprawka 02)
     node e2e-idle.js           http://127.0.0.1:8898               # postój ręki (3.15.0): przywarcie, łuk rośnie, kąt i spoiwo TIG bez ruchu, zablokowany timer, blur — gra == powtórka
     node e2e-history.js        http://127.0.0.1:8898               # historia prób (06): 3 rundy → wpisy + porada w raporcie, bez duplikatu, eksport/import, zablokowana pamięć
+    node e2e-tig-look.js       http://127.0.0.1:8898               # wygląd TIG (07): barwy nalotowe na blasze tylko przy TIG, ocena = sim.js (tylko rysunek)
 
 Każda runda ma oczekiwany wynik (przyjęta / REJECT z daną przyczyną), sprawdzaną pozycję, liczbę ściegów
 i tryb sterowania; wymagana jest co najmniej jedna runda przyjęta — inaczej zły bot i same zgodne odrzuty

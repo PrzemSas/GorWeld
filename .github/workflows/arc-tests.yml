@@ -62,6 +62,7 @@ jobs:
           - 'e2e-verdict-parity.js'
           - 'e2e-idle.js'
           - 'e2e-history.js'
+          - 'e2e-tig-look.js'
           - 'e2e-filler.js dabs'
           - 'e2e-filler.js nic'
           - 'e2e-heatinput.js'

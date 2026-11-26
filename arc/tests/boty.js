@@ -44,7 +44,8 @@ const SNIP = [
   ["wide", 'if(wide/baked.length>0.2)D.push({s:"minor",c:"wide"', 'if(cur.wide/baked.length>0.2)D.push({s:"minor",c:"wide"'],
   ["undercut", 'if(overflow>0.12)D.push({s:overflow>0.3?"major":"minor",c:"undercut"', 'if(overflow>0.12)D.push({s:overflow>0.3?"major":"minor",c:"undercut"'],
   ["porosity", 'if(porosity>0)D.push({s:porosity>3?"major":"minor",c:"porosity"', 'if(porosity>0)D.push({s:porosity>3?"major":"minor",c:"porosity"'],
-  ["arc", 'if(arcPen>0)D.push({s:arcPen>=12?"major":"minor",c:arcR<1?"arc_short":"arc_long"', 'if(arcPen>0)D.push({s:arcPen>=12?"major":"minor",c:arcR<1?"arc_short":"arc_long"'],
+  // 10: etykieta łuku w sim.js przez arcSh — dla kb≤9 arcSh = arcR<1 jak w grze (sprawdzane niżej), kb:10 = strona większej kary
+  ["arc", 'if(arcPen>0)D.push({s:arcPen>=12?"major":"minor",c:arcR<1?"arc_short":"arc_long"', 'if(arcPen>0)D.push({s:arcPen>=12?"major":"minor",c:arcSh?"arc_short":"arc_long"'],
   ["stick", 'if(arcFails>0)D.push({s:arcFails>2?"major":"minor",c:"stick"', 'if(arcFails>0)D.push({s:arcFails>2?"major":"minor",c:"stick"'],
   ["ang", 'constwo=angOverW(angW,posKey)*1.1,to=angOverT(Math.abs(angT))*0.9', 'constwo=angOverW(angW,posKey)*1.1,to=angOverT(Math.abs(angT))*0.9'],
   ["ang", 'constsev=angPen>=10?"major":"minor"', 's:angPen>=10?"major":"minor"'],
@@ -77,6 +78,7 @@ function srcCheck(simText) { const sb = simBlock(simText), miss = [];
   if (JSON.stringify(og) !== JSON.stringify(os)) miss.push("kolejność " + og.join(",") + " ≠ " + os.join(","));
   return miss; }
 const miss0 = srcCheck(SIMSRC);
+ok("10: etykieta łuku w sim.js dla rund kb≤9 = arcR<1 jak w grze (arcSh = kb10 ? … : arcR < 1)", nows(SIMSRC).includes("constarcSh=kb10?arcLoAcc>=arcHiAcc:arcR<1;") && nows(SIMSRC).includes("constkb10=round.kb>=10;"));
 ok(`warunki i progi wad w sim.js = inspect() w grze (${SNIP.length} fragmentów, kolejność kodów)`, miss0.length === 0, miss0.slice(0, 6));
 // stałe progów, z których korzystają oba pliki
 const constOf = (src, name) => { const m = src.match(new RegExp("\\b" + name + "\\s*=\\s*([0-9.]+)")); return m ? +m[1] : null; };

@@ -9,6 +9,7 @@
   GORWELD® — znak towarowy UPRP R.396313. Oprogramowanie zastrzeżone — warunki w /LICENSE.
   Pulpit szkoleniowy: trzech botów spawa tę samą próbkę, ocena WYŁĄCZNIE z ArcSim.simulate (sim.js).
   Bez sieci, bez analityki, bez zapisu w przeglądarce.
+  10: klikalne objaśnienia wad (PL/EN/RU; dotyk, mysz, klawiatura) + przełącznik reguły próbnej kb:10 (okno zajarzenia).
 -->
 <style>
   :root{--bg:#050709;--panel:#0b1014;--line:#1a242c;--tx:#cfd8de;--dim:#7c8a94;--B:#5fe08a;--C:#ffd23f;--D:#ff9a3c;--R:#ff5a4a;--acc:#3cb9ff}
@@ -39,7 +40,22 @@
   .log{grid-column:span 12}
   .sh{display:none}
   ul.def{list-style:none;margin:6px 0 0;padding:0}
-  ul.def li{padding:3px 0 3px 8px;border-left:3px solid var(--dim);margin-bottom:3px}
+  ul.def li{padding:0;border-left:3px solid var(--dim);margin-bottom:3px}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  ul.def button.defb{-webkit-tap-highlight-color:transparent;display:block;width:100%;min-height:44px;min-width:0;text-align:left;background:transparent;border:0;border-radius:0;padding:6px 8px;color:var(--tx);line-height:1.35}
+  ul.def button.defb:hover{background:#0f1820}
+  ul.def button.defb[aria-expanded="true"]{background:#10202c}
+  ul.def button.defb .more{color:var(--acc);margin-left:6px;font-size:11px;white-space:nowrap}
+  .dx{margin-top:8px;border:1px solid #2a3740;border-radius:6px;padding:10px;background:#070b0e}
+  .dx .note{font-size:11px;color:#9aa7b0;margin:0 52px 6px 0}
+  .dx h3{margin:0 52px 4px 0;font-size:13px;color:#e6edf1}
+  .dx dl{margin:0;clear:both}
+  .dx dt{color:#9aa7b0;font-size:11px;letter-spacing:.08em;margin-top:7px;text-transform:uppercase}
+  .dx dd{margin:2px 0 0}
+  .dx .gone{color:var(--C);margin:4px 0 0}
+  .dx .x{float:right;min-width:44px;min-height:44px;padding:0;font-size:18px;line-height:1}
+  .tg{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;cursor:pointer}
+  .tg input{width:18px;height:18px;margin:0}
   ul.def li.major{border-color:var(--R)}
   ul.def li.minor{border-color:var(--D)}
   ul.def li.ok{border-color:var(--B)}
@@ -61,6 +77,20 @@
     .full{display:none}
     .sh{display:inline!important}
     .hide-m2{display:none}
+    .bar{gap:4px;padding:6px 8px}
+    .bar button{min-width:0;padding:6px 9px}
+    #seed{width:92px}
+    .bar .lbl,#status{display:none}
+    .tg{min-height:32px;font-size:12px}
+  }
+  /* 10_v2: telefon do 480 px — każdy cel sterowania ≥ 44×44 px (WCAG 2.5.5), przełącznik kb:10 razem z etykietą */
+  @media (max-width:480px){
+    .bar{gap:6px}
+    .bar button,#seed{min-height:44px;min-width:44px;padding:0 10px}
+    .tg{min-height:44px;min-width:44px;padding:0 8px 0 4px}
+    .tg input{width:22px;height:22px}
+    /* rząd Stop / Krok / Auto ląduje na dole paska i tylko on zostaje przyklejony; ziarno i przełącznik przewijają się z treścią */
+    .bar{flex-wrap:wrap-reverse;top:calc(-1 * var(--barHide, 0px))}
   }
 </style>
 </head>
@@ -76,11 +106,12 @@
   <button id="b1">Krok 1</button>
   <button id="b10">Krok 10</button>
   <button id="bAuto">Auto</button>
-  <span class="dim" style="margin-left:8px">ziarno</span>
+  <span class="dim lbl" style="margin-left:8px">ziarno</span>
   <input id="seed" inputmode="numeric" aria-label="ziarno">
   <button id="bRand">Losuj ziarno</button>
   <button id="bReset">Od nowa</button>
-  <button id="bLang" title="Język opisów wad">PL / EN</button>
+  <button id="bLang" title="Język opisów i objaśnień wad: PL → EN → RU" aria-label="Język opisów wad">PL</button>
+  <label class="tg" title="Reguła próbna kb:10 — po zajarzeniu łuk nie jest karany za krótki, dopóki nie wejdzie w pasmo (najdłużej 0,5–1,0 s wg Ø). Gra i Battle nadal liczą kb:9."><input type="checkbox" id="grace"> Pomijaj zajarzenie (nowa reguła, próba)</label>
   <span id="status" class="dim"></span>
 </div>
 
@@ -92,6 +123,7 @@
     <div class="row"><div class="big" id="vIso">—</div><div style="text-align:right"><div id="vScore" class="big">—</div><div class="dim">punkty gry · litera <b id="vLetter">—</b></div></div></div>
     <div class="dim" id="vReasons"></div>
     <ul class="def" id="vDef"></ul>
+    <div id="dx" class="dx" role="region" aria-label="Objaśnienie wady" hidden></div>
   </div>
 
   <div class="p params">
@@ -106,8 +138,8 @@
   </div>
 
   <div class="p log">
-    <h2>DZIENNIK PRÓB</h2>
-    <div id="logbox"><table><thead><tr><th>#</th><th>bot</th><th>pkt</th><th class="hide-m2">lit.</th><th>ISO</th><th>wady</th><th class="hide-m">prąd</th><th class="hide-m">napięcie</th><th class="hide-m">tempo max</th></tr></thead><tbody id="logT"></tbody></table></div>
+    <h2>DZIENNIK PRÓB <span id="logRule" class="dim"></span></h2>
+    <div id="logbox"><table><thead><tr><th>#</th><th title="flaga reguły rundy: 9 = jak gra, 10 = próba (pomijaj zajarzenie)">kb</th><th>bot</th><th>pkt</th><th class="hide-m2">lit.</th><th>ISO</th><th>wady</th><th class="hide-m">prąd</th><th class="hide-m">napięcie</th><th class="hide-m">tempo max</th></tr></thead><tbody id="logT"></tbody></table></div>
   </div>
 </div>
 
@@ -125,6 +157,11 @@
   const ISO_COL = { B: "var(--B)", C: "var(--C)", D: "var(--D)", REJECT: "var(--R)" };
   const $ = id => document.getElementById(id);
   let lang = "pl", sel = 2, auto = null, busy = false;
+  const LANGS = ["pl", "en", "ru"];
+  // 10: objaśnienia — openK = przypięte (klik / tap / Enter), hoverK = podgląd myszą, focusK = podgląd z klawiatury,
+  // quietK = właśnie zamknięte (Esc / ponowny klik) — nie wraca jako podgląd, dopóki wskaźnik/fokus nie przejdzie dalej.
+  let openK = null, hoverK = null, focusK = null, quietK = null, minH = 0, dxSig = "";
+  const lastD = {};
   const bench = new B.Bench(20261126);
   window.__boty = bench;                                   // do testów E2E (tylko odczyt)
 
@@ -133,10 +170,10 @@
   const S0 = B.SAMPLE, vW = S.recommendedVolts(S0.proc, S0.thick);
   $("sample").textContent = "MMA (111) · PA · 5 mm · stal · złącze doczołowe · WPS: prąd wg Ø elektrody ściegu, " + num(vW, 1) + " V, " + num(B.SPEED_WPS, 1) + " mm/s";
   $("engine").textContent = "silnik ARC " + S.VERSION + " · ocena " + S.SCORING_VERSION;
-  $("note").textContent = B.TEXTS.pl.rep_note + " / " + B.TEXTS.en.rep_note;
+  $("note").textContent = B.TEXTS.pl.rep_note + " / " + B.TEXTS.en.rep_note + " / " + B.TEXTS.ru.rep_note;
 
   function setSeedBox(){ $("seed").value = String(bench.seed); }
-  function reset(seed){ stop(); bench.reset(seed); setSeedBox(); render(); }
+  function reset(seed, grace){ stop(); bench.reset(seed, grace); setSeedBox(); $("grace").checked = bench.grace; render(); }
 
   // ── karty botów ──
   function botsHTML(){
@@ -160,14 +197,14 @@
       $("bdt" + i).textContent = st.n ? "B " + st.iso.B + " · C " + st.iso.C + " · D " + st.iso.D + " · odrzucone " + st.iso.REJECT : "";
     });
     const e = lastOf(sel);
-    $("vWho").textContent = "· " + P[sel][lang === "en" ? "en" : "pl"].toUpperCase();
-    if (!e){ $("vIso").textContent = "—"; $("vIso").style.color = ""; $("vScore").textContent = "—"; $("vLetter").textContent = "—"; $("vReasons").textContent = "Wciśnij Krok 1 albo Auto."; $("vDef").innerHTML = ""; $("pTab").innerHTML = ""; }
+    $("vWho").textContent = "· " + (P[sel][lang] || P[sel].pl).toUpperCase();
+    if (!e){ $("vIso").textContent = "—"; $("vIso").style.color = ""; $("vScore").textContent = "—"; $("vLetter").textContent = "—"; $("vReasons").textContent = "Wciśnij Krok 1 albo Auto."; defList([]); $("pTab").innerHTML = ""; }
     else {
       $("vIso").textContent = isoTxt(e.iso); $("vIso").style.color = ISO_COL[e.iso];
       $("vScore").textContent = e.score; $("vLetter").textContent = e.letter;
       $("vReasons").textContent = "próba #" + e.n + (e.rejectReasons.length ? " · przyczyny odrzutu (silnik): " + e.rejectReasons.join(", ") : "");
       const ord = { major: 0, minor: 1, ok: 2 };
-      $("vDef").innerHTML = e.defects.slice().sort((a, b) => ord[a.s] - ord[b.s]).map(d => '<li class="' + d.s + '"><span class="tag">' + (d.s === "major" ? "MAJOR" : d.s === "minor" ? "MINOR" : "OK") + '</span>' + esc(B.defectText(d, lang)) + '</li>').join("");
+      defList(e.defects.slice().sort((a, b) => ord[a.s] - ord[b.s]));
       const rows = [
         e.elec.length ? ["Prąd (ściegi)", e.elec.map(x => x.amps).join(" / ") + " A", "WPS wg Ø: " + e.elec.map(x => "Ø" + num(x.typ / 10, 1) + " " + x.ref + " A").join(" / ") + (e.elec.some(x => x.d !== x.typ) ? " · użyta Ø: " + e.elec.map(x => num(x.d / 10, 1)).join(" / ") : "")]
                       : ["Prąd", e.amps + " A", "WPS " + e.ampsWps + " A"],
@@ -181,12 +218,59 @@
       $("pTab").innerHTML = rows.map(r => "<tr><td class='dim'>" + r[0] + "</td><td><b>" + r[1] + "</b><span class='ref'>" + r[2] + "</span></td></tr>").join("");
     }
     // dziennik — najnowsze na górze (do 300 wierszy na ekranie; pełny log zostaje w pamięci)
-    $("logT").innerHTML = bench.log.slice(-300).reverse().map(e => '<tr><td>' + e.n + '</td><td class="bn" style="color:' + P[e.bot].col + '"><span class="full">' + P[e.bot].pl + '</span><span class="sh">' + P[e.bot].sh + '</span></td><td>' + e.score + '</td><td class="hide-m2">' + e.letter
+    $("logT").innerHTML = bench.log.slice(-300).reverse().map(e => '<tr><td>' + e.n + '</td><td' + (e.kb === 10 ? ' style="color:var(--acc)"' : '') + '>' + e.kb + '</td><td class="bn" style="color:' + P[e.bot].col + '"><span class="full">' + P[e.bot].pl + '</span><span class="sh">' + P[e.bot].sh + '</span></td><td>' + e.score + '</td><td class="hide-m2">' + e.letter
       + '</td><td style="color:' + ISO_COL[e.iso] + '">' + (e.iso === "REJECT" ? "ODRZ." : e.iso) + '</td><td class="w">' + esc(defLine(e)) + '</td><td class="hide-m">' + (e.elec.length ? e.elec.map(x => x.amps).join("/") : e.amps) + ' A</td><td class="hide-m">' + num(e.volts, 1) + ' V</td><td class="hide-m">' + num(e.fastR * e.vWps, 1) + ' mm/s</td></tr>').join("");
     drawChart();
+    const rule = bench.grace ? "reguła kb:10 (próba: pomijaj zajarzenie)" : "reguła kb:9 (jak gra)";
+    $("logRule").textContent = "· " + rule; $("engine").textContent = "silnik ARC " + S.VERSION + " · ocena " + S.SCORING_VERSION + " · " + rule;
+    $("bLang").textContent = lang.toUpperCase();
     $("status").textContent = "prób na bota: " + bench.n + (auto ? " · AUTO" : "");
     $("bAuto").classList.toggle("on", !!auto);
   }
+  // ── 10: lista wad jako przyciski + objaśnienie (zwykły element pod listą, nie dymek) ──
+  const btnOf = k => document.querySelector('#vDef .defb[data-k="' + k + '"]');
+  const curKeys = () => Array.from(document.querySelectorAll("#vDef .defb")).map(b => b.dataset.k);
+  function defList(items){
+    const act = document.activeElement, fk = act && act.classList && act.classList.contains("defb") ? act.dataset.k : null, onX = act && act.id === "dxClose";
+    items.forEach(d => { lastD[d.k] = d; });
+    $("vDef").innerHTML = items.map(d => '<li class="' + d.s + '"><button type="button" class="defb" data-k="' + d.k + '" aria-controls="dx" aria-expanded="false"><span class="tag">'
+      + (d.s === "major" ? "MAJOR" : d.s === "minor" ? "MINOR" : "OK") + '</span>' + esc(B.defectText(d, lang)) + '<span class="more" aria-hidden="true">?</span></button></li>').join("");
+    const keys = items.map(d => d.k); if (hoverK && keys.indexOf(hoverK) < 0) hoverK = null;
+    renderDx(); holdList();
+    if (fk) { const b = btnOf(fk); if (b) b.focus({ preventScroll: true }); else if ($("dxClose")) $("dxClose").focus({ preventScroll: true }); else if (keys.length) btnOf(keys[0]).focus({ preventScroll: true }); }
+    else if (onX && $("dxClose")) $("dxClose").focus({ preventScroll: true });
+  }
+  // dopóki objaśnienie jest otwarte, lista wad nad nim się nie kurczy (Auto przebudowuje ją co krok) — panel nie skacze
+  function holdList(){ const ul = $("vDef"); ul.style.minHeight = ""; const h = ul.offsetHeight; minH = shownK() ? Math.max(minH, h) : 0; ul.style.minHeight = minH ? minH + "px" : ""; }
+  function shownK(){ for (const k of [hoverK, focusK]) if (k && k !== quietK) return k; return openK; }
+  function renderDx(){
+    const k = shownK(), dx = $("dx"), L = B.EXPLAIN[lang];
+    document.querySelectorAll("#vDef .defb").forEach(b => b.setAttribute("aria-expanded", String(b.dataset.k === k)));
+    const present = !!k && curKeys().indexOf(k) >= 0, sig = [k, lang, present, openK === k].join("|");
+    if (sig === dxSig) return; dxSig = sig;
+    const hadX = document.activeElement && document.activeElement.id === "dxClose";
+    if (!k) { dx.hidden = true; dx.innerHTML = ""; dx.removeAttribute("data-k"); holdList(); return; }
+    const X = B.explainOf(k, lang) || ["—", "—", "—", "—"], d = lastD[k], name = d ? B.defectText(d, lang).split(" — ")[0] : k;
+    dx.hidden = false; dx.dataset.k = k; dx.dataset.pinned = openK === k ? "1" : "0"; dx.setAttribute("aria-label", L.title); dx.lang = lang;
+    dx.innerHTML = '<button type="button" class="x" id="dxClose" aria-label="' + esc(L.close) + '" title="' + esc(L.close) + ' (Esc)">×</button>'
+      + '<p class="note" id="dxNote">' + esc(B.TEXTS[lang].rep_note) + '</p><h3>' + esc(name) + '</h3>'
+      + (present ? "" : '<p class="gone" id="dxGone">' + esc(L.gone) + '</p>')
+      + '<dl>' + L.labels.map((lb, i) => '<dt>' + esc(lb) + '</dt><dd>' + esc(X[i]) + '</dd>').join("") + '</dl>';
+    if (hadX) $("dxClose").focus({ preventScroll: true });
+    holdList();
+  }
+  function closeDx(){ const k = shownK(); if (!k) return; openK = null; hoverK = null; quietK = k; const b = btnOf(k); renderDx(); if (b) b.focus({ preventScroll: true }); }
+  $("vDef").addEventListener("click", ev => { const b = ev.target.closest(".defb"); if (!b) return; const k = b.dataset.k;
+    if (openK === k) { openK = null; quietK = k; } else { openK = k; quietK = null; } renderDx(); });
+  $("vDef").addEventListener("pointerover", ev => { if (ev.pointerType !== "mouse") return; const b = ev.target.closest(".defb"); if (!b || hoverK === b.dataset.k) return; hoverK = b.dataset.k; renderDx(); });
+  $("vDef").addEventListener("pointerout", ev => { if (ev.pointerType !== "mouse") return; const b = ev.target.closest(".defb"); if (!b || (ev.relatedTarget && b.contains(ev.relatedTarget))) return;
+    if (hoverK === b.dataset.k) hoverK = null; if (quietK === b.dataset.k && document.activeElement !== b) quietK = null; renderDx(); });
+  $("vDef").addEventListener("focusin", ev => { const b = ev.target.closest(".defb"); if (!b) return; if (quietK && quietK !== b.dataset.k) quietK = null; focusK = b.dataset.k; renderDx(); });
+  $("vDef").addEventListener("focusout", ev => { const b = ev.target.closest(".defb"); if (!b) return; if (focusK === b.dataset.k) focusK = null; if (quietK === b.dataset.k && hoverK !== b.dataset.k) quietK = null;
+    const nx = ev.relatedTarget; if (!(nx && nx.closest && nx.closest(".defb"))) renderDx(); });
+  $("dx").addEventListener("click", ev => { if (ev.target.closest("#dxClose")) closeDx(); });
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape" && shownK()) { ev.preventDefault(); closeDx(); } });
+
   function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
   function drawChart(){
@@ -201,6 +285,7 @@
     P.forEach((p, b) => { const pts = bench.log.filter(e => e.bot === b); if (!pts.length) return; g.strokeStyle = p.col; g.fillStyle = p.col; g.lineWidth = 1.6;
       g.beginPath(); pts.forEach((e, i) => { const x = X(e.n), y = Y(e.score); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
       pts.forEach(e => { g.beginPath(); g.arc(X(e.n), Y(e.score), e.iso === "REJECT" ? 3 : 2, 0, 6.3); e.iso === "REJECT" ? g.stroke() : g.fill(); }); });
+    if (bench.grace) { g.fillStyle = getC("var(--acc)"); g.fillText("kb:10 · pomijaj zajarzenie (próba)", L + 4, T + 10); }
     $("legend").innerHTML = P.map(p => '<span style="color:' + p.col + '">■ ' + p.pl + '</span>').join(" &nbsp; ") + " &nbsp; ○ = odrzucona";
   }
   function getC(c){ return c.startsWith("var(") ? getComputedStyle(document.documentElement).getPropertyValue(c.slice(4, -1)).trim() : c; }
@@ -217,10 +302,15 @@
   $("bReset").onclick = () => reset(bench.seed);
   $("bRand").onclick = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); reset(a[0] % 100000000); };   // wybór ziarna = wejście, widoczne w polu; nie wchodzi w ocenę
   $("seed").onchange = () => { const v = parseInt($("seed").value, 10); reset(Number.isFinite(v) && v >= 0 ? v : bench.seed); };
-  $("bLang").onclick = () => { lang = lang === "pl" ? "en" : "pl"; render(); };
+  $("bLang").onclick = () => { lang = LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]; render(); };
+  $("grace").onchange = () => reset(bench.seed, $("grace").checked);
   window.addEventListener("resize", drawChart);
+  // 10_v2: telefon ≤ 480 px — chowamy pod górną krawędź tylko górne rzędy paska (wszystko nad rzędem ze Stop)
+  const BAR = document.querySelector(".bar"), PHONE = matchMedia("(max-width:480px)");
+  function barFit(){ BAR.style.setProperty("--barHide", (PHONE.matches ? Math.max(0, $("bStop").offsetTop - parseFloat(getComputedStyle(BAR).paddingTop)) : 0) + "px"); }
+  if (window.ResizeObserver) new ResizeObserver(barFit).observe(BAR); window.addEventListener("resize", barFit);
 
-  botsHTML(); setSeedBox(); render();
+  botsHTML(); setSeedBox(); render(); barFit();
 })();
 </script>
 </body>

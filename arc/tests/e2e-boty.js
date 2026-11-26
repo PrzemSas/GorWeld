@@ -55,8 +55,9 @@ const SEED = 20261126;
   ph.on("pageerror", e => errs.push(String(e)));
   await ph.goto(BASE + "/boty.html"); await ph.tap("#b10"); await ph.waitForFunction(() => window.__boty.n === 10, null, { timeout: 30000 });
   const lay = await ph.evaluate(() => { const r = id => document.getElementById(id).getBoundingClientRect();
-    return { sw: document.documentElement.scrollWidth, iw: innerWidth, stop: r("bStop").top, auto: r("bAuto").bottom, iso: r("vIso").height, fs: parseFloat(getComputedStyle(document.getElementById("vIso")).fontSize) }; });
-  ok("telefon 390 px: bez poziomego przewijania, Stop/Krok/Auto na pierwszym ekranie, werdykt ISO duży", lay.sw <= lay.iw && lay.stop >= 0 && lay.auto < 200 && lay.iso > 0 && lay.fs >= 20, lay);
+    return { sw: document.documentElement.scrollWidth, iw: innerWidth, ih: innerHeight, stop: r("bStop").top, auto: r("bAuto").bottom, iso: r("vIso").height, fs: parseFloat(getComputedStyle(document.getElementById("vIso")).fontSize) }; });
+  // 10_v2: na telefonie rząd Stop / Krok / Auto jest dolnym rzędem paska (przykleja się tylko on, ziarno i przełącznik 44 px przewijają się) → próg „górna połowa ekranu”
+  ok("telefon 390 px: bez poziomego przewijania, Stop/Krok/Auto w górnej połowie pierwszego ekranu, werdykt ISO duży", lay.sw <= lay.iw && lay.stop >= 0 && lay.auto < lay.ih / 2 && lay.iso > 0 && lay.fs >= 20, lay);
   if (SHOTS) await ph.screenshot({ path: path.join(SHOTS, "podglad_telefon.png"), fullPage: true });
   ok("zero błędów konsoli", errs.length === 0, errs.slice(0, 3));
   ok("zero zapytań poza własny serwer (brak sieci / analityki)", reqs.length === 0, reqs.slice(0, 3));

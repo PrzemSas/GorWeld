@@ -71,6 +71,14 @@
   const ELEC_TRAVEL_ARC = 1000, ARC_BURN_S = 55;   // zapas drogi i czas jarzenia na całą elektrodę (1:1 z grą)
   const ARC_MAX_MUL = 3.2, ARC_V_SLOPE = 2.4, ARC_LO = 0.6, ARC_HI = 1.6;
   const ARC_LO_MMA = 0.5, ARC_HI_MMA = 1.1;   // 3.14.0 (kb:8, MMA): pasmo bez kary ~1×Ø (do 3.13.0 MMA 0,6–1,6 jak MAG)
+  // 10 (flaga `kb: 10`, REGUŁA PRÓBNA — gra i Battle nagrywają kb:9): OKNO ZAJARZENIA. Po każdym zajarzeniu (`down`) łuk startuje
+  // od 0, więc pierwsze ułamki sekundy ZAWSZE były „za krótkie" (fałszywa wada u każdego). W oknie próbki z r < lo nie dają kary
+  // (nie wchodzą do arcPenAcc ani do arcRSum/arcTimeL — średniej r). Mianownik kary zostaje pełny (arcTime): próbka z okna liczy się
+  // jak łuk w paśmie, więc kara z flagą nigdy nie jest WIĘKSZA niż bez niej, a napięcie i HI się nie zmieniają. Okno kończy się przy PIERWSZYM z dwóch:
+  // (a) łuk pierwszy raz wszedł w pasmo (r ≥ lo), (b) minął limit = ARC_GRACE_K × najkrótszy możliwy czas dojścia do pasma
+  // z podnoszeniem (lo·L0 / (ARC_RISE + ARC_LIFT)), nie więcej niż ARC_GRACE_S. MMA: Ø2,0 0,50 s · Ø2,5 0,63 s · Ø3,2 0,80 s · Ø4,0 1,00 s.
+  // Bez zmian także w oknie: za długi łuk (r > hi), przywarcie, zerwanie, napięcie (arcVSum/arcTime → HI), pęcherze, czas ściegu.
+  const ARC_GRACE_S = 1.0, ARC_GRACE_K = 1.25;
   const VOLT_TABLES = {
     MMA:[[1,3,20],[3,6,22],[6,10,24],[10,15,26]],
     MIG:[[1,3,18],[3,6,22],[6,12,26]],
@@ -296,6 +304,8 @@
     // 3.14.0: węższe pasmo łuku MMA (0,5–1,1×Ø) — kb≤7 i MIG/TIG bit-w-bit jak 3.13.0
     const arcMma = round.kb >= 8 && proc === "MMA", aLo = arcMma ? ARC_LO_MMA : ARC_LO, aHi = arcMma ? ARC_HI_MMA : ARC_HI;
     const kb9 = round.kb >= 9;     // 3.15.0: krok czasu przy postoju + zdarzenia `inp` (zmiana przycisków/klawiszy/spoiwa bez ruchu)
+    const kb10 = round.kb >= 10;   // 10 (próba): okno zajarzenia + etykieta krótki/długi po stronie większej kary. kb≤9 bit-w-bit jak 3.15.0
+    let graceOn = false, graceT = 0, arcTimeL = 0, arcLoAcc = 0, arcHiAcc = 0;
     const keepDia = round.kb >= 6;  // 3.12.0: elektroda zostaje w uchwycie na następny ścieg (do 3.11.0 wracała do typowej)   // 3.11.0: łuk tylko w strefie rowka (rowek + faza ×ZONE_BW) — kb≤4 bit-w-bit jak 3.10.0   // 3.10.0: Ø elektrody per ścieg, prąd z Ø — kb≤3 i MIG/TIG bit-w-bit jak 3.9.0
     let waDeg = 0, taDeg = 0, keyMask = 0;
     let angPenAcc = 0, angTime = 0, angPorAcc = 0, angWSum = 0, angTSum = 0;
@@ -458,7 +468,11 @@
         } else contactT = 0;
         if (arcLen >= arcL0 * ARC_MAX_MUL) { arcLen = arcL0 * ARC_MAX_MUL; arcBroke++; return false; }
         const r = arcLen / arcL0;
-        arcPenAcc += arcPenNow(r, aLo, aHi) * dtS; arcTime += dtS; arcRSum += r * dtS;
+        if (!kb10) { arcPenAcc += arcPenNow(r, aLo, aHi) * dtS; arcTime += dtS; arcRSum += r * dtS; }
+        else { arcTime += dtS;   // arcTime zostaje pełny: mianownik kary łuku i napięcia (arcVSum → HI) bez zmian
+          if (graceOn) { graceT += dtS; if (r >= aLo || graceT > Math.min(ARC_GRACE_S, ARC_GRACE_K * aLo * arcL0 / (ARC_RISE + ARC_LIFT))) graceOn = false; }
+          if (!graceOn) { const pn = arcPenNow(r, aLo, aHi) * dtS; arcPenAcc += pn; arcTimeL += dtS; arcRSum += r * dtS;
+            if (r < aLo) arcLoAcc += pn; else if (r > aHi) arcHiAcc += pn; } }
         const uNow = recommendedVolts(proc, thick) + ARC_V_SLOPE * (arcLen - arcL0);
         arcVSum += uNow * dtS; if (dz) { arcVb += uNow * dtS; arcTb += dtS; }
         if (r > aHi) arcPorAcc += (r - aHi) * dtS;
@@ -538,6 +552,7 @@
         if (needChip) { slagCount++; needChip = false; }
         last = { x: ev.x, y: ev.y }; lastT = ev.t; lastPtrT = ev.t; lastSpeedT = ev.t; chunked = false; vEMA = targetPx; lastDab = ev.t;
         btnMask = arcLive ? (ev.b | 0) : 0; keyMask = angLive ? ((ev.k | 0) & 15) : 0; arcLen = tigLive ? arcL0 : 0; contactT = 0;
+        if (kb10) { graceOn = arcLive && !tigLive; graceT = 0; }   // 10: każde zajarzenie otwiera okno
         trail = [{ t: ev.t, x: ev.x, y: ev.y }];
         if (replacing) { electrodeLeft = 1; replacing = false; } return; }
       if (ev.type === "up") { advanceTo(ev.t); if (last) zeroSpeedTo(ev.t); last = null; return; }
@@ -688,7 +703,9 @@
     const cur = passMetrics(), all = passLog.concat([cur]), n = all.length, avg = k => all.reduce((a, m) => a + m[k], 0) / n;
     const coverage = avg("coverage"), spdAcc = avg("spdAcc"), evenness = avg("evenness");
     const overflow = Math.max.apply(null, all.map(m => m.overflow));
-    const arcPen = arcTime ? arcPenAcc / arcTime : 0, arcR = arcTime ? arcRSum / arcTime : 1;
+    const arcTE = kb10 ? arcTimeL : arcTime;   // 10: średnie r bez próbek z okna zajarzenia (kara: okno = 0, mianownik pełny)
+    const arcPen = arcTime ? arcPenAcc / arcTime : 0, arcR = arcTE ? arcRSum / arcTE : 1;
+    const arcSh = kb10 ? arcLoAcc >= arcHiAcc : arcR < 1;   // 10: etykieta wady po stronie, która dała większą karę (punkty bez zmian)
     const arcFails = stickCount + arcBroke;
     const angPen = angTime ? angPenAcc / angTime : 0;
     const angW = angTime ? angWSum / angTime : 0, angT = angTime ? angTSum / angTime : 0;
@@ -810,7 +827,8 @@
              volts: arcTime ? +(arcVSum / arcTime).toFixed(2) : recommendedVolts(proc, thick),
              hi: hiR, hiWps: hiRW, hiMax: hiRM, hiOver, cvn, fastR: +fastR.toFixed(3), fastMax: +fastMax.toFixed(3), tooFast, rejectReasons: iso === "REJECT" ? rejectReasons : [], ...(dirOn ? { dirWrong } : {}),
              ...(dz ? { elec, diaPen: +diaPen.toFixed(2) } : {}),
-             ...(kb ? { kb: true, beads: beadPlan.length, edgeCov: +edgeCov.toFixed(3), edgePen: +edgePen.toFixed(2), ibGaps, ibMax: +ibMax.toFixed(3), slag: slagCount } : {}) };
+             ...(kb ? { kb: true, beads: beadPlan.length, edgeCov: +edgeCov.toFixed(3), edgePen: +edgePen.toFixed(2), ibGaps, ibMax: +ibMax.toFixed(3), slag: slagCount } : {}),
+             ...(kb10 ? { kb10: true, arcSide: arcPen > 0 ? (arcSh ? "short" : "long") : null } : {}) };
     if (!(opts && opts.defects)) return res;
 
     // ── 09: LISTA WAD 1:1 z inspect() w index.html (te same warunki, progi, kolejność i kody `c`) ──
@@ -827,7 +845,7 @@
     if (cur.wide / baked.length > 0.2) D.push({ s: "minor", c: "wide", k: "def_wide", p: [] });
     if (overflow > 0.12) D.push({ s: overflow > 0.3 ? "major" : "minor", c: "undercut", k: "def_undercut", p: [Math.round(overflow * 100)] });
     if (porosity > 0) D.push({ s: porosity > 3 ? "major" : "minor", c: "porosity", k: "def_porosity", p: [porosity] });
-    if (arcPen > 0) D.push({ s: arcPen >= 12 ? "major" : "minor", c: arcR < 1 ? "arc_short" : "arc_long", k: arcR < 1 ? "def_arc_short" : "def_arc_long", p: [] });
+    if (arcPen > 0) D.push({ s: arcPen >= 12 ? "major" : "minor", c: arcSh ? "arc_short" : "arc_long", k: arcSh ? "def_arc_short" : "def_arc_long", p: [] });
     if (arcFails > 0) D.push({ s: arcFails > 2 ? "major" : "minor", c: "stick", k: "def_stick", p: [arcFails] });
     if (angPen > 0) { const wo = angOverW(angW, posKey) * 1.1, to = angOverT(Math.abs(angT)) * 0.9, c = wo >= to ? "ang_work" : (angT > 0 ? "ang_drag" : "ang_push");
       D.push({ s: angPen >= 10 ? "major" : "minor", c, k: "def_" + c, p: [] }); }
@@ -853,6 +871,10 @@
     return res;
   }
 
+  // 10 (próba, flaga `kb: 10`, wersja silnika i SCORING bez zmian, bo gra i Battle nagrywają kb:9) — OKNO ZAJARZENIA
+  //         (ARC_GRACE_S / ARC_GRACE_K) i etykieta „za krótki / za długi łuk" po stronie większej kary. Rundy kb≤9 bit-w-bit
+  //         jak 3.15.0 (zamrożony sim-3.15.0.js, test kb10.js). Battle przyjmuje tylko kb:9, więc kb:10 nie trafi do pojedynku.
+  //         Włączenie w grze = poprawka 11: VERSION 3.16.0, SCORING 1.11.0, KB_FOR_SCORING w serwerze, recStart kb:10.
   // 3.15.0 — CZAS PRZY POSTOJU (flaga `kb: 9`): fizyka (łuk, kąt, tempo, odpryski, czas ściegu) liczona krokami 50 ms
   //         także wtedy, gdy ręka stoi; zmiany przycisków/klawiszy/spoiwa bez ruchu jako zdarzenia `inp`; łuk gaśnie po
   //         2,5 s bez ruchu wskaźnika; ścieg bez przejazdu (droga < 0,5 mm) na stali cvn = REJECT heatInput. Nagrania kb≤8
@@ -926,7 +948,7 @@
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
   // Bump SCORING_VERSION when score, grade thresholds, or inspection rejection rules change.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, weldPlan, bevelEdgePx, grooveGeom, capHalfMm, VIS_K, elecTyp, diaAmps, diaFit, AMP_DIA, DIAS, VERSION: "3.15.0", SCORING_VERSION: "1.10.0", STEP_MS, GRACE_MS, IDLE_MS, ZERO_PATH_MM, DIR_MIN, DIR_BAD, ZONE_BW, ARC_LO_MMA, ARC_HI_MMA };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, weldPlan, bevelEdgePx, grooveGeom, capHalfMm, VIS_K, elecTyp, diaAmps, diaFit, AMP_DIA, DIAS, VERSION: "3.15.0", SCORING_VERSION: "1.10.0", STEP_MS, GRACE_MS, IDLE_MS, ZERO_PATH_MM, DIR_MIN, DIR_BAD, ZONE_BW, ARC_LO_MMA, ARC_HI_MMA, ARC_GRACE_S, ARC_GRACE_K, TRIAL_KB: 10 };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

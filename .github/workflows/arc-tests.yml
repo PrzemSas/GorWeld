@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [parity, angle, amps, arcstop, offaxis, filler, heatinput, fast, kb, kb2, kb3, kb4, kb5, kb6, kb7, kb8, kb9, history, acceptance, reject-reasons, battle, plate-end]
+        test: [parity, angle, amps, arcstop, offaxis, filler, heatinput, fast, kb, kb2, kb3, kb4, kb5, kb6, kb7, kb8, kb9, history, acceptance, reject-reasons, battle, plate-end, boty]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -74,6 +74,7 @@ jobs:
           - 'e2e-battle-ui.js'
           - 'e2e-battle-layout.js'
           - 'e2e-battle-server.js'
+          - 'e2e-boty.js'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -254,7 +254,7 @@
   // czytał to jako drżenie ręki i doliczał 2 pkt porowatości (−10 pkt) każdemu w mniejszym oknie.
   const V_WIN = 0.10;             // okno pomiaru prędkości [s]
 
-  function simulate(round) {
+  function simulate(round, opts) {   // opts.defects (09): dołóż listę wad jak inspect() — wynik i reszta pól bez zmian
     const { seed, W, H, proc, joint, pos: posKey, thick, bead, amps, arc, ang, events } = round;
     const rng = mulberry32(seed >>> 0);
     const P = POSITIONS[posKey];
@@ -349,7 +349,7 @@
       beadBase = diaAmps(diaSel, posKey); beadAmps = (ampMan && manA) ? manA : Math.round(beadBase * ampK);
       ampF = ampFOf(beadAmps / beadBase); fitF = diaFit(diaSel, diaTyp, joint === "fillet" ? -1 : b.lay); arcL0 = diaSel / 10; }
     function elecEntry(m) { return { d: diaSel, typ: diaTyp, amps: beadAmps, ref: diaAmps(diaTyp, posKey), pen: ampF.pen, sev: ampF.sev, ar: ampF.ar,
-      fit: fitF, avgV: m.avgV, u: arcTb ? arcVb / arcTb : null, zero: !!m.zeroTravel }; }
+      fit: fitF, avgV: m.avgV, u: arcTb ? arcVb / arcTb : null, zero: !!m.zeroTravel, bi: passIndex }; }   // bi (09): numer ściegu do opisu wady Ø — jak w grze
     beadElec();
     const EDGE = bevelEdgePx(thick, grooveHalf);
     const capMin = kb ? seamPts.map(() => 1e9) : null, capMax = kb ? seamPts.map(() => -1e9) : null;
@@ -727,14 +727,15 @@
     // Do raportu idzie ścieg najbliżej sufitu (najgorszy). Kary prądu i Ø = średnia po ściegach, wada = najgorsza.
     let ampPenT = ampF.pen, ampMajor = ampF.sev === "major", diaPen = 0, diaMajor = false, elec = null;
     let hiR = hiAct, hiRW = hiWps, hiRM = hiMax, ampsR = ampsUse;
+    let hiZero = zeroCur, Ed = null;   // 09: tylko do listy wad (opts.defects) — nie wchodzi do wyniku
     if (dz) {
-      const E = elecLog.concat([elecEntry(cur)]), tr = targetPx / PX_PER_MM;
+      const E = elecLog.concat([elecEntry(cur)]), tr = targetPx / PX_PER_MM; Ed = E;
       ampPenT = 0; ampMajor = false; hiOver = false; let worst = -1;
       for (const e of E) { ampPenT += e.pen; diaPen += e.fit.pen; if (e.sev === "major") ampMajor = true; if (e.fit.sev === "major") diaMajor = true;
         e.hiW = vWps != null ? heatInputKJmm(vWps, e.ref, tr, effP) : null;
         e.hiM = e.hiW != null ? Math.round(e.hiW * HI_MAX_R * 1000) / 1000 : null;
         e.hi = (vWps != null && !(kb9 && e.zero)) ? heatInputKJmm(e.u != null ? e.u : vWps, e.amps, e.avgV / PX_PER_MM, effP) : null;
-        if (kb9 && e.zero && cvn && e.hiM != null) hiOver = true;   // 3.15.0: ścieg bez przejazdu na stali
+        if (kb9 && e.zero && cvn && e.hiM != null) { hiOver = true; hiZero = true; }   // 3.15.0: ścieg bez przejazdu na stali
         if (e.hi != null && e.hiM != null) { const r = e.hi / e.hiM; if (r > worst) { worst = r; hiR = e.hi; hiRW = e.hiW; hiRM = e.hiM; ampsR = e.amps; }
           if (cvn && e.hi > e.hiM) hiOver = true; } }
       ampPenT /= E.length; diaPen /= E.length;
@@ -802,7 +803,7 @@
     const pf = 1 + 0.18 * (nLay - 1);
     const difficulty = mb * pm * jm * mf * pf;
 
-    return { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: dz ? ampsR : ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampPenT.toFixed(2),
+    const res = { score, letter, iso, coverage, spdAcc, evenness, overflow, porosity, spatter, endGap, baked: baked.length, passes: passPlanArr.length, difficulty: +difficulty.toFixed(2), amps: dz ? ampsR : ampRec && amps ? amps : ampRec, ampsWps: ampRec, ampPen: +ampPenT.toFixed(2),
              arcPen: +arcPen.toFixed(2), arcR: +arcR.toFixed(3), stickCount, arcBroke,
              angPen: +angPen.toFixed(2), offPen: +offPen.toFixed(2), filPen: +filPen.toFixed(2), filDabs: filCount, waDeg: +waDeg.toFixed(2), taDeg: +taDeg.toFixed(2),
              angW: +angW.toFixed(2), angT: +angT.toFixed(2), taIdeal: TA_IDEAL[proc] != null ? TA_IDEAL[proc] : 0,
@@ -810,6 +811,46 @@
              hi: hiR, hiWps: hiRW, hiMax: hiRM, hiOver, cvn, fastR: +fastR.toFixed(3), fastMax: +fastMax.toFixed(3), tooFast, rejectReasons: iso === "REJECT" ? rejectReasons : [], ...(dirOn ? { dirWrong } : {}),
              ...(dz ? { elec, diaPen: +diaPen.toFixed(2) } : {}),
              ...(kb ? { kb: true, beads: beadPlan.length, edgeCov: +edgeCov.toFixed(3), edgePen: +edgePen.toFixed(2), ibGaps, ibMax: +ibMax.toFixed(3), slag: slagCount } : {}) };
+    if (!(opts && opts.defects)) return res;
+
+    // ── 09: LISTA WAD 1:1 z inspect() w index.html (te same warunki, progi, kolejność i kody `c`) ──
+    // Tylko odczyt: liczone PO wyniku, nic tu nie zmienia score/letter/iso/rejectReasons. Bez `opts.defects`
+    // obiekt wyniku jest bit-w-bit taki jak bez tej poprawki (Battle i stare testy go nie widzą).
+    // k = klucz tekstu gry (def_*), p = liczby do wstawienia w %1/%2/%3 (formatuje strona, jak fmt() w grze).
+    const D = [];
+    if (hiOver) D.push((hiZero && hiR == null) ? { s: "major", c: "hi", k: "def_hi_zero", p: [hiRM] } : { s: "major", c: "hi", k: "def_hi_over", p: [hiR, hiRM] });
+    if (tooFast) { const fastV = Math.max.apply(null, all.map(m => m.avgV));
+      D.push({ s: "major", c: "fast", k: "def_fast", p: [(fastV / PX_PER_MM).toFixed(1), (targetPx / PX_PER_MM).toFixed(1)] }); }
+    if (dirBad) D.push({ s: "major", c: "dir", k: posKey === "PF" ? "def_dir_pf" : "def_dir_pg", p: [] });
+    if (coverage < 0.85) D.push({ s: coverage < 0.6 ? "major" : "minor", c: "pen", k: "def_pen", p: [Math.round((1 - coverage) * 100)] });
+    if (cur.narrow / baked.length > 0.25) D.push({ s: "minor", c: "narrow", k: "def_narrow", p: [] });
+    if (cur.wide / baked.length > 0.2) D.push({ s: "minor", c: "wide", k: "def_wide", p: [] });
+    if (overflow > 0.12) D.push({ s: overflow > 0.3 ? "major" : "minor", c: "undercut", k: "def_undercut", p: [Math.round(overflow * 100)] });
+    if (porosity > 0) D.push({ s: porosity > 3 ? "major" : "minor", c: "porosity", k: "def_porosity", p: [porosity] });
+    if (arcPen > 0) D.push({ s: arcPen >= 12 ? "major" : "minor", c: arcR < 1 ? "arc_short" : "arc_long", k: arcR < 1 ? "def_arc_short" : "def_arc_long", p: [] });
+    if (arcFails > 0) D.push({ s: arcFails > 2 ? "major" : "minor", c: "stick", k: "def_stick", p: [arcFails] });
+    if (angPen > 0) { const wo = angOverW(angW, posKey) * 1.1, to = angOverT(Math.abs(angT)) * 0.9, c = wo >= to ? "ang_work" : (angT > 0 ? "ang_drag" : "ang_push");
+      D.push({ s: angPen >= 10 ? "major" : "minor", c, k: "def_" + c, p: [] }); }
+    if (offPen > 0) D.push({ s: offPen >= OFF_MAJOR ? "major" : "minor", c: "offaxis", k: "def_offaxis", p: [] });
+    if (filPen > 0) D.push({ s: filPen >= FIL_MAJOR ? "major" : "minor", c: "filler", k: "def_filler", p: [] });
+    if (Ed) { const sv = x => x === "major" ? 2 : x ? 1 : 0; let ampSevT = null;
+      for (const e of Ed) if (e.sev === "major" || (e.sev && !ampSevT)) ampSevT = e.sev;
+      const ea = Ed.filter(e => e.sev).sort((p, q) => sv(q.sev) - sv(p.sev) || Math.abs(q.ar - 1) - Math.abs(p.ar - 1))[0];
+      if (ea) D.push({ s: ampSevT, c: ea.ar < 1 ? "amp_low" : "amp_high", k: ea.ar < 1 ? "def_amp_low" : "def_amp_high", p: [ea.amps, diaAmps(ea.d, posKey)] });
+      const ed = Ed.filter(e => e.fit.s).sort((p, q) => sv(q.fit.sev) - sv(p.fit.sev) || Math.abs(q.fit.s) - Math.abs(p.fit.s))[0];
+      if (ed) { const bl = beadPlan && beadPlan[ed.bi]; const k = ed.fit.s < 0 ? "def_dia_small" : (joint !== "fillet" && bl && bl.lay === 0 ? "def_dia_root" : "def_dia_big");
+        D.push({ s: ed.fit.sev, c: "dia", k, p: [ed.d, ed.typ, ed.bi] }); } }
+    else if (ampF.sev && ampRec != null) D.push({ s: ampF.sev, c: ampF.ar < 1 ? "amp_low" : "amp_high", k: ampF.ar < 1 ? "def_amp_low" : "def_amp_high", p: [ampsUse, ampRec] });
+    if (spatter > 4 && proc !== "TIG") D.push({ s: "minor", c: "spatter", k: "def_spatter", p: [spatter] });
+    if (evenness < 0.6) D.push({ s: "minor", c: "uneven", k: "def_uneven", p: [] });
+    if (endGap > 0) D.push({ s: endGap > 1 ? "major" : "minor", c: "crater", k: "def_crater", p: [] });
+    if (passPlanArr[0] === "root" && rootCov < 0.8) D.push({ s: "major", c: "rootlack", k: "def_rootlack", p: [Math.round(rootCov * 100)] });
+    if (kb && edgeCov < EDGE_OK) D.push({ s: edgeCov < EDGE_MAJOR ? "major" : "minor", c: "edges", k: "def_edges", p: [Math.round((1 - edgeCov) * 100)] });
+    if (ibGaps > 0) D.push({ s: ibMax >= IB_MAJOR ? "major" : "minor", c: "interbead", k: "def_interbead", p: [] });
+    if (slagCount > 0) D.push({ s: "major", c: "slag", k: "def_slag", p: [slagCount] });
+    if (D.length === 0) D.push({ s: "ok", c: "ok", k: "def_clean", p: [] });
+    res.defects = D;
+    return res;
   }
 
   // 3.15.0 — CZAS PRZY POSTOJU (flaga `kb: 9`): fizyka (łuk, kąt, tempo, odpryski, czas ściegu) liczona krokami 50 ms

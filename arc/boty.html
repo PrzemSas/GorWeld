@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GORWELD ARC — Boty kontra norma</title>
+<!--
+  GORWELD ARC WELDER — „Boty kontra norma" (poprawka 09). © 2026 Przemysław Sąsiadek (gorweld.com).
+  GORWELD® — znak towarowy UPRP R.396313. Oprogramowanie zastrzeżone — warunki w /LICENSE.
+  Pulpit szkoleniowy: trzech botów spawa tę samą próbkę, ocena WYŁĄCZNIE z ArcSim.simulate (sim.js).
+  Bez sieci, bez analityki, bez zapisu w przeglądarce.
+-->
+<style>
+  :root{--bg:#050709;--panel:#0b1014;--line:#1a242c;--tx:#cfd8de;--dim:#7c8a94;--B:#5fe08a;--C:#ffd23f;--D:#ff9a3c;--R:#ff5a4a;--acc:#3cb9ff}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:15px;letter-spacing:.12em}
+  .dim{color:var(--dim)}
+  .bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+  button,input{font:inherit;color:var(--tx);background:var(--panel);border:1px solid #2a3740;border-radius:4px;padding:6px 10px}
+  button{cursor:pointer;min-width:64px}
+  button:hover{border-color:var(--acc)}
+  button.on{background:#123044;border-color:var(--acc)}
+  #seed{width:120px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;padding:10px 14px}
+  .p{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}
+  .p h2{margin:0 0 8px;font-size:11px;letter-spacing:.14em;color:var(--dim);font-weight:600}
+  .bots{grid-column:span 12;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .bot{cursor:pointer}
+  .bot.sel{outline:1px solid var(--acc)}
+  .bot .nm{font-weight:700;font-size:14px}
+  .big{font-size:26px;font-weight:800;letter-spacing:.04em}
+  .row{display:flex;justify-content:space-between;gap:8px}
+  .isobar{display:flex;height:8px;border-radius:3px;overflow:hidden;background:#11181d;margin-top:6px}
+  .verdict{grid-column:span 5}
+  .params{grid-column:span 3}
+  .chart{grid-column:span 4}
+  .log{grid-column:span 12}
+  .sh{display:none}
+  ul.def{list-style:none;margin:6px 0 0;padding:0}
+  ul.def li{padding:3px 0 3px 8px;border-left:3px solid var(--dim);margin-bottom:3px}
+  ul.def li.major{border-color:var(--R)}
+  ul.def li.minor{border-color:var(--D)}
+  ul.def li.ok{border-color:var(--B)}
+  .tag{font-size:10px;letter-spacing:.1em;color:var(--dim);margin-right:6px}
+  table{width:100%;border-collapse:collapse}
+  td,th{padding:3px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{color:var(--dim);font-weight:600;font-size:11px}
+  td.w{white-space:normal}
+  #logbox{max-height:300px;overflow:auto}
+  #pTab td{white-space:normal;vertical-align:top}
+  #pTab .ref{display:block;font-size:11px;color:var(--dim)}
+  canvas{width:100%;height:190px;display:block}
+  footer{padding:10px 14px 18px;color:var(--dim);border-top:1px solid var(--line)}
+  @media (max-width:900px){
+    .verdict,.params,.chart{grid-column:span 12}
+    .bots{grid-template-columns:1fr}
+    .hide-m{display:none}
+    #logT td.w{min-width:150px}
+    .full{display:none}
+    .sh{display:inline!important}
+    .hide-m2{display:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>BOTY KONTRA NORMA</h1>
+  <span id="sample" class="dim"></span>
+  <span id="engine" class="dim"></span>
+</header>
+
+<div class="bar">
+  <button id="bStop">Stop</button>
+  <button id="b1">Krok 1</button>
+  <button id="b10">Krok 10</button>
+  <button id="bAuto">Auto</button>
+  <span class="dim" style="margin-left:8px">ziarno</span>
+  <input id="seed" inputmode="numeric" aria-label="ziarno">
+  <button id="bRand">Losuj ziarno</button>
+  <button id="bReset">Od nowa</button>
+  <button id="bLang" title="Język opisów wad">PL / EN</button>
+  <span id="status" class="dim"></span>
+</div>
+
+<div class="grid">
+  <div class="bots" id="bots"></div>
+
+  <div class="p verdict">
+    <h2>WERDYKT ISO 5817 — OSTATNIA PRÓBA <span id="vWho"></span></h2>
+    <div class="row"><div class="big" id="vIso">—</div><div style="text-align:right"><div id="vScore" class="big">—</div><div class="dim">punkty gry · litera <b id="vLetter">—</b></div></div></div>
+    <div class="dim" id="vReasons"></div>
+    <ul class="def" id="vDef"></ul>
+  </div>
+
+  <div class="p params">
+    <h2>PARAMETRY PROCESU</h2>
+    <table id="pTab"></table>
+  </div>
+
+  <div class="p chart">
+    <h2>PUNKTY W KOLEJNYCH PRÓBACH</h2>
+    <canvas id="cv" width="600" height="190"></canvas>
+    <div class="dim" id="legend"></div>
+  </div>
+
+  <div class="p log">
+    <h2>DZIENNIK PRÓB</h2>
+    <div id="logbox"><table><thead><tr><th>#</th><th>bot</th><th>pkt</th><th class="hide-m2">lit.</th><th>ISO</th><th>wady</th><th class="hide-m">prąd</th><th class="hide-m">napięcie</th><th class="hide-m">tempo max</th></tr></thead><tbody id="logT"></tbody></table></div>
+  </div>
+</div>
+
+<footer>
+  <div id="note"></div>
+  <div>Każda próba to surowe ruchy ręki bota policzone przez ten sam silnik oceny co gra (ArcSim.simulate). Lista wad: te same progi co raport VT w ARC. Profile różnią się tylko ruchem i ustawieniami, nie punktami.</div>
+</footer>
+
+<script src="sim.js"></script>
+<script src="boty.js"></script>
+<script>
+(function(){
+  "use strict";
+  const S = window.ArcSim, B = window.ArcBoty, P = B.PROFILES;
+  const ISO_COL = { B: "var(--B)", C: "var(--C)", D: "var(--D)", REJECT: "var(--R)" };
+  const $ = id => document.getElementById(id);
+  let lang = "pl", sel = 2, auto = null, busy = false;
+  const bench = new B.Bench(20261126);
+  window.__boty = bench;                                   // do testów E2E (tylko odczyt)
+
+  const num = (v, d) => v == null || !isFinite(v) ? "—" : (+v).toFixed(d).replace(".", lang === "en" ? "." : ",");
+  const isoTxt = c => B.TEXTS[lang][c === "REJECT" ? "iso_reject" : "iso_" + c];
+  const S0 = B.SAMPLE, vW = S.recommendedVolts(S0.proc, S0.thick);
+  $("sample").textContent = "MMA (111) · PA · 5 mm · stal · złącze doczołowe · WPS: prąd wg Ø elektrody ściegu, " + num(vW, 1) + " V, " + num(B.SPEED_WPS, 1) + " mm/s";
+  $("engine").textContent = "silnik ARC " + S.VERSION + " · ocena " + S.SCORING_VERSION;
+  $("note").textContent = B.TEXTS.pl.rep_note + " / " + B.TEXTS.en.rep_note;
+
+  function setSeedBox(){ $("seed").value = String(bench.seed); }
+  function reset(seed){ stop(); bench.reset(seed); setSeedBox(); render(); }
+
+  // ── karty botów ──
+  function botsHTML(){
+    $("bots").innerHTML = P.map((p, i) => '<div class="p bot" data-b="' + i + '"><div class="row"><span class="nm" style="color:' + p.col + '">' + p.pl + '</span><span class="big" id="bi' + i + '">—</span></div>'
+      + '<div class="row dim"><span>prób <b id="bn' + i + '">0</b></span><span>średnio <b id="ba' + i + '">—</b> pkt</span><span>zaliczone <b id="bp' + i + '">—</b></span></div>'
+      + '<div class="isobar" id="bd' + i + '"></div><div class="dim" id="bdt' + i + '" style="margin-top:4px"></div></div>').join("");
+    document.querySelectorAll(".bot").forEach(el => el.onclick = () => { sel = +el.dataset.b; render(); });
+  }
+
+  function lastOf(b){ for (let i = bench.log.length - 1; i >= 0; i--) if (bench.log[i].bot === b) return bench.log[i]; return null; }
+  function defLine(e){ const D = e.defects.filter(d => d.s !== "ok"); if (!D.length) return B.defectText(e.defects[0], lang);
+    const maj = D.filter(d => d.s === "major"), pick = (maj.length ? maj : D).slice(0, 2);
+    return pick.map(d => B.defectText(d, lang).split(" — ")[0]).join("; ") + (D.length > pick.length ? " (+" + (D.length - pick.length) + ")" : ""); }
+
+  function render(){
+    document.querySelectorAll(".bot").forEach(el => el.classList.toggle("sel", +el.dataset.b === sel));
+    P.forEach((p, i) => { const st = bench.stats(i), L = lastOf(i);
+      $("bn" + i).textContent = st.n; $("ba" + i).textContent = st.n ? num(st.avg, 1) : "—"; $("bp" + i).textContent = st.n ? Math.round(st.pass * 100) + "%" : "—";
+      $("bi" + i).textContent = L ? (L.iso === "REJECT" ? "ODRZ." : L.iso) : "—"; $("bi" + i).style.color = L ? ISO_COL[L.iso] : "";
+      $("bd" + i).innerHTML = st.n ? ["B", "C", "D", "REJECT"].map(k => '<span style="width:' + (st.iso[k] / st.n * 100) + '%;background:' + ISO_COL[k] + '"></span>').join("") : "";
+      $("bdt" + i).textContent = st.n ? "B " + st.iso.B + " · C " + st.iso.C + " · D " + st.iso.D + " · odrzucone " + st.iso.REJECT : "";
+    });
+    const e = lastOf(sel);
+    $("vWho").textContent = "· " + P[sel][lang === "en" ? "en" : "pl"].toUpperCase();
+    if (!e){ $("vIso").textContent = "—"; $("vIso").style.color = ""; $("vScore").textContent = "—"; $("vLetter").textContent = "—"; $("vReasons").textContent = "Wciśnij Krok 1 albo Auto."; $("vDef").innerHTML = ""; $("pTab").innerHTML = ""; }
+    else {
+      $("vIso").textContent = isoTxt(e.iso); $("vIso").style.color = ISO_COL[e.iso];
+      $("vScore").textContent = e.score; $("vLetter").textContent = e.letter;
+      $("vReasons").textContent = "próba #" + e.n + (e.rejectReasons.length ? " · przyczyny odrzutu (silnik): " + e.rejectReasons.join(", ") : "");
+      const ord = { major: 0, minor: 1, ok: 2 };
+      $("vDef").innerHTML = e.defects.slice().sort((a, b) => ord[a.s] - ord[b.s]).map(d => '<li class="' + d.s + '"><span class="tag">' + (d.s === "major" ? "MAJOR" : d.s === "minor" ? "MINOR" : "OK") + '</span>' + esc(B.defectText(d, lang)) + '</li>').join("");
+      const rows = [
+        e.elec.length ? ["Prąd (ściegi)", e.elec.map(x => x.amps).join(" / ") + " A", "WPS wg Ø: " + e.elec.map(x => "Ø" + num(x.typ / 10, 1) + " " + x.ref + " A").join(" / ") + (e.elec.some(x => x.d !== x.typ) ? " · użyta Ø: " + e.elec.map(x => num(x.d / 10, 1)).join(" / ") : "")]
+                      : ["Prąd", e.amps + " A", "WPS " + e.ampsWps + " A"],
+        ["Napięcie łuku", num(e.volts, 1) + " V", "WPS " + num(vW, 1) + " V"],
+        ["Tempo najszybszego ściegu", num(e.fastR * e.vWps, 1) + " mm/s", "WPS " + num(e.vWps, 1) + " · odrzut > " + num(e.fastMax * e.vWps, 1)],
+        ["Kąt roboczy", num(e.waDeg, 1) + "°", "WPS 0°"],
+        ["Kąt ciągnięcia", num(e.taDeg, 1) + "°", "WPS " + e.taIdeal + "°"],
+        ["Wkład ciepła", num(e.hi, 3) + " kJ/mm", "max " + num(e.hiMax, 3)],
+        ["Pokrycie rowka", Math.round(e.coverage * 100) + "%", "ściegów " + e.passes]
+      ];
+      $("pTab").innerHTML = rows.map(r => "<tr><td class='dim'>" + r[0] + "</td><td><b>" + r[1] + "</b><span class='ref'>" + r[2] + "</span></td></tr>").join("");
+    }
+    // dziennik — najnowsze na górze (do 300 wierszy na ekranie; pełny log zostaje w pamięci)
+    $("logT").innerHTML = bench.log.slice(-300).reverse().map(e => '<tr><td>' + e.n + '</td><td class="bn" style="color:' + P[e.bot].col + '"><span class="full">' + P[e.bot].pl + '</span><span class="sh">' + P[e.bot].sh + '</span></td><td>' + e.score + '</td><td class="hide-m2">' + e.letter
+      + '</td><td style="color:' + ISO_COL[e.iso] + '">' + (e.iso === "REJECT" ? "ODRZ." : e.iso) + '</td><td class="w">' + esc(defLine(e)) + '</td><td class="hide-m">' + (e.elec.length ? e.elec.map(x => x.amps).join("/") : e.amps) + ' A</td><td class="hide-m">' + num(e.volts, 1) + ' V</td><td class="hide-m">' + num(e.fastR * e.vWps, 1) + ' mm/s</td></tr>').join("");
+    drawChart();
+    $("status").textContent = "prób na bota: " + bench.n + (auto ? " · AUTO" : "");
+    $("bAuto").classList.toggle("on", !!auto);
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function drawChart(){
+    const cv = $("cv"), dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 600, h = cv.clientHeight || 190;
+    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    const L = 26, R = 6, T = 6, Bt = 16, n = Math.max(10, bench.n), X = i => L + (i - 1) / Math.max(1, n - 1) * (w - L - R), Y = s => T + (1 - s / 100) * (h - T - Bt);
+    g.font = "10px ui-monospace,monospace"; g.lineWidth = 1;
+    [[50, "var(--R)", "odrzut < 50"], [72, "#ffd23f", "C ≥ 72"], [88, "#5fe08a", "B ≥ 88"]].forEach(([s, c, t]) => { const tw = g.measureText(t).width; g.strokeStyle = getC(c); g.globalAlpha = .35; g.setLineDash([3, 3]);
+      g.beginPath(); g.moveTo(L, Y(s)); g.lineTo(w - R, Y(s)); g.stroke(); g.setLineDash([]); g.globalAlpha = .8; g.fillStyle = getC(c); g.fillText(t, w - R - tw - 2, Y(s) - 2); g.globalAlpha = 1; });
+    g.fillStyle = "#7c8a94"; [0, 50, 100].forEach(s => g.fillText(String(s), 2, Y(s) + 3)); g.fillText("próba " + bench.n, w - 70, h - 3);
+    P.forEach((p, b) => { const pts = bench.log.filter(e => e.bot === b); if (!pts.length) return; g.strokeStyle = p.col; g.fillStyle = p.col; g.lineWidth = 1.6;
+      g.beginPath(); pts.forEach((e, i) => { const x = X(e.n), y = Y(e.score); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+      pts.forEach(e => { g.beginPath(); g.arc(X(e.n), Y(e.score), e.iso === "REJECT" ? 3 : 2, 0, 6.3); e.iso === "REJECT" ? g.stroke() : g.fill(); }); });
+    $("legend").innerHTML = P.map(p => '<span style="color:' + p.col + '">■ ' + p.pl + '</span>').join(" &nbsp; ") + " &nbsp; ○ = odrzucona";
+  }
+  function getC(c){ return c.startsWith("var(") ? getComputedStyle(document.documentElement).getPropertyValue(c.slice(4, -1)).trim() : c; }
+
+  // ── sterowanie ── Krok = jedna skończona próba każdego z trzech botów
+  function stop(){ if (auto) { clearTimeout(auto); auto = null; } render(); }
+  function stepAsync(k){ if (busy) return Promise.resolve(); busy = true;
+    return new Promise(res => { let left = k; const go = () => { bench.stepOne(); render(); if (--left > 0) setTimeout(go, 0); else { busy = false; res(); } }; go(); }); }
+  function autoTick(){ stepAsync(1).then(() => { if (auto) auto = setTimeout(autoTick, 700); }); }
+  $("bStop").onclick = stop;
+  $("b1").onclick = () => stepAsync(1);
+  $("b10").onclick = () => stepAsync(10);
+  $("bAuto").onclick = () => { if (auto) return; auto = setTimeout(autoTick, 0); render(); };
+  $("bReset").onclick = () => reset(bench.seed);
+  $("bRand").onclick = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); reset(a[0] % 100000000); };   // wybór ziarna = wejście, widoczne w polu; nie wchodzi w ocenę
+  $("seed").onchange = () => { const v = parseInt($("seed").value, 10); reset(Number.isFinite(v) && v >= 0 ? v : bench.seed); };
+  $("bLang").onclick = () => { lang = lang === "pl" ? "en" : "pl"; render(); };
+  window.addEventListener("resize", drawChart);
+
+  botsHTML(); setSeedBox(); render();
+})();
+</script>
+</body>
+</html>

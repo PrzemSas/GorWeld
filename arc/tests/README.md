@@ -25,6 +25,8 @@ na weryfikacji z powodu, którego nie da się wytłumaczyć.
     node kb.js         # kombajn (3.7.0): realna sekwencja ściegów, tory, lico vs faza, 401, żużel; bez `kb` bit-w-bit jak 3.6.0
     node acceptance.js # zaliczenie treningu: odrzut ISO (major albo <50) blokuje ZALICZONE, XP i konfetti; konkurs bez zmian
     node reject-reasons.js # przyczyny odrzutu: REJECT ma co najmniej jedną znaną przyczynę, zaliczenie pustą listę
+    node boty.js       # „Boty kontra norma” (09): lista wad simulate(r,{defects:true}) = warunki inspect() (źródła + mutacje), wada major ⇔ rejectReasons, bez opcji wynik bit w bit; boty: ziarno, Krok 1/10, parytet z silnikiem
+    node e2e-boty.js http://127.0.0.1:8898 # pulpit arc/boty.html w Chromium: przyciski, Auto/Stop, dziennik = Node, telefon 390 px, zero sieci
     node e2e-battle.js http://127.0.0.1:8898 # pełny Battle host → link → gość → VS; wymaga Playwright/Chromium i serwera HTTP
 
 Testy nodowe czytają NAGRANIE, a nie klawiaturę — więc same nie wychwycą błędu, w którym dab

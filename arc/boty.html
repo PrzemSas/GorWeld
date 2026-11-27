@@ -10,6 +10,7 @@
   Pulpit szkoleniowy: trzech botów spawa tę samą próbkę, ocena WYŁĄCZNIE z ArcSim.simulate (sim.js).
   Bez sieci, bez analityki, bez zapisu w przeglądarce.
   10: klikalne objaśnienia wad (PL/EN/RU; dotyk, mysz, klawiatura) + przełącznik reguły próbnej kb:10 (okno zajarzenia).
+  11: wybór reguły kb:9 (jak gra) / kb:10 / kb:11 (+ treningowy zakres ARC, próg wady łuku), domyślnie kb:9; zakres prądu i kąt bezwzględny w parametrach.
 -->
 <style>
   :root{--bg:#050709;--panel:#0b1014;--line:#1a242c;--tx:#cfd8de;--dim:#7c8a94;--B:#5fe08a;--C:#ffd23f;--D:#ff9a3c;--R:#ff5a4a;--acc:#3cb9ff}
@@ -56,6 +57,14 @@
   .dx .x{float:right;min-width:44px;min-height:44px;padding:0;font-size:18px;line-height:1}
   .tg{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;cursor:pointer}
   .tg input{width:18px;height:18px;margin:0}
+  /* 11: wybór reguły — trzy radia w jednej grupie (Tab wchodzi, strzałki zmieniają, tap w etykietę wybiera) */
+  fieldset.rule{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0;padding:0 2px;border:0;min-width:0}
+  fieldset.rule legend{float:left;color:var(--dim);margin-right:4px;padding:0}
+  .rb{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 8px;border:1px solid #2a3740;border-radius:4px;cursor:pointer;background:var(--panel)}
+  .rb input{width:16px;height:16px;margin:0;accent-color:var(--acc)}
+  .rb:has(input:checked){border-color:var(--acc);background:#123044}
+  .rb:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
+  .rb .x2{color:var(--dim)}
   ul.def li.major{border-color:var(--R)}
   ul.def li.minor{border-color:var(--D)}
   ul.def li.ok{border-color:var(--B)}
@@ -82,6 +91,7 @@
     #seed{width:92px}
     .bar .lbl,#status{display:none}
     .tg{min-height:32px;font-size:12px}
+    .rb{min-height:32px;font-size:12px}
   }
   /* 10_v2: telefon do 480 px — każdy cel sterowania ≥ 44×44 px (WCAG 2.5.5), przełącznik kb:10 razem z etykietą */
   @media (max-width:480px){
@@ -89,6 +99,8 @@
     .bar button,#seed{min-height:44px;min-width:44px;padding:0 10px}
     .tg{min-height:44px;min-width:44px;padding:0 8px 0 4px}
     .tg input{width:22px;height:22px}
+    .rb{min-height:44px;min-width:44px;padding:0 10px}
+    .rb input{width:20px;height:20px}
     /* rząd Stop / Krok / Auto ląduje na dole paska i tylko on zostaje przyklejony; ziarno i przełącznik przewijają się z treścią */
     .bar{flex-wrap:wrap-reverse;top:calc(-1 * var(--barHide, 0px))}
   }
@@ -111,7 +123,11 @@
   <button id="bRand">Losuj ziarno</button>
   <button id="bReset">Od nowa</button>
   <button id="bLang" title="Język opisów i objaśnień wad: PL → EN → RU" aria-label="Język opisów wad">PL</button>
-  <label class="tg" title="Reguła próbna kb:10 — po zajarzeniu łuk nie jest karany za krótki, dopóki nie wejdzie w pasmo (najdłużej 0,5–1,0 s wg Ø). Gra i Battle nadal liczą kb:9."><input type="checkbox" id="grace"> Pomijaj zajarzenie (nowa reguła, próba)</label>
+  <fieldset class="rule" id="rule"><legend>Reguła</legend>
+    <label class="rb" title="Tak jak gra i Battle dziś."><input type="radio" name="rule" value="9" id="r9" checked> kb:9 <span class="x2">(jak gra)</span></label>
+    <label class="rb" title="Reguła próbna z 10: po zajarzeniu łuk nie jest karany za krótki, dopóki nie wejdzie w pasmo (najdłużej 0,5–1,0 s wg Ø)."><input type="radio" name="rule" value="10" id="r10"> kb:10 <span class="x2">(pomijaj zajarzenie)</span></label>
+    <label class="rb" title="Reguła próbna z 11 = kb:10 + wada prądu tylko poza treningowym zakresem ARC dla Ø i pozycji + wada łuku dopiero od kary 0,25. Gra i Battle nadal liczą kb:9."><input type="radio" name="rule" value="11" id="r11"> kb:11 <span class="x2">(kb:10 + zakres ARC, próg łuku)</span></label>
+  </fieldset>
   <span id="status" class="dim"></span>
 </div>
 
@@ -173,7 +189,18 @@
   $("note").textContent = B.TEXTS.pl.rep_note + " / " + B.TEXTS.en.rep_note + " / " + B.TEXTS.ru.rep_note;
 
   function setSeedBox(){ $("seed").value = String(bench.seed); }
-  function reset(seed, grace){ stop(); bench.reset(seed, grace); setSeedBox(); $("grace").checked = bench.grace; render(); }
+  function reset(seed, rule){ stop(); bench.reset(seed, rule); setSeedBox(); const r = $("r" + bench.rule); if (r) r.checked = true; render(); }
+  // 11: teksty wierszy parametrów w języku opisów (PL / EN / RU) — kąt pokazany BEZWZGLĘDNIE, średnio z całej próby, z pasmem bez kary
+  const PT = {
+    pl: { amp: "Prąd (ściegi)", amp1: "Prąd", ampRange: "zakres ARC", wpsD: "WPS wg Ø", used: "użyta Ø", volt: "Napięcie łuku", fast: "Tempo najszybszego ściegu", rej: "odrzut", hi: "Wkład ciepła", cov: "Pokrycie rowka", beads: "ściegów",
+          wa: "Kąt roboczy", waV: "od osi złącza (średnio)", waR: "WPS: w osi złącza, pasmo bez kary ±", ta: "Kąt ciągnięcia", tad: "ciągnięcia", tap: "pchania", avg: "średnio", taR: "WPS: ciągnięcie", band: "pasmo bez kary ±",
+          rule: { 9: "reguła kb:9 (jak gra)", 10: "reguła kb:10 (próba: pomijaj zajarzenie)", 11: "reguła kb:11 (próba: kb:10 + zakres ARC + próg wady łuku)" } },
+    en: { amp: "Current (beads)", amp1: "Current", ampRange: "ARC range", wpsD: "WPS by Ø", used: "Ø used", volt: "Arc voltage", fast: "Fastest bead speed", rej: "reject", hi: "Heat input", cov: "Groove coverage", beads: "beads",
+          wa: "Work angle", waV: "off the joint axis (average)", waR: "WPS: on the joint axis, no-penalty band ±", ta: "Drag angle", tad: "drag", tap: "push", avg: "average", taR: "WPS: drag", band: "no-penalty band ±",
+          rule: { 9: "rule kb:9 (like the game)", 10: "rule kb:10 (trial: skip arc strike)", 11: "rule kb:11 (trial: kb:10 + ARC range + arc fault threshold)" } },
+    ru: { amp: "Ток (валики)", amp1: "Ток", ampRange: "диапазон ARC", wpsD: "WPS по Ø", used: "Ø в работе", volt: "Напряжение дуги", fast: "Скорость самого быстрого валика", rej: "брак", hi: "Погонная энергия", cov: "Заполнение разделки", beads: "валиков",
+          wa: "Рабочий угол", waV: "от оси соединения (в среднем)", waR: "WPS: по оси соединения, без штрафа ±", ta: "Угол наклона назад", tad: "углом назад", tap: "углом вперёд", avg: "в среднем", taR: "WPS: углом назад", band: "без штрафа ±",
+          rule: { 9: "правило kb:9 (как в игре)", 10: "правило kb:10 (проба: без зажигания)", 11: "правило kb:11 (проба: kb:10 + диапазон ARC + порог дефекта дуги)" } } };
 
   // ── karty botów ──
   function botsHTML(){
@@ -205,23 +232,26 @@
       $("vReasons").textContent = "próba #" + e.n + (e.rejectReasons.length ? " · przyczyny odrzutu (silnik): " + e.rejectReasons.join(", ") : "");
       const ord = { major: 0, minor: 1, ok: 2 };
       defList(e.defects.slice().sort((a, b) => ord[a.s] - ord[b.s]));
+      const T = PT[lang], taA = e.taIdeal + e.angT;   // 11: kąt bezwzględny = WPS + średnia odchyłka (sim.js: angT po czasie; waDeg/taDeg to chwilowa odchyłka z końca próby)
+      const rngTxt = e.elec.length && e.elec.every(x => x.rng);   // kb:11: treningowy zakres ARC dla użytej Ø i pozycji
       const rows = [
-        e.elec.length ? ["Prąd (ściegi)", e.elec.map(x => x.amps).join(" / ") + " A", "WPS wg Ø: " + e.elec.map(x => "Ø" + num(x.typ / 10, 1) + " " + x.ref + " A").join(" / ") + (e.elec.some(x => x.d !== x.typ) ? " · użyta Ø: " + e.elec.map(x => num(x.d / 10, 1)).join(" / ") : "")]
-                      : ["Prąd", e.amps + " A", "WPS " + e.ampsWps + " A"],
-        ["Napięcie łuku", num(e.volts, 1) + " V", "WPS " + num(vW, 1) + " V"],
-        ["Tempo najszybszego ściegu", num(e.fastR * e.vWps, 1) + " mm/s", "WPS " + num(e.vWps, 1) + " · odrzut > " + num(e.fastMax * e.vWps, 1)],
-        ["Kąt roboczy", num(e.waDeg, 1) + "°", "WPS 0°"],
-        ["Kąt ciągnięcia", num(e.taDeg, 1) + "°", "WPS " + e.taIdeal + "°"],
-        ["Wkład ciepła", num(e.hi, 3) + " kJ/mm", "max " + num(e.hiMax, 3)],
-        ["Pokrycie rowka", Math.round(e.coverage * 100) + "%", "ściegów " + e.passes]
+        e.elec.length ? [T.amp, e.elec.map(x => x.amps).join(" / ") + " A", rngTxt ? T.ampRange + " " + e.elec.map(x => "Ø" + num(x.d / 10, 1) + " " + x.rng[0] + "–" + x.rng[1] + " A").join(" / ")
+                        : T.wpsD + ": " + e.elec.map(x => "Ø" + num(x.typ / 10, 1) + " " + x.ref + " A").join(" / ") + (e.elec.some(x => x.d !== x.typ) ? " · " + T.used + ": " + e.elec.map(x => num(x.d / 10, 1)).join(" / ") : "")]
+                      : [T.amp1, e.amps + " A", "WPS " + e.ampsWps + " A"],
+        [T.volt, num(e.volts, 1) + " V", "WPS " + num(vW, 1) + " V"],
+        [T.fast, num(e.fastR * e.vWps, 1) + " mm/s", "WPS " + num(e.vWps, 1) + " · " + T.rej + " > " + num(e.fastMax * e.vWps, 1)],
+        [T.wa, num(e.angW, 1) + "° " + T.waV, T.waR + num(S.waBandFor(S0.pos), 0) + "°"],
+        [T.ta, num(Math.abs(taA), 1) + "° " + (taA >= 0 ? T.tad : T.tap) + " (" + T.avg + ")", T.taR + " " + e.taIdeal + "°, " + T.band + S.TA_BAND + "°"],
+        [T.hi, num(e.hi, 3) + " kJ/mm", "max " + num(e.hiMax, 3)],
+        [T.cov, Math.round(e.coverage * 100) + "%", T.beads + " " + e.passes]
       ];
       $("pTab").innerHTML = rows.map(r => "<tr><td class='dim'>" + r[0] + "</td><td><b>" + r[1] + "</b><span class='ref'>" + r[2] + "</span></td></tr>").join("");
     }
     // dziennik — najnowsze na górze (do 300 wierszy na ekranie; pełny log zostaje w pamięci)
-    $("logT").innerHTML = bench.log.slice(-300).reverse().map(e => '<tr><td>' + e.n + '</td><td' + (e.kb === 10 ? ' style="color:var(--acc)"' : '') + '>' + e.kb + '</td><td class="bn" style="color:' + P[e.bot].col + '"><span class="full">' + P[e.bot].pl + '</span><span class="sh">' + P[e.bot].sh + '</span></td><td>' + e.score + '</td><td class="hide-m2">' + e.letter
+    $("logT").innerHTML = bench.log.slice(-300).reverse().map(e => '<tr><td>' + e.n + '</td><td' + (e.kb >= 10 ? ' style="color:var(--acc)"' : '') + '>' + e.kb + '</td><td class="bn" style="color:' + P[e.bot].col + '"><span class="full">' + P[e.bot].pl + '</span><span class="sh">' + P[e.bot].sh + '</span></td><td>' + e.score + '</td><td class="hide-m2">' + e.letter
       + '</td><td style="color:' + ISO_COL[e.iso] + '">' + (e.iso === "REJECT" ? "ODRZ." : e.iso) + '</td><td class="w">' + esc(defLine(e)) + '</td><td class="hide-m">' + (e.elec.length ? e.elec.map(x => x.amps).join("/") : e.amps) + ' A</td><td class="hide-m">' + num(e.volts, 1) + ' V</td><td class="hide-m">' + num(e.fastR * e.vWps, 1) + ' mm/s</td></tr>').join("");
     drawChart();
-    const rule = bench.grace ? "reguła kb:10 (próba: pomijaj zajarzenie)" : "reguła kb:9 (jak gra)";
+    const rule = PT[lang].rule[bench.rule];
     $("logRule").textContent = "· " + rule; $("engine").textContent = "silnik ARC " + S.VERSION + " · ocena " + S.SCORING_VERSION + " · " + rule;
     $("bLang").textContent = lang.toUpperCase();
     $("status").textContent = "prób na bota: " + bench.n + (auto ? " · AUTO" : "");
@@ -277,7 +307,7 @@
     const cv = $("cv"), dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 600, h = cv.clientHeight || 190;
     if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
-    const L = 26, R = 6, T = 6, Bt = 16, n = Math.max(10, bench.n), X = i => L + (i - 1) / Math.max(1, n - 1) * (w - L - R), Y = s => T + (1 - s / 100) * (h - T - Bt);
+    const tag = bench.rule >= 10, L = 26, R = 6, T = tag ? 18 : 6, Bt = 16, n = Math.max(10, bench.n), X = i => L + (i - 1) / Math.max(1, n - 1) * (w - L - R), Y = s => T + (1 - s / 100) * (h - T - Bt);
     g.font = "10px ui-monospace,monospace"; g.lineWidth = 1;
     [[50, "var(--R)", "odrzut < 50"], [72, "#ffd23f", "C ≥ 72"], [88, "#5fe08a", "B ≥ 88"]].forEach(([s, c, t]) => { const tw = g.measureText(t).width; g.strokeStyle = getC(c); g.globalAlpha = .35; g.setLineDash([3, 3]);
       g.beginPath(); g.moveTo(L, Y(s)); g.lineTo(w - R, Y(s)); g.stroke(); g.setLineDash([]); g.globalAlpha = .8; g.fillStyle = getC(c); g.fillText(t, w - R - tw - 2, Y(s) - 2); g.globalAlpha = 1; });
@@ -285,7 +315,11 @@
     P.forEach((p, b) => { const pts = bench.log.filter(e => e.bot === b); if (!pts.length) return; g.strokeStyle = p.col; g.fillStyle = p.col; g.lineWidth = 1.6;
       g.beginPath(); pts.forEach((e, i) => { const x = X(e.n), y = Y(e.score); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
       pts.forEach(e => { g.beginPath(); g.arc(X(e.n), Y(e.score), e.iso === "REJECT" ? 3 : 2, 0, 6.3); e.iso === "REJECT" ? g.stroke() : g.fill(); }); });
-    if (bench.grace) { g.fillStyle = getC("var(--acc)"); g.fillText("kb:10 · pomijaj zajarzenie (próba)", L + 4, T + 10); }
+    // 11_v2: napis reguły NAD polem wykresu (linia bazowa 12 px, pole od T = 18 px) — nie nachodzi na linie botów ani progów; na wąskim ekranie krótsza wersja
+    if (tag) { g.fillStyle = getC("var(--acc)"); const full = bench.rule === 11 ? "kb:11 · kb:10 + zakres ARC, próg łuku (próba)" : "kb:10 · pomijaj zajarzenie (próba)", short = bench.rule === 11 ? "kb:11 · zakres ARC, próg łuku" : "kb:10 · pomijaj zajarzenie";
+      const txt = g.measureText(full).width <= w - L - R - 4 ? full : short, m = g.measureText(txt); g.fillText(txt, L + 4, 12);
+      cv.dataset.tag = [L + 4, 12 - m.actualBoundingBoxAscent, L + 4 + m.width, 12 + m.actualBoundingBoxDescent].map(v => Math.round(v * 10) / 10).join(","); } else delete cv.dataset.tag;
+    cv.dataset.top = T; cv.dataset.w = w;
     $("legend").innerHTML = P.map(p => '<span style="color:' + p.col + '">■ ' + p.pl + '</span>').join(" &nbsp; ") + " &nbsp; ○ = odrzucona";
   }
   function getC(c){ return c.startsWith("var(") ? getComputedStyle(document.documentElement).getPropertyValue(c.slice(4, -1)).trim() : c; }
@@ -303,7 +337,7 @@
   $("bRand").onclick = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); reset(a[0] % 100000000); };   // wybór ziarna = wejście, widoczne w polu; nie wchodzi w ocenę
   $("seed").onchange = () => { const v = parseInt($("seed").value, 10); reset(Number.isFinite(v) && v >= 0 ? v : bench.seed); };
   $("bLang").onclick = () => { lang = LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]; render(); };
-  $("grace").onchange = () => reset(bench.seed, $("grace").checked);
+  document.querySelectorAll('input[name="rule"]').forEach(r => r.onchange = () => { if (r.checked) reset(bench.seed, +r.value); });
   window.addEventListener("resize", drawChart);
   // 10_v2: telefon ≤ 480 px — chowamy pod górną krawędź tylko górne rzędy paska (wszystko nad rzędem ze Stop)
   const BAR = document.querySelector(".bar"), PHONE = matchMedia("(max-width:480px)");

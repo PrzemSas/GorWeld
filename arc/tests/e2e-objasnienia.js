@@ -45,7 +45,7 @@ const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y
   await page.click(sel0); await page.mouse.move(5, 5); s = await st();
   ok("drugi klik odpina", s.hidden && s.exp.length === 0);
   // klawiatura: Tab → wada, Enter, Esc (fokus wraca), Spacja
-  await page.focus("#grace"); let reached = null;
+  await page.focus("#r9"); let reached = null;   // 11: przełącznik kb:10 zastąpiony wyborem reguły (radia r9 / r10 / r11)
   for (let i = 0; i < 40 && !reached; i++) { await page.keyboard.press("Tab"); const a = await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("defb") ? document.activeElement.dataset.k : null); if (a) reached = a; }
   const fv = await page.evaluate(() => { const a = document.activeElement, cs = getComputedStyle(a); return { o: cs.outlineStyle, w: parseFloat(cs.outlineWidth), fv: a.matches(":focus-visible") }; });
   ok("klawiatura: Tab dochodzi do wady, widoczny :focus-visible", !!reached && fv.fv && fv.o !== "none" && fv.w >= 2, { reached, fv });
@@ -87,16 +87,16 @@ const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y
   const nB = await page.evaluate(() => window.__boty.n); await page.evaluate(() => document.getElementById("b1").click()); await page.waitForFunction(n => window.__boty.n === n + 1, nB);
   const af = await page.evaluate(() => { const a = document.activeElement; return a && a.dataset && a.dataset.k ? "defb:" + a.dataset.k : a ? a.id || a.tagName : null; });
   ok("przebudowa listy przy nowej próbie: fokus nie ucieka (ta sama wada albo Zamknij)", af === "defb:" + kf || af === "dxClose", af);
-  // przełącznik kb:10
-  await page.check("#grace"); await page.click("#b10"); await page.waitForFunction(() => window.__boty.n === 10, null, { timeout: 60000 });
+  // reguła kb:10 (11: wybór reguły zamiast przełącznika)
+  await page.check("#r10"); await page.click("#b10"); await page.waitForFunction(() => window.__boty.n === 10, null, { timeout: 60000 });
   const lg10 = await page.evaluate(() => JSON.stringify(window.__boty.log));
   const kbCells = await page.$$eval("#logT tr td:nth-child(2)", t => t.map(x => x.textContent));
-  ok("przełącznik „Pomijaj zajarzenie”: dziennik = Node Bench(ziarno, kb:10) bit w bit, kolumna kb = 10, znacznik w nagłówku", lg10 === JSON.stringify(new Bt.Bench(SEED, true).step(10).log) && kbCells.length === 30 && kbCells.every(x => x === "10") && (await page.textContent("#logRule")).includes("kb:10"));
+  ok("reguła kb:10 („pomijaj zajarzenie”): dziennik = Node Bench(ziarno, kb:10) bit w bit, kolumna kb = 10, znacznik w nagłówku", lg10 === JSON.stringify(new Bt.Bench(SEED, true).step(10).log) && kbCells.length === 30 && kbCells.every(x => x === "10") && (await page.textContent("#logRule")).includes("kb:10"));
   const exShort = await page.evaluate(() => window.__boty.log.filter(e => e.bot === 2 && e.defects.some(d => d.c === "arc_short")).length);
   ok("z flagą egzaminator bez „za krótkiego łuku” (10 prób)", exShort === 0, exShort);
-  await page.uncheck("#grace"); const after = await page.evaluate(() => ({ n: window.__boty.n, g: window.__boty.grace }));
+  await page.check("#r9"); const after = await page.evaluate(() => ({ n: window.__boty.n, g: window.__boty.grace }));
   await page.click("#b1"); await page.waitForFunction(() => window.__boty.n === 1);
-  ok("wyłączenie przełącznika: od nowa, kb:9 jak gra (= 09)", after.n === 0 && after.g === false && (await page.evaluate(() => JSON.stringify(window.__boty.log))) === JSON.stringify(new Bt.Bench(SEED).step(1).log));
+  ok("powrót do kb:9: od nowa, kb:9 jak gra (= 09)", after.n === 0 && after.g === false && (await page.evaluate(() => JSON.stringify(window.__boty.log))) === JSON.stringify(new Bt.Bench(SEED).step(1).log));
   // telefon
   const ph = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }); watch(ph);
   await ph.goto(BASE + "/boty.html"); await ph.tap("#b1"); await ph.waitForFunction(() => window.__boty.n === 1);
@@ -118,14 +118,14 @@ const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y
     await pw.goto(BASE + "/boty.html"); await pw.tap("#b1"); await pw.waitForFunction(() => window.__boty.n === 1);
     const sz = await pw.evaluate(() => { const ids = ["bStop", "b1", "b10", "bAuto", "seed", "bRand", "bReset", "bLang"], o = {};
       for (const i of ids) { const b = document.getElementById(i).getBoundingClientRect(); o[i] = [Math.round(b.width), Math.round(b.height)]; }
-      const t = document.querySelector("label.tg").getBoundingClientRect(); o.tg = [Math.round(t.width), Math.round(t.height)];
-      o.tgHit = (() => { const e = document.elementFromPoint(t.left + t.width - 8, t.top + t.height / 2); return !!e && (e.id === "grace" || e.closest("label.tg") !== null); })();
+      document.querySelectorAll("#rule label.rb").forEach((l, i) => { const t = l.getBoundingClientRect(); o["kb" + [9, 10, 11][i]] = [Math.round(t.width), Math.round(t.height)]; });
+      o.tgHit = Array.from(document.querySelectorAll("#rule label.rb")).every(l => { const t = l.getBoundingClientRect(), e = document.elementFromPoint(t.left + t.width - 8, t.top + t.height / 2); return !!e && l.contains(e); });
       o.sw = document.documentElement.scrollWidth; o.iw = innerWidth; return o; });
     const small = Object.entries(sz).filter(([k, v]) => Array.isArray(v) && (v[0] < 44 || v[1] < 44)).map(([k, v]) => k + ":" + v.join("×"));
-    ok(`telefon ${W} px: Stop / Krok 1 / Krok 10 / Auto / ziarno / Losuj / Od nowa / język i „Pomijaj zajarzenie” z etykietą ≥ 44×44`, small.length === 0 && sz.tgHit && sz.sw <= sz.iw, small.length ? small : sz);
-    const g0 = await pw.$eval("#grace", e => e.checked); await pw.tap("label.tg", { position: { x: 40, y: 22 } });
-    const g1 = await pw.evaluate(() => ({ c: document.getElementById("grace").checked, g: window.__boty.grace })); await pw.tap("label.tg", { position: { x: 40, y: 22 } });
-    ok(`telefon ${W} px: tap w tekst etykiety przełącza regułę (i z powrotem)`, !g0 && g1.c && g1.g === true && !(await pw.$eval("#grace", e => e.checked)), g1);
+    ok(`telefon ${W} px: Stop / Krok 1 / Krok 10 / Auto / ziarno / Losuj / Od nowa / język i wybór reguły (kb:9 / kb:10 / kb:11) z etykietą ≥ 44×44`, small.length === 0 && sz.tgHit && sz.sw <= sz.iw, small.length ? small : sz);
+    const g0 = await pw.evaluate(() => window.__boty.rule); await pw.tap('#rule label.rb:has(#r10)', { position: { x: 40, y: 22 } });
+    const g1 = await pw.evaluate(() => ({ c: document.getElementById("r10").checked, g: window.__boty.grace, r: window.__boty.rule })); await pw.tap('#rule label.rb:has(#r9)', { position: { x: 40, y: 22 } });
+    ok(`telefon ${W} px: tap w tekst etykiety zmienia regułę (kb:9 → kb:10 → kb:9)`, g0 === 9 && g1.c && g1.g === true && g1.r === 10 && (await pw.evaluate(() => window.__boty.rule)) === 9, g1);
     await pw.evaluate(() => window.scrollTo(0, document.getElementById("vDef").getBoundingClientRect().top + scrollY - 80)); await pw.waitForTimeout(150);
     const st = await pw.evaluate(() => { const bar = document.querySelector(".bar").getBoundingClientRect(), hit = ["bStop", "b1", "b10", "bAuto"].map(id => { const r = document.getElementById(id).getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!e && e.id === id && r.top >= 0; });
       return { strip: Math.round(Math.max(0, bar.bottom)), hit, y: Math.round(scrollY) }; });

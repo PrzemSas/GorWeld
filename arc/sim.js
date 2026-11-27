@@ -79,6 +79,11 @@
   // z podnoszeniem (lo·L0 / (ARC_RISE + ARC_LIFT)), nie więcej niż ARC_GRACE_S. MMA: Ø2,0 0,50 s · Ø2,5 0,63 s · Ø3,2 0,80 s · Ø4,0 1,00 s.
   // Bez zmian także w oknie: za długi łuk (r > hi), przywarcie, zerwanie, napięcie (arcVSum/arcTime → HI), pęcherze, czas ściegu.
   const ARC_GRACE_S = 1.0, ARC_GRACE_K = 1.25;
+  // 11 (flaga `kb: 11`, REGUŁA PRÓBNA, zawiera kb:10, bo kb ≥ 10): PRÓG WADY ŁUKU. Wada „za krótki / za długi łuk" i jej kara
+  // dopiero od arcPen ≥ ARC_DEF_MIN; poniżej kara łuku = 0 (martwa strefa: nie ma odjętych punktów bez widocznej wady).
+  // 0,25 ≈ łuk 1,2×Ø (10 % za górną granicą pasma) przez ok. 7 % czasu palenia albo 0,4×Ø przez ok. 3,6 %. Dane: najmniejsza kara
+  // łuku nowicjusza na 100 próbach = 0,80 (nic mu nie znika), u egzaminatora wycina 18 z 32 wad z karą 0,01–0,22. Major (≥ 12) bez zmian.
+  const ARC_DEF_MIN = 0.25;
   const VOLT_TABLES = {
     MMA:[[1,3,20],[3,6,22],[6,10,24],[10,15,26]],
     MIG:[[1,3,18],[3,6,22],[6,12,26]],
@@ -158,6 +163,17 @@
   // Zdarzenie `dia` (d = Ø×10) przyjmowane tylko przed pierwszym kroplą ściegu — w trakcie Ø stoi.
   const DIAS = [20, 25, 32, 40];
   const AMP_DIA = { 20: 60, 25: 80, 32: 115, 40: 160 };   // 2,0: 50–70 · 2,5: 70–90 · 3,2: 100–130 · 4,0: 140–180 A
+  // 11 (kb:11, próba): ZAKRES PRĄDU WPS dla Ø zamiast jednej liczby — ten sam zakres co w komentarzu wyżej (nominał = środek).
+  // Każdy mieści się w całości w karcie producenta co najmniej jednej elektrody rutylowej (ESAB OK 46.00 / Böhler FOX OHV)
+  // i jednej zasadowej (ESAB OK 48.00 / Böhler FOX EV 50) — źródła: poprawka 11, zrodla_zakresow.md. Pozycja: × POS_AMP_MUL (jak nominał).
+  // W zakresie: brak wady i kara 0; poza: minor, kara rośnie OD KRAWĘDZI (ciągle) tym samym nachyleniem co dotąd (70 / 50 na 100 %);
+  // major i odrzut `amps` jak dotąd: |prąd / nominał − 1| ≥ 0,25. Fizyka jeziorka (szerokość, odpryski, pory) dalej od nominału.
+  // MIG / TIG (prąd z grubości, AMP_TABLES) bez zakresu — karty producentów podają zakres na Ø drutu / elektrody W, nie na grubość.
+  const AMP_RNG = { 20: [50, 70], 25: [70, 90], 32: [100, 130], 40: [140, 180] };
+  function ampRng(d, posK) { const m = POS_AMP_MUL[POSITIONS[posK].stars] || 1; return [Math.round(AMP_RNG[d][0] * m), Math.round(AMP_RNG[d][1] * m)]; }
+  function ampFRng(a, base, rng) { const f = ampFOf(a / base), lo = rng[0], hi = rng[1];
+    const pen = a < lo ? Math.min(30, (lo - a) / base * 70) : a > hi ? Math.min(30, (a - hi) / base * 50) : 0;
+    return { ar: f.ar, w: f.w, pen, sev: f.sev === "major" ? "major" : pen > 0 ? "minor" : null, spatAdd: f.spatAdd, por: f.por, lo, hi }; }
   function elecTyp(k, thick) { return thick <= 2 ? 20 : thick <= 3 || k === "root" ? 25 : thick > 8 && k === "fill" ? 40 : 32; }
   function diaAmps(d, posK) { return Math.round(AMP_DIA[d] * (POS_AMP_MUL[POSITIONS[posK].stars] || 1)); }
   // s = o ile rozmiarów od typowej. +1: szersze, gorętsze jeziorko; na grani doczołowej (warstwa 0) przepalenie = wada.
@@ -304,6 +320,7 @@
     // 3.14.0: węższe pasmo łuku MMA (0,5–1,1×Ø) — kb≤7 i MIG/TIG bit-w-bit jak 3.13.0
     const arcMma = round.kb >= 8 && proc === "MMA", aLo = arcMma ? ARC_LO_MMA : ARC_LO, aHi = arcMma ? ARC_HI_MMA : ARC_HI;
     const kb9 = round.kb >= 9;     // 3.15.0: krok czasu przy postoju + zdarzenia `inp` (zmiana przycisków/klawiszy/spoiwa bez ruchu)
+    const kb11 = round.kb >= 11;   // 11 (próba): zakres prądu WPS dla Ø + próg wady łuku; zawiera kb:10. kb≤10 bit-w-bit jak 3.15.0-kb10
     const kb10 = round.kb >= 10;   // 10 (próba): okno zajarzenia + etykieta krótki/długi po stronie większej kary. kb≤9 bit-w-bit jak 3.15.0
     let graceOn = false, graceT = 0, arcTimeL = 0, arcLoAcc = 0, arcHiAcc = 0;
     const keepDia = round.kb >= 6;  // 3.12.0: elektroda zostaje w uchwycie na następny ścieg (do 3.11.0 wracała do typowej)   // 3.11.0: łuk tylko w strefie rowka (rowek + faza ×ZONE_BW) — kb≤4 bit-w-bit jak 3.10.0   // 3.10.0: Ø elektrody per ścieg, prąd z Ø — kb≤3 i MIG/TIG bit-w-bit jak 3.9.0
@@ -357,9 +374,9 @@
     function beadElec() { if (!dz) return; const b = beadPlan[passIndex] || beadPlan[beadPlan.length - 1];
       diaTyp = elecTyp(b.k, thick); if (!diaSel) diaSel = diaTyp;
       beadBase = diaAmps(diaSel, posKey); beadAmps = (ampMan && manA) ? manA : Math.round(beadBase * ampK);
-      ampF = ampFOf(beadAmps / beadBase); fitF = diaFit(diaSel, diaTyp, joint === "fillet" ? -1 : b.lay); arcL0 = diaSel / 10; }
+      ampF = kb11 ? ampFRng(beadAmps, beadBase, ampRng(diaSel, posKey)) : ampFOf(beadAmps / beadBase); fitF = diaFit(diaSel, diaTyp, joint === "fillet" ? -1 : b.lay); arcL0 = diaSel / 10; }
     function elecEntry(m) { return { d: diaSel, typ: diaTyp, amps: beadAmps, ref: diaAmps(diaTyp, posKey), pen: ampF.pen, sev: ampF.sev, ar: ampF.ar,
-      fit: fitF, avgV: m.avgV, u: arcTb ? arcVb / arcTb : null, zero: !!m.zeroTravel, bi: passIndex }; }   // bi (09): numer ściegu do opisu wady Ø — jak w grze
+      fit: fitF, avgV: m.avgV, u: arcTb ? arcVb / arcTb : null, zero: !!m.zeroTravel, bi: passIndex, ampLo: ampF.lo, ampHi: ampF.hi }; }   // bi (09): numer ściegu do opisu wady Ø — jak w grze
     beadElec();
     const EDGE = bevelEdgePx(thick, grooveHalf);
     const capMin = kb ? seamPts.map(() => 1e9) : null, capMax = kb ? seamPts.map(() => -1e9) : null;
@@ -704,7 +721,7 @@
     const coverage = avg("coverage"), spdAcc = avg("spdAcc"), evenness = avg("evenness");
     const overflow = Math.max.apply(null, all.map(m => m.overflow));
     const arcTE = kb10 ? arcTimeL : arcTime;   // 10: średnie r bez próbek z okna zajarzenia (kara: okno = 0, mianownik pełny)
-    const arcPen = arcTime ? arcPenAcc / arcTime : 0, arcR = arcTE ? arcRSum / arcTE : 1;
+    const arcPenRaw = arcTime ? arcPenAcc / arcTime : 0, arcPen = kb11 && arcPenRaw < ARC_DEF_MIN ? 0 : arcPenRaw, arcR = arcTE ? arcRSum / arcTE : 1;
     const arcSh = kb10 ? arcLoAcc >= arcHiAcc : arcR < 1;   // 10: etykieta wady po stronie, która dała większą karę (punkty bez zmian)
     const arcFails = stickCount + arcBroke;
     const angPen = angTime ? angPenAcc / angTime : 0;
@@ -756,7 +773,7 @@
         if (e.hi != null && e.hiM != null) { const r = e.hi / e.hiM; if (r > worst) { worst = r; hiR = e.hi; hiRW = e.hiW; hiRM = e.hiM; ampsR = e.amps; }
           if (cvn && e.hi > e.hiM) hiOver = true; } }
       ampPenT /= E.length; diaPen /= E.length;
-      elec = E.map(e => ({ d: e.d, typ: e.typ, amps: e.amps, ref: e.ref, fit: e.fit.s, hi: e.hi, hiMax: e.hiM }));
+      elec = E.map(e => ({ d: e.d, typ: e.typ, amps: e.amps, ref: e.ref, fit: e.fit.s, hi: e.hi, hiMax: e.hiM, ...(kb11 ? { ampRng: [e.ampLo, e.ampHi] } : {}) }));
     }
     const fastR = Math.max.apply(null, all.map(m => m.avgV)) / targetPx, fastMax = 1 + FAST_TOL * MATERIAL[bead].tol;
     const tooFast = uf && fastR > fastMax;
@@ -828,7 +845,8 @@
              hi: hiR, hiWps: hiRW, hiMax: hiRM, hiOver, cvn, fastR: +fastR.toFixed(3), fastMax: +fastMax.toFixed(3), tooFast, rejectReasons: iso === "REJECT" ? rejectReasons : [], ...(dirOn ? { dirWrong } : {}),
              ...(dz ? { elec, diaPen: +diaPen.toFixed(2) } : {}),
              ...(kb ? { kb: true, beads: beadPlan.length, edgeCov: +edgeCov.toFixed(3), edgePen: +edgePen.toFixed(2), ibGaps, ibMax: +ibMax.toFixed(3), slag: slagCount } : {}),
-             ...(kb10 ? { kb10: true, arcSide: arcPen > 0 ? (arcSh ? "short" : "long") : null } : {}) };
+             ...(kb10 ? { kb10: true, arcSide: arcPen > 0 ? (arcSh ? "short" : "long") : null } : {}),
+             ...(kb11 ? { kb11: true, arcPenRaw: +arcPenRaw.toFixed(2) } : {}) };   // 11: kara łuku przed progiem (arcPen = 0 poniżej ARC_DEF_MIN)
     if (!(opts && opts.defects)) return res;
 
     // ── 09: LISTA WAD 1:1 z inspect() w index.html (te same warunki, progi, kolejność i kody `c`) ──
@@ -854,7 +872,8 @@
     if (Ed) { const sv = x => x === "major" ? 2 : x ? 1 : 0; let ampSevT = null;
       for (const e of Ed) if (e.sev === "major" || (e.sev && !ampSevT)) ampSevT = e.sev;
       const ea = Ed.filter(e => e.sev).sort((p, q) => sv(q.sev) - sv(p.sev) || Math.abs(q.ar - 1) - Math.abs(p.ar - 1))[0];
-      if (ea) D.push({ s: ampSevT, c: ea.ar < 1 ? "amp_low" : "amp_high", k: ea.ar < 1 ? "def_amp_low" : "def_amp_high", p: [ea.amps, diaAmps(ea.d, posKey)] });
+      if (ea && kb11) D.push({ s: ampSevT, c: ea.ar < 1 ? "amp_low" : "amp_high", k: ea.ar < 1 ? "def_amp_low_r" : "def_amp_high_r", p: [ea.amps, ea.ampLo, ea.ampHi] });   // 11: tekst z zakresem WPS
+      else if (ea) D.push({ s: ampSevT, c: ea.ar < 1 ? "amp_low" : "amp_high", k: ea.ar < 1 ? "def_amp_low" : "def_amp_high", p: [ea.amps, diaAmps(ea.d, posKey)] });
       const ed = Ed.filter(e => e.fit.s).sort((p, q) => sv(q.fit.sev) - sv(p.fit.sev) || Math.abs(q.fit.s) - Math.abs(p.fit.s))[0];
       if (ed) { const bl = beadPlan && beadPlan[ed.bi]; const k = ed.fit.s < 0 ? "def_dia_small" : (joint !== "fillet" && bl && bl.lay === 0 ? "def_dia_root" : "def_dia_big");
         D.push({ s: ed.fit.sev, c: "dia", k, p: [ed.d, ed.typ, ed.bi] }); } }
@@ -948,7 +967,7 @@
   // 1.1.0 — spatter jako tempo z sufitem kary, metryki niezależne od Hz, parytet z index.html.
   // Rundy nagrane silnikiem 1.2.0 i starszym liczą się inaczej i NIE są porównywalne z challengem.
   // Bump SCORING_VERSION when score, grade thresholds, or inspection rejection rules change.
-  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, weldPlan, bevelEdgePx, grooveGeom, capHalfMm, VIS_K, elecTyp, diaAmps, diaFit, AMP_DIA, DIAS, VERSION: "3.15.0", SCORING_VERSION: "1.10.0", STEP_MS, GRACE_MS, IDLE_MS, ZERO_PATH_MM, DIR_MIN, DIR_BAD, ZONE_BW, ARC_LO_MMA, ARC_HI_MMA, ARC_GRACE_S, ARC_GRACE_K, TRIAL_KB: 10 };
+  const API = { simulate, mulberry32, recommendedAmps, recommendedVolts, heatInputKJmm, weldPlan, bevelEdgePx, grooveGeom, capHalfMm, VIS_K, elecTyp, diaAmps, diaFit, AMP_DIA, DIAS, VERSION: "3.15.0", SCORING_VERSION: "1.10.0", STEP_MS, GRACE_MS, IDLE_MS, ZERO_PATH_MM, DIR_MIN, DIR_BAD, ZONE_BW, ARC_LO_MMA, ARC_HI_MMA, ARC_GRACE_S, ARC_GRACE_K, TRIAL_KB: 10, AMP_RNG, ampRng, ARC_DEF_MIN, TRIAL_KB_MAX: 11, WA_BAND, TA_BAND, TA_IDEAL, waBandFor };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.ArcSim = API;
 })(typeof self !== "undefined" ? self : this);

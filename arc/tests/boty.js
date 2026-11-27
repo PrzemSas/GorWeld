@@ -160,7 +160,10 @@ const sig = b => JSON.stringify(b.log);
 // ── F) teksty i czystość kodu ──
 { const i = HTML.indexOf("const I18N={"); let dd = 0, j = i + 11; for (; j < HTML.length; j++) { const ch = HTML[j]; if (ch === "{") dd++; else if (ch === "}") { dd--; if (!dd) break; } }
   const I = vm.runInNewContext("(" + HTML.slice(i + 11, j + 1) + ")"), bad = [];
-  for (const l of ["pl", "en"]) for (const k of Object.keys(Bt.TEXTS[l])) if (Bt.TEXTS[l][k] !== I[l][k]) bad.push(l + ":" + k);
+  // 11: klucze z zakresem prądu (TEXTS_KB11) są tylko na pulpicie (reguła kb:11) — gra ich nie ma i nie może ich mieć (gra nietknięta)
+  const K11 = Bt.TEXTS_KB11 || [];
+  for (const l of ["pl", "en"]) for (const k of Object.keys(Bt.TEXTS[l])) if (K11.indexOf(k) < 0 && Bt.TEXTS[l][k] !== I[l][k]) bad.push(l + ":" + k);
+  for (const k of K11) if (I.pl[k] !== undefined || !/%3/.test(Bt.TEXTS.pl[k] || "")) bad.push("kb11:" + k);
   const keys = new Set([...simBlock(SIMSRC).matchAll(/"(def_[a-z_]+)"/g)].map(m => m[1]));
   const noTxt = [...keys].filter(k => !Bt.TEXTS.pl[k] || !Bt.TEXTS.en[k]);
   ok(`teksty wad, klas ISO i zastrzeżenia 1:1 z I18N gry (${Object.keys(Bt.TEXTS.pl).length} kluczy × PL/EN)`, bad.length === 0 && noTxt.length === 0, bad.concat(noTxt).slice(0, 5)); }
